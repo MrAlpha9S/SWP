@@ -1,54 +1,24 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from './layouts/Navbar/navbar';
 import './App.css';
+import Home from './pages/homePage/home';
+import Login from './pages/loginPage/login';
+import Register from './pages/registerPage/register';
+import dashBoard from './pages/dashboardPage/dashboard';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
       <Navbar />
-      <h1 class="text-3xl font-bold underline pt-24">Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
-      <p>aaaaaaaa</p>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />}></Route>
+          <Route path="/login" element={<Login />}></Route>
+          <Route path="/register" element={<Register />}></Route>
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
