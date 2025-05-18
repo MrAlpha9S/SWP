@@ -9,8 +9,10 @@ class Navbar extends React.Component {
                 <div className="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
 
                     {/* Brand */}
-                    <div className="text-2xl font-bold text-gray-800">
-                        <a href="/">My Website</a>
+                    <div className="flex items-center">
+                        <a href="/">
+                            <img src='/logo.jpg' alt="Logo" className="w-30" />
+                        </a>
                     </div>
 
                     {/* Menu */}
