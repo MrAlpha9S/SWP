@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "concurrently": "^9.1.2",
     "vite": "^6.3.5"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\""
   }
 }
