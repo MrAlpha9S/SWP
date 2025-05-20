@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import LoginInButton from "../../ui/loginInButton.jsx";
 import LogoutButton from "../../ui/LogoutButton.jsx";
 import SignUpButton from "../../ui/signUpButton.jsx";
+import Profile from "../../ui/auth0_profile.jsx";
 
 function NavbarWithAuth0(props) {
     const { isAuthenticated } = useAuth0();
@@ -38,6 +39,8 @@ class Navbar extends React.Component {
                             </>
                         )}
                     </div>
+                    {/*User profile*/}
+                    <Profile/>
                 </div>
             </nav>
         );
