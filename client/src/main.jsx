@@ -10,8 +10,8 @@ import dashBoard from './pages/dashboardPage/dashboard.jsx';
 createRoot(document.getElementById('root')).render(
 
     <Auth0Provider
-        domain="dev-cl6n70h2qmq3y0b2.us.auth0.com"
-        clientId="5hStf3vvyBSxtalxk6BhGg4nTvZ3p6Na"
+        domain={process.env.AUTH0_DOMAIN}
+        clientId={process.env.AUTH0_CLIENT_ID}
         authorizationParams={{
             redirect_uri: window.location.origin
         }}

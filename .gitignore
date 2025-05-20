@@ -23,7 +23,7 @@ build/
 
 # Ignore environment files inside subdirectories
 **/.env
-**/.env.*
+server/.env
 
 # IDE and editor settings
 .vscode/
