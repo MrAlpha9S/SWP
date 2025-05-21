@@ -1,8 +1,9 @@
 import React from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import LoginInButton from "../../components/loginInButton";
-import LogoutButton from "../../components/LogoutButton";
-import SignUpButton from "../../components/signUpButton";
+import LoginInButton from "../../ui/loginInButton.jsx";
+import LogoutButton from "../../ui/LogoutButton.jsx";
+import SignUpButton from "../../ui/signUpButton.jsx";
+import Profile from "../../ui/auth0_profile.jsx";
 
 function NavbarWithAuth0(props) {
     const { isAuthenticated } = useAuth0();
@@ -17,15 +18,15 @@ class Navbar extends React.Component {
                 <div className="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
                     {/* Brand */}
                     <div className="flex items-center">
-                        <a href="/">
+                        <a href="/client/public">
                             <img src='/logo.jpg' alt="Logo" className="w-30" />
                         </a>
                     </div>
                     {/* Menu */}
                     <ul className="hidden md:flex space-x-6 text-gray-600 font-medium">
-                        <li><a href="/" className="hover:text-blue-500 transition">Home</a></li>
-                        <li><a href="/" className="hover:text-blue-500 transition">About</a></li>
-                        <li><a href="/" className="hover:text-blue-500 transition">Contact</a></li>
+                        <li><a href="/client/public" className="hover:text-blue-500 transition">Home</a></li>
+                        <li><a href="/client/public" className="hover:text-blue-500 transition">About</a></li>
+                        <li><a href="/client/public" className="hover:text-blue-500 transition">Contact</a></li>
                     </ul>
                     {/* Right-side buttons */}
                     <div className="hidden md:flex space-x-3">
@@ -38,6 +39,8 @@ class Navbar extends React.Component {
                             </>
                         )}
                     </div>
+                    {/*User profile*/}
+                    <Profile/>
                 </div>
             </nav>
         );

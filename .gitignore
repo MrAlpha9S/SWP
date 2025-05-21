@@ -1,0 +1,30 @@
+# Global ignores
+.DS_Store
+*.log
+*.env
+*.env.*  # Covers things like .env.local, .env.production
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Root node_modules (if any)
+node_modules/
+
+# Build outputs (adjust if you build at root level)
+dist/
+build/
+
+# Ignore all node_modules inside subdirectories
+**/node_modules/
+
+# Ignore build directories inside subdirectories (e.g., Vite or Webpack outputs)
+**/dist/
+**/build/
+
+# Ignore environment files inside subdirectories
+**/.env
+server/.env
+
+# IDE and editor settings
+.vscode/
+.idea/

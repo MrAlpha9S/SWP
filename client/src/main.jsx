@@ -10,14 +10,15 @@ import dashBoard from './pages/dashboardPage/dashboard.jsx';
 createRoot(document.getElementById('root')).render(
 
     <Auth0Provider
-        domain="dev-cl6n70h2qmq3y0b2.us.auth0.com"
-        clientId="5hStf3vvyBSxtalxk6BhGg4nTvZ3p6Na"
+        domain={import.meta.env.VITE_AUTH0_DOMAIN}
+        clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
         authorizationParams={{
             redirect_uri: window.location.origin
         }}
     >
         <App />
-    </Auth0Provider>,
+    </Auth0Provider>
+
 
 )
 
