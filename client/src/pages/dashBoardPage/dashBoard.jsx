@@ -1,6 +1,7 @@
 import React from "react";
+import {withAuthenticationRequired} from "@auth0/auth0-react";
 
-function dashBoard() {
+function DashBoard() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -8,8 +9,6 @@ function dashBoard() {
             <p className="text-lg text-gray-700">This is a simple dashboard layout.</p>
         </div>
     );
-
-
 }
 
-export default dashBoard;
+export default withAuthenticationRequired(DashBoard)
