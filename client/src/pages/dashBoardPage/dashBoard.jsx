@@ -18,17 +18,17 @@ function DashBoard() {
             <p className="text-lg text-gray-700">This is a simple dashboard layout.</p>
             <div>
                 <div>User List</div>
-                <ul>
-                    {userList.map((user, key) => {
-                            return <>
+                {userList.map((user, key) => {
+                        return <div className="flex flex-col items-center justify-center h-[150px] w-[250px] bg-gray-200 gap-2">
+                            <ul>
                                 <li key={key}>{user.user_id}</li>
                                 <li key={key}>{user.auth0_id}</li>
                                 <li key={key}>{user.username}</li>
                                 <li key={key}>{user.email}</li>
-                            </>
-                        }
-                    )}
-                </ul>
+                            </ul>
+                        </div>
+                    }
+                )}
             </div>
         </div>
     )
