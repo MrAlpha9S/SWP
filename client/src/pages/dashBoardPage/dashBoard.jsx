@@ -1,16 +1,29 @@
 import React, {useEffect} from "react";
-import {withAuthenticationRequired} from "@auth0/auth0-react";
+import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
 
 function DashBoard() {
 
     const [userList, setUserList] = React.useState([]);
+    const { getAccessTokenSilently } = useAuth0();
 
     useEffect(() => {
-        fetch('http://localhost:3000/getUsers')
-            .then(res => res.json())
-            .then(data => setUserList(data))
-            .catch(err => console.error("Error fetching users:", err));
-    }, []);
+        const fetchUsers = async () => {
+            try {
+                const token = await getAccessTokenSilently();
+                const res = await fetch('http://localhost:3000/getUsers', {
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await res.json();
+                setUserList(data);
+            } catch (err) {
+                console.error("Error fetching users:", err);
+            }
+        };
+
+        fetchUsers();
+    }, [getAccessTokenSilently]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

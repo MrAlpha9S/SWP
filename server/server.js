@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+const { auth } = require('express-oauth2-jwt-bearer');
 const cors = require('cors');
 const sql = require('mssql');
 require('dotenv').config({ path: `.env` });
@@ -20,9 +21,14 @@ const sqlConfig = {
     }
 }
 
+const jwtCheck = auth({
+    audience: 'https://smokerecession.com',
+    issuerBaseURL: 'https://dev-66yg41ux7po256no.us.auth0.com/',
+});
+
 app.use(cors());
 
-app.get('/getUsers', async (req, res) => {
+app.get('/getUsers', jwtCheck,  async (req, res) => {
     try {
         await sql.connect(sqlConfig)
         const result = await sql.query`select * from users`
