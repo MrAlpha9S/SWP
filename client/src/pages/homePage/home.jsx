@@ -1,14 +1,26 @@
-import React from "react";
+import Navbar from '../../components/layout/Navbar.jsx'
+import Hero from '../../components/layout/Hero'
+import Stats from '../../components/layout/Stats'
+import SupportMethods from '../../components/layout/SupportMethods'
+import Tools from '../../components/layout/Tools'
+import Membership from '../../components/layout/Membership'
+import Testimonials from '../../components/layout/Testimonials'
+import Footer from '../../components/layout/Footer'
 
-function Home () {
-    
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <h1 className="text-4xl font-bold mb-4">Welcome to the Home Page</h1>
-                <p className="text-lg text-gray-700">This is a simple home page layout.</p>
-            </div>
-        );
-    
+function Home() {
+    return (
+        <div className="flex flex-col min-h-screen">
+            <main>
+                <Hero />
+                <Stats />
+                <SupportMethods />
+                <Tools />
+                <Membership />
+                <Testimonials />
+            </main>
+            <Footer />
+        </div>
+    )
 }
 
-export default Home;
+export default Home
