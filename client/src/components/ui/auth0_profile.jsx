@@ -10,7 +10,6 @@ const Profile = () => {
     return (
         isAuthenticated && (
             <div className='flex justify-center items-center'>
-                <img src={user.picture} className='size-5'/>
                 <h2>{user.name}</h2>
             </div>
         )
