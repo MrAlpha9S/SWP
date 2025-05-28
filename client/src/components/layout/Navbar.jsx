@@ -5,7 +5,7 @@ import LoginInButton from "../ui/loginInButton.jsx";
 import LogoutButton from "../ui/LogoutButton.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import SignUpButton from "../ui/signUpButton.jsx";
-import Profile from "../ui/auth0_profile.jsx";
+import Profile from "../ui/UserProfile.jsx";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
