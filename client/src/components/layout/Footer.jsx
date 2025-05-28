@@ -11,7 +11,7 @@ function Footer() {
               <Logo />
             </div>
             <p className="text-gray-400 mb-4">
-              Helping people break free from nicotine addiction with proven methods and ongoing support.
+              Giúp mọi người thoát khỏi sự phụ thuộc nicotine bằng các phương pháp đã được chứng minh và sự hỗ trợ liên tục.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -35,8 +35,8 @@ function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Home</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Trang ch</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors"></a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Services</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Resources</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>

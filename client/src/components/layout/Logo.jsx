@@ -3,10 +3,10 @@ import React from "react";
 function Logo() {
   return (
     <div className="flex items-center">
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100">
+        <div className="flex items-center justify-center size-16 rounded-full bg-white">
             <div className="flex items-center">
                 <a href="/client/public">
-                    <img src='/logo.jpg' alt="Logo" className="w-30"/>
+                    <img src='/logo.png' alt="Logo" className="w-30"/>
                 </a>
             </div>
         </div>

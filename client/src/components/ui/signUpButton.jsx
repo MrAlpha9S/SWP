@@ -6,9 +6,9 @@ const SignUpButton = () => {
 
     return (
         <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+            className="w-[100px] px-2 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition"
             onClick={() => loginWithRedirect({ authorizationParams: { screen_hint: 'signup' } })}>
-            Sign Up
+            Đăng ký
         </button>
     );
 };

@@ -13,7 +13,7 @@ function Navbar() {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     return (
-        <nav className="bg-white shadow-sm sticky top-0 z-50">
+        <nav className="bg-primary-900 shadow-sm sticky top-0 z-50 py-2">
             <div className="container-custom">
                 <div className="flex justify-between items-center h-16 gap-5">
                     {/* Logo */}
@@ -23,20 +23,20 @@ function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex justify-between items-center w-full">
-                        <div className="w-full flex space-x-8">
-                            <a href="#" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Home
+                        <div className="w-[50%] flex gap-10">
+                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                                Trang chủ
                             </a>
-                            <a href="#" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Community
+                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                                Cộng đồng
                             </a>
-                            <a href="#" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-                                Support
+                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                                Hỗ trợ
                             </a>
 
                         </div>
 
-                        <div className="flex space-x-8 h-12 w-72">
+                        <div className="flex justify-end gap-2 h-12 w-[50%]">
                             {isAuthenticated ? (
                                 <>
                                     <Profile/>
@@ -44,8 +44,8 @@ function Navbar() {
                                 </>
                             ) : (
                                 <>
-                                    <LoginInButton/>
                                     <SignUpButton/>
+                                    <LoginInButton/>
                                 </>
                             )}
                         </div>

@@ -5,9 +5,9 @@ const LogoutButton = () => {
     const { logout } = useAuth0();
 
     return (<button
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+        className="w-[100px] px-2 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition"
         onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
-        Log Out
+        Đăng xuất
     </button>
     );
 };
