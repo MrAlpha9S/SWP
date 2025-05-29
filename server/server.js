@@ -76,7 +76,7 @@ app.get('/getUserInfo', async (req, res) => {
     }
 });
 
-app.post('/onboarding', jwtCheck, async (req, res) => {
+app.post('/postSignup', jwtCheck, async (req, res) => {
     const {user_id} = req.body;
     if (!user_id) return res.status(400).json({success: false, message: 'user_id required'});
 

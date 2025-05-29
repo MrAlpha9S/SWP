@@ -3,60 +3,56 @@ import { FiCheck } from 'react-icons/fi'
 function Membership() {
   const plans = [
     {
-      name: 'Basic',
-      price: 'Free',
+      name: 'Cơ Bản',
+      price: 'Miễn phí',
       features: [
-        'Access to community forums',
-        'Basic tracking tools',
-        'Educational resources',
-        'Email support'
+        'Truy cập diễn đàn cộng đồng',
+        'Kế hoạch cai nghiện cá nhân hóa',
+        'Công cụ theo dõi cơ bản',
+        'Tài liệu giáo dục',
+        'Truy cập các công cụ quản lý cơn thèm'
       ],
-      buttonText: 'Sign Up',
+      buttonText: 'Đăng ký',
       popular: false
     },
     {
-      name: 'Premium',
-      price: '$9.99/month',
+      name: 'Cao Cấp',
+      price: '$9.99/tháng',
       features: [
-        'Everything in Basic',
-        'Personalized quit plan',
-        'Advanced tracking tools',
-        '24/7 chat support',
-        'Weekly check-ins'
+        'Tất cả trong gói Cơ Bản',
+        'Hỗ trợ trò chuyện 24/7 với AI',
       ],
-      buttonText: 'Get Started',
+      buttonText: 'Bắt đầu ngay',
       popular: true
     },
     {
-      name: 'Pro',
-      price: '$19.99/month',
+      name: 'Chuyên Nghiệp',
+      price: '$19.99/tháng',
       features: [
-        'Everything in Premium',
-        'One-on-one counseling',
-        'Priority support',
-        'Customized resources',
-        'Family support resources'
+        'Tất cả trong gói Cao Cấp',
+        'Tư vấn trực tiếp với huấn luyện viên được chứng nhận',
       ],
-      buttonText: 'Choose Pro',
+      buttonText: 'Chọn gói Pro',
       popular: false
     }
   ]
+
 
   return (
     <section className="py-16 bg-gray-50">
       <div className="container-custom">
         <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
-          Membership Plans
+          Gói đăng ký
         </h2>
         <p className="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-          Choose the right level of support for your quit journey.
+          Chọn gói đăng ký phù hợp với nhu cầu của bạn.
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <div 
               key={index} 
-              className={`card hover:shadow-lg relative ${plan.popular ? 'border-2 border-primary-500 transform md:scale-105' : ''}`}
+              className={` flex flex-col card hover:shadow-lg relative ${plan.popular ? 'border-2 border-primary-500 transform md:scale-105' : ''}`}
             >
               {plan.popular && (
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-primary-500 text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -78,7 +74,7 @@ function Membership() {
                 ))}
               </ul>
               <button 
-                className={`btn w-full ${plan.popular ? 'btn-primary' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                className={`mt-auto btn w-full ${plan.popular ? 'btn-primary' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
               >
                 {plan.buttonText}
               </button>
