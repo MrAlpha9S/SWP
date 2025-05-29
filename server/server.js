@@ -84,7 +84,7 @@ app.post('/onboarding', jwtCheck, async (req, res) => {
         await sql.connect(sqlConfig)
         const existingUser = await sql.query`SELECT * FROM users WHERE auth0_id = ${user_id}`;
 
-        if (existingUser.recordsets.length == 0) {
+        if (existingUser.recordset.length > 0) {
             return res.status(200).json({success: false, message: 'User already onboarded'});
         }
 

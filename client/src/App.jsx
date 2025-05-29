@@ -4,7 +4,7 @@ import Navbar from './components/layout/Navbar.jsx';
 import './App.css';
 import Home from './pages/homePage/home';
 import DashBoard from "./pages/dashboardPage/dashboard";
-import OnboardingPage from "./pages/onboardingPage.jsx";
+import PostSignUpRedirect from "./pages/PostSignUpRedirect.jsx";
 
 function App() {
 
@@ -14,7 +14,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home/>}></Route>
                 <Route path="/dashboard" element={<DashBoard/>}></Route>
-                <Route path="/onboarding" element={<OnboardingPage/>}></Route>
+                <Route path="/onboarding" element={<PostSignUpRedirect/>}></Route>
             </Routes>
         </>
     )

@@ -6,10 +6,12 @@ import LogoutButton from "../ui/LogoutButton.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import SignUpButton from "../ui/signUpButton.jsx";
 import Profile from "../ui/UserProfile.jsx";
+import {FaSpinner} from "react-icons/fa";
+import {Fa0} from "react-icons/fa6";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const {isAuthenticated} = useAuth0();
+    const {isAuthenticated, isLoading} = useAuth0();
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
     return (
@@ -24,34 +26,31 @@ function Navbar() {
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex justify-between items-center w-full">
                         <div className="w-[50%] flex gap-10">
-                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
                                 Trang chủ
                             </a>
-                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
                                 Cộng đồng
                             </a>
-                            <a href="#" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
                                 Hỗ trợ
                             </a>
 
                         </div>
 
-                        <div className="flex justify-end gap-2 h-12 w-[50%]">
-                            {isAuthenticated ? (
-                                <>
-                                    <Profile/>
-                                    <LogoutButton/>
-                                </>
+                        <div className="flex justify-end gap-2 h-full w-[50%]">
+                            {isLoading ? (
+                                <FaSpinner icon="spinner" className="spinner size-10" color="white"/>
+                            ) : isAuthenticated ? (
+                                <Profile />
                             ) : (
                                 <>
-                                    <SignUpButton/>
-                                    <LoginInButton/>
+                                    <SignUpButton />
+                                    <LoginInButton />
                                 </>
                             )}
                         </div>
-
                     </div>
-
 
                     {/* Search and Mobile Menu Button */}
                     <div className="flex items-center">
