@@ -6,6 +6,7 @@ import Homepage from './pages/homepage/homepage.jsx';
 import DashBoard from "./pages/dashboardPage/dashboard.jsx";
 import PostSignUpCallback from "./pages/signup/postSignUpCallback.jsx";
 import Onboarding from "./pages/signup/onboarding.jsx";
+import Footer from "./components/layout/footer.jsx";
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/postSignup" element={<PostSignUpCallback/>}></Route>
                 <Route path="/onboarding" element={<Onboarding/>}></Route>
             </Routes>
+            <Footer/>
         </>
     )
 }

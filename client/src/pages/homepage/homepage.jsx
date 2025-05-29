@@ -1,10 +1,8 @@
-import Navbar from '../../components/layout/navbar.jsx'
-import Hero from '../../components/layout/hero.jsx'
-import Stats from '../../components/layout/stats.jsx'
-import SupportMethods from '../../components/layout/supportMethods.jsx'
-import Tools from '../../components/layout/tools.jsx'
-import Membership from '../../components/layout/membership.jsx'
-import Testimonials from '../../components/layout/testimonials.jsx'
+import Hero from '../../components/layout/homepage/hero.jsx'
+import Stats from '../../components/layout/homepage/stats.jsx'
+import SupportMethods from '../../components/layout/homepage/supportMethods.jsx'
+import Membership from '../../components/layout/homepage/membership.jsx'
+import Testimonials from '../../components/layout/homepage/testimonials.jsx'
 import Footer from '../../components/layout/footer.jsx'
 
 function Homepage() {

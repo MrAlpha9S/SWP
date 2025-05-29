@@ -7,7 +7,27 @@ import {ConfigProvider} from "antd";
 
 
 createRoot(document.getElementById('root')).render(
-
+    <ConfigProvider
+        theme={{
+            "components": {
+                "Collapse": {
+                    "headerBg": "rgb(19,78,74)",
+                    "colorTextHeading": "rgba(255,255,255,0.88)",
+                    "contentBg": "rgb(255,255,255)",
+                },
+                "Steps": {
+                    "colorPrimary": "rgb(19,78,74)"
+                },
+                "Checkbox": {
+                    "colorPrimary": "rgb(19,78,74)",
+                    "colorPrimaryHover": "rgb(19,78,74)",
+                },
+                "Radio": {
+                    "colorPrimary": "rgb(19,78,74)",
+                    "colorPrimaryHover": "rgb(19,78,74)",
+                }
+            }
+        }}>
         <BrowserRouter>
             <Auth0Provider
                 domain={import.meta.env.VITE_AUTH0_DOMAIN}
@@ -20,7 +40,7 @@ createRoot(document.getElementById('root')).render(
                 <App/>
             </Auth0Provider>
         </BrowserRouter>
-
+    </ConfigProvider>
 )
 
 

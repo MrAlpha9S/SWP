@@ -1,5 +1,5 @@
 import { FiMail, FiPhone } from 'react-icons/fi'
-import Logo from './logo.jsx'
+import Logo from './homepage/logo.jsx'
 
 function Footer() {
   return (

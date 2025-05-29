@@ -20,7 +20,7 @@ function SupportMethods() {
   ]
 
   return (
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 ">
         <div className="container-custom">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
             QuitEase giúp bạn cai thuốc như thế nào
