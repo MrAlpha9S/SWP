@@ -1,5 +1,5 @@
 import { FiMail, FiPhone } from 'react-icons/fi'
-import Logo from './Logo'
+import Logo from './logo.jsx'
 
 function Footer() {
   return (
@@ -33,13 +33,12 @@ function Footer() {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4">Truy cập nhanh</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Trang ch</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors"></a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Services</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Resources</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Trang chủ</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Về chúng tôi</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Tài nguyên</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Liên hệ</a></li>
             </ul>
           </div>
           
@@ -47,15 +46,14 @@ function Footer() {
             <h3 className="text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-2">
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Community Forum</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Success Stories</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Cộng đồng</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Câu chuyện người dùng</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Research</a></li>
             </ul>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
+          <div className='flex flex-col items-center'>
+            <h3 className="text-lg font-semibold mb-4">Liên hệ chúng tôi</h3>
             <div className="space-y-4">
               <div className="flex items-start">
                 <FiMail className="text-primary-400 mt-1 mr-3" />

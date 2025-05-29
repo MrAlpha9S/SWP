@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
 
-function DashBoard() {
+function Dashboard() {
 
     const [userList, setUserList] = React.useState([]);
     const { getAccessTokenSilently } = useAuth0();
@@ -48,4 +48,4 @@ function DashBoard() {
         ;
 }
 
-export default withAuthenticationRequired(DashBoard)
+export default withAuthenticationRequired(Dashboard)

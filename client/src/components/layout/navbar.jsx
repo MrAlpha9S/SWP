@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
 import {FiSearch, FiMenu, FiX} from 'react-icons/fi'
-import Logo from './Logo'
-import LoginInButton from "../ui/loginInButton.jsx";
-import LogoutButton from "../ui/LogoutButton.jsx";
+import Logo from './logo.jsx'
+import LoginButton from "../ui/loginButton.jsx";
+import LogoutButton from "../ui/logoutButton.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import SignUpButton from "../ui/signUpButton.jsx";
-import Profile from "../ui/UserProfile.jsx";
+import Profile from "../ui/userProfile.jsx";
 import {FaSpinner} from "react-icons/fa";
 import {Fa0} from "react-icons/fa6";
 
@@ -46,7 +46,7 @@ function Navbar() {
                             ) : (
                                 <>
                                     <SignUpButton />
-                                    <LoginInButton />
+                                    <LoginButton />
                                 </>
                             )}
                         </div>
@@ -83,7 +83,7 @@ function Navbar() {
                            className="block py-2 text-gray-700 hover:text-primary-600 font-medium transition-colors">
                             Support
                         </a>
-                        <LoginInButton/>
+                        <LoginButton/>
                         <LogoutButton/>
                     </div>
                 </div>

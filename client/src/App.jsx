@@ -1,10 +1,11 @@
 
 import { Routes, Route} from "react-router-dom";
-import Navbar from './components/layout/Navbar.jsx';
+import Navbar from './components/layout/navbar.jsx';
 import './App.css';
-import Home from './pages/homePage/home';
-import DashBoard from "./pages/dashboardPage/dashboard";
-import PostSignUpRedirect from "./pages/PostSignUpRedirect.jsx";
+import Homepage from './pages/homepage/homepage.jsx';
+import DashBoard from "./pages/dashboardPage/dashboard.jsx";
+import PostSignUpCallback from "./pages/signup/postSignUpCallback.jsx";
+import Onboarding from "./pages/signup/onboarding.jsx";
 
 function App() {
 
@@ -12,9 +13,10 @@ function App() {
         <>
             <Navbar/>
             <Routes>
-                <Route path="/" element={<Home/>}></Route>
+                <Route path="/" element={<Homepage/>}></Route>
                 <Route path="/dashboard" element={<DashBoard/>}></Route>
-                <Route path="/onboarding" element={<PostSignUpRedirect/>}></Route>
+                <Route path="/postSignup" element={<PostSignUpCallback/>}></Route>
+                <Route path="/onboarding" element={<Onboarding/>}></Route>
             </Routes>
         </>
     )
