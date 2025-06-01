@@ -1,8 +1,8 @@
-import { create } from 'zustand';
+import {create} from 'zustand';
 
 export const useQuitReadinessStore = create((set) => ({
     readinessValue: '',
-    setReadinessValue: (value) => set({ readinessValue: value }),
+    setReadinessValue: (value) => set({readinessValue: value}),
 }));
 
 export const useReasonStore = create((set) => ({
@@ -11,7 +11,7 @@ export const useReasonStore = create((set) => ({
         set((state) =>
             state.reasonList.includes(reason)
                 ? state
-                : { reasonList: [...state.reasonList, reason] }
+                : {reasonList: [...state.reasonList, reason]}
         ),
     removeReason: (reason) =>
         set((state) => ({
@@ -20,41 +20,38 @@ export const useReasonStore = create((set) => ({
     toggleReason: (reason) =>
         set((state) =>
             state.reasonList.includes(reason)
-                ? { reasonList: state.reasonList.filter((r) => r !== reason) }
-                : { reasonList: [...state.reasonList, reason] }
+                ? {reasonList: state.reasonList.filter((r) => r !== reason)}
+                : {reasonList: [...state.reasonList, reason]}
         ),
-    resetReasons: () => set({ reasonList: [] }),
+    resetReasons: () => set({reasonList: []}),
 }));
 
 export const usePricePerPackStore = create((set) => ({
     pricePerPack: 0,
-    setPricePerPack: (value) => set({ pricePerPack: value }),
+    setPricePerPack: (value) => set({pricePerPack: value}),
 }))
 
-export const useCigsPerPackStore  = create((set) => ({
+export const useCigsPerPackStore = create((set) => ({
     cigsPerPack: 0,
-    setCigsPerPack: (value) => set({ cigsPerPack: value})
+    setCigsPerPack: (value) => set({cigsPerPack: value})
 }))
 
-export const useCigsPerDayStore  = create((set) => ({
-    cigsPerDay: 0,
-    setCigsPerDay: (value) => set({ cigsPerDay: value }),
-}))
-
-export const useTimeAfterWakingStore  = create((set) => ({
+export const useTimeAfterWakingStore = create((set) => ({
     timeAfterWaking: '',
-    setTimeAfterWaking: (value) => set({ timeAfterWaking: value }),
+    setTimeAfterWaking: (value) => set({timeAfterWaking: value}),
 }))
 
-export const useTimeOfDayStore  = create((set) => ({
+export const useTimeOfDayStore = create((set) => ({
     timeOfDayList: [],
     customTimeOfDay: '',
-    setCustomTimeOfDay: (value) => set({ customTimeOfDay: value }),
+    customTimeOfDayChecked: false,
+    setCustomTimeOfDayChecked: (value) => set({customTimeOfDayChecked: value}),
+    setCustomTimeOfDay: (value) => set({customTimeOfDay: value}),
     addTimeOfDay: (timeOfDay) =>
         set((state) =>
             state.timeOfDayList.includes(timeOfDay)
                 ? state
-                : { timeOfDayList: [...state.timeOfDayList, timeOfDay] }
+                : {timeOfDayList: [...state.timeOfDayList, timeOfDay]}
         ),
     removeTimeOfDay: (timeOfDay) =>
         set((state) => ({
@@ -63,21 +60,23 @@ export const useTimeOfDayStore  = create((set) => ({
     toggleTimeOfDay: (timeOfDay) =>
         set((state) =>
             state.timeOfDayList.includes(timeOfDay)
-                ? { timeOfDayList: state.timeOfDayList.filter((r) => r !== timeOfDay) }
-                : { timeOfDayList: [...state.timeOfDayList, timeOfDay] }
+                ? {timeOfDayList: state.timeOfDayList.filter((r) => r !== timeOfDay)}
+                : {timeOfDayList: [...state.timeOfDayList, timeOfDay]}
         ),
-    resetTimeOfDay: () => set({ timeOfDayList: [] }),
+    resetTimeOfDay: () => set({timeOfDayList: []}),
 }))
 
 export const useTriggersStore = create((set) => ({
     triggers: [],
     customTrigger: '',
-    setCustomTrigger: (trigger) => set({ customTrigger: trigger }),
+    customTriggerChecked: false,
+    setCustomTriggerChecked: (value) => set({customTriggerChecked: value}),
+    setCustomTrigger: (trigger) => set({customTrigger: trigger}),
     addTrigger: (trigger) =>
         set((state) =>
             state.triggers.includes(trigger)
                 ? state
-                : { triggers: [...state.triggers, trigger] }
+                : {triggers: [...state.triggers, trigger]}
         ),
     removeTrigger: (trigger) =>
         set((state) => ({
@@ -86,25 +85,32 @@ export const useTriggersStore = create((set) => ({
     toggleTrigger: (trigger) =>
         set((state) =>
             state.triggers.includes(trigger)
-                ? { triggers: state.triggers.filter((t) => t !== trigger) }
-                : { triggers: [...state.triggers, trigger] }
+                ? {triggers: state.triggers.filter((t) => t !== trigger)}
+                : {triggers: [...state.triggers, trigger]}
         ),
-    resetTriggers: () => set({ triggers: [] }),
+    resetTriggers: () => set({triggers: []}),
 }));
 
-export const useCustomTimeOfDayCheckedStore = create((set) => ({
-    customTimeOfDayChecked: false,
-    setCustomTimeOfDayChecked: (value) => set({ customTimeOfDayChecked: value }),
-}))
-
-export const useCustomTriggerCheckedStore = create((set) => ({
-    customTriggerChecked: false,
-    setCustomTriggerChecked: (value) => set({ customTriggerChecked: value }),
-}))
-
-export const useStartDateStore = create((set) => ({
+export const usePlanStore = create((set) => ({
     startDate: '',
-    setStartDate: (value) => set({ startDate: value }),
+    setStartDate: (value) => set({startDate: value}),
+    cigsPerDay: 0,
+    setCigsPerDay: (value) => set({cigsPerDay: value}),
+    quittingMethod: '',
+    setQuittingMethod: (value) => set({quittingMethod: value}),
+    cigsReduced: 0,
+    setCigsReduced: (value) => set({cigsReduced: value}),
+    expectedQuitDate: '',
+    setExpectedQuitDate: (value) => set({expectedQuitDate: value}),
+    stoppedDate: '',
+    setStoppedDate: (value) => set({stoppedDate: value}),
+    planLog: [],
+    setPlanLog: (value) => set({planLog: value}),
+}))
+
+export const useQuittingMethodStore = create((set) => ({
+    quittingMethod: '',
+    setQuittingMethod: (value) => set({quittingMethod: value}),
 }))
 
 export const useErrorStore = create((set) => ({
@@ -114,7 +120,7 @@ export const useErrorStore = create((set) => ({
             const exists = state.errors.some(
                 (err) => err.location === error.location && err.atPage === error.atPage
             );
-            return exists ? state : { errors: [...state.errors, error] };
+            return exists ? state : {errors: [...state.errors, error]};
         }),
 
     removeError: (error) =>
@@ -124,6 +130,21 @@ export const useErrorStore = create((set) => ({
             ),
         })),
 }));
+
+export const useGoalsStore = create((set) => ({
+    createGoalChecked: false,
+    setCreateGoalChecked: (value) => set({createGoalChecked: value}),
+    goalList: [],
+    setGoalList: (value) => set({goalList: value}),
+    removeGoal: (goal) =>
+        set((state) => ({
+            goalList: state.goalList.filter((g) => g !== goal)
+        })),
+    goalName: '',
+    setGoalName: (name) => set({goalName: name}),
+    goalAmount: 0,
+    setGoalAmount: (value) => set({goalAmount: value}),
+}))
 
 
 

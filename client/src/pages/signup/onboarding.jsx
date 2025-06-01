@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import Hero from "../../components/layout/signup/hero.jsx";
-import {Radio, Collapse, Steps, Checkbox} from "antd";
-import {FaArrowLeft, FaArrowRight, FaCheck} from "react-icons/fa";
+import {Collapse, Steps} from "antd";
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import {FaCircleCheck} from "react-icons/fa6";
 import Readiness from "../../components/layout/signup/readiness.jsx";
@@ -9,7 +9,15 @@ import Reason from "../../components/layout/signup/reason.jsx";
 import CigInfo from "../../components/layout/signup/cigInfo.jsx";
 import SmokingRoutine from "../../components/layout/signup/smokingRoutine.jsx";
 import StartDate from "../../components/layout/signup/startDate.jsx";
-import {useErrorStore, usePricePerPackStore, useQuitReadinessStore, useReasonStore} from "../../stores/store.js";
+import {
+    useCigsPerPackStore,
+    useErrorStore, useGoalsStore, usePlanStore,
+    usePricePerPackStore,
+    useQuitReadinessStore,
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+} from "../../stores/store.js";
+import {onboardingErrorMsg} from "../../constants/constants.js";
+import SetGoals from "../../components/layout/signup/setGoals.jsx";
 
 const planTipsCollapseItems = [
     {
@@ -30,31 +38,6 @@ const planTipsCollapseItems = [
     }
 ];
 
-const goalTipsCollapseItems = [
-    {
-        key: '1',
-        label: 'Mẹo để đặt mục tiêu',
-        children: <div className="text-left w-full h-full bg-white px-4 text-sm md:text-base">
-            <p><strong>Mục tiêu tiết kiệm</strong></p>
-            <p>Hãy đặt mục tiêu cụ thể, chẳng hạn như: "Tôi sẽ dùng số tiền tiết kiệm được từ việc không hút thuốc để
-                mua một chiếc điện thoại mới", thay vì những điều chung chung như "Tôi sẽ tiết kiệm một ít tiền". Sử
-                dụng các công cụ tính toán để theo dõi tiến trình của bạn.</p>
-
-            <p><strong>Mục tiêu về sức khỏe</strong></p>
-            <p>Hãy đặt mục tiêu rõ ràng, ví dụ: "Tôi sẽ đi bộ 20 phút, 3 lần mỗi tuần trong vòng một tháng", thay vì
-                những câu mơ hồ như "Tôi sẽ trở nên khỏe mạnh". Đảm bảo rằng mục tiêu của bạn là khả thi.</p>
-
-            <p><strong>Mục tiêu ngắn hạn</strong></p>
-            <p>Tăng sự tự tin trong giai đoạn đầu cai thuốc bằng cách đặt ra các mục tiêu ngắn hạn. Ví dụ, tiết kiệm 2.5
-                triệu đồng cho một buổi tối đi chơi, hoặc đi bộ vào giờ nghỉ trưa 10 phút, hai lần mỗi tuần.</p>
-
-            <p>Nếu bạn là thành viên đã đăng ký của iCanQuit, bạn có thể thêm nhiều mục tiêu hơn hoặc điều chỉnh các mục
-                tiêu hiện tại trong bảng điều khiển Kế hoạch Cai thuốc của mình.</p>
-
-        </div>
-    }
-]
-
 const stepsItems = [
     {
         title: 'Bắt đầu',
@@ -69,7 +52,7 @@ const stepsItems = [
         title: 'Thói quen',
     },
     {
-        title: 'Ngày bắt đầu',
+        title: 'Lên kế hoạch',
     },
     {
         title: 'Mục tiêu',
@@ -82,12 +65,25 @@ const stepsItems = [
 
 const Onboarding = () => {
     const [currentStep, setCurrentStep] = useState(0);
-    const [savingGoalChecked, setSavingGoalChecked] = useState(false);
+
+    const errorMap = React.useMemo(() => {
+        const map = {};
+        onboardingErrorMsg.forEach(err => {
+            map[err.location] = err;
+        });
+        return map;
+    }, []);
+
     const {readinessValue} = useQuitReadinessStore();
     const {addError, removeError} = useErrorStore();
     const {reasonList} = useReasonStore();
     const {pricePerPack} = usePricePerPackStore();
-
+    const {cigsPerPack} = useCigsPerPackStore();
+    const {timeAfterWaking} = useTimeAfterWakingStore();
+    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
+    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
+    const {createGoalChecked, goalName, goalAmount} = useGoalsStore()
 
     const toPreviousPage = () => {
         if (currentStep > 0) {
@@ -97,9 +93,9 @@ const Onboarding = () => {
 
     const toNextPage = () => {
         if (currentStep <= 8) {
-            switch(currentStep) {
+            switch (currentStep) {
                 case 0: {
-                    const errorMsg = {atPage: "readiness", location: "readinessRadio", message: "Vui lòng chọn 1"}
+                    const errorMsg = errorMap["readinessRadio"]
                     if (readinessValue.length === 0) {
                         addError(errorMsg)
                         return;
@@ -110,7 +106,7 @@ const Onboarding = () => {
                     break;
                 }
                 case 1: {
-                    const errorMsg = {atPage: "reason", location: "reasonCheckbox", message: "Vui lòng chọn ít nhất 3 lý do"}
+                    const errorMsg = errorMap["reasonCheckbox"]
                     if (reasonList.length < 3) {
                         addError(errorMsg)
                     } else {
@@ -120,10 +116,142 @@ const Onboarding = () => {
                     break;
                 }
                 case 2: {
-                    const errorMsgPricePerPack = {atPage: "cigInfo", location: "pricePerPack", message: "Giá tiền không hợp lệ"}
-                    const errorMsgCigsPerPack = {atPage: "cigInfo", location: "cigsPerPack", message: "Số điếu không hợp lệ"}
-                    const errorMsgCigsPerDay = {atPage: "cigInfo", location: "cigsPerDay", message: "Số điếu không hợp lệ"}
+                    const errorMsgPricePerPack = errorMap["pricePerPack"]
+                    const errorMsgCigsPerPack = errorMap["cigsPerPack"]
+                    if (pricePerPack <= 0) {
+                        addError(errorMsgPricePerPack)
+                    } else {
+                        removeError(errorMsgPricePerPack)
+                    }
+                    if (cigsPerPack <= 0) {
+                        addError(errorMsgCigsPerPack)
+                    } else {
+                        removeError(errorMsgCigsPerPack)
+                    }
+                    if (pricePerPack > 0 && cigsPerPack > 0) {
+                        setCurrentStep(currentStep + 1)
+                    }
+                    break;
+                }
+                case 3: {
+                    const errorMsgTimeAfterWaking = errorMap["timeAfterWaking"];
+                    const errorMsgTimeOfDay = errorMap["timeOfDay"];
+                    const errorMsgTriggers = errorMap["triggers"];
+                    const errorMsgCustomTimeOfDay = errorMap["customTimeOfDay"];
+                    const errorMsgCustomTrigger = errorMap["customTrigger"];
 
+                    if (timeAfterWaking.length === 0) {
+                        addError(errorMsgTimeAfterWaking)
+                    } else {
+                        removeError(errorMsgTimeAfterWaking)
+                    }
+                    if (timeOfDayList.length === 0) {
+                        addError(errorMsgTimeOfDay)
+                    } else {
+                        removeError(errorMsgTimeOfDay)
+                    }
+                    if (customTimeOfDayChecked && customTimeOfDay.length === 0) {
+                        addError(errorMsgCustomTimeOfDay)
+                    } else {
+                        removeError(errorMsgCustomTimeOfDay)
+                    }
+                    if (triggers.length === 0) {
+                        addError(errorMsgTriggers)
+                    } else {
+                        removeError(errorMsgTriggers)
+                    }
+                    if (customTriggerChecked && customTrigger.length === 0) {
+                        addError(errorMsgCustomTrigger)
+                    } else {
+                        removeError(errorMsgCustomTrigger)
+                    }
+
+                    if (
+                        timeAfterWaking.length !== 0 &&
+                        timeOfDayList.length !== 0 &&
+                        triggers.length !== 0 &&
+                        (!customTriggerChecked || (customTriggerChecked && customTrigger.length !== 0)) &&
+                        (!customTimeOfDayChecked || (customTimeOfDayChecked && customTimeOfDay.length !== 0))
+                    ) {
+                        setCurrentStep(currentStep + 1);
+                    }
+                    break;
+                }
+                case 4: {
+                    const errorMsgStartDate = errorMap["startDate"];
+                    const errorMsgCigsPerDay = errorMap["cigsPerDay"];
+                    const errorMsgQuitMethod = errorMap["quitMethod"];
+                    const errorMsgCigsReduced = errorMap["cigsReduced"];
+                    const errorMsgExpectedQuitDate = errorMap["expectedQuitDate"];
+                    const errorMsgStoppedDate = errorMap["stoppedDate"];
+
+                    if (readinessValue === 'ready') {
+                        if (startDate.length === 0) {
+                            addError(errorMsgStartDate)
+                        } else {
+                            removeError(errorMsgStartDate)
+                        }
+                        if (cigsPerDay <= 0) {
+                            addError(errorMsgCigsPerDay)
+                        } else {
+                            removeError(errorMsgCigsPerDay)
+                        }
+                        if (quittingMethod.length === 0) {
+                            addError(errorMsgQuitMethod)
+                        } else {
+                            removeError(errorMsgQuitMethod)
+                        }
+                        if (expectedQuitDate.length === 0) {
+                            addError(errorMsgExpectedQuitDate)
+                        } else {
+                            removeError(errorMsgExpectedQuitDate)
+                        }
+                        if (cigsReduced <= 0) {
+                            addError(errorMsgCigsReduced)
+                        } else {
+                            removeError(errorMsgCigsReduced)
+                        }
+                        if (startDate.length > 0 &&
+                            cigsPerDay > 0 &&
+                            quittingMethod.length > 0 &&
+                            ((quittingMethod !== 'target-date' && cigsReduced > 0) || (!(quittingMethod === 'target-date') && expectedQuitDate.length > 0))) {
+                            setCurrentStep(currentStep + 1)
+                        }
+                    } else {
+                        if (stoppedDate.length === 0) {
+                            addError(errorMsgStoppedDate)
+                        } else {
+                            removeError(errorMsgStoppedDate)
+                        }
+                        if (stoppedDate.length > 0) {
+                            setCurrentStep(currentStep + 1)
+                        }
+                    }
+
+
+                    break;
+                }
+                case 5: {
+                    const errorMsgGoalName = errorMap["goalName"];
+                    const errorMsgGoalAmount = errorMap["goalAmount"];
+                    if (createGoalChecked) {
+                        if (goalName.length === 0) {
+                            addError(errorMsgGoalName)
+                        } else {
+                            removeError(errorMsgGoalName)
+                        }
+                        if (goalAmount <= 0) {
+                            addError(errorMsgGoalAmount)
+                        } else {
+                            removeError(errorMsgGoalAmount)
+                        }
+                        if (goalName.length !== 0 && goalAmount > 0) {
+                            setCurrentStep(currentStep + 1)
+                        }
+                    } else {
+                        setCurrentStep(currentStep + 1)
+                    }
+                    break;
                 }
             }
         }
@@ -131,27 +259,114 @@ const Onboarding = () => {
 
     useEffect(() => {
         if (readinessValue.length > 0) {
-            removeError({
-                atPage: "readiness",
-                location: "readinessRadio",
-                message: "Vui lòng chọn 1"
-            });
+            removeError(errorMap["readinessRadio"]);
         }
-        if (reasonList.length >= 3) {
-            removeError({
-                atPage: "reason",
-                location: "reasonCheckbox",
-                message: "Vui lòng chọn ít nhất 3 lý do"
-            })
-        }
-    }, [readinessValue, reasonList, removeError]);
+    }, [readinessValue]);
 
-    // const onChangeSteps = value => {
-    //     if (value === 8)
-    //         setCurrentStep(value - 1);
-    //     else
-    //         setCurrentStep(value);
-    // };
+    useEffect(() => {
+        if (reasonList.length >= 3) {
+            removeError(errorMap["reasonCheckbox"]);
+        }
+    }, [reasonList]);
+
+    useEffect(() => {
+        if (pricePerPack > 0) {
+            removeError(errorMap["pricePerPack"]);
+        }
+    }, [pricePerPack]);
+
+    useEffect(() => {
+        if (cigsPerDay > 0) {
+            removeError(errorMap["cigsPerDay"]);
+        }
+    }, [cigsPerDay]);
+
+    useEffect(() => {
+        if (timeAfterWaking.length > 0) {
+            removeError(errorMap["timeAfterWaking"]);
+        }
+    }, [timeAfterWaking]);
+
+    useEffect(() => {
+        if (timeOfDayList.length > 0) {
+            removeError(errorMap["timeOfDay"]);
+        }
+    }, [timeOfDayList]);
+
+    useEffect(() => {
+        if (customTimeOfDayChecked) {
+            if (customTimeOfDay.length > 0) {
+                removeError(errorMap["customTimeOfDay"]);
+            }
+        }
+    }, [customTimeOfDay])
+
+    useEffect(() => {
+        if (customTriggerChecked) {
+            if (customTrigger.length > 0) {
+                removeError(errorMap["customTrigger"]);
+            }
+        }
+    }, [customTrigger])
+
+    useEffect(() => {
+        if (triggers.length > 0) {
+            removeError(errorMap["triggers"]);
+        }
+    }, [triggers]);
+
+    useEffect(() => {
+        if (startDate.length > 0) {
+            removeError(errorMap["startDate"]);
+        }
+    }, [startDate]);
+
+    useEffect(() => {
+        if (cigsPerPack > 0) {
+            removeError(errorMap["cigsPerPack"]);
+        }
+    }, [cigsPerPack]);
+
+    useEffect(() => {
+        if (quittingMethod.length > 0) {
+            removeError(errorMap["quitMethod"]);
+        }
+    }, [quittingMethod]);
+
+    useEffect(() => {
+        if (cigsReduced > 0) {
+            removeError(errorMap["cigsReduced"]);
+        }
+    }, [cigsReduced]);
+
+    useEffect(() => {
+        if (expectedQuitDate.length > 0) {
+            removeError(errorMap["expectedQuitDate"]);
+        }
+    }, [expectedQuitDate]);
+
+    useEffect(() => {
+        if (createGoalChecked) {
+            if (goalName.length > 0) {
+                removeError(errorMap["goalName"]);
+            }
+        }
+    }, [goalName]);
+
+    useEffect(() => {
+        if (createGoalChecked) {
+            if (goalAmount > 0) {
+                removeError(errorMap["goalAmount"]);
+            }
+        }
+    }, [goalAmount]);
+
+    const onChangeSteps = value => {
+        if (value === 8)
+            setCurrentStep(value - 1);
+        else
+            setCurrentStep(value);
+    };
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -165,13 +380,6 @@ const Onboarding = () => {
         }
     }, [currentStep]);
 
-    const [value, setValue] = useState(1);
-    const onChangeCheckbox = event => {
-        setValue(event.target.value);
-    }
-    const savingGoalOnChange = e => {
-        setSavingGoalChecked(!savingGoalChecked);
-    };
     const scrollRef = useRef(null);
     return (
         <>
@@ -184,12 +392,11 @@ const Onboarding = () => {
                     />
                 </div>
 
-
                 <Steps
                     ref={scrollRef}
                     className='bg-white'
                     current={currentStep}
-                    // onChange={onChangeSteps}
+                    onChange={onChangeSteps}
                     labelPlacement="vertical"
                     items={stepsItems}
                 />
@@ -200,70 +407,7 @@ const Onboarding = () => {
                     {currentStep === 2 && <CigInfo/>}
                     {currentStep === 3 && <SmokingRoutine/>}
                     {currentStep === 4 && <StartDate/>}
-                    {currentStep === 5 && (
-                        <>
-                            <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                                6. Đề ra mục tiêu
-                            </h2>
-
-                            <div className="text-left text-sm md:text-base">
-                                <p>
-                                    Đặt mục tiêu có thể giúp bạn duy trì động lực và khiến việc cai thuốc trở nên khả
-                                    thi hơn.
-                                    Mục tiêu cũng giúp bạn có điều gì đó để mong chờ trong hành trình sống không thuốc
-                                    lá.
-                                    Hãy bắt đầu bằng cách đặt mục tiêu cho việc tiết kiệm.
-                                </p>
-                            </div>
-
-                            <div className="flex flex-col w-full bg-white">
-                                <Collapse
-                                    className='w-[70%]' items={goalTipsCollapseItems} defaultActiveKey={['1']}
-                                />
-                            </div>
-
-                            <div className="flex flex-col gap-3 w-[70%] bg-[rgb(19,78,74)] p-8 rounded-lg text-white">
-                                <h3 className='font-bold text-left text-base md:text-lg flex flex-col gap-3'>Thêm mục
-                                    tiêu tiết kiệm</h3>
-                                <p className="text-left text-sm md:text-base">
-                                    Bạn có thể bắt đầu với một mục tiêu tiết kiệm ngắn hạn, ví dụ như tiết kiệm 3
-                                    triệu cho chuyến đi Đà Lạt
-                                </p>
-                                <Checkbox onChange={() => savingGoalOnChange()}><span
-                                    className='text-white text-sm md:text-base'>Thêm mục tiêu tiết kiệm</span>
-                                </Checkbox>
-                                {savingGoalChecked && (
-                                    <form className="w-[60%] flex flex-col gap-3">
-                                        <div className="flex flex-col gap-3">
-                                            <label htmlFor="goal" className="font-bold text-sm md:text-base">
-                                                Mục tiêu tiết kiệm của bạn?
-                                            </label>
-                                            <p className="text-xs md:text-sm">Ví dụ: tour vòng quanh Châu Âu</p>
-                                            <input
-                                                id="goal"
-                                                type="text"
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-3">
-                                            <label htmlFor="moneyGoal" className="font-bold text-sm md:text-base">
-                                                Tổng số tiền bạn cần tiết kiệm?
-                                            </label>
-                                            <p className="block text-xs md:text-sm">Nhập vào số tiền (VND) mà bạn cần
-                                                tiết kiệm</p>
-                                            <input
-                                                id="moneyGoal"
-                                                type="number"
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
-                                        </div>
-                                    </form>
-                                )}
-                            </div>
-
-                        </>
-                    )}
+                    {currentStep === 5 && <SetGoals/>}
                 </div>
                 <div className='flex justify-between gap-5 w-full'>
                     {currentStep !== 0 && (
