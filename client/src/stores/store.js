@@ -140,10 +140,23 @@ export const useGoalsStore = create((set) => ({
         set((state) => ({
             goalList: state.goalList.filter((g) => g !== goal)
         })),
+    addGoal: (goal) =>
+        set((state) =>
+            state.goalList.includes(goal)
+                ? state
+                : {goalList: [...state.goalList, goal]}
+        ),
+    goalType: '',
+    setGoalType: (type) => set({goalType: type}),
     goalName: '',
     setGoalName: (name) => set({goalName: name}),
     goalAmount: 0,
-    setGoalAmount: (value) => set({goalAmount: value}),
+    setGoalAmount: (amount) => set({goalAmount: amount}),
+}))
+
+export const useCurrentStepStore = create((set) => ({
+    currentStep: 0,
+    setCurrentStep: (value) => set({currentStep: value}),
 }))
 
 

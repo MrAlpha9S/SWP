@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useRef, useEffect} from 'react';
 import Hero from "../../components/layout/signup/hero.jsx";
 import {Collapse, Steps} from "antd";
 import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
@@ -8,9 +8,9 @@ import Readiness from "../../components/layout/signup/readiness.jsx";
 import Reason from "../../components/layout/signup/reason.jsx";
 import CigInfo from "../../components/layout/signup/cigInfo.jsx";
 import SmokingRoutine from "../../components/layout/signup/smokingRoutine.jsx";
-import StartDate from "../../components/layout/signup/startDate.jsx";
+import SetPlan from "../../components/layout/signup/setPlan.jsx";
 import {
-    useCigsPerPackStore,
+    useCigsPerPackStore, useCurrentStepStore,
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
@@ -18,6 +18,7 @@ import {
 } from "../../stores/store.js";
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
+import Summary from "../../components/layout/signup/summary.jsx";
 
 const planTipsCollapseItems = [
     {
@@ -38,33 +39,10 @@ const planTipsCollapseItems = [
     }
 ];
 
-const stepsItems = [
-    {
-        title: 'Bắt đầu',
-    },
-    {
-        title: 'Động lực',
-    },
-    {
-        title: 'Thông tin thuốc',
-    },
-    {
-        title: 'Thói quen',
-    },
-    {
-        title: 'Lên kế hoạch',
-    },
-    {
-        title: 'Mục tiêu',
-    },
-    {
-        title: 'Tổng kết',
-        icon: <FaCircleCheck className="size-8"/>
-    },
-]
+
 
 const Onboarding = () => {
-    const [currentStep, setCurrentStep] = useState(0);
+    const {currentStep, setCurrentStep} = useCurrentStepStore();
 
     const errorMap = React.useMemo(() => {
         const map = {};
@@ -84,6 +62,21 @@ const Onboarding = () => {
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
     const {createGoalChecked, goalName, goalAmount} = useGoalsStore()
+
+    const stepsItems = React.useMemo(() => [
+        { title: 'Bắt đầu' },
+        { title: 'Động lực' },
+        { title: 'Thông tin thuốc' },
+        { title: 'Thói quen' },
+        {
+            title: readinessValue === 'ready' ? 'Lên kế hoạch' : 'Kết quả & theo dõi',
+        },
+        { title: 'Mục tiêu' },
+        {
+            title: 'Tổng kết',
+            icon: <FaCircleCheck className="size-8" />,
+        },
+    ], [readinessValue]);
 
     const toPreviousPage = () => {
         if (currentStep > 0) {
@@ -118,18 +111,30 @@ const Onboarding = () => {
                 case 2: {
                     const errorMsgPricePerPack = errorMap["pricePerPack"]
                     const errorMsgCigsPerPack = errorMap["cigsPerPack"]
+                    const errorMsgCigsPerDay = errorMap["cigsPerDay"]
                     if (pricePerPack <= 0) {
                         addError(errorMsgPricePerPack)
                     } else {
                         removeError(errorMsgPricePerPack)
                     }
-                    if (cigsPerPack <= 0) {
+                    if (cigsPerPack <= 0 || !Number.isInteger(cigsPerPack)) {
                         addError(errorMsgCigsPerPack)
                     } else {
                         removeError(errorMsgCigsPerPack)
                     }
-                    if (pricePerPack > 0 && cigsPerPack > 0) {
-                        setCurrentStep(currentStep + 1)
+                    if (readinessValue === 'relapse-support') {
+                        if (cigsPerDay <=0 || !Number.isInteger(cigsPerDay)) {
+                            addError(errorMsgCigsPerDay)
+                        } else {
+                            removeError(errorMsgCigsPerDay)
+                        }
+                        if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
+                            setCurrentStep(currentStep + 1)
+                        }
+                    } else {
+                        if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
+                            setCurrentStep(currentStep + 1)
+                        }
                     }
                     break;
                 }
@@ -191,7 +196,7 @@ const Onboarding = () => {
                         } else {
                             removeError(errorMsgStartDate)
                         }
-                        if (cigsPerDay <= 0) {
+                        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
                             addError(errorMsgCigsPerDay)
                         } else {
                             removeError(errorMsgCigsPerDay)
@@ -201,20 +206,25 @@ const Onboarding = () => {
                         } else {
                             removeError(errorMsgQuitMethod)
                         }
-                        if (expectedQuitDate.length === 0) {
-                            addError(errorMsgExpectedQuitDate)
+                        if (quittingMethod === 'target-date') {
+                            if (expectedQuitDate.length === 0) {
+                                addError(errorMsgExpectedQuitDate);
+                            } else {
+                                removeError(errorMsgExpectedQuitDate);
+                            }
+                            removeError(errorMsgCigsReduced);
                         } else {
-                            removeError(errorMsgExpectedQuitDate)
-                        }
-                        if (cigsReduced <= 0) {
-                            addError(errorMsgCigsReduced)
-                        } else {
-                            removeError(errorMsgCigsReduced)
+                            if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                                addError(errorMsgCigsReduced);
+                            } else {
+                                removeError(errorMsgCigsReduced);
+                            }
+                            removeError(errorMsgExpectedQuitDate);
                         }
                         if (startDate.length > 0 &&
                             cigsPerDay > 0 &&
                             quittingMethod.length > 0 &&
-                            ((quittingMethod !== 'target-date' && cigsReduced > 0) || (!(quittingMethod === 'target-date') && expectedQuitDate.length > 0))) {
+                            ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
                             setCurrentStep(currentStep + 1)
                         }
                     } else {
@@ -276,7 +286,7 @@ const Onboarding = () => {
     }, [pricePerPack]);
 
     useEffect(() => {
-        if (cigsPerDay > 0) {
+        if (cigsPerDay > 0 || Number.isInteger(cigsPerDay)) {
             removeError(errorMap["cigsPerDay"]);
         }
     }, [cigsPerDay]);
@@ -322,7 +332,7 @@ const Onboarding = () => {
     }, [startDate]);
 
     useEffect(() => {
-        if (cigsPerPack > 0) {
+        if (cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
             removeError(errorMap["cigsPerPack"]);
         }
     }, [cigsPerPack]);
@@ -386,11 +396,13 @@ const Onboarding = () => {
             <Hero/>
             <div className='flex flex-col h-full bg-white gap-14 p-14'>
 
-                <div className="flex flex-col w-full bg-white">
-                    <Collapse
-                        className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
-                    />
-                </div>
+                {currentStep !== 6 &&
+                    <div className="flex flex-col w-full bg-white">
+                        <Collapse
+                            className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
+                        />
+                    </div>
+                }
 
                 <Steps
                     ref={scrollRef}
@@ -406,8 +418,9 @@ const Onboarding = () => {
                     {currentStep === 1 && <Reason/>}
                     {currentStep === 2 && <CigInfo/>}
                     {currentStep === 3 && <SmokingRoutine/>}
-                    {currentStep === 4 && <StartDate/>}
+                    {currentStep === 4 && <SetPlan/>}
                     {currentStep === 5 && <SetGoals/>}
+                    {currentStep === 6 && <Summary/>}
                 </div>
                 <div className='flex justify-between gap-5 w-full'>
                     {currentStep !== 0 && (

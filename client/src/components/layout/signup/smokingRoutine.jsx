@@ -54,7 +54,7 @@ const SmokingRoutine = () => {
     return (
         <>
             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                4. Những yếu tố kích thích bạn hút thuốc
+                4. Thói quen hút thuốc của bạn
             </h2>
 
             <div className="text-left text-sm md:text-base">

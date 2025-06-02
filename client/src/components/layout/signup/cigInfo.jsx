@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    useCigsPerPackStore, useErrorStore,
+    useCigsPerPackStore, useErrorStore, usePlanStore,
     usePricePerPackStore,
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
@@ -8,6 +8,7 @@ import ErrorText from "../../ui/errorText.jsx";
 const CigInfo = () => {
     const {pricePerPack, setPricePerPack} = usePricePerPackStore();
     const {cigsPerPack, setCigsPerPack} = useCigsPerPackStore();
+    const {cigsPerDay, setCigsPerDay} = usePlanStore()
     const {errors} = useErrorStore();
 
     return (
@@ -28,7 +29,7 @@ const CigInfo = () => {
                         Một gói thuốc bạn thường hút có giá bao nhiêu?
                     </label>
                     <input
-                        onChange={(e) => setPricePerPack(e.target.value)}
+                        onChange={(e) => setPricePerPack(Number(e.target.value))}
                         id="pricePerPack"
                         type="number"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -51,7 +52,7 @@ const CigInfo = () => {
                         Có bao nhiêu điếu trong một gói thuốc bạn thường hút?
                     </label>
                     <input
-                        onChange={(e) => setCigsPerPack(e.target.value)}
+                        onChange={(e) => setCigsPerPack(Number(e.target.value))}
                         id="cigsPerPack"
                         type="number"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -66,6 +67,27 @@ const CigInfo = () => {
                             )
                         }
                     })}
+                </div>
+                <label htmlFor="cigsPerInterval" className="block text-sm md:text-base text-gray-700 mb-1">
+                    Bạn đã thường hút bao nhiêu điếu một ngày?
+                </label>
+                <div className=''>
+                    {errors.map((error, index) => {
+                        if (error.location === "cigsPerDay") {
+                            return (
+                                <ErrorText key={index}>{error.message}</ErrorText>
+                            )
+                        }
+                    })}
+                </div>
+                <div className='flex gap-1'>
+                    <input
+                        onChange={(e) => setCigsPerDay(Number(e.target.value))}
+                        id="cigsPerInterval"
+                        type="number"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={cigsPerDay}
+                    />
                 </div>
 
                 <div>
