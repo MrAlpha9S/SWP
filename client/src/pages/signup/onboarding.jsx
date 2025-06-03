@@ -429,7 +429,7 @@ const Onboarding = () => {
                         </CustomButton>
                     )}
                     <CustomButton type="primary" onClick={() => toNextPage()}>
-                        Tiếp tục <FaArrowRight/>
+                        {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                     </CustomButton>
                 </div>
             </div>

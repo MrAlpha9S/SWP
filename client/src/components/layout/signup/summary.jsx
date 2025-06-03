@@ -186,10 +186,11 @@ const Summary = () => {
                     </p>
                     <CustomButton type='primary' onClick={() => setCurrentStep(2)}>Thay đổi</CustomButton>
 
-                    <Divider/>
+
 
                     {readinessValue === 'relapse-support' && (
                         <>
+                            <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
                                 Thống kê kết quả
                             </p>
