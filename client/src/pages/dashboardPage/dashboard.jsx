@@ -1,5 +1,6 @@
-import React, {useEffect} from "react";
-import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
+import React, { useEffect } from "react";
+import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
+import { differenceInMilliseconds } from 'date-fns';
 
 function Dashboard() {
 
@@ -25,23 +26,100 @@ function Dashboard() {
         fetchUsers();
     }, [getAccessTokenSilently]);
 
+    //formatting the difference in time
+    const formatDifference = (ms) => {
+        if (ms < 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, isNegative: true };
+
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        return {
+            days: days,
+            hours: hours % 24,
+            minutes: minutes % 60,
+            seconds: seconds % 60,
+            isNegative: false,
+        };
+    };
+
+    //quit date
+    const quitDate = new Date('2025-06-01'); // Example quit date
+    const quitYear = quitDate.getFullYear();
+    const quitMonth = quitDate.toLocaleString('default', { month: 'short' });
+    const quitDay = String(quitDate.getDate()).padStart(2, '0');
+
+    //now
+    const currectDate = new Date();
+    const currectYear = currectDate.getFullYear();
+    const currectMonth = currectDate.toLocaleString('default', { month: 'short' });
+    const currectDay = String(currectDate.getDate()).padStart(2, '0');
+
+    // Calculate the difference using date-fns
+    const differenceInMs = differenceInMilliseconds(currectDate, quitDate);
+    const difference = formatDifference(differenceInMs);
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <h1 className="text-4xl font-bold mb-4">Welcome to the Dashboard</h1>
-            <p className="text-lg text-gray-700">This is a simple dashboard layout.</p>
-            <div>
-                <div>User List</div>
-                {userList.map((user, key) => {
-                        return <div className="flex flex-col items-center justify-center h-[150px] w-[250px] bg-gray-200 gap-2">
-                            <ul key={key}>
-                                <li>{user.user_id}</li>
-                                <li>{user.auth0_id}</li>
-                                <li>{user.username}</li>
-                                <li>{user.email}</li>
-                            </ul>
-                        </div>
-                    }
-                )}
+        <div class="bg-primary-50 min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
+
+
+                <div class="flex items-center justify-between">
+                    <button class="bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-800">
+                        Daily check-in →
+                    </button>
+                    <a href="#" class="text-sm text-primary-700 hover:underline">
+                        What's a check-in and why are they important?
+                    </a>
+                </div>
+
+
+                <div class="bg-primary-100 rounded-lg p-6 text-center">
+                    <h2 class="text-gray-600 text-sm font-medium">Total time smoke-free</h2>
+                    <div class="flex justify-center items-baseline space-x-2 mt-2">
+                        <span class="text-4xl font-bold text-primary-800">{difference.days}</span>
+                        <span class="text-sm text-gray-500">days</span>
+                        <span class="text-4xl font-bold text-primary-800">{difference.hours}</span>
+                        <span class="text-sm text-gray-500">hours</span>
+                        <span class="text-4xl font-bold text-primary-800">{difference.minutes}</span>
+                        <span class="text-sm text-gray-500">mins</span>
+                    </div>
+                </div>
+
+
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-primary-100 p-4 rounded-lg">
+                        <div class="text-2xl">💰</div>
+                        <div class="text-xl font-semibold text-primary-800">$40</div>
+                        <div class="text-sm text-gray-600">Money saved</div>
+                    </div>
+                    <div class="bg-primary-100 p-4 rounded-lg">
+                        <div class="text-2xl">🚭</div>
+                        <div class="text-xl font-semibold text-primary-800">8</div>
+                        <div class="text-sm text-gray-600">Puffs avoided</div>
+                    </div>
+                    <div class="bg-primary-100 p-4 rounded-lg">
+                        <div class="text-2xl">🏆</div>
+                        <div class="text-xl font-semibold text-primary-800">1</div>
+                        <div class="text-sm text-gray-600">Badges earned</div>
+                    </div>
+                </div>
+
+
+                <div class="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
+                    <div class="absolute right-3 top-3">
+                        <a href="#" class="text-sm text-primary-700 hover:underline">Is this correct?</a>
+                    </div>
+                    <div class="text-2xl">📅</div>
+                    <h3 class="text-lg font-semibold text-primary-800">My quit start date</h3>
+                    <p class="text-sm text-gray-600">{quitDay} {quitMonth} {quitYear} to {currectDay} {currectMonth} {currectYear}</p>
+                </div>
+
+                <div class="text-center">
+                    <a href="#" class="text-sm text-primary-700 hover:underline">🔗 Share my progress</a>
+                </div>
+
             </div>
         </div>
     )
