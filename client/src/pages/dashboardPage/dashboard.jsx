@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import { differenceInMilliseconds } from 'date-fns';
+import CheckInButton from "../../components/dashboardpage/CheckInButton";
 
 function Dashboard() {
 
@@ -59,10 +60,6 @@ function Dashboard() {
     // Calculate the difference using date-fns
     const differenceInMs = differenceInMilliseconds(currectDate, quitDate);
     const difference = formatDifference(differenceInMs);
-
-    useEffect(() => {
-        console.log(userList);
-    }, [userList]);
 
     return (
         <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
