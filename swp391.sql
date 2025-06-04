@@ -18,22 +18,86 @@ CREATE TABLE [users] (
   [email] varchar(255),
   [role] nvarchar(50) DEFAULT ('Member'),
   [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
-  [is_vip] bit DEFAULT (0),
-  [vip_duration] int DEFAULT(0),
-  [vip_end_date] datetime DEFAULT(NULL)
+  [sub_id] int DEFAULT (1),
+  [vip_end_date] datetime DEFAULT (null),
+  [isBanned] int DEFAULT (0)
+)
+GO
+
+CREATE TABLE [subcriptions] (
+  [sub_id] int PRIMARY KEY IDENTITY(1, 1),
+  [sub_type] varchar(50),
+  [duration] int,
+  [price] float
 )
 GO
 
 CREATE TABLE [user_profiles] (
   [profile_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
-  [quit_date] datetime DEFAULT (CURRENT_TIMESTAMP),
+  [readiness] varchar(20),
+  [start_date] datetime,
+  [quit_date] datetime,
   [expected_quit_date] datetime,
   [cigs_per_day] int,
   [cigs_per_pack] int,
-  [price_per_pack] decimal(5,2)
+  [price_per_pack] decimal(10,2),
+  [time_after_waking] varchar(30),
+  [quit_method] varchar(20),
+  [cigs_reduced] int,
+  [custom_time_of_day] nvarchar(100),
+  [custom_trigger] nvarchar(100),
+  [created_at] datetime default (CURRENT_TIMESTAMP),
+  [updated_at] datetime
 )
 GO
+
+CREATE TABLE [goals] (
+  [goal_id] int PRIMARY KEY IDENTITY(1, 1),
+  [goal_name] nvarchar(50),
+  [goal_amount] float,
+  [profile_id] int
+)
+GO
+
+
+CREATE TABLE [plan_log] (
+  [plan_id] int PRIMARY KEY IDENTITY(1, 1),
+  [profile_id] int,
+  [date] datetime,
+  [num_of_cigs] int
+)
+GO
+
+CREATE TABLE [time_profile] (
+  [profile_id] int,
+  [time_id] int,
+  PRIMARY KEY ([profile_id], [time_id])
+)
+GO
+
+CREATE TABLE [time_of_day] (
+  [time_id] int PRIMARY KEY IDENTITY(1, 1),
+  [content] varchar(30)
+)
+GO
+
+
+CREATE TABLE [smoke_triggers] (
+  [trigger_id] int PRIMARY KEY IDENTITY(1, 1),
+  [trig_content] varchar(50)
+)
+GO
+
+
+CREATE TABLE [triggers_profiles] (
+  [trigger_id] int,
+  [profile_id] int,
+  PRIMARY KEY ([trigger_id], [profile_id])
+)
+GO
+
+
 
 CREATE TABLE [profiles_reasons] (
   [profile_id] int,
@@ -47,6 +111,7 @@ CREATE TABLE [quit_reasons] (
   [reason] nvarchar(250)
 )
 GO
+
 
 CREATE TABLE [user_progresses] (
   [progress_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -103,7 +168,8 @@ CREATE TABLE [blog_posts] (
   [title] nvarchar(255),
   [content] nvarchar(max),
   [user_id] int,
-  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP)
+  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
+  [isPendingForApprovement] int DEFAULT (1)
 )
 GO
 
@@ -111,7 +177,8 @@ CREATE TABLE [social_posts] (
   [post_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [content] nvarchar(max),
-  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP)
+  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
+  [isReported] int DEFAULT (0)
 )
 GO
 
@@ -121,7 +188,8 @@ CREATE TABLE [social_comments] (
   [user_id] int,
   [post_id] int,
   [content] nvarchar(max),
-  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP)
+  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
+  [isReported] int DEFAULT (0)
 )
 GO
 
@@ -148,12 +216,8 @@ CREATE TABLE [user_conversation] (
 )
 GO
 
-CREATE TABLE [user_plans] (
-  [plan_id] int PRIMARY KEY IDENTITY(1, 1),
-  [user_id] int,
-  [plan_type] nvarchar(50),
-  [cigs_reduce_per_day] int
-)
+
+ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subcriptions] ([sub_id])
 GO
 
 ALTER TABLE [user_achievements] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -210,14 +274,49 @@ GO
 ALTER TABLE [profiles_reasons] ADD FOREIGN KEY ([reason_id]) REFERENCES [quit_reasons] ([reason_id])
 GO
 
-ALTER TABLE [user_plans] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [time_profile] ADD FOREIGN KEY ([time_id]) REFERENCES [time_of_day] ([time_id])
+GO
+
+ALTER TABLE [triggers_profiles] ADD FOREIGN KEY ([trigger_id]) REFERENCES [smoke_triggers] ([trigger_id])
+GO
+
+ALTER TABLE [time_profile] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
+GO
+
+ALTER TABLE [triggers_profiles] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
+GO
+
+ALTER TABLE [plan_log] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
+GO
+
+ALTER TABLE [goals] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
 GO
 
 
-INSERT INTO [users] ([auth0_id], [username], [email], [role], [vip_duration], [vip_end_date])
+INSERT INTO [subcriptions] ([sub_type], [duration], [price])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com', 'user', 30, DATEADD(day, 30, GETDATE())),
-('auth0|xyz789', 'jane_smith', 'jane@example.com', 'admin', 0, NULL),
-('auth0|lmn456', 'bob_lee', 'bob@example.com', 'moderator', 90, DATEADD(day, 90, GETDATE()));
+  ('Free', 0, 0.0),
+
+  ('Premium - Monthly', 1, 9.99),
+  ('Premium - Yearly', 12, 99.99),
+
+  ('Pro - Monthly', 1, 19.99),
+  ('Pro - Yearly', 12, 199.99);
+
+
+INSERT INTO [users] ([auth0_id], [username], [email], [role])
+VALUES 
+('auth0|abc123', 'john_doe', 'john@example.com', 'Coach'),
+('auth0|xyz789', 'jane_smith', 'jane@example.com', 'Admin'),
+('auth0|lmn456', 'bob_lee', 'bob@example.com', 'Member');
+
 
 SELECT * FROM users
+
+SELECT * FROM user_profiles
+select * from plan_log
+select * from quit_reasons
+select * from goals
+select * from time_of_day
+select * from smoke_triggers
+select * from triggers_profiles
