@@ -64,61 +64,89 @@ export default function SmokeFreeCheckin() {
 
     //
 
-    const handleStepOneYes = () => setStep('a');
-    const handleStepOneNo = () => setStep('');
-    const handleBack = () => setStep('');
+    const handleStepOneYes = () => {
+        setStep('StepTwoOnYes');
+        next();
+    };
+    const handleStepOneNo = () => {
+        setStep('StepTwoOnNo');
+        next();
+    };
+    const handleBackToStepOne = () => {
+        setStep('StepOne');
+        prev();
+    };
 
-    const [size, setSize] = useState('middle');
-    const handleSizeChange = e => {
-        setSize(e.target.value);
+    const [feel, setFeel] = useState('Okay');
+    const handleFeelChange = e => {
+        setFeel(e.target.value);
     };
     return (
         <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
-            {step === 'StepOne' && (
-                <div class="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-200 text-center">
-                    <Steps className='pb-5' current={current} items={items} />
-                    <h1 class="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
-                    <p class="text-gray-600 mb-6">Check-in daily to track your progress and stay motivated on your smoke-free journey.</p>
+            <div class="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-200 text-center">
+                <Steps className='pb-5' current={current} items={items} />
+                {step === 'StepOne' && (
+                    <div class="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
 
-                    <div class="mb-6 text-left">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Check-in date</label>
-                        <p class="text-xs text-gray-500 mb-1">You can select a previous date.</p>
-                        <input
-                            type="date"
-                            value={checkInDate}
-                            onChange={handleDateChange}
-                            class="w-full border border-primary-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
-                    </div>
-                    <div class="mb-6 pb-10">
-                        <p class="font-semibold text-gray-800 mb-3">How did you feel today?</p>
-                        <Radio.Group
-                            className="flex justify-between items-center gap-3 max-w-md mx-auto"
-                            value={size}
-                            onChange={handleSizeChange}
-                        >
-                            {FEELINGS.map(({ value, emoji, label }) => (
-                                <Radio.Button
-                                    className="flex flex-col items-center text-gray-500 hover:border-primary-600 rounded-lg cursor-pointer"
-                                    key={value}
-                                    value={value}
-                                >
-                                    <span className="text-2xl">{emoji}</span>
-                                    <span className="text-sm mt-1">{label}</span>
-                                </Radio.Button>
-                            ))}
-                        </Radio.Group>
-                    </div>
+                        <h1 class="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
+                        <p class="text-gray-600 mb-6">Check-in daily to track your progress and stay motivated on your smoke-free journey.</p>
+
+                        <div class="mb-6 text-left">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Check-in date</label>
+                            <p class="text-xs text-gray-500 mb-1">You can select a previous date.</p>
+                            <input
+                                type="date"
+                                value={checkInDate}
+                                onChange={handleDateChange}
+                                class="w-full border border-primary-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                        <div class="mb-6 pb-10">
+                            <p class="font-semibold text-gray-800 mb-3">How did you feel today?</p>
+                            <Radio.Group
+                                className="flex justify-between items-center gap-3 max-w-md mx-auto"
+                                value={feel}
+                                onChange={handleFeelChange}
+                            >
+                                {FEELINGS.map(({ value, emoji, label }) => (
+                                    <Radio.Button
+                                        className="flex flex-col items-center text-gray-500 hover:border-primary-600 rounded-lg"
+                                        key={value}
+                                        value={value}
+                                    >
+                                        <span className="text-2xl">{emoji}</span>
+                                        <span className="text-sm mt-1">{label}</span>
+                                    </Radio.Button>
+                                ))}
+                            </Radio.Group>
+                        </div>
 
 
-                    <div>
-                        <p class="font-semibold text-gray-800 mb-3">Did you stay smoke-free today?</p>
-                        <div class="flex justify-center gap-6">
-                            <button class="px-6 py-2 border border-primary-400 text-primary-600 rounded-md hover:bg-primary-50 font-medium">No</button>
-                            <button class="px-6 py-2 border border-primary-400 text-primary-600 rounded-md hover:bg-primary-50 font-medium">Yes</button>
+                        <div>
+                            <p class="font-semibold text-gray-800 mb-3">Did you stay smoke-free today?</p>
+                            <div class="flex justify-center gap-6">
+                                <button onClick={handleStepOneNo} class="px-6 py-2 border border-primary-400 text-primary-600 rounded-md hover:bg-primary-50 font-medium">No</button>
+                                <button onClick={handleStepOneYes} class="px-6 py-2 border border-primary-400 text-primary-600 rounded-md hover:bg-primary-50 font-medium">Yes</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+                {step === 'StepTwoOnYes' && (
+                    <div class="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
+                        <h1 class="text-2xl font-bold text-primary-800 mb-2">Congratulations!</h1>
+                        <p class="text-gray-600 mb-6">You stayed smoke-free today! Keep up the great work.</p>
+                        <Button type="primary" onClick={handleBackToStepOne}>Back</Button>
+                    </div>
+                )}
+                {step === 'StepTwoOnNo' && (
+                    <div class="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
+                        <h1 class="text-2xl font-bold text-primary-800 mb-2">Don't worry!</h1>
+                        <p class="text-gray-600 mb-6">It's okay to have setbacks. Just remember why you started.</p>
+                        <Button type="primary" onClick={handleBackToStepOne}>Back</Button>
+                    </div>
+                )}
+            </div>
+
+
 
 
         </div>
