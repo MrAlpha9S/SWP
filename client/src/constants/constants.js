@@ -8,7 +8,6 @@ export const checkboxStyle = {
 export const readinessRadioOptions = [
     { value: 'ready', label: 'Tôi đã sẵn sàng' },
     { value: 'relapse-support', label: 'Tôi đã cai thuốc nhưng vẫn cần hỗ trợ để duy trì' },
-    { value: 'not-ready', label: 'Tôi đang nghĩ đến chuyện cai thuốc nhưng chưa sẵn sàng ngay bây giờ' },
 ]
 
 export const reasonListOptions = [
@@ -67,4 +66,31 @@ export const smokingTriggerOptions = [
     { value: "any_opportunity", label: "Tôi hút bất cứ khi nào có cơ hội" },
     { value: "other", label: "Khác" },
 ];
+
+export const onboardingErrorMsg = [
+    {atPage: "readiness", location: "readinessRadio", message: "Vui lòng chọn 1"},
+    {atPage: "reason", location: "reasonCheckbox", message: "Vui lòng chọn ít nhất 3 lý do"},
+    {atPage: "cigInfo", location: "pricePerPack", message: "Giá tiền không hợp lệ"},
+    {atPage: "cigInfo", location: "cigsPerPack", message: "Số điếu không hợp lệ"},
+    {atPage: "cigInfo", location: "cigsPerDay", message: "Số điếu không hợp lệ"},
+    {atPage: "smokingRoutine", location: "timeAfterWaking", message: "Vui lòng chọn 1"},
+    {atPage: "smokingRoutine", location: "timeOfDay", message: "Vui lòng chọn ít nhất 1"},
+    {atPage: "smokingRoutine", location: "triggers", message: "Vui lòng chọn ít nhất 1"},
+    {atPage: "smokingRoutine", location: "customTimeOfDay", message: "Không để trống mục này"},
+    {atPage: "smokingRoutine", location: "customTrigger", message: "Không để trống mục này"},
+    {atPage: "createPlan", location: "startDate", message: "Vui lòng chọn ngày"},
+    {atPage: "createPlan", location: "cigsPerDay", message: "Số điếu không hợp lệ"},
+    {atPage: "createPlan", location: "quitMethod", message: "Vui lòng chọn 1"},
+    {atPage: "createPlan", location: "cigsReduced", message: "Số điếu không hợp lệ"},
+    {atPage: "createPlan", location: "expectedQuitDate", message: "Vui lòng chọn ngày"},
+    {atPage: "createPlan", location: "stoppedDate", message: "Vui lòng chọn ngày"},
+    {atPage: "setGoal", location: "goalName", message: "Không để trống mục này"},
+    {atPage: "setGoal", location: "goalAmount", message: "Số tiền không hợp lệ"}
+]
+
+export const quittingMethodOptions = [
+    {value: "gradual-daily", label: "Giảm dần số điếu thuốc mỗi ngày"},
+    {value: "gradual-weekly", label: "Giảm dần số điếu thuốc mỗi tuần"},
+    {value: "target-date", label: "Chọn ngày muốn bỏ hoàn toàn"}
+]
 

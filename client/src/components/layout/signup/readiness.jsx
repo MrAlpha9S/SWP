@@ -18,6 +18,14 @@ const Readiness = () => {
             <h2 className='text-left md:text-4xl lg:text-5xl font-bold'>
                 1. Bạn đã sẵn sàng bỏ thuốc chưa?
             </h2>
+            <div className="text-left text-sm md:text-base">
+                <p>
+                    Mỗi người có một thời điểm khác nhau để bắt đầu hành trình bỏ thuốc. Việc xác định bạn đang ở giai
+                    đoạn nào sẽ giúp xây dựng một kế hoạch phù hợp và hiệu quả hơn. Bạn có thể đã sẵn sàng để bắt đầu
+                    thay đổi, hoặc có thể bạn đã bỏ thuốc và đang tìm cách duy trì kết quả. Hãy lựa chọn tình trạng
+                    hiện tại của bạn để chúng tôi có thể hỗ trợ bạn đúng cách, đúng lúc.
+                </p>
+            </div>
             <div className='my-[-30px]'>
                 {errors.map((error, index) => {
                     if (error.atPage === 'readiness') {

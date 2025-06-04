@@ -1,8 +1,7 @@
 import React from 'react';
 import {Checkbox, Radio, Input} from "antd";
 import {
-    useCustomTimeOfDayCheckedStore,
-    useCustomTriggerCheckedStore,
+    useErrorStore,
     useTimeAfterWakingStore,
     useTimeOfDayStore,
     useTriggersStore
@@ -13,16 +12,30 @@ import {
     timeOfDayOptions,
     smokingTriggerOptions
 } from "../../../constants/constants.js";
+import ErrorText from "../../ui/errorText.jsx";
 
 const SmokingRoutine = () => {
 
     const {TextArea} = Input
 
     const {timeAfterWaking, setTimeAfterWaking} = useTimeAfterWakingStore()
-    const {timeOfDayList, toggleTimeOfDay, customTimeOfDay, setCustomTimeOfDay} = useTimeOfDayStore()
-    const {triggers, toggleTrigger, customTrigger, setCustomTrigger} = useTriggersStore()
-    const {customTimeOfDayChecked, setCustomTimeOfDayChecked} = useCustomTimeOfDayCheckedStore()
-    const {customTriggerChecked, setCustomTriggerChecked} = useCustomTriggerCheckedStore()
+    const {
+        timeOfDayList,
+        toggleTimeOfDay,
+        customTimeOfDay,
+        setCustomTimeOfDay,
+        customTimeOfDayChecked,
+        setCustomTimeOfDayChecked
+    } = useTimeOfDayStore()
+    const {
+        triggers,
+        toggleTrigger,
+        customTrigger,
+        setCustomTrigger,
+        customTriggerChecked,
+        setCustomTriggerChecked
+    } = useTriggersStore()
+    const {errors} = useErrorStore()
 
     function timeOfDayOnChange(value) {
         if (value === 'other') {
@@ -41,7 +54,7 @@ const SmokingRoutine = () => {
     return (
         <>
             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                4. Những yếu tố kích thích bạn hút thuốc
+                4. Thói quen hút thuốc của bạn
             </h2>
 
             <div className="text-left text-sm md:text-base">
@@ -55,6 +68,15 @@ const SmokingRoutine = () => {
 
             <div className="mt-8 text-left font-bold text-base md:text-lg">
                 <h3>Bạn thường hút thuốc bao lâu sau khi thức dậy?</h3>
+            </div>
+            <div className='my-[-30]'>
+                {errors.map((error, index) => {
+                    if (error.location === "timeAfterWaking") {
+                        return (
+                            <ErrorText key={index}>{error.message}</ErrorText>
+                        )
+                    }
+                })}
             </div>
             <div className="flex flex-col gap-2">
                 <Radio.Group
@@ -75,6 +97,15 @@ const SmokingRoutine = () => {
                     <span className="font-normal block text-sm">(Chọn tất cả những gì phù hợp)</span>
                 </h3>
             </div>
+            <div className='my-[-30]'>
+                {errors.map((error, index) => {
+                    if (error.location === "timeOfDay") {
+                        return (
+                            <ErrorText key={index}>{error.message}</ErrorText>
+                        )
+                    }
+                })}
+            </div>
             <div className="flex flex-col gap-2">
                 {timeOfDayOptions.map((option) => (
                     <Checkbox
@@ -86,10 +117,22 @@ const SmokingRoutine = () => {
                         {option.label}
                     </Checkbox>
                 ))}
-                {customTimeOfDayChecked && <TextArea
-                    onChange={(e) => setCustomTimeOfDay(e.target.value)}
-                    value={customTimeOfDay}
-                />}
+                {customTimeOfDayChecked &&
+                    <>
+                        <div className=''>
+                            {errors.map((error, index) => {
+                                if (error.location === "customTimeOfDay") {
+                                    return (
+                                        <ErrorText key={index}>{error.message}</ErrorText>
+                                    )
+                                }
+                            })}
+                        </div>
+                        <TextArea
+                            onChange={(e) => setCustomTimeOfDay(e.target.value)}
+                            value={customTimeOfDay}
+                        />
+                    </>}
                 <div className="mt-4 text-sm text-gray-600">
                     <strong>Đã chọn:</strong>{" "}
                     {timeOfDayList.length === 0
@@ -103,6 +146,15 @@ const SmokingRoutine = () => {
                     <span className="font-normal block text-sm">(Chọn tất cả những gì phù hợp)</span>
                 </h3>
             </div>
+            <div className='my-[-30]'>
+                {errors.map((error, index) => {
+                    if (error.location === "triggers") {
+                        return (
+                            <ErrorText key={index}>{error.message}</ErrorText>
+                        )
+                    }
+                })}
+            </div>
             <div className="flex flex-col gap-2">
                 {smokingTriggerOptions.map((option) => (
                     <Checkbox
@@ -114,10 +166,22 @@ const SmokingRoutine = () => {
                         {option.label}
                     </Checkbox>
                 ))}
-                {customTriggerChecked && <TextArea
-                    onChange={(e) => setCustomTrigger(e.target.value)}
-                    value={customTrigger}
-                />}
+                {customTriggerChecked &&
+                    <>
+                        <div className=''>
+                            {errors.map((error, index) => {
+                                if (error.location === "customTrigger") {
+                                    return (
+                                        <ErrorText key={index}>{error.message}</ErrorText>
+                                    )
+                                }
+                            })}
+                        </div>
+                        <TextArea
+                            onChange={(e) => setCustomTrigger(e.target.value)}
+                            value={customTrigger}
+                        />
+                    </>}
                 <div className="mt-4 text-sm text-gray-600">
                     <strong>Đã chọn:</strong>{" "}
                     {triggers.length === 0

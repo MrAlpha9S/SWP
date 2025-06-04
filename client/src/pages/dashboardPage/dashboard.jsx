@@ -11,7 +11,7 @@ function Dashboard() {
         const fetchUsers = async () => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch('http://localhost:3000/getUsers', {
+                const res = await fetch('http://localhost:3000/users/getAllUsers', {
                     headers: {
                         authorization: `Bearer ${token}`,
                     },
@@ -60,64 +60,68 @@ function Dashboard() {
     const differenceInMs = differenceInMilliseconds(currectDate, quitDate);
     const difference = formatDifference(differenceInMs);
 
+    useEffect(() => {
+        console.log(userList);
+    }, [userList]);
+
     return (
-        <div class="bg-primary-50 min-h-screen flex items-center justify-center p-4">
+        <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
             <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
 
 
-                <div class="flex items-center justify-between">
-                    <button class="bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-800">
+                <div className="flex items-center justify-between">
+                    <button className="bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-800">
                         Daily check-in →
                     </button>
-                    <a href="#" class="text-sm text-primary-700 hover:underline">
+                    <a href="#" className="text-sm text-primary-700 hover:underline">
                         What's a check-in and why are they important?
                     </a>
                 </div>
 
 
-                <div class="bg-primary-100 rounded-lg p-6 text-center">
-                    <h2 class="text-gray-600 text-sm font-medium">Total time smoke-free</h2>
-                    <div class="flex justify-center items-baseline space-x-2 mt-2">
-                        <span class="text-4xl font-bold text-primary-800">{difference.days}</span>
-                        <span class="text-sm text-gray-500">days</span>
-                        <span class="text-4xl font-bold text-primary-800">{difference.hours}</span>
-                        <span class="text-sm text-gray-500">hours</span>
-                        <span class="text-4xl font-bold text-primary-800">{difference.minutes}</span>
-                        <span class="text-sm text-gray-500">mins</span>
+                <div className="bg-primary-100 rounded-lg p-6 text-center">
+                    <h2 className="text-gray-600 text-sm font-medium">Total time smoke-free</h2>
+                    <div className="flex justify-center items-baseline space-x-2 mt-2">
+                        <span className="text-4xl font-bold text-primary-800">{difference.days}</span>
+                        <span className="text-sm text-gray-500">days</span>
+                        <span className="text-4xl font-bold text-primary-800">{difference.hours}</span>
+                        <span className="text-sm text-gray-500">hours</span>
+                        <span className="text-4xl font-bold text-primary-800">{difference.minutes}</span>
+                        <span className="text-sm text-gray-500">mins</span>
                     </div>
                 </div>
 
 
-                <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-primary-100 p-4 rounded-lg">
-                        <div class="text-2xl">💰</div>
-                        <div class="text-xl font-semibold text-primary-800">$40</div>
-                        <div class="text-sm text-gray-600">Money saved</div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="bg-primary-100 p-4 rounded-lg">
+                        <div className="text-2xl">💰</div>
+                        <div className="text-xl font-semibold text-primary-800">$40</div>
+                        <div className="text-sm text-gray-600">Money saved</div>
                     </div>
-                    <div class="bg-primary-100 p-4 rounded-lg">
-                        <div class="text-2xl">🚭</div>
-                        <div class="text-xl font-semibold text-primary-800">8</div>
-                        <div class="text-sm text-gray-600">Puffs avoided</div>
+                    <div className="bg-primary-100 p-4 rounded-lg">
+                        <div className="text-2xl">🚭</div>
+                        <div className="text-xl font-semibold text-primary-800">8</div>
+                        <div className="text-sm text-gray-600">Puffs avoided</div>
                     </div>
-                    <div class="bg-primary-100 p-4 rounded-lg">
-                        <div class="text-2xl">🏆</div>
-                        <div class="text-xl font-semibold text-primary-800">1</div>
-                        <div class="text-sm text-gray-600">Badges earned</div>
+                    <div className="bg-primary-100 p-4 rounded-lg">
+                        <div className="text-2xl">🏆</div>
+                        <div className="text-xl font-semibold text-primary-800">1</div>
+                        <div className="text-sm text-gray-600">Badges earned</div>
                     </div>
                 </div>
 
 
-                <div class="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
-                    <div class="absolute right-3 top-3">
-                        <a href="#" class="text-sm text-primary-700 hover:underline">Is this correct?</a>
+                <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
+                    <div className="absolute right-3 top-3">
+                        <a href="#" className="text-sm text-primary-700 hover:underline">Is this correct?</a>
                     </div>
-                    <div class="text-2xl">📅</div>
-                    <h3 class="text-lg font-semibold text-primary-800">My quit start date</h3>
-                    <p class="text-sm text-gray-600">{quitDay} {quitMonth} {quitYear} to {currectDay} {currectMonth} {currectYear}</p>
+                    <div className="text-2xl">📅</div>
+                    <h3 className="text-lg font-semibold text-primary-800">My quit start date</h3>
+                    <p className="text-sm text-gray-600">{quitDay} {quitMonth} {quitYear} to {currectDay} {currectMonth} {currectYear}</p>
                 </div>
 
-                <div class="text-center">
-                    <a href="#" class="text-sm text-primary-700 hover:underline">🔗 Share my progress</a>
+                <div className="text-center">
+                    <a href="#" className="text-sm text-primary-700 hover:underline">🔗 Share my progress</a>
                 </div>
 
             </div>
