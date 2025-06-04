@@ -19,6 +19,7 @@ import {
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
 import Summary from "../../components/layout/signup/summary.jsx";
+import {useNavigate} from "react-router-dom";
 
 const planTipsCollapseItems = [
     {
@@ -62,6 +63,7 @@ const Onboarding = () => {
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
     const {createGoalChecked, goalName, goalAmount} = useGoalsStore()
+    const navigate = useNavigate();
 
     const stepsItems = React.useMemo(() => [
         { title: 'Bắt đầu' },
@@ -428,7 +430,7 @@ const Onboarding = () => {
                             Trở lại <FaArrowLeft/>
                         </CustomButton>
                     )}
-                    <CustomButton type="primary" onClick={() => toNextPage()}>
+                    <CustomButton type="primary" onClick={() => {currentStep !== 6 ? toNextPage() : navigate('/postOnboarding')}}>
                         {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                     </CustomButton>
                 </div>

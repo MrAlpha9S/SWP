@@ -10,7 +10,7 @@ function Dashboard() {
         const fetchUsers = async () => {
             try {
                 const token = await getAccessTokenSilently();
-                const res = await fetch('http://localhost:3000/getUsers', {
+                const res = await fetch('http://localhost:3000/users/getAllUsers', {
                     headers: {
                         authorization: `Bearer ${token}`,
                     },
@@ -24,6 +24,10 @@ function Dashboard() {
 
         fetchUsers();
     }, [getAccessTokenSilently]);
+
+    useEffect(() => {
+        console.log(userList);
+    }, [userList]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

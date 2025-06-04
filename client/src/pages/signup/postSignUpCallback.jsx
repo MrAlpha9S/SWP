@@ -9,7 +9,7 @@ export default function PostSignUpCallback() {
     const [msg, setMsg] = useState('');
 
     useEffect(() => {
-        const fetchOnboarding = async () => {
+        const postUserInfo = async () => {
             if (!isAuthenticated || !user) return;
 
             const token = await getAccessTokenSilently();
@@ -20,7 +20,7 @@ export default function PostSignUpCallback() {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ user_id: user.sub })
+                body: JSON.stringify({ userAuth0Id: user.sub })
             });
 
             const data = await res.json();
@@ -28,7 +28,7 @@ export default function PostSignUpCallback() {
             setMsg(data.message)
         };
 
-        fetchOnboarding();
+        postUserInfo();
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
     useEffect(() => {
@@ -37,5 +37,5 @@ export default function PostSignUpCallback() {
         }
     }, [onboardingStatus, navigate, msg]);
 
-    return <div>{onboardingStatus}</div>;
+    return <div className='h-screen w-screen'>{onboardingStatus}</div>;
 }
