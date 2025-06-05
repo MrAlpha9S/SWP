@@ -85,7 +85,8 @@ export const onboardingErrorMsg = [
     {atPage: "createPlan", location: "expectedQuitDate", message: "Vui lòng chọn ngày"},
     {atPage: "createPlan", location: "stoppedDate", message: "Vui lòng chọn ngày"},
     {atPage: "setGoal", location: "goalName", message: "Không để trống mục này"},
-    {atPage: "setGoal", location: "goalAmount", message: "Số tiền không hợp lệ"}
+    {atPage: "setGoal", location: "goalAmount", message: "Số tiền không hợp lệ"},
+    {atPage: "setGoal", location: "goalList", message: "Bạn chưa tạo mục tiêu nào. Nếu không muốn tạo mục tiêu, hãy bỏ chọn Thêm mục tiêu tiết kiệm"},
 ]
 
 export const quittingMethodOptions = [

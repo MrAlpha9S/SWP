@@ -1,41 +1,36 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { postUserInfo } from "../../components/utils/userUtils.js";
+import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js"
 
 export default function PostSignUpCallback() {
     const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
-    const [onboardingStatus, setOnboardingStatus] = useState(null);
     const navigate = useNavigate();
-    const [msg, setMsg] = useState('');
 
     useEffect(() => {
-        const postUserInfo = async () => {
+        const handlePostSignup = async () => {
             if (!isAuthenticated || !user) return;
 
-            const token = await getAccessTokenSilently();
+            const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
+            if (data.success) {
+                const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+                const profile = profileRes?.data;
 
-            const res = await fetch('http://localhost:3000/users/postSignup', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userAuth0Id: user.sub })
-            });
+                await syncProfileToStores(profile)
 
-            const data = await res.json();
-            setOnboardingStatus(data.success);
-            setMsg(data.message)
+                navigate('/dashboard');
+            } else {
+                navigate('/error');
+            }
         };
 
-        postUserInfo();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+        handlePostSignup();
+    }, [isAuthenticated, user, getAccessTokenSilently, navigate]);
 
-    useEffect(() => {
-        if (onboardingStatus === true || onboardingStatus === false) {
-            navigate('/dashboard');
-        }
-    }, [onboardingStatus, navigate, msg]);
-
-    return <div className='h-screen w-screen'>{onboardingStatus}</div>;
+    return (
+        <div className="h-screen w-screen flex items-center justify-center">
+            Loading...
+        </div>
+    );
 }

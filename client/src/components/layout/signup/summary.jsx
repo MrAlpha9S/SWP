@@ -182,7 +182,7 @@ const Summary = () => {
                     <p className='text-sm md:text-base'>
                         Số điếu trong một gói: {cigsPerPack} <br/>
                         Giá tiền của một gói: {pricePerPack.toLocaleString('vi-VN')} VNĐ <br/>
-                        Số điếu bạn đã từng hút trong một ngày: {cigsPerDay}
+                        {readinessValue === 'ready' ? `Số điếu bạn thường hút trong một ngày: ${cigsPerDay}` : `Số điếu bạn đã từng hút trong một ngày: ${cigsPerDay}`}
                     </p>
                     <CustomButton type='primary' onClick={() => setCurrentStep(2)}>Thay đổi</CustomButton>
 
@@ -220,8 +220,8 @@ const Summary = () => {
                                 Phương
                                 pháp: {quittingMethodOptions.find(option => option.value === quittingMethod).label}
                                 <br/>
-                                {quittingMethod === 'gradual-daily' && 'Số điếu giảm mỗi ngày: ' + cigsReduced}
-                                {quittingMethod === 'gradual-weekly' && 'Số điếu giảm mỗi tuần: ' + cigsReduced} <br/>
+                                {quittingMethod === 'gradual-daily' && 'Số điếu giảm mỗi ngày: ' + cigsReduced + '<br/>'}
+                                {quittingMethod === 'gradual-weekly' && 'Số điếu giảm mỗi tuần: ' + cigsReduced + '<br/>'}
                                 Ngày dự kiến bỏ thuốc: {expectedQuitDate}
                                 <br/>
                                 Biểu đồ theo dõi

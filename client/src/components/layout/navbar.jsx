@@ -7,11 +7,13 @@ import {useAuth0} from "@auth0/auth0-react";
 import SignUpButton from "../ui/signUpButton.jsx";
 import Profile from "../ui/userProfile.jsx";
 import {FaSpinner} from "react-icons/fa";
+import {useNavigate} from "react-router-dom";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const {isAuthenticated, isLoading} = useAuth0();
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+    const navigate = useNavigate();
 
     return (
         <nav className="bg-primary-800 shadow-sm sticky top-0 z-50 py-2">
@@ -25,13 +27,13 @@ function Navbar() {
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex justify-between items-center w-full">
                         <div className="w-[50%] flex gap-10">
-                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Trang chủ
                             </a>
-                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Cộng đồng
                             </a>
-                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Hỗ trợ
                             </a>
 
