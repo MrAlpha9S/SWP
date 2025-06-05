@@ -92,7 +92,7 @@ const Summary = () => {
             <div className='w-full lg:w-[80%] flex flex-col gap-5'>
                 {!user &&
                     <div
-                        className="w-full bg-[#fff7e5] p-5 flex flex-col gap-5 max-h-[500px] border border-primary-600 rounded-[8px]">
+                        className="w-full bg-[#fff7e5] p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                         <p className='text-left md:text-2xl lg:text-3xl font-bold'>
                             Gia nhập QuitEz để lưu thông tin kế hoạch của bạn
                         </p>
@@ -115,7 +115,7 @@ const Summary = () => {
                     <CustomButton type='primary' onClick={() => setCurrentStep(0)}>Thay đổi</CustomButton>
                 </div>
                 <div
-                    className="w-full p-5 flex flex-col gap-5 max-h-[500px] border border-primary-600 rounded-[8px]">
+                    className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                         2. Động lực của bạn
                     </p>
@@ -135,7 +135,7 @@ const Summary = () => {
                     <CustomButton type='primary' onClick={() => setCurrentStep(1)}>Thay đổi</CustomButton>
                 </div>
                 <div
-                    className="w-full p-5 flex flex-col gap-5 max-h-[500px] border border-primary-600 rounded-[8px]">
+                    className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                         3. Thói quen hút thuốc của bạn
                     </p>
@@ -171,7 +171,7 @@ const Summary = () => {
                     <CustomButton type='primary' onClick={() => setCurrentStep(3)}>Thay đổi</CustomButton>
                 </div>
                 <div
-                    className="w-full p-5 flex flex-col gap-5 max-h-[2000px] border border-primary-600 rounded-[8px]">
+                    className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                         4.{readinessValue === 'ready' ? ' Thông tin kế hoạch' : ' Tình hình hiện tại'}
                     </p>
@@ -270,7 +270,7 @@ const Summary = () => {
                 {(createGoalChecked && goalList) &&
                     <>
                         <div
-                            className="w-full p-5 flex flex-col gap-5 max-h-[500px] border border-primary-600 rounded-[8px]">
+                            className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                             <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                                 5. Những mục tiêu ngắn hạn
                             </p>

@@ -430,7 +430,7 @@ const Onboarding = () => {
                             Trở lại <FaArrowLeft/>
                         </CustomButton>
                     )}
-                    <CustomButton type="primary" onClick={() => {currentStep !== 6 ? toNextPage() : navigate('/postOnboarding')}}>
+                    <CustomButton type="primary" onClick={() => {currentStep !== 6 ? toNextPage() : navigate('/post-onboarding')}}>
                         {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                     </CustomButton>
                 </div>

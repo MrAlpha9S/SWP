@@ -1,8 +1,9 @@
 const express = require('express');
 const userRouter = express.Router();
-const jwtCheck = require('../middlewares/jwtChecker');
-const {getAllUsersController} = require("../controllers/userController");
+const checkJwt = require('../middlewares/jwtChecker');
+const {getAllUsersController, handlePostSignup} = require("../controllers/userController");
 
-userRouter.get('/getAllUsers', jwtCheck, getAllUsersController);
+userRouter.get('/getAllUsers', checkJwt, getAllUsersController);
+userRouter.post('/postSignup', checkJwt, handlePostSignup);
 
 module.exports = userRouter;

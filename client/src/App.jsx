@@ -9,6 +9,7 @@ import Onboarding from "./pages/signup/onboarding.jsx";
 import Footer from "./components/layout/footer.jsx";
 import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
 import CheckIn from "./pages/dashboardPage/checkIn.jsx";
+import MyProfile from "./pages/dashboardPage/myProfile.jsx";
 
 function App() {
 
@@ -19,11 +20,13 @@ function App() {
                 <Route path="/" element={<Homepage />} />
                 <Route path="/dashboard" element={<DashBoard />} />
                 <Route path="/dashboard/check-in" element={<CheckIn />} />
-                <Route path="/postSignup" element={<PostSignUpCallback />} />
+                <Route path="/post-signup" element={<PostSignUpCallback />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="*" element={<div>404 Not Found</div>} />
-                <Route path="/postOnboarding" element={<PostOnboardingCallback/>}></Route>
+                <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
+                <Route path="/my-profile" element={<MyProfile/>}></Route>
             </Routes>
+            <Footer />
         </>
     )
 }
