@@ -27,6 +27,11 @@ function Dashboard() {
         fetchUsers();
     }, [getAccessTokenSilently]);
 
+    useEffect(() => {
+        console.log(userList)
+    }, [userList])
+
+
     //formatting the difference in time
     const formatDifference = (ms) => {
         if (ms < 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, isNegative: true };
@@ -67,9 +72,7 @@ function Dashboard() {
 
 
                 <div className="flex items-center justify-between">
-                    <button className="bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-800">
-                        Daily check-in →
-                    </button>
+                    <CheckInButton />
                     <a href="#" className="text-sm text-primary-700 hover:underline">
                         What's a check-in and why are they important?
                     </a>
