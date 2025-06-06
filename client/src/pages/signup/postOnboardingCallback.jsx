@@ -6,12 +6,12 @@ import {
     useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists
 } from "../../stores/store.js";
 
 const PostOnboardingCallback = () => {
 
-    const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [onboardingStatus, setOnboardingStatus] = useState(null);
     const navigate = useNavigate();
     const [msg, setMsg] = useState('');
@@ -23,7 +23,8 @@ const PostOnboardingCallback = () => {
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
-    const {goalList} = useGoalsStore()
+    const {goalList, createGoalChecked} = useGoalsStore()
+    const {setIsProfileExist} = useProfileExists()
 
     useEffect(() => {
         const postUserProfile = async () => {
@@ -63,14 +64,13 @@ const PostOnboardingCallback = () => {
                 bodyPayLoad.quittingMethod = quittingMethod;
                 if (quittingMethod !== 'target-date') {
                     bodyPayLoad.cigsReduced = cigsReduced
-                } else {
-                    bodyPayLoad.expectedQuitDate = expectedQuitDate
                 }
+                bodyPayLoad.expectedQuitDate = expectedQuitDate
                 bodyPayLoad.planLog = planLog
             } else {
                 bodyPayLoad.stoppedDate = stoppedDate;
             }
-            if (goalList.length > 0) {
+            if (createGoalChecked && goalList.length > 0) {
                 bodyPayLoad.goalList = goalList;
             }
 
@@ -87,6 +87,7 @@ const PostOnboardingCallback = () => {
             const data = await res.json();
             setOnboardingStatus(data.success);
             setMsg(data.message)
+            setIsProfileExist(true)
         };
 
         postUserProfile();

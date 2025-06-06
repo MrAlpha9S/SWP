@@ -159,6 +159,11 @@ export const useCurrentStepStore = create((set) => ({
     setCurrentStep: (value) => set({currentStep: value}),
 }))
 
+export const useProfileExists = create((set) => ({
+    isProfileExist: false,
+    setIsProfileExist: (value) => set({isProfileExist: value}),
+}))
+
 
 
 

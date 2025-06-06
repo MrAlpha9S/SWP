@@ -8,9 +8,28 @@ import PostSignUpCallback from "./pages/signup/postSignUpCallback.jsx";
 import Onboarding from "./pages/signup/onboarding.jsx";
 import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
 import MyProfile from "./pages/dashboardPage/myProfile.jsx";
+import ErrorPage from "./pages/errorPage.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
+import {useEffect} from "react";
+import ForumPage from "./pages/forumPage/forumPage.jsx";
+import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 
 function App() {
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+
+    useEffect(() => {
+        const syncOnLoad = async () => {
+            if (!isAuthenticated || !user) return;
+            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+            if (result?.data) {
+                await syncProfileToStores(result.data);
+            }
+        };
+
+        syncOnLoad();
+    }, [isAuthenticated, user, getAccessTokenSilently]);
 
     return (
         <>
@@ -21,10 +40,13 @@ function App() {
                 <Route path="/dashboard/check-in" element={<CheckIn />} />
                 <Route path="/post-signup" element={<PostSignUpCallback />} />
                 <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="*" element={<div>404 Not Found</div>} />
+                <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                 <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/forum" element={<ForumPage />}></Route>
+                <Route path="/forum/thread/:threadId" element={<ThreadDiscussion />} />
             </Routes>
+            <Footer />
         </>
     )
 }

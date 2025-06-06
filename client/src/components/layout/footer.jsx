@@ -3,7 +3,7 @@ import Logo from './homepage/logo.jsx'
 
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white pt-12 pb-8 mt-auto">
+    <footer className="bg-gray-900 text-white pt-12 pb-8">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>

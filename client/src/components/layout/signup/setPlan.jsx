@@ -38,7 +38,6 @@ const SetPlan = () => {
     const today = new Date().toISOString().split('T')[0];
     const scrollRef = useRef(null);
     const frequencyLabel = quittingMethod === "gradual-weekly" ? "tuần" : "ngày";
-    const quitDate = planLog[planLog.length - 1]?.date;
     const {pricePerPack} = usePricePerPackStore();
     const {cigsPerPack} = useCigsPerPackStore();
     useEffect(() => {
@@ -177,31 +176,6 @@ const SetPlan = () => {
                                 onChange={e => setStartDate(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
-                        </div>
-
-                        <div>
-                            <label htmlFor="cigsPerInterval" className="block text-sm md:text-base text-gray-700 mb-1">
-                                Bạn thường hút bao nhiêu điếu một ngày?
-                            </label>
-                            <div className=''>
-                                {errors.map((error, index) => {
-                                    if (error.location === "cigsPerDay") {
-                                        return (
-                                            <ErrorText key={index}>{error.message}</ErrorText>
-                                        )
-                                    }
-                                })}
-                            </div>
-                            <div className='flex gap-1'>
-                                <input
-                                    onChange={(e) => setCigsPerDay(Number(e.target.value))}
-                                    id="cigsPerInterval"
-                                    type="number"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={cigsPerDay}
-                                />
-                            </div>
-
                         </div>
 
                         <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
@@ -355,7 +329,7 @@ const SetPlan = () => {
                                     ? "và sẽ giảm dần cho đến khi số điếu về 0"
                                     : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
                             }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
-                            <strong>{quitDate}</strong>.
+                            <strong>{expectedQuitDate}</strong>.
                         </p>
 
                         <ul>
