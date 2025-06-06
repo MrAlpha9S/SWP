@@ -4,7 +4,9 @@ import CheckInStepOne from './checkInStepOne';
 import CheckInStepTwoOnYes from './checkInStepTwoYes';
 import CheckInStepTwoOnNo from './checkInStepTwoNo';
 import CheckInStepThree from './checkInStepThree';
-import { useStepCheckInStore } from '../../stores/checkInStore';
+import CheckInJournal from './checkInJournal';
+import CheckInStepFour from './checkInStepFour';
+import { useStepCheckInStore } from '../../../stores/checkInStore';
 
 function SmokeFreeCheckin() {
     const { step, current } = useStepCheckInStore();
@@ -55,6 +57,12 @@ function SmokeFreeCheckin() {
                 )}
                 {step === 'StepThree' && (
                     <CheckInStepThree />
+                )}
+                {step === 'StepJournal' && (
+                    <CheckInJournal />
+                )}
+                {step === 'StepFour' && (
+                    <CheckInStepFour />
                 )}
             </div>
 

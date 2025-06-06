@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Checkbox, Button } from 'antd';
-import { useStepCheckInStore } from '../../stores/checkInStore';
+import { useStepCheckInStore, useCheckInDataStore } from '../../../stores/checkInStore';
 
 const smokeOptions = [
     'Thuốc lá',
@@ -15,11 +15,18 @@ const smokeOptions = [
 
 const CheckInStep2No = () => {
     const { handleBackToStepOne, handleStepTwo } = useStepCheckInStore();
-    const [selectedItems, setSelectedItems] = useState([]);
+    const { checkedSmokeItems, setCheckedSmokeItems } = useCheckInDataStore();
 
-    const handleChange = (checkedValues) => {
-        setSelectedItems(checkedValues);
+    const [showError, setShowError] = useState(false);
+    const handleNext = () => {
+        if (!checkedSmokeItems || checkedSmokeItems.length === 0) {
+            setShowError(true);
+            return;
+        }
+        setShowError(false);
+        handleStepTwo();
     };
+
 
     return (
         <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white">
@@ -34,9 +41,13 @@ const CheckInStep2No = () => {
             <Checkbox.Group
                 className="flex flex-col gap-4"
                 options={smokeOptions}
-                value={selectedItems}
-                onChange={handleChange}
+                value={checkedSmokeItems}
+                onChange={setCheckedSmokeItems}
             />
+
+            {showError && (
+                <p className="text-sm text-red-500 mt-4">Hãy chọn ít nhất một lựa chọn</p>
+            )}
 
             <div className="flex justify-between items-center mt-10">
                 <Button onClick={handleBackToStepOne} className="bg-white border-primary-500 text-primary-700 hover:bg-primary-50" size="large">
@@ -45,7 +56,7 @@ const CheckInStep2No = () => {
                 <Button
                     size="large"
                     className="bg-primary-500 text-white hover:bg-primary-600"
-                    onClick={handleStepTwo}
+                    onClick={handleNext}
                 >
                     Tiếp theo  &gt;
                 </Button>

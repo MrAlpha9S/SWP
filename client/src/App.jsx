@@ -8,7 +8,7 @@ import PostSignUpCallback from "./pages/signup/postSignUpCallback.jsx";
 import Onboarding from "./pages/signup/onboarding.jsx";
 import Footer from "./components/layout/footer.jsx";
 import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
-import CheckIn from "./pages/dashboardPage/checkIn.jsx";
+import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 
 function App() {
 

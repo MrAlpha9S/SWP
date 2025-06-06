@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Button, message, Steps, theme, Radio } from 'antd';
-import { useCheckInDateStore, useCheckInFeelStore, useStepCheckInStore } from '../../stores/checkInStore';
+import { useCheckInDataStore, useStepCheckInStore } from '../../../stores/checkInStore';
 
 const CheckInStepOne = () => {
     const { handleStepOneNo, handleStepOneYes } = useStepCheckInStore();
 
-    const { checkInDate, setCheckInDate } = useCheckInDateStore();
-    const { feel, setFeel } = useCheckInFeelStore();
+    const { checkInDate, setCheckInDate, feel, setFeel } = useCheckInDataStore();
 
     const handleDateChange = (event) => {
         const selectedDate = new Date(event.target.value);

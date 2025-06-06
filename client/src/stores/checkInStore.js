@@ -20,16 +20,38 @@ export const useStepCheckInStore = create((set) => ({
     handleBackToStepOne: () => set({
         step: 'StepOne',
         current: 0
+    }),
+    handleJournal: () => set({
+        step: 'StepJournal',
+        current: 2
+    }),
+    handleStepThree: () => set({
+        step: 'StepFour',
+        current: 3
     })
 
 }));
 
-export const useCheckInDateStore = create((set) => ({
+export const useCheckInDataStore = create((set) => ({
     checkInDate: new Date().toISOString().split('T')[0],
     setCheckInDate: (value) => set({ checkInDate: value }),
-}));
-
-export const useCheckInFeelStore = create((set) => ({
     feel: 'okay',
     setFeel: (value) => set({ feel: value }),
+    checkedQuitItems: [],
+    setCheckedQuitItems: (items) => set({ checkedQuitItems: items}),
+    checkedSmokeItems: [],
+    setCheckedSmokeItems: (items) => set({ checkedSmokeItems: items}),
+    freeText: '',
+    setFreeText: (value) => set({ freeText: value }),
+    qna: {
+        smokeCraving: '',
+        healthChanges: '',
+        exercise: '',
+        cravings: '',
+        encourage: '',
+    },
+    setQna: (newQna) => set((state) => ({ qna: { ...state.qna, ...newQna } })),
+
 }));
+
+

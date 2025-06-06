@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Checkbox, Button } from 'antd';
-import { useStepCheckInStore } from '../../stores/checkInStore';
+import { useStepCheckInStore, useCheckInDataStore } from '../../../stores/checkInStore';
 
 const strategies = [
   'Tư duy tích cực và tự thúc đẩy bản thân',
@@ -16,10 +16,16 @@ const strategies = [
 
 const CheckInStep2Yes = () => {
   const { handleBackToStepOne, handleStepTwo } = useStepCheckInStore();
-  const [checkedItems, setCheckedItems] = useState([]);
+  const { checkedQuitItems, setCheckedQuitItems } = useCheckInDataStore();
+  const [showError, setShowError] = useState(false);
 
-  const handleChange = (checkedValues) => {
-    setCheckedItems(checkedValues);
+  const handleNext = () => {
+    if (!checkedQuitItems || checkedQuitItems.length === 0) {
+      setShowError(true);
+      return;
+    }
+    setShowError(false);
+    handleStepTwo();
   };
 
   return (
@@ -35,15 +41,17 @@ const CheckInStep2Yes = () => {
       <Checkbox.Group
         className="flex flex-col gap-3"
         options={strategies}
-        value={checkedItems}
-        onChange={handleChange}
+        value={checkedQuitItems}
+        onChange={setCheckedQuitItems}
       />
-
+      {showError && (
+        <p className="text-sm text-red-500 mt-4">Hãy chọn ít nhất một lựa chọn</p>
+      )}
       <div className="flex justify-between items-center mt-8">
         <Button onClick={handleBackToStepOne} className="bg-white border-primary-500 text-primary-700 hover:bg-primary-50" size="large">
           &lt; Trở lại
         </Button>
-        <Button onClick={handleStepTwo} size="large" className="bg-primary-500 text-white hover:bg-primary-600">
+        <Button onClick={handleNext} size="large" className="bg-primary-500 text-white hover:bg-primary-600">
           Tiếp Theo  &gt;
         </Button>
       </div>

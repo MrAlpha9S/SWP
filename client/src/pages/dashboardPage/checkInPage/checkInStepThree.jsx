@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button } from 'antd';
-import { useStepCheckInStore } from '../../stores/checkInStore';
+import { useStepCheckInStore } from '../../../stores/checkInStore';
 
 const CheckInStep3 = () => {
-    const { handleBackToStepOne } = useStepCheckInStore();
+    const { handleJournal, handleStepThree, handleBackToStepOne } = useStepCheckInStore();
 
     return (
         <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white text-center">
@@ -18,17 +18,19 @@ const CheckInStep3 = () => {
                     className="border border-primary-500 text-primary-700 hover:bg-primary-50"
                     size="large"
                 >
-                    &lt; Trở lại 
+                    &lt; Trở lại
                 </Button>
 
                 <Button
+                    onClick={handleStepThree}
                     className="bg-primary-500 text-white hover:bg-primary-600"
                     size="large"
                 >
-                    Không - Tôi xong rồi 
+                    Không - Tôi xong rồi
                 </Button>
 
                 <Button
+                    onClick={handleJournal}
                     className="bg-primary-500 text-white hover:bg-primary-600"
                     size="large"
                 >
