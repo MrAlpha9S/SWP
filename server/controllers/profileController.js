@@ -1,24 +1,6 @@
-const {userExists, createUser, postUserProfile, userProfileExists} = require('../services/userService');
+const {userProfileExists, postUserProfile, getUserProfile} = require("../services/profileService");
 const {getUserFromAuth0} = require("../services/auth0Service");
 
-const handlePostSignup = async (req, res) => {
-    const {userAuth0Id} = req.body;
-    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required'});
-
-    try {
-        if (await userExists(userAuth0Id)) {
-            return res.status(200).json({success: false, message: 'User info already exist'});
-        }
-
-        const userData = await getUserFromAuth0(userAuth0Id);
-        await createUser(userAuth0Id, userData.name || '', userData.email || '');
-
-        return res.status(201).json({success: true, message: 'User info inserted'});
-    } catch (err) {
-        console.error('post signup error:', err);
-        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
-    }
-};
 
 const handlePostOnboarding = async (req, res) => {
     const {
@@ -76,5 +58,23 @@ const handlePostOnboarding = async (req, res) => {
     }
 }
 
+const handleGetProfile = async (req, res) => {
+    const { userAuth0Id } = req.body;
 
-module.exports = {handlePostSignup, handlePostOnboarding};
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required'});
+
+    try {
+        const userProfile = await getUserProfile(userAuth0Id);
+        if (!userProfile) {
+            return res.status(404).json({success: false, message: 'User profile not found'});
+        } else {
+            return res.status(200).json(userProfile);
+        }
+    } catch (err) {
+        console.error('handleGetProfile error:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
+    }
+}
+
+
+module.exports = {handlePostOnboarding, handleGetProfile};

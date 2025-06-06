@@ -14,7 +14,7 @@ export default function PostSignUpCallback() {
 
             const token = await getAccessTokenSilently();
 
-            const res = await fetch('http://localhost:3000/postSignup', {
+            const res = await fetch('http://localhost:3000/users/postSignup', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,

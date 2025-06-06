@@ -3,7 +3,7 @@ import {useAuth0} from "@auth0/auth0-react";
 import {useNavigate} from "react-router-dom";
 import {
     useCigsPerPackStore,
-    useErrorStore, useGoalsStore, usePlanStore,
+    useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
@@ -75,7 +75,7 @@ const PostOnboardingCallback = () => {
             }
 
 
-            const res = await fetch('http://localhost:3000/postOnboarding', {
+            const res = await fetch('http://localhost:3000/profiles/postOnboarding', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
