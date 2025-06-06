@@ -31,8 +31,18 @@ const goalTipsCollapseItems = [
 
 const SetGoals = () => {
 
-    const { createGoalChecked, setCreateGoalChecked, goalAmount, goalName, goalList, setGoalAmount, setGoalName, addGoal, removeGoal } = useGoalsStore();
-    const { errors } = useErrorStore();
+    const {
+        createGoalChecked,
+        setCreateGoalChecked,
+        goalAmount,
+        goalName,
+        goalList,
+        setGoalAmount,
+        setGoalName,
+        addGoal,
+        removeGoal
+    } = useGoalsStore();
+    const {errors} = useErrorStore();
 
     return (
         <>
@@ -48,7 +58,8 @@ const SetGoals = () => {
                     lá.
                     Hãy bắt đầu bằng cách đặt mục tiêu cho việc tiết kiệm.
                 </p>
-                <p>Hãy đặt mục tiêu cụ thể, chẳng hạn như: "Tôi sẽ dùng số tiền tiết kiệm được từ việc không hút thuốc để
+                <p>Hãy đặt mục tiêu cụ thể, chẳng hạn như: "Tôi sẽ dùng số tiền tiết kiệm được từ việc không hút thuốc
+                    để
                     mua một chiếc điện thoại mới", thay vì những điều chung chung như "Tôi sẽ tiết kiệm một ít tiền". Sử
                     dụng các công cụ tính toán để theo dõi tiến trình của bạn.</p>
             </div>
@@ -118,25 +129,39 @@ const SetGoals = () => {
                                 className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
-                        <CustomButton type='primary' onClick={() => addGoal({goalName : goalName, goalAmount: goalAmount})}>Thêm</CustomButton>
-                        <div className="font-bold text-sm md:text-base">
-                            Danh sách mục tiêu đã thêm
+                        <CustomButton type='primary' onClick={() => addGoal({
+                            goalName: goalName,
+                            goalAmount: goalAmount
+                        })}>Thêm</CustomButton>
+
+                        <div className=''>
+                            {errors.map((error, index) => {
+                                if (error.location === "goalList") {
+                                    return (
+                                        <ErrorText key={index}>{error.message}</ErrorText>
+                                    )
+                                }
+                            })}
                         </div>
+
                         <div className="flex flex-wrap gap-2">
-                        {goalList?.map((item, index) => (
-                            <div key={index} className='flex items-center gap-2'>
-                            <div key={index} className='w-[200px] p-1 h-[100px] bg-white rounded-[8px]'>
-                                <p className='font-bold text-sm md:text-base text-black'>
-                                    {item.goalName}
-                                </p>
-                                <Divider/>
-                                <p className='text-xs text-black'>
-                                    {item.goalAmount.toLocaleString('vi-VN')}
-                                </p>
-                            </div>
-                                <CustomButton type='primary' onClick={() => removeGoal(item)}>Xóa</CustomButton>
-                            </div>
-                        ))}
+                            {goalList.length > 0 && <div className="font-bold text-sm md:text-base">
+                                Danh sách mục tiêu đã thêm
+                            </div>}
+                            {goalList?.map((item, index) => (
+                                <div key={index} className='flex items-center gap-2'>
+                                    <div key={index} className='w-[200px] p-1 h-[100px] bg-white rounded-[8px]'>
+                                        <p className='font-bold text-sm md:text-base text-black'>
+                                            {item.goalName}
+                                        </p>
+                                        <Divider/>
+                                        <p className='text-xs text-black'>
+                                            {item.goalAmount.toLocaleString('vi-VN')}
+                                        </p>
+                                    </div>
+                                    <CustomButton type='primary' onClick={() => removeGoal(item)}>Xóa</CustomButton>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
