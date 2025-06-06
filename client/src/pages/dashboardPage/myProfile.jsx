@@ -1,21 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import CustomButton from "../../components/ui/CustomButton.jsx";
-import {
-    quittingMethodOptions,
-    reasonListOptions,
-    smokingTriggerOptions,
-    timeAfterWakingRadioOptions,
-    timeOfDayOptions
-} from "../../constants/constants.js";
-import {Divider, message, Result, Typography} from "antd";
-import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
-import {CustomizedAxisTick} from "../../components/utils/customizedAxisTick.jsx";
+import {Result} from "antd";
+
 import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
 import {useNavigate} from "react-router-dom";
-import {HomeOutlined, ReloadOutlined} from '@ant-design/icons';
+
 import Title from "antd/es/skeleton/Title.js";
 import Paragraph from "antd/es/skeleton/Paragraph.js";
-import {getUserProfile} from "../../components/utils/profileUtils.js"
+import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js"
+import Summary from "../../components/layout/signup/summary.jsx";
 
 const MyProfile = () => {
 
@@ -23,31 +16,21 @@ const MyProfile = () => {
     const [fetchStatus, setFetchStatus] = useState(null);
     const navigate = useNavigate();
     const [msg, setMsg] = useState('');
-    const [messageApi, contextHolder] = message.useMessage();
-
-    const error = () => {
-        messageApi.open({
-            type: 'error',
-            content: 'Có lỗi khi lấy thông tin kế hoạch',
-        });
-    };
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            const data = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            if (data.success === false) {
-                error()
-            } else {
-                setFetchStatus(true)
+        const syncOnLoad = async () => {
+            if (!isAuthenticated || !user) return;
+            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+            if (result?.data) {
+                await syncProfileToStores(result.data);
+                setFetchStatus(true);
             }
-        }
-        fetchUserProfile();
+        };
+        syncOnLoad();
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
-
     return (
-        <div className='h-[calc(100vh-80px-409px)] flex items-center'>
-            {contextHolder}
+        <div className='min-h-[calc(100vh-80px-409px)] flex items-center'>
             {!fetchStatus &&
                 <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
                     <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
@@ -74,6 +57,7 @@ const MyProfile = () => {
                         className="!p-0"
                     />
                 </div>}
+            <div className='flex flex-col h-full w-full bg-white gap-14 p-14'><Summary/></div>
         </div>
     );
 };
