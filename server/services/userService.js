@@ -46,7 +46,6 @@ const getUserIdFromAuth0Id = async (auth0_id) => {
         const result = await pool.request()
             .input('auth0_id', auth0_id)
             .query('SELECT user_id from users WHERE auth0_id = @auth0_id');
-        console.log('id from auth0 id', result.recordset[0].user_id);
         return result.recordset[0].user_id;
     } catch (error) {
         console.error('error in getUserIdFromAuth0Id', error);
