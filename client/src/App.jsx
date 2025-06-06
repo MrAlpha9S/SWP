@@ -15,6 +15,7 @@ import {useEffect} from "react";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
 import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
+import Footer from "./components/layout/footer.jsx";
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();

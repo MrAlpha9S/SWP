@@ -3,7 +3,7 @@ import clsx from "clsx"; // Optional: install clsx for cleaner conditional class
 
 const CustomButton = ({ type = "primary", onClick, children, disabled = false }) => {
     const baseClasses =
-        " flex items-center justify-center gap-2 h-[42px] w-[120px] px-2 py-2 rounded-md transition font-medium";
+        " flex items-center justify-center gap-2 h-[42px] min-w-[120px] px-2 py-2 rounded-md transition font-medium";
 
     const typeStyles = {
         primary:
