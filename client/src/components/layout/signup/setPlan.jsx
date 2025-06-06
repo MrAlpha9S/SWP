@@ -20,7 +20,6 @@ const SetPlan = () => {
         startDate,
         setStartDate,
         cigsPerDay,
-        setCigsPerDay,
         quittingMethod,
         setQuittingMethod,
         cigsReduced,
@@ -52,18 +51,18 @@ const SetPlan = () => {
         }
     }, [planLog]);
 
-    function calculatePlan(startDate, dailyCigs, method, decreaseBy, targetQuitDate = null) {
+    function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate = null) {
         const planLog = [];
         let date = new Date(startDate);
-        let currentCigs = dailyCigs;
+        let currentCigs = cigsPerDay;
 
-        if (method === 'gradual-daily') {
+        if (quittingMethod === 'gradual-daily') {
             while (currentCigs > 0) {
                 planLog.push({
                     date: date.toISOString().split('T')[0],
                     cigs: currentCigs,
                 });
-                currentCigs = Math.max(currentCigs - decreaseBy, 0);
+                currentCigs = Math.max(currentCigs - cigsReduced, 0);
                 date.setDate(date.getDate() + 1);
 
             }
@@ -76,13 +75,13 @@ const SetPlan = () => {
             }
         }
 
-        else if (method === 'gradual-weekly') {
+        else if (quittingMethod === 'gradual-weekly') {
             while (currentCigs > 0) {
                 planLog.push({
                     date: date.toISOString().split('T')[0],
                     cigs: currentCigs,
                 });
-                currentCigs = Math.max(currentCigs - decreaseBy, 0);
+                currentCigs = Math.max(currentCigs - cigsReduced, 0);
                 date.setDate(date.getDate() + 7);
 
             }
@@ -95,14 +94,14 @@ const SetPlan = () => {
             }
         }
 
-        else if (method === 'target-date' && targetQuitDate) {
-            const end = new Date(targetQuitDate);
+        else if (quittingMethod === 'target-date' && expectedQuitDate) {
+            const end = new Date(expectedQuitDate);
             const days = Math.ceil((end - date) / (1000 * 60 * 60 * 24));
-            const dailyReduction = dailyCigs / days;
+            const dailyReduction = cigsPerDay / days;
 
             for (let i = 0; i <= days; i++) {
                 date.setDate(date.getDate() + 1);
-                const remaining = Math.round(Math.max(dailyCigs - dailyReduction * i, 0));
+                const remaining = Math.round(Math.max(cigsPerDay - dailyReduction * i, 0));
                 planLog.push({
                     date: date.toISOString().split('T')[0],
                     cigs: remaining,
