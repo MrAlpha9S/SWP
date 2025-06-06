@@ -14,6 +14,8 @@ import ErrorPage from "./pages/errorPage.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
 import {useEffect} from "react";
+import ForumPage from "./pages/forumPage/forumPage.jsx";
+import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -42,6 +44,8 @@ function App() {
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                 <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/forum" element={<ForumPage />}></Route>
+                <Route path="/forum/thread/:threadId" element={<ThreadDiscussion />} />
             </Routes>
             <Footer />
         </>

@@ -30,7 +30,7 @@ function Navbar() {
                             <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Trang chủ
                             </a>
-                            <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
+                            <a onClick={() => navigate('/forum')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Cộng đồng
                             </a>
                             <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
