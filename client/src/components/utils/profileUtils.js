@@ -12,6 +12,7 @@ import {
 } from '../../stores/store.js';
 
 export async function getUserProfile(user, getAccessTokenSilently, isAuthenticated) {
+
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();

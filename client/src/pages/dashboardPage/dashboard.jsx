@@ -13,6 +13,7 @@ import {useNavigate} from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
+import {useMutation, useQuery} from '@tanstack/react-query'
 
 function Dashboard() {
 
@@ -31,25 +32,31 @@ function Dashboard() {
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    useEffect(() => {
-        const syncOnLoad = async () => {
+    const {isPending, error, data, isFetching} = useQuery({
+        queryKey: ['userProfile'],
+        queryFn: async () => {
             if (!isAuthenticated || !user) return;
+            return await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
 
-            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            if (result?.data) {
-                console.log('profile in dashboard useeffect', result?.data);
-                setTimeout(async () => await syncProfileToStores(result?.data), 1000);
-            }
-        };
-        syncOnLoad();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+    useEffect(() => {
+        if (isPending || !data) return;
+        const syncStores = async () => {
+            await syncProfileToStores();
+        }
+        syncStores();
+    }, [data, isPending])
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col p-4">
             <Hero/>
             {readinessValue === 'ready' ?
                 <ProgressBoard startDate={startDate} pricePerPack={pricePerPack} cigsPerPack={cigsPerPack}
-                               cigsReduced={cigsReduced} quittingMethod={quittingMethod} planLog={planLog} cigsPerDay={cigsPerDay} expectedQuitDate={expectedQuitDate} stoppedDate={stoppedDate}/>
+                               cigsReduced={cigsReduced} quittingMethod={quittingMethod} planLog={planLog}
+                               cigsPerDay={cigsPerDay} expectedQuitDate={expectedQuitDate}
+                               stoppedDate={stoppedDate}/>
                 : <div className="flex items-center justify-between">Relapse support</div>}
         </div>
     )
