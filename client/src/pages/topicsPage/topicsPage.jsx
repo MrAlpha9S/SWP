@@ -62,9 +62,9 @@ const TopicsPage = () => {
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold text-primary-800 mb-4">Topics</h1>
           <p className="text-gray-700 text-lg">
-            Quitting smoking is a journey, and it helps to have the right information at the right time. Whether you're
-            just thinking about quitting or have already taken the first step, our topics are here to guide and support
-            you.
+            Bỏ thuốc lá là một hành trình, và việc có thông tin đúng vào đúng thời điểm sẽ rất hữu ích. Cho dù bạn
+chỉ đang nghĩ đến việc bỏ thuốc hay đã thực hiện bước đầu tiên, các chủ đề của chúng tôi ở đây để hướng dẫn và hỗ trợ
+bạn.
           </p>
         </div>
         {/* Right image placeholder (replace with actual image if needed) */}
