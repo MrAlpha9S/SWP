@@ -5,8 +5,8 @@ import {checkboxStyle, readinessRadioOptions} from "../../../constants/constants
 import ErrorText from "../../ui/errorText.jsx";
 
 const Readiness = () => {
-    const readinessValue = useQuitReadinessStore((state) => state.readinessValue);
-    const setReadinessValue = useQuitReadinessStore((state) => state.setReadinessValue);
+    const {readinessValue, setReadinessValue} = useQuitReadinessStore();
+
     const {errors} = useErrorStore();
 
     const onChangeCheckbox = (event) => {
