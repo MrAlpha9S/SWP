@@ -8,8 +8,9 @@ import ErrorText from "../../ui/errorText.jsx";
 import {checkboxStyle, quittingMethodOptions} from "../../../constants/constants.js";
 import {Radio} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
+import calculatePlan from "../../utils/calculatePlan.js";
 
 
 
@@ -51,86 +52,15 @@ const SetPlan = () => {
         }
     }, [planLog]);
 
-    function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate = null) {
-        const planLog = [];
-        let date = new Date(startDate);
-        let currentCigs = cigsPerDay;
-
-        if (quittingMethod === 'gradual-daily') {
-            while (currentCigs > 0) {
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: currentCigs,
-                });
-                currentCigs = Math.max(currentCigs - cigsReduced, 0);
-                date.setDate(date.getDate() + 1);
-
-            }
-            if (planLog[planLog.length - 1].cigs !== 0) {
-                date.setDate(date.getDate() + 1);
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: 0,
-                });
-            }
-        }
-
-        else if (quittingMethod === 'gradual-weekly') {
-            while (currentCigs > 0) {
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: currentCigs,
-                });
-                currentCigs = Math.max(currentCigs - cigsReduced, 0);
-                date.setDate(date.getDate() + 7);
-
-            }
-            if (planLog[planLog.length - 1].cigs !== 0) {
-                date.setDate(date.getDate() + 7);
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: 0,
-                });
-            }
-        }
-
-        else if (quittingMethod === 'target-date' && expectedQuitDate) {
-            const end = new Date(expectedQuitDate);
-            const days = Math.ceil((end - date) / (1000 * 60 * 60 * 24));
-            const dailyReduction = cigsPerDay / days;
-
-            for (let i = 0; i <= days; i++) {
-                date.setDate(date.getDate() + 1);
-                const remaining = Math.round(Math.max(cigsPerDay - dailyReduction * i, 0));
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: remaining,
-                });
-            }
-            if (planLog[planLog.length - 1].cigs !== 0) {
-                date.setDate(date.getDate() + 1);
-                planLog.push({
-                    date: date.toISOString().split('T')[0],
-                    cigs: 0,
-                });
-            }
-        }
-        setExpectedQuitDate(planLog[planLog.length - 1].date);
-        setPlanLog(planLog);
-        return planLog;
-    }
-
     const createPlan = () => {
         if (startDate.length > 0 && cigsPerDay > 0 && quittingMethod.length > 0) {
             if (quittingMethod === 'target-date' && expectedQuitDate.length > 0) {
-                calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate);
+                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate));
             } else if (quittingMethod !== 'target-date' && cigsReduced > 0) {
-                calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced);
+                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced))
             }
         }
     }
-
-
 
     return (
         <>
@@ -170,7 +100,7 @@ const SetPlan = () => {
                             <input
                                 id="startDate"
                                 type="date"
-                                min={today}
+
                                 value={startDate}
                                 onChange={e => setStartDate(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -328,7 +258,7 @@ const SetPlan = () => {
                                     ? "và sẽ giảm dần cho đến khi số điếu về 0"
                                     : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
                             }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
-                            <strong>{expectedQuitDate}</strong>.
+                            <strong>{planLog[planLog.length - 1].date}</strong>.
                         </p>
 
                         <ul>
@@ -342,18 +272,20 @@ const SetPlan = () => {
                         </p>
                     </div>
 
-                    <LineChart width={700} height={300} data={planLog} margin={{
-                        top: 20,
-                        right: 30,
-                        left: 20,
-                        bottom: 25,
-                    }}>
-                        <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
-                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                        <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
-                        <YAxis/>
-                        <Tooltip/>
-                    </LineChart>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={planLog} margin={{
+                            top: 20,
+                            right: 30,
+                            left: 20,
+                            bottom: 25,
+                        }}>
+                            <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                            <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                            <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                            <YAxis/>
+                            <Tooltip/>
+                        </LineChart>
+                    </ResponsiveContainer>
                 </>
             }
 

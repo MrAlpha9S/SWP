@@ -51,8 +51,6 @@ const PostOnboardingCallback = () => {
                 //stoppedDate: stoppedDate,
             }
 
-            console.log(bodyPayLoad);
-
             if (customTimeOfDayChecked) {
                 bodyPayLoad.customTimeOfDay = customTimeOfDay;
             }
@@ -98,10 +96,6 @@ const PostOnboardingCallback = () => {
             navigate('/dashboard');
         }
     })
-
-    useEffect(() => {
-        console.log(msg)
-    }, [msg])
 
     return <div className='h-screen w-screen'>{onboardingStatus}</div>;
 };

@@ -14,7 +14,7 @@ import {
     reasonListOptions, smokingTriggerOptions,
     timeAfterWakingRadioOptions, timeOfDayOptions
 } from "../../../constants/constants.js";
-import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
 
@@ -225,18 +225,20 @@ const Summary = () => {
                                 Ngày dự kiến bỏ thuốc: {expectedQuitDate}
                                 <br/>
                                 Biểu đồ theo dõi
-                                <LineChart width={700} height={300} data={planLog} margin={{
-                                    top: 20,
-                                    right: 30,
-                                    left: 20,
-                                    bottom: 25,
-                                }}>
-                                    <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
-                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
-                                    <YAxis/>
-                                    <Tooltip/>
-                                </LineChart>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <LineChart data={planLog} margin={{
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 25,
+                                    }}>
+                                        <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                        <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                        <YAxis/>
+                                        <Tooltip/>
+                                    </LineChart>
+                                </ResponsiveContainer>
                                 <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay đổi</CustomButton>
                             </p>
 

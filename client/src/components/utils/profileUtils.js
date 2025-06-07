@@ -31,6 +31,8 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
 export async function syncProfileToStores(profile) {
     if (!profile) return;
 
+    console.log('profile in utils', profile);
+
     useProfileExists.getState().setIsProfileExist(true);
     useQuitReadinessStore.getState().setReadinessValue(profile.readiness_value);
 
@@ -44,12 +46,14 @@ export async function syncProfileToStores(profile) {
     usePlanStore.getState().setQuittingMethod(profile.quitting_method ?? '');
     usePlanStore.getState().setCigsReduced(profile.cigs_reduced ?? 0);
 
+    console.log('plan log in profile', profile.planLog);
     usePlanStore.getState().setPlanLog(
-        (profile.planLog ?? []).map(entry => ({
+        (profile.planLog).map(entry => ({
             date: entry.date.split('T')[0],
             cigs: entry.cigs,
         }))
     );
+    console.log('✅ planLog set:', usePlanStore.getState().planLog);
 
     if (profile.goalList) {
         useGoalsStore.getState().setCreateGoalChecked(true);

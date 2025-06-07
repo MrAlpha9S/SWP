@@ -24,7 +24,7 @@ function Dashboard() {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
     const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
@@ -34,21 +34,22 @@ function Dashboard() {
     useEffect(() => {
         const syncOnLoad = async () => {
             if (!isAuthenticated || !user) return;
+
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
             if (result?.data) {
-                await syncProfileToStores(result.data);
+                console.log('profile in dashboard useeffect', result?.data);
+                setTimeout(async () => await syncProfileToStores(result?.data), 1000);
             }
         };
         syncOnLoad();
     }, [isAuthenticated, user, getAccessTokenSilently]);
-
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col p-4">
             <Hero/>
             {readinessValue === 'ready' ?
                 <ProgressBoard startDate={startDate} pricePerPack={pricePerPack} cigsPerPack={cigsPerPack}
-                               cigsReduced={cigsReduced} quittingMethod={quittingMethod}/>
+                               cigsReduced={cigsReduced} quittingMethod={quittingMethod} planLog={planLog} cigsPerDay={cigsPerDay} expectedQuitDate={expectedQuitDate} stoppedDate={stoppedDate}/>
                 : <div className="flex items-center justify-between">Relapse support</div>}
         </div>
     )
