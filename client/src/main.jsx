@@ -4,7 +4,12 @@ import App from './App.jsx'
 import {Auth0Provider} from "@auth0/auth0-react";
 import {BrowserRouter} from "react-router-dom";
 import {ConfigProvider} from "antd";
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query'
 
+const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(
     <ConfigProvider
@@ -37,7 +42,9 @@ createRoot(document.getElementById('root')).render(
                     audience: 'https://smokerecession.com'
                 }}
             >
-                <App/>
+                <QueryClientProvider client={queryClient}>
+                    <App/>
+                </QueryClientProvider>
             </Auth0Provider>
         </BrowserRouter>
     </ConfigProvider>

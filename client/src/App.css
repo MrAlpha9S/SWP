@@ -1,12 +1,14 @@
 #root {
     max-width: 1280px;
     margin: 0 auto;
-
+    min-height: 100vh;
     background-color: #fff7e5;
 }
 
+
 .body {
     background-color: #fff7e5;
+    min-height: 100vh;
 }
 
 .logo {

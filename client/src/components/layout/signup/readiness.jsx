@@ -6,7 +6,6 @@ import ErrorText from "../../ui/errorText.jsx";
 
 const Readiness = () => {
     const {readinessValue, setReadinessValue} = useQuitReadinessStore();
-
     const {errors} = useErrorStore();
 
     const onChangeCheckbox = (event) => {

@@ -15,22 +15,18 @@ const Profile = () => {
         navigate("/my-profile");
     };
 
+    const handleDashboardClick = () => {
+        navigate("/dashboard");
+    }
+
     const items = [
         {
             key: "1",
-            label: (
-                <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://www.antgroup.com"
-                >
-                    1st menu item
-                </a>
-            ),
+            label: <span onClick={handleDashboardClick}>Bảng điều khiển</span>,
         },
         {
             key: "2",
-            label: <span onClick={handleProfileClick}>Go to Profile</span>,
+            label: <span onClick={handleProfileClick}>Thông tin & kế hoạch</span>,
         },
         {
             key: "3",
@@ -40,10 +36,9 @@ const Profile = () => {
                     rel="noopener noreferrer"
                     href="https://www.luohanacademy.com"
                 >
-                    3rd menu item (disabled)
+                    Thông tin cá nhân
                 </a>
             ),
-            disabled: true,
         },
         {
             key: "4",

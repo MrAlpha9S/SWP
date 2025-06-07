@@ -1,6 +1,6 @@
-import React, { useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import Hero from "../../components/layout/signup/hero.jsx";
-import {Collapse, Steps} from "antd";
+import {Collapse, Steps, Modal} from "antd";
 import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import {FaCircleCheck} from "react-icons/fa6";
@@ -14,7 +14,7 @@ import {
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists
 } from "../../stores/store.js";
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
@@ -41,7 +41,6 @@ const planTipsCollapseItems = [
 ];
 
 
-
 const Onboarding = () => {
     const {currentStep, setCurrentStep} = useCurrentStepStore();
 
@@ -62,21 +61,32 @@ const Onboarding = () => {
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
-    const {createGoalChecked, goalName, goalAmount} = useGoalsStore()
+    const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
     const navigate = useNavigate();
+    const {isProfileExist} = useProfileExists();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (isProfileExist) {
+            setCurrentStep(6)
+            setIsModalOpen(true);
+        } else {
+            setCurrentStep(0)
+        }
+    }, [])
 
     const stepsItems = React.useMemo(() => [
-        { title: 'Bắt đầu' },
-        { title: 'Động lực' },
-        { title: 'Thông tin thuốc' },
-        { title: 'Thói quen' },
+        {title: 'Bắt đầu'},
+        {title: 'Động lực'},
+        {title: 'Thông tin thuốc'},
+        {title: 'Thói quen'},
         {
             title: readinessValue === 'ready' ? 'Lên kế hoạch' : 'Kết quả & theo dõi',
         },
-        { title: 'Mục tiêu' },
+        {title: 'Mục tiêu'},
         {
             title: 'Tổng kết',
-            icon: <FaCircleCheck className="size-8" />,
+            icon: <FaCircleCheck className="size-8"/>,
         },
     ], [readinessValue]);
 
@@ -84,6 +94,15 @@ const Onboarding = () => {
         if (currentStep > 0) {
             setCurrentStep(currentStep - 1);
         }
+    }
+
+    const ModalFooter = () => {
+        return (
+            <div className='flex gap-2 justify-end'>
+                <CustomButton onClick={() => setIsModalOpen(false)}>Tôi đã hiểu</CustomButton>
+                <CustomButton onClick={() => navigate('/')} type='cancel'>Trở lại</CustomButton>
+            </div>
+        )
     }
 
     const toNextPage = () => {
@@ -125,7 +144,7 @@ const Onboarding = () => {
                         removeError(errorMsgCigsPerPack)
                     }
                     if (readinessValue === 'relapse-support') {
-                        if (cigsPerDay <=0 || !Number.isInteger(cigsPerDay)) {
+                        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
                             addError(errorMsgCigsPerDay)
                         } else {
                             removeError(errorMsgCigsPerDay)
@@ -244,25 +263,22 @@ const Onboarding = () => {
                     break;
                 }
                 case 5: {
-                    const errorMsgGoalName = errorMap["goalName"];
                     const errorMsgGoalAmount = errorMap["goalAmount"];
+                    const errorMsgGoalList = errorMap["goalList"];
                     if (createGoalChecked) {
-                        if (goalName.length === 0) {
-                            addError(errorMsgGoalName)
-                        } else {
-                            removeError(errorMsgGoalName)
+                        if (goalList.length === 0) {
+                            addError(errorMsgGoalList);
                         }
                         if (goalAmount <= 0) {
-                            addError(errorMsgGoalAmount)
-                        } else {
-                            removeError(errorMsgGoalAmount)
+                            addError(errorMsgGoalAmount);
                         }
-                        if (goalName.length !== 0 && goalAmount > 0) {
+                        if (goalList.length > 0 && goalAmount > 0) {
                             setCurrentStep(currentStep + 1)
                         }
                     } else {
                         setCurrentStep(currentStep + 1)
                     }
+
                     break;
                 }
             }
@@ -359,17 +375,17 @@ const Onboarding = () => {
 
     useEffect(() => {
         if (createGoalChecked) {
-            if (goalName.length > 0) {
-                removeError(errorMap["goalName"]);
+            if (goalList.length > 0) {
+                removeError(errorMap["goalList"]);
             }
         }
-    }, [goalName]);
+    }, [goalList]);
 
     useEffect(() => {
         if (createGoalChecked) {
-            if (goalAmount > 0) {
-                removeError(errorMap["goalAmount"]);
-            }
+                if (goalAmount > 0) {
+                    removeError(errorMap["goalAmount"]);
+                }
         }
     }, [goalAmount]);
 
@@ -395,6 +411,26 @@ const Onboarding = () => {
     const scrollRef = useRef(null);
     return (
         <>
+            <Modal
+                title="Kế hoạch đã tồn tại"
+                closable={{'aria-label': 'Custom Close Button'}}
+                open={isModalOpen}
+                onOk={() => setIsModalOpen(false)}
+                onCancel={() => navigate('/')}
+                centered
+                maskClosable
+                closeIcon={null}
+                footer={<ModalFooter/>}
+            >
+                <p>
+                    Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
+                </p>
+                <p>
+                    Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
+                </p>
+
+
+            </Modal>
             <Hero/>
             <div className='flex flex-col h-full bg-white gap-14 p-14'>
 
@@ -430,7 +466,9 @@ const Onboarding = () => {
                             Trở lại <FaArrowLeft/>
                         </CustomButton>
                     )}
-                    <CustomButton type="primary" onClick={() => {currentStep !== 6 ? toNextPage() : navigate('/post-onboarding')}}>
+                    <CustomButton type="primary" onClick={() => {
+                        currentStep !== 6 ? toNextPage() : navigate('/post-onboarding')
+                    }}>
                         {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                     </CustomButton>
                 </div>

@@ -72,9 +72,9 @@ const CigInfo = () => {
                         }
                     })}
                 </div>
-                {readinessValue === 'relapse_support' && <>
+                <div>
                     <label htmlFor="cigsPerInterval" className="block text-sm md:text-base text-gray-700 mb-1">
-                        Bạn đã thường hút bao nhiêu điếu một ngày?
+                        Bạn {readinessValue === 'relapse-support' ? 'đã' : ''} thường hút bao nhiêu điếu một ngày?
                     </label>
                     <div className=''>
                         {errors.map((error, index) => {
@@ -85,7 +85,6 @@ const CigInfo = () => {
                             }
                         })}
                     </div>
-
                     <div className='flex gap-1'>
                         <input
                             onChange={(e) => setCigsPerDay(Number(e.target.value))}
@@ -95,7 +94,8 @@ const CigInfo = () => {
                             value={cigsPerDay}
                         />
                     </div>
-                </>}
+
+                </div>
 
             </form>
         </>

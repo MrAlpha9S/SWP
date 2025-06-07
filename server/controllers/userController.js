@@ -9,7 +9,7 @@ const handlePostSignup = async (req, res) => {
 
     try {
         if (await userExists(userAuth0Id)) {
-            return res.status(200).json({success: false, message: 'User info already exist'});
+            return res.status(200).json({success: true, message: 'User info already exist'});
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);
