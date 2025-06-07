@@ -47,7 +47,7 @@ function App() {
                 <Route path="/topics" element={<TopicsPage />} />
                 <Route path="/topics/:topicId" element={<Topic />} />
 
-                <Route path="/postSignup" element={<PostSignUpCallback />} />
+                <Route path="/post-signup" element={<PostSignUpCallback />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
@@ -55,7 +55,7 @@ function App() {
                 <Route path="/forum" element={<ForumPage />}></Route>
                 <Route path="/forum/thread/:threadId" element={<ThreadDiscussion />} />
                 <Route path="*" element={<div>404 Not Found</div>} />
-                <Route path="/postOnboarding" element={<PostOnboardingCallback />}></Route>
+                <Route path="/post-onboarding" element={<PostOnboardingCallback />}></Route>
             </Routes>
             <Footer />
         </>
