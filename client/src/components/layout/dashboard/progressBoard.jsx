@@ -14,11 +14,6 @@ import {
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
-import {
-    usePlanStore,
-    usePricePerPackStore,
-    useCigsPerPackStore
-} from "../../../stores/store.js";
 import {Skeleton} from "antd";
 
 const ProgressBoard = ({
@@ -31,7 +26,8 @@ const ProgressBoard = ({
                            quittingMethod,
                            isPending,
                            pricePerPack,
-                           cigsPerPack
+                           cigsPerPack,
+                           readinessValue
                        }) => {
     const navigate = useNavigate();
 
@@ -59,10 +55,42 @@ const ProgressBoard = ({
     };
 
     const localStartDate = new Date(startDate);
-    const differenceInMs = differenceInMilliseconds(currentDate, localStartDate);
-    const difference = formatDateDifference(differenceInMs);
+    let differenceInMs
+    let difference
+    if (readinessValue === 'ready') {
+        differenceInMs = differenceInMilliseconds(currentDate, localStartDate);
+        difference = formatDateDifference(differenceInMs);
+    } else {
+        differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
+        console.log(differenceInMs);
+        difference = formatDateDifference(differenceInMs);
+    }
+
     const pricePerCig = Math.round(pricePerPack / cigsPerPack);
     const dayDifference = difference.days;
+
+
+    let totalDaysPhrase = ''
+
+    if (readinessValue === 'relapse-support') {
+        totalDaysPhrase = (
+            <>
+                Chúc mừng bạn đã cai thuốc <br/>
+                Tổng thời gian kể từ khi bạn cai thuốc
+            </>
+        )
+    } else if (currentDate > new Date(expectedQuitDate)) {
+        totalDaysPhrase = (
+            <>
+                Chúc mừng bạn đã hoàn thành kế hoạch cai thuốc <br/>
+                Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc
+            </>
+        )
+    } else if (localStartDate > currentDate) {
+        totalDaysPhrase = 'Thời gian cho đến khi bắt đầu hành trình cai thuốc';
+    } else if (currentDate < new Date(expectedQuitDate)) {
+        totalDaysPhrase = 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
+    }
 
     let cigsQuit = 0;
     if (differenceInMs > 0) {
@@ -76,6 +104,8 @@ const ProgressBoard = ({
             if (todayEntry) {
                 cigsQuit = cigsPerDay - todayEntry.cigs;
             }
+        } else if (readinessValue === 'relapse-support') {
+            cigsQuit = cigsPerDay * dayDifference;
         }
     }
 
@@ -100,9 +130,7 @@ const ProgressBoard = ({
 
             <div className="bg-primary-100 rounded-lg p-6 text-center">
                 <h2 className="text-gray-600 text-sm font-medium">
-                    {differenceInMs > 0
-                        ? 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc'
-                        : 'Thời gian cho đến khi bắt đầu bỏ thuốc'}
+                    {totalDaysPhrase}
                 </h2>
                 <div className="flex justify-center items-baseline space-x-2 mt-2">
                     {isPending ? (
@@ -149,47 +177,50 @@ const ProgressBoard = ({
                     )}
                 </div>
                 <div className="text-2xl">📅</div>
-                <h3 className="text-lg font-semibold text-primary-800">Ngày tôi bắt đầu bỏ thuốc</h3>
+                <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
                 <p className="text-sm text-gray-600">
                     {isPending ?
-                        <Skeleton.Input style={{width: 160}} active/> : localStartDate.toLocaleDateString('vi-VN')}
+                        <Skeleton.Input style={{width: 160}}
+                                        active/> : readinessValue === 'ready' ? localStartDate.toLocaleDateString('vi-VN') : stoppedDate}
                 </p>
             </div>
+            {readinessValue === 'ready' &&
+                <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
+                    <div className="absolute right-3 top-3">
+                        {!isPending && (
+                            <a onClick={() => navigate('/onboarding')}
+                               className="text-sm text-primary-700 hover:underline">
+                                Chỉnh sửa?
+                            </a>
+                        )}
+                    </div>
+                    <div className="text-2xl">📉</div>
+                    <h3 className="text-lg font-semibold text-primary-800">Biểu đồ kế hoạch số điếu mỗi ngày</h3>
 
-            <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
-                <div className="absolute right-3 top-3">
-                    {!isPending && (
-                        <a onClick={() => navigate('/onboarding')} className="text-sm text-primary-700 hover:underline">
-                            Chỉnh sửa?
-                        </a>
-                    )}
+                    {isPending ? (
+                        <Skeleton.Input style={{width: '100%', height: 300}} active/>
+                    ) : planLog?.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                <ReferenceLine
+                                    x={
+                                        currentDate < new Date(expectedQuitDate)
+                                            ? currentDate.toISOString().split('T')[0]
+                                            : ''
+                                    }
+                                    stroke="#115e59"
+                                    label="Hôm nay"
+                                />
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                <YAxis/>
+                                <Tooltip/>
+                            </LineChart>
+                        </ResponsiveContainer>
+                    ) : null}
                 </div>
-                <div className="text-2xl">📉</div>
-                <h3 className="text-lg font-semibold text-primary-800">Biểu đồ kế hoạch số điếu mỗi ngày</h3>
-
-                {isPending ? (
-                    <Skeleton.Input style={{width: '100%', height: 300}} active/>
-                ) : planLog.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
-                            <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
-                            <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                            <ReferenceLine
-                                x={
-                                    currentDate < new Date(expectedQuitDate)
-                                        ? currentDate.toISOString().split('T')[0]
-                                        : ''
-                                }
-                                stroke="#115e59"
-                                label="Hôm nay"
-                            />
-                            <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
-                            <YAxis/>
-                            <Tooltip/>
-                        </LineChart>
-                    </ResponsiveContainer>
-                ) : null}
-            </div>
+            }
 
             <div className="text-center">
                 {isPending ? (

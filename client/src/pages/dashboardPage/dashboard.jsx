@@ -51,33 +51,30 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col p-4">
-            <Hero />
+            <Hero/>
             {isAuthenticated ? (
-                isPending ? (
-                    <ProgressBoard isPending={true} />
-                ) : readinessValue === 'ready' ? (
-                    <ProgressBoard
-                        startDate={startDate}
-                        pricePerPack={pricePerPack}
-                        cigsPerPack={cigsPerPack}
-                        cigsReduced={cigsReduced}
-                        quittingMethod={quittingMethod}
-                        planLog={planLog}
-                        cigsPerDay={cigsPerDay}
-                        expectedQuitDate={expectedQuitDate}
-                        stoppedDate={stoppedDate}
-                        isPending={false}
-                    />
-                ) : (
-                    <div className="flex items-center justify-between">Relapse support</div>
-                )
-            ) : isPending && <ProgressBoard isPending={true}/>}
+                    isPending ? (
+                            <ProgressBoard isPending={true}/>
+                        ) :
+                        <ProgressBoard
+                            startDate={startDate}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            cigsReduced={cigsReduced}
+                            quittingMethod={quittingMethod}
+                            planLog={planLog}
+                            cigsPerDay={cigsPerDay}
+                            expectedQuitDate={expectedQuitDate}
+                            stoppedDate={stoppedDate}
+                            isPending={false}
+                            readinessValue={readinessValue}
+                        />
+                ) : isPending && <ProgressBoard isPending={true}/>}
         </div>
     );
 
 
 }
-
 
 
 export default Dashboard;

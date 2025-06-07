@@ -46,7 +46,7 @@ export async function syncProfileToStores(profile) {
     usePlanStore.getState().setCigsReduced(profile.cigs_reduced ?? 0);
 
     usePlanStore.getState().setPlanLog(
-        (profile.planLog).map(entry => ({
+        (profile.planLog ?? []).map(entry => ({
             date: entry.date.split('T')[0],
             cigs: entry.cigs,
         }))

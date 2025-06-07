@@ -13,8 +13,6 @@ import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
 
 
-
-
 const SetPlan = () => {
 
     const {
@@ -62,6 +60,12 @@ const SetPlan = () => {
         }
     }
 
+    useEffect(() => {
+        if (planLog.length > 0 && readinessValue === 'ready' && quittingMethod !== 'target-date') {
+            setExpectedQuitDate(planLog[planLog.length - 1].date)
+        }
+    }, [planLog])
+
     return (
         <>
             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
@@ -73,10 +77,13 @@ const SetPlan = () => {
                     <div className="text-left text-sm md:text-base">
                         <p>
                             Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ thuốc.
-                            Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng bước tiến bộ ra sao.
+                            Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng bước
+                            tiến bộ ra sao.
                             Bạn hãy chọn ngày bắt đầu, số lượng thuốc bạn hút mỗi ngày và tốc độ bạn muốn giảm dần.
-                            Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần hoặc đặt ra ngày muốn bỏ hoàn toàn.
-                            Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi, duy trì và đạt được mục tiêu bỏ thuốc.
+                            Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần hoặc đặt ra
+                            ngày muốn bỏ hoàn toàn.
+                            Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi, duy trì và
+                            đạt được mục tiêu bỏ thuốc.
                         </p>
                     </div>
 
@@ -191,10 +198,14 @@ const SetPlan = () => {
                 <>
                     <div className="text-left text-sm md:text-base">
                         <p>
-                            Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng thẳng,
-                            mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp bạn theo
-                            dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào ngày
-                            bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông tin đó
+                            Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng
+                            thẳng,
+                            mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp
+                            bạn theo
+                            dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào
+                            ngày
+                            bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông
+                            tin đó
                             cho bạn theo dõi để có động lực duy trì tình trạng ngừng hút hơn.
                         </p>
                     </div>
@@ -227,68 +238,77 @@ const SetPlan = () => {
                         </p>
                         <p className='text-sm md:text-base'>
                             Kể từ khi bạn bỏ thuốc từ ngày <strong>{stoppedDate}</strong>, bạn đã: <br/>
-                            Bỏ thuốc được <strong>{Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
+                            Bỏ thuốc
+                            được <strong>{Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
                             Bỏ được <strong>
                             {Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
                         </strong> điếu thuốc <br/>
-                            Tiết kiệm được <strong>{(Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong> <br/>
+                            Tiết kiệm
+                            được <strong>{(Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
+                            <br/>
                             <em>Hãy giữ vững tinh thần nhé!</em>
 
                         </p>
                     </form>
                 </>}
-            {readinessValue === 'ready' && <CustomButton type='primary' onClick={createPlan}>Tạo kế hoạch</CustomButton>}
-            {(planLog.length > 0) &&
+            {readinessValue === 'ready' && (
                 <>
-                    <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
-                        <h3>Tổng quan kế hoạch</h3>
-                    </div>
+                    <CustomButton type="primary" onClick={createPlan}>Tạo kế hoạch</CustomButton>
 
-                    <div className="text-sm md:text-base">
-                        <p>
-                            Dựa trên thông tin bạn đã nhập, biểu đồ cho thấy kế hoạch{" "}
-                            {
-                                quittingMethod === "target-date"
-                                    ? "giảm dần số lượng thuốc lá bạn hút mỗi ngày cho đến ngày bạn chọn"
-                                    : `giảm dần số lượng thuốc lá bạn hút mỗi ${frequencyLabel}`
-                            }, bắt đầu từ <strong>{startDate}</strong> với mức ban đầu là{" "}
-                            <strong>{cigsPerDay}</strong>,{" "}
-                            {
-                                quittingMethod === "target-date"
-                                    ? "và sẽ giảm dần cho đến khi số điếu về 0"
-                                    : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
-                            }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
-                            <strong>{planLog[planLog.length - 1].date}</strong>.
-                        </p>
+                    {planLog.length > 0 && (
+                        <>
+                            <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
+                                <h3>Tổng quan kế hoạch</h3>
+                            </div>
 
-                        <ul>
-                            <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ lúc bắt đầu đến ngày kết thúc.</li>
-                            <li><strong>Trục dọc (số điếu thuốc):</strong> cho thấy số lượng bạn nên hút mỗi ngày tương ứng.</li>
-                            <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn và rõ ràng.</li>
-                        </ul>
+                            <div className="text-sm md:text-base">
+                                <p>
+                                    Dựa trên thông tin bạn đã nhập, biểu đồ cho thấy kế hoạch{" "}
+                                    {
+                                        quittingMethod === "target-date"
+                                            ? "giảm dần số lượng thuốc lá bạn hút mỗi ngày cho đến ngày bạn chọn"
+                                            : `giảm dần số lượng thuốc lá bạn hút mỗi ${frequencyLabel}`
+                                    }, bắt đầu từ <strong>{startDate}</strong> với mức ban đầu là{" "}
+                                    <strong>{cigsPerDay}</strong>,{" "}
+                                    {
+                                        quittingMethod === "target-date"
+                                            ? "và sẽ giảm dần cho đến khi số điếu về 0"
+                                            : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
+                                    }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
+                                    <strong>{planLog[planLog.length - 1].date}</strong>.
+                                </p>
 
-                        <p>
-                            👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn đang từng bước tiến gần hơn đến mục tiêu bỏ thuốc hoàn toàn!</em>
-                        </p>
-                    </div>
+                                <ul>
+                                    <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ lúc bắt
+                                        đầu đến ngày kết thúc.
+                                    </li>
+                                    <li><strong>Trục dọc (số điếu thuốc):</strong> cho thấy số lượng bạn nên hút mỗi
+                                        ngày tương ứng.
+                                    </li>
+                                    <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn và rõ
+                                        ràng.
+                                    </li>
+                                </ul>
 
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={planLog} margin={{
-                            top: 20,
-                            right: 30,
-                            left: 20,
-                            bottom: 25,
-                        }}>
-                            <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
-                            <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                            <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
-                            <YAxis/>
-                            <Tooltip/>
-                        </LineChart>
-                    </ResponsiveContainer>
+                                <p>
+                                    👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn đang từng
+                                    bước tiến gần hơn đến mục tiêu bỏ thuốc hoàn toàn!</em>
+                                </p>
+                            </div>
+
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                    <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                    <YAxis/>
+                                    <Tooltip/>
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </>
+                    )}
                 </>
-            }
-
+            )}
         </>
     );
 };
