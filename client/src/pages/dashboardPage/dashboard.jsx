@@ -63,8 +63,9 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
+            
             <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
-
+                
 
                 <div className="flex items-center justify-between">
                     <button className="bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-800">
