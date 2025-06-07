@@ -10,6 +10,7 @@ import Footer from "./components/layout/footer.jsx";
 import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
+import Topic from "./pages/topicsPage/topic.jsx";
 
 function App() {
 
@@ -23,7 +24,7 @@ function App() {
                 <Route path="/dashboard/check-in" element={<CheckIn />} />
 
                 <Route path="/topics" element={<TopicsPage />} />
-
+                <Route path="/topics/:topicId" element={<Topic />} />
 
                 <Route path="/postSignup" element={<PostSignUpCallback />} />
                 <Route path="/onboarding" element={<Onboarding />} />

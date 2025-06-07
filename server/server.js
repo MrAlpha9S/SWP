@@ -5,6 +5,7 @@ const port = 3000;
 const cors = require('cors');
 const userRouter = require("./routes/userRoute");
 const profileRouter = require("./routes/profileRoute");
+const topicRouter = require("./routes/topicRoute");
 
 
 app.use(cors());
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/users', userRouter)
 app.use('/profiles', profileRouter)
+app.use('/topics', topicRouter);
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
