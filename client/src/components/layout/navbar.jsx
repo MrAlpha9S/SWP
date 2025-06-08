@@ -37,7 +37,7 @@ function Navbar() {
                             <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Hỗ trợ
                             </a>
-                            <a href="/" className="text-white hover:text-primary-500 font-medium transition-colors">
+                            <a onClick={() => navigate('/topics')} className="text-white hover:text-primary-500 font-medium transition-colors">
                                 <TopicsDropdown />
                             </a>
 

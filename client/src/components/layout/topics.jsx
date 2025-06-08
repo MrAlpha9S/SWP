@@ -1,5 +1,6 @@
 import React from 'react';
 import { DownOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const topics = [
   ['Preparing to quit', 'Children and family', 'Vaping'],
@@ -8,6 +9,7 @@ const topics = [
 ];
 
 const TopicsDropdown = () => {
+  const navigate = useNavigate();
   return (
     <div className="relative group">
       {/* Trigger Button */}
@@ -18,7 +20,7 @@ const TopicsDropdown = () => {
       {/* Dropdown block - stays open when hovering over dropdown too */}
       <div className="absolute left-0 top-full z-50 mt-2 w-[800px] bg-white shadow-lg border border-gray-100 p-6 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
         <div className="flex items-center justify-between mb-2">
-          <a href='/topics' className="text-lg font-semibold text-primary-700 flex items-center gap-1 hover:underline">
+          <a onClick={() => navigate('/topics')} className="text-lg font-semibold text-primary-700 flex items-center gap-1 hover:underline">
             Topics <ArrowRightOutlined />
           </a>
         </div>

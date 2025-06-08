@@ -43,6 +43,9 @@ const Topic = () => {
                     },
                 }
             );
+            if (!result) {
+                console.log('Failed to fetch topic data');
+            }
             return await result.json();
         },
         enabled: isAuthenticated && !!user,
@@ -54,15 +57,15 @@ const Topic = () => {
         console.log('Fetched topic data:', data);
     }, [data, isPending])
 
-    console.log('Current topic ID:', topicId);
-    console.log('Fetched topic data:', data);
+    console.log('Topic Data:', data);
+
     return (
-        <div className="bg-purple-50 min-h-screen pb-16">
+        <div className="bg-primary-50 min-h-screen pb-16">
             {/* Header */}
-            <div className="px-6 md:px-20 py-12 bg-purple-100 text-purple-900">
-                <h1 className="text-4xl font-bold mb-4">{data.data.topic_name}</h1>
+            <div className="px-6 md:px-20 py-12 bg-primary-100 text-primary-900">
+                <h1 className="text-4xl font-bold mb-4">ok</h1>
                 <p className="text-lg max-w-3xl">
-                    The moment you quit smoking, your body starts to heal and your health begins to improve. Discover how smoking affects your body, the risks of passive smoking, and what happens during withdrawal as you start your journey to better health.
+                    ok
                 </p>
             </div>
 
@@ -72,7 +75,7 @@ const Topic = () => {
                     <Card key={index} className="shadow-sm border border-gray-200">
                         <div className="space-y-1">
                             <p className="text-sm text-gray-500 font-medium">Topics</p>
-                            <h2 className="text-xl font-semibold text-purple-900">{topic.title}</h2>
+                            <h2 className="text-xl font-semibold text-primary-900">{topic.title}</h2>
                             <p className="text-gray-700">{topic.description}</p>
                         </div>
                     </Card>
