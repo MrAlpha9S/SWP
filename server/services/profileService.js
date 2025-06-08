@@ -33,27 +33,28 @@ const postUserProfile = async (userAuth0Id,
                                stoppedDate,
                                cigsPerDay,
                                planLog,
-                               goalList) => {
+                               goalList, actionType, profile_id = 0) => {
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
 
-        // 1. Insert into user_profiles
-        const result = await pool.request()
-            .input('userId', sql.Int, userId)
-            .input('readiness', sql.VarChar(20), readiness)
-            .input('startDate', sql.DateTime, startDate ?? null)
-            .input('quitDate', sql.DateTime, stoppedDate ?? null)
-            .input('expectedQuitDate', sql.DateTime, expectedQuitDate)
-            .input('cigsPerDay', sql.Int, cigsPerDay)
-            .input('cigsPerPack', sql.Int, cigsPerPack)
-            .input('pricePerPack', sql.Decimal(10, 2), pricePerPack)
-            .input('timeAfterWaking', sql.VarChar(30), timeAfterWaking)
-            .input('quittingMethod', sql.VarChar(20), quittingMethod ?? null)
-            .input('cigsReduced', sql.Int, cigsReduced ?? null)
-            .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
-            .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
-            .query(`
+        if (actionType !== 'update') {
+
+            const result = await pool.request()
+                .input('userId', sql.Int, userId)
+                .input('readiness', sql.VarChar(20), readiness)
+                .input('startDate', sql.DateTime, startDate ?? null)
+                .input('quitDate', sql.DateTime, stoppedDate ?? null)
+                .input('expectedQuitDate', sql.DateTime, expectedQuitDate)
+                .input('cigsPerDay', sql.Int, cigsPerDay)
+                .input('cigsPerPack', sql.Int, cigsPerPack)
+                .input('pricePerPack', sql.Decimal(10, 2), pricePerPack)
+                .input('timeAfterWaking', sql.VarChar(30), timeAfterWaking)
+                .input('quittingMethod', sql.VarChar(20), quittingMethod ?? null)
+                .input('cigsReduced', sql.Int, cigsReduced ?? null)
+                .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
+                .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
+                .query(`
                 INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
                                            cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
                                            quitting_method, cigs_reduced, custom_time_of_day, custom_trigger)
@@ -63,7 +64,9 @@ const postUserProfile = async (userAuth0Id,
                     );
             `);
 
-        const profile_id = result.recordset[0].profile_id;
+            profile_id = result.recordset[0].profile_id;
+        }
+
 
         // 2. Insert quit reasons
         for (const reasonText of reasonList ?? []) {
@@ -138,9 +141,8 @@ const getUserProfile = async (userAuth0Id) => {
         const reasonsResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT r.reason
+        SELECT pr.reason_value
         FROM profiles_reasons pr
-        JOIN quit_reasons r ON pr.reason_id = r.reason_id
         WHERE pr.profile_id = @profileId
       `);
         const reasonList = reasonsResult.recordset.map(row => row.reason);
@@ -149,22 +151,21 @@ const getUserProfile = async (userAuth0Id) => {
         const triggersResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT t.trig_content
+        SELECT tp.trigger_value
         FROM triggers_profiles tp
         WHERE tp.profile_id = @profileId
       `);
-        const triggers = triggersResult.recordset.map(row => row.trig_content);
+        const triggers = triggersResult.recordset.map(row => row.trigger_value);
 
         // 4. Get time of day
         const timeResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT t.content
+        SELECT tp.time_value
         FROM time_profile tp
-        JOIN time_of_day t ON tp.time_id = t.time_id
         WHERE tp.profile_id = @profileId
       `);
-        const timeOfDayList = timeResult.recordset.map(row => row.content);
+        const timeOfDayList = timeResult.recordset.map(row => row.time_value);
 
         // 5. Get plan log
         const planLogResult = await pool.request()
@@ -266,67 +267,32 @@ const updateUserProfile = async (
         const profile_id = result.recordset[0].profile_id;
 
         // Clear related tables
-        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals'];
+        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals' ];
         for (const table of tablesToClear) {
             await pool.request()
                 .input('profile_id', profile_id)
                 .query(`DELETE FROM ${table} WHERE profile_id = @profile_id`);
         }
 
-        // Re-insert many-to-many data
-        for (const reasonText of reasonList ?? []) {
-            const reasonResult = await pool.request()
-                .input('reason', sql.NVarChar(250), reasonText)
-                .query(`INSERT INTO quit_reasons (reason) OUTPUT INSERTED.reason_id VALUES (@reason)`);
-            const reason_id = reasonResult.recordset[0].reason_id;
-
-            await pool.request()
-                .input('profile_id', sql.Int, profile_id)
-                .input('reason_id', sql.Int, reason_id)
-                .query(`INSERT INTO profiles_reasons (profile_id, reason_id) VALUES (@profile_id, @reason_id)`);
-        }
-
-        for (const triggerText of triggers ?? []) {
-            const triggerResult = await pool.request()
-                .input('trig_content', sql.VarChar(50), triggerText)
-                .query(`INSERT INTO smoke_triggers (trig_content) OUTPUT INSERTED.trigger_id VALUES (@trig_content)`);
-            const trigger_id = triggerResult.recordset[0].trigger_id;
-
-            await pool.request()
-                .input('profile_id', sql.Int, profile_id)
-                .input('trigger_id', sql.Int, trigger_id)
-                .query('INSERT INTO triggers_profiles (trigger_id, profile_id) VALUES (@trigger_id, @profile_id)');
-        }
-
-        for (const timeText of timeOfDayList ?? []) {
-            const timeResult = await pool.request()
-                .input('content', sql.VarChar(30), timeText)
-                .query(`INSERT INTO time_of_day (content) OUTPUT INSERTED.time_id VALUES (@content)`);
-            const time_id = timeResult.recordset[0].time_id;
-
-            await pool.request()
-                .input('profile_id', sql.Int, profile_id)
-                .input('time_id', sql.Int, time_id)
-                .query('INSERT INTO time_profile (profile_id, time_id) VALUES (@profile_id, @time_id)');
-        }
-
-        for (const entry of planLog ?? []) {
-            await pool.request()
-                .input('profile_id', sql.Int, profile_id)
-                .input('date', sql.DateTime, entry.date)
-                .input('num_of_cigs', sql.Int, entry.cigs)
-                .query('INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (@profile_id, @date, @num_of_cigs)');
-        }
-
-        for (const goal of goalList ?? []) {
-            await pool.request()
-                .input('profile_id', sql.Int, profile_id)
-                .input('goal_name', sql.NVarChar(50), goal.goalName)
-                .input('goal_amount', sql.Float, goal.goalAmount)
-                .query('INSERT INTO goals (goal_name, goal_amount, profile_id) VALUES (@goal_name, @goal_amount, @profile_id)');
-        }
-
-        return true;
+        //re-insert new data
+        return await postUserProfile(userAuth0Id,
+            readiness,
+            reasonList,
+            pricePerPack,
+            cigsPerPack,
+            timeAfterWaking,
+            timeOfDayList,
+            customTimeOfDay,
+            triggers,
+            customTrigger,
+            startDate,
+            quittingMethod,
+            cigsReduced,
+            expectedQuitDate,
+            stoppedDate,
+            cigsPerDay,
+            planLog,
+            goalList, 'update', profile_id)
 
     } catch (error) {
         console.error('Error in updateUserProfile:', error);
