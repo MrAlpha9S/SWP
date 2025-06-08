@@ -65,7 +65,7 @@ const CheckInJournal = () => {
                 Nó giúp bạn theo dõi thành công, duy trì động lực và điều chỉnh các chiến lược để vượt qua những thách
                 thức trên hành trình cai thuốc của bạn.</div>
 
-            <Tabs defaultActiveKey="1" className="mt-4" onChange={(e) => handleTabChange(e)}>
+            <Tabs defaultActiveKey={isFreeText ? "1" : "2"} className="mt-4" onChange={(e) => handleTabChange(e)}>
                 {/* Free-text journal */}
                 <TabPane tab={<span>Nhật ký văn bản tự do</span>} key="1">
                     <label className="font-medium block mb-2 mt-4">

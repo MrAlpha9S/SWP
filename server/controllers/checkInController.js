@@ -1,0 +1,42 @@
+const {postCheckIn} = require("../services/checkInService");
+
+const handlePostCheckIn = async (req, res) => {
+    const {
+        userAuth0Id,
+        feel,
+        checkedQuitItems,
+        cigsSmoked,
+        freeText,
+        qna
+    } = req.body;
+
+    console.log("auth0 id", userAuth0Id);
+    console.log("feel", feel);
+    console.log("checkedQuitItems", checkedQuitItems);
+    console.log("cigsSmoked", cigsSmoked)
+    console.log("freeText", freeText)
+    console.log("qna", qna);
+
+
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
+
+    try {
+        const result = await postCheckIn(userAuth0Id,
+            feel,
+            checkedQuitItems,
+            cigsSmoked,
+            freeText,
+            qna);
+
+        if (!result) {
+            return res.status(404).json({success: false, message: 'Check-in data insert failed', data: null});
+        } else {
+            return res.status(200).json({success: true, message: 'Check-in data insert successful', data: result});
+        }
+    } catch (err) {
+        console.error('handleGetProfile error:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+    }
+}
+
+module.exports = {handlePostCheckIn};

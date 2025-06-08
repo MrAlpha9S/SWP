@@ -5,6 +5,7 @@ const port = 3000;
 const cors = require('cors');
 const userRouter = require("./routes/userRoute");
 const profileRouter = require("./routes/profileRoute");
+const checkInRouter = require("./routes/checkInRoute");
 
 
 app.use(cors());
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.use('/users', userRouter)
 app.use('/profiles', profileRouter)
+app.use('/check-in', checkInRouter)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

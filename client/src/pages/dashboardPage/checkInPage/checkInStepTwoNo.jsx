@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import { Checkbox, Button } from 'antd';
 import { useStepCheckInStore, useCheckInDataStore } from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
 import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
@@ -7,7 +6,7 @@ import ErrorText from "../../../components/ui/errorText.jsx";
 
 
 const CheckInStep2No = () => {
-    const { handleBackToStepOne, handleStepTwo, handleStepThree } = useStepCheckInStore();
+    const { handleBackToStepOne, handleStepTwo } = useStepCheckInStore();
     const { cigsSmoked, setCigsSmoked } = useCheckInDataStore();
 
     const [showError, setShowError] = useState(false);
@@ -17,7 +16,7 @@ const CheckInStep2No = () => {
             setShowError(true);
             return
         }
-        handleStepThree();
+        handleStepTwo();
     };
 
     useEffect(() => {

@@ -12,6 +12,10 @@ import {
 import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
 import {qnaOptions} from "../../../constants/constants.js";
+import {useMutation} from "@tanstack/react-query";
+import {useAuth0} from "@auth0/auth0-react";
+import {postCheckIn} from "../../../components/utils/checkInUtils.js";
+import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
 
@@ -29,6 +33,8 @@ const CheckInStepFour = () => {
     } = useCheckInDataStore();
     const {handleBackToStepOne} = useStepCheckInStore();
     const [journalRender, setJournalRender] = useState('')
+    const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
+    const navigate = useNavigate();
 
     let feelLabel = ''
     switch (feel) {
@@ -57,11 +63,25 @@ const CheckInStepFour = () => {
                 setJournalRender('qna')
             }
         }
+        console.log('isJournalSelected', isJournalSelected)
+        console.log('isFreeText', isFreeText)
     }, [isFreeText, isJournalSelected])
 
+    const postCheckin = useMutation({
+        mutationFn: () => {
+            postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
+        },
+    })
+
+    const handleSave = () => {
+        postCheckin.mutate()
+    }
+
     useEffect(() => {
-        console.log(qna)
-    }, [qna])
+        if (postCheckin.isSuccess) {
+            navigate('/dashboard')
+        }
+    }, [postCheckin.isSuccess])
 
 
     return (
@@ -81,10 +101,10 @@ const CheckInStepFour = () => {
                     <a onClick={handleBackToStepOne} className="text-primary-700 font-medium cursor-pointer">Sửa</a>
                 </div>
 
-                <div className="flex items-start gap-2 mb-2">
+                {isStepOneOnYes && <div className="flex items-start gap-2 mb-2">
                     <CheckCircleOutlined className="text-blue-500 mt-1"/>
                     <Text className='text-left'>Tôi đã không hút thuốc vì: {checkedQuitItems.join(', ')}</Text>
-                </div>
+                </div>}
 
                 {!isStepOneOnYes && (
                     <div className="flex items-start gap-2 mb-2">
@@ -124,7 +144,7 @@ const CheckInStepFour = () => {
                         <div>
                             <Title level={5}>Nhật ký của bạn</Title>
                             <div className="text-left space-y-6">
-                                {qnaOptions.map(({ value, label }) => (
+                                {qnaOptions.map(({value, label}) => (
                                     <div key={value}>
                                         <p className="text-xs md:text-sm font-bold mb-4">{label}</p>
                                         <Text>{qna[value]}</Text>
@@ -136,7 +156,8 @@ const CheckInStepFour = () => {
                     </>
                 }
             </div>
-            <div className="flex justify-center w-full mt-6"><CustomButton>Lưu</CustomButton></div>
+            <div className="flex justify-center w-full mt-6"><CustomButton
+                onClick={() => handleSave()}>Lưu</CustomButton></div>
         </div>
     );
 };
