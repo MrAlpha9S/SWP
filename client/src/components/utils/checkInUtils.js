@@ -52,13 +52,11 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 export function mergeByDate(planLog = [], checkinLog = []) {
     const map = new Map();
 
-    // Step 1: Insert check-in data
     for (const { date, cigs } of checkinLog) {
         const day = new Date(date).toISOString().split('T')[0];
         map.set(day, { date: day, actual: cigs, plan: null });
     }
 
-    // Step 2: Expand planLog to fill 7-day periods
     for (let i = 0; i < planLog.length; i++) {
         const { date, cigs } = planLog[i];
         const start = new Date(date);
@@ -73,6 +71,5 @@ export function mergeByDate(planLog = [], checkinLog = []) {
         }
     }
 
-    // Step 3: Return sorted array
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }

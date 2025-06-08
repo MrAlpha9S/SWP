@@ -118,8 +118,6 @@ const ProgressBoard = ({
     const moneySaved = cigsQuit * pricePerCig;
 
     let mergedDataSet = mergeByDate(planLog, checkInDataSet)
-    console.log(mergedDataSet)
-
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
