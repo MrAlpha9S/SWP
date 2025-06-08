@@ -145,7 +145,7 @@ const getUserProfile = async (userAuth0Id) => {
         FROM profiles_reasons pr
         WHERE pr.profile_id = @profileId
       `);
-        const reasonList = reasonsResult.recordset.map(row => row.reason);
+        const reasonList = reasonsResult.recordset.map(row => row.reason_value);
 
         // 3. Get smoke triggers
         const triggersResult = await pool.request()

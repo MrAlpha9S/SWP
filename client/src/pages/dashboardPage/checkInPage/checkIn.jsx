@@ -43,9 +43,9 @@ function SmokeFreeCheckin() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
-            <div class="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
+            <div className="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
                 <Steps className='pb-5' current={current} items={items} />
-                <h1 class="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
+                <h1 className="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
                 {step === 'StepOne' && (
                     <CheckInStepOne />
                 )}

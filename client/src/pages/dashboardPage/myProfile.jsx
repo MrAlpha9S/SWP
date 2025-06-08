@@ -9,6 +9,7 @@ import Title from "antd/es/skeleton/Title.js";
 import Paragraph from "antd/es/skeleton/Paragraph.js";
 import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js"
 import Summary from "../../components/layout/signup/summary.jsx";
+import {useQuery} from "@tanstack/react-query";
 
 const MyProfile = () => {
 
@@ -17,18 +18,23 @@ const MyProfile = () => {
     const navigate = useNavigate();
     const [msg, setMsg] = useState('');
 
-    useEffect(() => {
-        const syncOnLoad = async () => {
+    const {isPending, error, data, isFetching} = useQuery({
+        queryKey: ['userProfile'],
+        queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            if (result?.data) {
-                console.log(result.data);
-                await syncProfileToStores(result.data);
-                setFetchStatus(true);
-            }
-        };
-        syncOnLoad();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+            return await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (isPending || !data) return;
+        const syncStores = async () => {
+            await syncProfileToStores();
+        }
+        syncStores();
+        setFetchStatus(true);
+    }, [data, isPending])
 
     return (
         <div className='min-h-[calc(100vh-80px-409px)] flex items-center'>
@@ -47,12 +53,10 @@ const MyProfile = () => {
                                 level={1}
                                 className="!text-gray-800 !mb-4 text-2xl md:text-3xl lg:text-4xl font-bold"
                             >
-                                hey
                             </Title>
                         }
                         subTitle={
                             <Paragraph className="!text-gray-600 !text-lg md:!text-xl !mb-8 leading-relaxed">
-                                yo
                             </Paragraph>
                         }
                         className="!p-0"
