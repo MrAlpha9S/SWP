@@ -1,5 +1,4 @@
-
-import { Routes, Route } from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import Navbar from './components/layout/navbar.jsx';
 import './App.css';
 import Homepage from './pages/homepage/homepage.jsx';
@@ -19,7 +18,7 @@ import Footer from "./components/layout/footer.jsx";
 
 
 function App() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
     useEffect(() => {
         const syncOnLoad = async () => {
@@ -35,20 +34,22 @@ function App() {
 
     return (
         <>
-            <Navbar />
-            <Routes>
-                <Route path="/" element={<Homepage />} />
-                <Route path="/dashboard" element={<DashBoard />} />
-                <Route path="/dashboard/check-in" element={<CheckIn />} />
-                <Route path="/post-signup" element={<PostSignUpCallback />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/error" element={<ErrorPage />} />
-                <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
-                <Route path="/my-profile" element={<MyProfile/>}></Route>
-                <Route path="/forum" element={<ForumPage />}></Route>
-                <Route path="/forum/thread/:threadId" element={<ThreadDiscussion />} />
-            </Routes>
-            <Footer />
+            <Navbar/>
+            <div className="max-w-[1280px] mx-auto">
+                <Routes>
+                    <Route path="/" element={<Homepage/>}/>
+                    <Route path="/dashboard" element={<DashBoard/>}/>
+                    <Route path="/dashboard/check-in" element={<CheckIn/>}/>
+                    <Route path="/post-signup" element={<PostSignUpCallback/>}/>
+                    <Route path="/onboarding" element={<Onboarding/>}/>
+                    <Route path="/error" element={<ErrorPage/>}/>
+                    <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
+                    <Route path="/my-profile" element={<MyProfile/>}></Route>
+                    <Route path="/forum" element={<ForumPage/>}></Route>
+                    <Route path="/forum/thread/:threadId" element={<ThreadDiscussion/>}/>
+                </Routes>
+            </div>
+            <Footer/>
         </>
     )
 }
