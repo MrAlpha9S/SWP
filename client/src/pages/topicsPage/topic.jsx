@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect } from 'react';
 import { Card } from 'antd';
 import { useParams } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
 import { useQuery } from '@tanstack/react-query';
 
 const topics = [
@@ -23,33 +23,28 @@ const topics = [
     },
 ];
 
+
+
 const Topic = () => {
     const { topicId } = useParams();
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     const { isPending, error, data } = useQuery({
-        queryKey: ['Topic'],
+        queryKey: ['Topic', topicId],
         queryFn: async () => {
             const token = await getAccessTokenSilently();
-
             if (!isAuthenticated || !user || !token) return;
-
-            const result = await fetch(`http://localhost:3000/topics/${topicId}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            if (!result) {
-                console.log('Failed to fetch topic data');
-            }
+            const result = await fetch(`http://localhost:3000/topics/${topicId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return await result.json();
         },
-        enabled: isAuthenticated && !!user,
-    })
+        enabled: isAuthenticated && !!user && !!topicId,
+    });
 
 
     useEffect(() => {
@@ -57,15 +52,14 @@ const Topic = () => {
         console.log('Fetched topic data:', data);
     }, [data, isPending])
 
-    console.log('Topic Data:', data);
-
+    console.log('Fetched topic data:', data);
     return (
         <div className="bg-primary-50 min-h-screen pb-16">
             {/* Header */}
             <div className="px-6 md:px-20 py-12 bg-primary-100 text-primary-900">
-                <h1 className="text-4xl font-bold mb-4">ok</h1>
+                <h1 className="text-4xl font-bold mb-4">a</h1>
                 <p className="text-lg max-w-3xl">
-                    ok
+                    ad
                 </p>
             </div>
 
@@ -85,4 +79,5 @@ const Topic = () => {
     );
 };
 
-export default Topic;
+const AuthTopic = withAuthenticationRequired(Topic);
+export default AuthTopic;

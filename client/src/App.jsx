@@ -19,6 +19,7 @@ import Footer from "./components/layout/footer.jsx";
 
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
+import BlogPost from "./pages/topicsPage/blogPost.jsx";
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -46,6 +47,8 @@ function App() {
 
                 <Route path="/topics" element={<TopicsPage />} />
                 <Route path="/topics/:topicId" element={<Topic />} />
+
+                <Route path="/blog" element={<BlogPost />} />
 
                 <Route path="/post-signup" element={<PostSignUpCallback />} />
                 <Route path="/onboarding" element={<Onboarding />} />

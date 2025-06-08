@@ -6,8 +6,8 @@ import LogoutButton from "../ui/logoutButton.jsx";
 import { useAuth0 } from "@auth0/auth0-react";
 import SignUpButton from "../ui/signUpButton.jsx";
 import Profile from "../ui/userProfile.jsx";
-import {FaSpinner} from "react-icons/fa";
-import {useNavigate} from "react-router-dom";
+import { FaSpinner } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import TopicsDropdown from "./topics.jsx";
 
 function Navbar() {
@@ -37,9 +37,12 @@ function Navbar() {
                             <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Hỗ trợ
                             </a>
-                            <a onClick={() => navigate('/topics')} className="text-white hover:text-primary-500 font-medium transition-colors">
-                                <TopicsDropdown />
-                            </a>
+                            {isAuthenticated === true && (
+                                <a onClick={() => navigate('/topics')} className="text-white hover:text-primary-500 font-medium transition-colors">
+                                    <TopicsDropdown />
+                                </a>
+                            )}
+
 
                         </div>
 

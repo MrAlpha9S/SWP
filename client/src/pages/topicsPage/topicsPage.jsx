@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import {  useAuth0, withAuthenticationRequired} from '@auth0/auth0-react';
 
 const topics = [
   {
@@ -100,4 +101,4 @@ bạn.
   );
 };
 
-export default TopicsPage;
+export default withAuthenticationRequired(TopicsPage);
