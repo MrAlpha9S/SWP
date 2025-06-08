@@ -3,7 +3,6 @@ import Stats from '../../components/layout/homepage/stats.jsx'
 import SupportMethods from '../../components/layout/homepage/supportMethods.jsx'
 import Membership from '../../components/layout/homepage/membership.jsx'
 import Testimonials from '../../components/layout/homepage/testimonials.jsx'
-import Footer from '../../components/layout/footer.jsx'
 
 function Homepage() {
     return (
@@ -15,7 +14,6 @@ function Homepage() {
                 <Membership />
                 <Testimonials />
             </main>
-            <Footer />
         </div>
     )
 }

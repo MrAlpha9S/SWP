@@ -35,7 +35,7 @@ function App() {
     return (
         <>
             <Navbar/>
-            <div className="max-w-[1280px] mx-auto">
+            <div className="max-w-[1280px] mx-auto bg-[#fff7e5]">
                 <Routes>
                     <Route path="/" element={<Homepage/>}/>
                     <Route path="/dashboard" element={<DashBoard/>}/>
