@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Steps, Tabs, Input, Button, Typography } from 'antd';
 import { useStepCheckInStore, useCheckInDataStore } from '../../../stores/checkInStore';
+import CustomButton from "../../../components/ui/CustomButton.jsx";
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
 
 const { Step } = Steps;
 const { TabPane } = Tabs;
@@ -59,7 +61,7 @@ const CheckInJournal = () => {
 
       <Tabs defaultActiveKey="1" className="mt-4">
         {/* Free-text journal */}
-        <TabPane tab={<span className="text-primary-600 font-semibold">Nhật ký văn bản tự do</span>} key="1">
+        <TabPane tab={<span>Nhật ký văn bản tự do</span>} key="1">
           <label className="font-medium block mb-2 mt-4">
             Gần đây bạn cảm thấy thế nào? Điều gì đã xảy ra trong hành trình cai thuốc của bạn?
           </label>
@@ -68,7 +70,7 @@ const CheckInJournal = () => {
             maxLength={2000}
             showCount
             value={freeText}
-            onChange={(e) => setFreeText(e.target.value)}
+            onChange={(e) => setFreeText(e.target.value)}z
             placeholder="Bắt đầu viết ở đây..."
           />
           {showErrorFreeText && (
@@ -100,12 +102,8 @@ const CheckInJournal = () => {
       </Tabs>
 
       <div className="flex justify-between mt-6">
-        <Button onClick={handleBackToStepOne} type="default" className="text-primary-600 border-primary-600 hover:bg-primary-50">
-          &lt; Back
-        </Button>
-        <Button onClick={handleNext} className="bg-primary-500 text-white hover:bg-primary-600">
-          Finish check-in &gt;
-        </Button>
+        <CustomButton type='secondary' onClick={handleStepThree}><FaArrowLeft/> Trở lại </CustomButton>
+        <CustomButton type='primary' onClick={handleNext}>Hoàn thành<FaArrowRight/></CustomButton>
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ const MyProfile = () => {
             if (!isAuthenticated || !user) return;
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
             if (result?.data) {
+                console.log(result.data);
                 await syncProfileToStores(result.data);
                 setFetchStatus(true);
             }

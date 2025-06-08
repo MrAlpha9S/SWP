@@ -1,9 +1,19 @@
 import React from 'react';
-import { Button } from 'antd';
-import { useStepCheckInStore } from '../../../stores/checkInStore';
+import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
+import CustomButton from "../../../components/ui/CustomButton.jsx";
 
 const CheckInStep3 = () => {
-    const { handleJournal, handleStepThree, handleBackToStepOne } = useStepCheckInStore();
+    const { handleJournal, handleStepThree, handleStepOneYes, handleStepOneNo } = useStepCheckInStore();
+    const {isStepOneOnYes} = useCheckInDataStore();
+
+    const handleBackToStepTwo = () => {
+        if (isStepOneOnYes) {
+            handleStepOneYes()
+        } else {
+            handleStepOneNo();
+        }
+    }
 
     return (
         <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white text-center">
@@ -13,29 +23,9 @@ const CheckInStep3 = () => {
             </p>
 
             <div className="flex justify-center gap-4">
-                <Button
-                    onClick={handleBackToStepOne}
-                    className="border border-primary-500 text-primary-700 hover:bg-primary-50"
-                    size="large"
-                >
-                    &lt; Trở lại
-                </Button>
-
-                <Button
-                    onClick={handleStepThree}
-                    className="bg-primary-500 text-white hover:bg-primary-600"
-                    size="large"
-                >
-                    Không - Tôi xong rồi
-                </Button>
-
-                <Button
-                    onClick={handleJournal}
-                    className="bg-primary-500 text-white hover:bg-primary-600"
-                    size="large"
-                >
-                    Có
-                </Button>
+                <CustomButton type='secondary' onClick={handleBackToStepTwo}><FaArrowLeft/> Trở lại </CustomButton>
+                <CustomButton type='primary' onClick={handleStepThree}>Không - Tôi xong rồi </CustomButton>
+                <CustomButton type='primary' onClick={handleJournal}>Tiếp tục <FaArrowRight/></CustomButton>
             </div>
         </div>
     );

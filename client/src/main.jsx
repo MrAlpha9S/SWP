@@ -30,7 +30,19 @@ createRoot(document.getElementById('root')).render(
                 "Radio": {
                     "colorPrimary": "rgb(19,78,74)",
                     "colorPrimaryHover": "rgb(19,78,74)",
-                }
+                    "colorBorder": "rgba(255,255,255,0)",
+                    "borderRadius": 0,
+                },
+                "Tabs": {
+                    "inkBarColor": "rgb(13,148, 136)",
+                    "itemHoverColor": "rgb(13,148, 136)",
+                    "itemActiveColor": "rgb(13,148, 136)",
+                    "itemSelectedColor": "rgb(13,148, 136)",
+                },
+                "Input": {
+                    "hoverBorderColor": "rgb(13,148, 136)",
+                    "activeBorderColor": "rgb(13,148, 136)",
+                },
             }
         }}>
         <BrowserRouter>

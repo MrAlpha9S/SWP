@@ -95,3 +95,24 @@ export const quittingMethodOptions = [
     {value: "target-date", label: "Chọn ngày muốn bỏ hoàn toàn"}
 ]
 
+export const quitStrategies = [
+    { value: "positive_mindset", label: "Tư duy tích cực và tự thúc đẩy bản thân" },
+    { value: "social_support", label: "Hỗ trợ từ bạn bè, gia đình hoặc nhóm hỗ trợ" },
+    { value: "nrt", label: "Bỏ thuốc hoặc NRT (kẹo cao su, miếng dán, bình xịt, v.v.)" },
+    { value: "therapy", label: "Liệu pháp hành vi hoặc tư vấn" },
+    { value: "trigger_avoidance", label: "Xác định và tránh các tác nhân gây nghiện hoặc tình huống rủi ro cao" },
+    { value: "craving_management", label: "Phát triển cơ chế đối phó với cơn thèm và quản lý căng thẳng" },
+    { value: "quit_plan", label: "Kế hoạch bỏ thuốc của tôi với các cột mốc và phần thưởng" },
+    { value: "mindfulness", label: "Chánh niệm" },
+    { value: "other", label: "Khác" }
+];
+
+export const FEELINGS = [
+    { value: 'terrible', emoji: '😞', label: 'Tệ' },
+    { value: 'bad', emoji: '☹️', label: 'Buồn' },
+    { value: 'okay', emoji: '😐', label: 'Ổn' },
+    { value: 'good', emoji: '😊', label: 'Tốt' },
+    { value: 'great', emoji: '😃', label: 'Tuyệt' },
+];
+
+

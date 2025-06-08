@@ -39,8 +39,8 @@ export const useCheckInDataStore = create((set) => ({
     setFeel: (value) => set({ feel: value }),
     checkedQuitItems: [],
     setCheckedQuitItems: (items) => set({ checkedQuitItems: items}),
-    checkedSmokeItems: [],
-    setCheckedSmokeItems: (items) => set({ checkedSmokeItems: items}),
+    cigsSmoked: 0,
+    setCigsSmoked: (value) => set({ cigsSmoked: value }),
     freeText: '',
     setFreeText: (value) => set({ freeText: value }),
     qna: {
@@ -51,7 +51,10 @@ export const useCheckInDataStore = create((set) => ({
         encourage: '',
     },
     setQna: (newQna) => set((state) => ({ qna: { ...state.qna, ...newQna } })),
-
+    isStepOneOnYes: false,
+    setIsStepOneOnYes: (value) => set({ isStepOneOnYes: value }),
+    isFreeText: true,
+    setIsFreeText: (value) => set({ isFreeText: value }),
 }));
 
 

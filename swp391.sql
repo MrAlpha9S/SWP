@@ -35,7 +35,7 @@ GO
 CREATE TABLE [user_profiles] (
   [profile_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
-  [readiness] varchar(20),
+  [readiness_value] varchar(20),
   [start_date] datetime,
   [quit_date] datetime,
   [expected_quit_date] datetime,
@@ -43,14 +43,24 @@ CREATE TABLE [user_profiles] (
   [cigs_per_pack] int,
   [price_per_pack] decimal(10,2),
   [time_after_waking] varchar(30),
-  [quit_method] varchar(20),
+  [quitting_method] varchar(20),
   [cigs_reduced] int,
   [custom_time_of_day] nvarchar(100),
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
-  [updated_at] datetime
+  [updated_at] datetime,
+  [is_public] bit default (1)
 )
 GO
+
+CREATE TABLE [journal_log] (
+  [log_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [feeling] nvarchar(10),
+  [created_at] datetime default (CURRENT_TIMESTAMP),
+  [cigs_slipped] int,
+  
+)
 
 CREATE TABLE [goals] (
   [goal_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -176,9 +186,13 @@ GO
 CREATE TABLE [social_posts] (
   [post_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
+  [title] nvarchar(max),
   [content] nvarchar(max),
   [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
-  [isReported] int DEFAULT (0)
+  [is_reported] int DEFAULT (0),
+  [likes] int DEFAULT (0),
+  [comments] int DEFAULT (0),
+  [is_liked] bit DEFAULT (0)
 )
 GO
 
@@ -189,9 +203,29 @@ CREATE TABLE [social_comments] (
   [post_id] int,
   [content] nvarchar(max),
   [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
-  [isReported] int DEFAULT (0)
+  [is_reported] int DEFAULT (0),
+  [likes] int DEFAULT (0),
+  [comments] int DEFAULT (0),
+  [is_liked] bit DEFAULT (0)
 )
 GO
+
+CREATE TABLE [social_likes] (
+  [like_id] INT PRIMARY KEY IDENTITY(1,1),
+  [user_id] INT,
+  [post_id] INT NULL,
+  [comment_id] INT NULL,
+  [created_at] DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
+
+CREATE TABLE [social_reports] (
+  [report_id] INT PRIMARY KEY IDENTITY(1,1),
+  [user_id] INT,
+  [post_id] INT NULL,
+  [comment_id] INT NULL,
+  [reason] NVARCHAR(MAX),
+  [created_at] DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
 
 CREATE TABLE [conversations] (
   [conversation_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -291,6 +325,19 @@ GO
 
 ALTER TABLE [goals] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
 GO
+
+ALTER TABLE [social_posts] 
+ADD FOREIGN KEY ([user_id]) REFERENCES [users]([user_id]);
+
+ALTER TABLE [social_comments] 
+ADD FOREIGN KEY ([user_id]) REFERENCES [users]([user_id]);
+
+ALTER TABLE [social_comments] 
+ADD FOREIGN KEY ([post_id]) REFERENCES [social_posts]([post_id]);
+
+ALTER TABLE [social_comments] 
+ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id]);
+
 
 
 INSERT INTO [subcriptions] ([sub_type], [duration], [price])
