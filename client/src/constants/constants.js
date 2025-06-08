@@ -115,4 +115,19 @@ export const FEELINGS = [
     { value: 'great', emoji: '😃', label: 'Tuyệt' },
 ];
 
+export const qnaQuestions = [
+    'Bạn có cảm thấy muốn hút thuốc không? Bạn đã làm gì để vượt qua cảm giác đó?',
+    'Bạn có nhận thấy bất kỳ thay đổi nào về sức khỏe, tâm trạng hoặc năng lượng của mình không?',
+    'Hôm nay bạn có tập thể dục hay vận động gì không? Bạn cảm thấy thế nào?',
+    'Bạn có thèm ăn không? Điều gì giúp bạn đối phó với chúng?',
+    'Có ai ủng hộ hoặc động viên bạn không? Điều đó khiến bạn cảm thấy thế nào?',
+];
+
+export const qnaFields = [
+    'smokeCraving',
+    'healthChanges',
+    'exercise',
+    'cravings',
+    'encourage',
+];
 

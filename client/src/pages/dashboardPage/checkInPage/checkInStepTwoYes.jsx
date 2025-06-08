@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Checkbox, Button } from 'antd';
 import { useStepCheckInStore, useCheckInDataStore } from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
@@ -12,13 +12,18 @@ const CheckInStep2Yes = () => {
   const [showError, setShowError] = useState(false);
 
   const handleNext = () => {
-    if (!checkedQuitItems || checkedQuitItems.length === 0) {
-      setShowError(true);
-      return;
-    }
-    setShowError(false);
+      if (checkedQuitItems.length === 0) {
+          setShowError(true);
+          return
+      }
     handleStepTwo();
   };
+
+  useEffect(() => {
+      if (checkedQuitItems.length > 0) {
+          setShowError(false);
+      }
+  }, [checkedQuitItems]);
 
   return (
     <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white">

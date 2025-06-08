@@ -29,7 +29,6 @@ export const useStepCheckInStore = create((set) => ({
         step: 'StepFour',
         current: 3
     })
-
 }));
 
 export const useCheckInDataStore = create((set) => ({
