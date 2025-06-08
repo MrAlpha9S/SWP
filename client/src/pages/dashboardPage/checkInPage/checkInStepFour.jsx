@@ -14,7 +14,7 @@ import CustomButton from "../../../components/ui/CustomButton.jsx";
 import {qnaOptions} from "../../../constants/constants.js";
 import {useMutation} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
-import {postCheckIn} from "../../../components/utils/checkInUtils.js";
+import { postCheckIn } from "../../../components/utils/checkInUtils.js";
 import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
@@ -74,7 +74,7 @@ const CheckInStepFour = () => {
     })
 
     const handleSave = () => {
-        postCheckin.mutate()
+
     }
 
     useEffect(() => {

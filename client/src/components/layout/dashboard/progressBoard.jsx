@@ -10,11 +10,16 @@ import {
     Tooltip,
     XAxis,
     YAxis,
-    ReferenceLine
+    ReferenceLine, Legend
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
 import {Skeleton} from "antd";
+import {PiPiggyBankLight} from "react-icons/pi";
+import {IoLogoNoSmoking} from "react-icons/io";
+import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
+import {BsGraphDown} from "react-icons/bs";
+import {mergeByDate} from "../../utils/checkInUtils.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -27,7 +32,8 @@ const ProgressBoard = ({
                            isPending,
                            pricePerPack,
                            cigsPerPack,
-                           readinessValue
+                           readinessValue,
+                           checkInDataSet
                        }) => {
     const navigate = useNavigate();
 
@@ -111,6 +117,10 @@ const ProgressBoard = ({
 
     const moneySaved = cigsQuit * pricePerCig;
 
+    let mergedDataSet = mergeByDate(planLog, checkInDataSet)
+    console.log(mergedDataSet)
+
+
     return (
         <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
             <div className="flex items-center justify-between">
@@ -150,12 +160,14 @@ const ProgressBoard = ({
 
             <div className="grid grid-cols-3 gap-3 text-center">
                 {[0, 1, 2].map((i) => (
-                    <div key={i} className="bg-primary-100 p-4 rounded-lg">
+                    <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
                         {isPending ? (
                             <Skeleton active paragraph={{rows: 2}}/>
                         ) : (
                             <>
-                                <div className="text-2xl">{['💰', '🚭', '🏆'][i]}</div>
+                                <div className="text-2xl">{[<PiPiggyBankLight className='size-10 text-primary-800'/>,
+                                    <IoLogoNoSmoking className='size-10 text-primary-800'/>,
+                                    <FaTrophy className='size-9 text-primary-800'/>][i]}</div>
                                 <div className="text-xl font-semibold text-primary-800">
                                     {i === 0 ? moneySaved + ' VNĐ' : i === 1 ? cigsQuit : 1}
                                 </div>
@@ -176,7 +188,8 @@ const ProgressBoard = ({
                         </a>
                     )}
                 </div>
-                <div className="text-2xl">📅</div>
+                <div className="text-2xl flex justify-center"><FaRegCalendarCheck
+                    className='size-9 text-primary-800 mb-1'/></div>
                 <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
                 <p className="text-sm text-gray-600">
                     {isPending ?
@@ -194,16 +207,39 @@ const ProgressBoard = ({
                             </a>
                         )}
                     </div>
-                    <div className="text-2xl">📉</div>
+                    <div className="text-2xl flex justify-center"><BsGraphDown
+                        className='size-7 text-primary-800 mb-1'/></div>
                     <h3 className="text-lg font-semibold text-primary-800">Biểu đồ kế hoạch số điếu mỗi ngày</h3>
 
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
-                    ) : planLog?.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
-                                <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                    ) : mergedDataSet?.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={350}>
+                            <LineChart
+                                data={mergedDataSet}
+                                margin={{top: 20, right: 30, left: 20, bottom: 25}}
+                            >
+                                {/* Smoked line (actual check-ins) */}
+                                <Line
+                                    type="monotone"
+                                    dataKey="actual"
+                                    stroke="#ef4444"
+                                    dot={{r: 3}}
+                                    name="Đã hút"
+                                />
+
+                                {/* Planned line (target plan) */}
+                                <Line
+                                    type="monotone"
+                                    dataKey="plan"
+                                    stroke="#14b8a6"
+                                    strokeDasharray="5 5"
+                                    dot={false}
+                                    name="Kế hoạch"
+                                />
+
                                 <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+
                                 <ReferenceLine
                                     x={
                                         currentDate < new Date(expectedQuitDate)
@@ -211,13 +247,16 @@ const ProgressBoard = ({
                                             : ''
                                     }
                                     stroke="#115e59"
-                                    label="Hôm nay"
+                                    label={quittingMethod === 'gradual-weekly' ? 'Tuần hiện tại' : 'Hôm nay'}
                                 />
-                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={6}/>
                                 <YAxis/>
                                 <Tooltip/>
+                                <Legend verticalAlign="top"/>
                             </LineChart>
                         </ResponsiveContainer>
+
                     ) : null}
                 </div>
             }

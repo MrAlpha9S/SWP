@@ -60,4 +60,22 @@ const postCheckIn = async (userAuth0Id,
     }
 }
 
-module.exports = {postCheckIn};
+const getCheckInLogDataset = async (userAuth0Id) => {
+    try {
+        const pool = await poolPromise;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+        const checkin_logs = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query('SELECT logged_at as date, cigs_smoked as cigs FROM checkin_log WHERE user_id = @user_id');
+
+        console.log(checkin_logs.recordset);
+        return checkin_logs.recordset;
+
+    } catch (error) {
+        console.error('error in getCheckInLogDataset', error);
+        return false;
+    }
+}
+
+module.exports = {postCheckIn, getCheckInLogDataset};
