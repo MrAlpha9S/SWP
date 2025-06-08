@@ -44,7 +44,7 @@ const postUserProfile = async (userAuth0Id,
             .input('readiness', sql.VarChar(20), readiness)
             .input('startDate', sql.DateTime, startDate ?? null)
             .input('quitDate', sql.DateTime, stoppedDate ?? null)
-            .input('expectedQuitDate', sql.DateTime, expectedQuitDate ?? null)
+            .input('expectedQuitDate', sql.DateTime, expectedQuitDate)
             .input('cigsPerDay', sql.Int, cigsPerDay)
             .input('cigsPerPack', sql.Int, cigsPerPack)
             .input('pricePerPack', sql.Decimal(10, 2), pricePerPack)
@@ -67,54 +67,27 @@ const postUserProfile = async (userAuth0Id,
 
         // 2. Insert quit reasons
         for (const reasonText of reasonList ?? []) {
-            const reasonResult = await pool.request()
-                .input('reason', sql.NVarChar(250), reasonText)
-                .query(`
-                    INSERT INTO quit_reasons (reason)
-                        OUTPUT INSERTED.reason_id
-                    VALUES (@reason)
-                `);
-            const reason_id = reasonResult.recordset[0].reason_id;
-
             await pool.request()
                 .input('profile_id', sql.Int, profile_id)
-                .input('reason_id', sql.Int, reason_id)
-                .query(`INSERT INTO profiles_reasons (profile_id, reason_id)
-                        VALUES (@profile_id, @reason_id)`);
+                .input('reason_value', sql.VarChar(30), reasonText)
+                .query(`INSERT INTO profiles_reasons (profile_id, reason_value)
+                        VALUES (@profile_id, @reason_value)`);
         }
 
         // 3. Insert smoke triggers
         for (const triggerText of triggers ?? []) {
-            const triggerResult = await pool.request()
-                .input('trig_content', sql.VarChar(50), triggerText)
-                .query(`
-                    INSERT INTO smoke_triggers (trig_content)
-                        OUTPUT INSERTED.trigger_id
-                    VALUES (@trig_content)
-                `);
-            const trigger_id = triggerResult.recordset[0].trigger_id;
-
             await pool.request()
                 .input('profile_id', sql.Int, profile_id)
-                .input('trigger_id', sql.Int, trigger_id)
-                .query('INSERT INTO triggers_profiles (trigger_id, profile_id) VALUES (@trigger_id, @profile_id)');
+                .input('trigger_value', sql.VarChar(30), triggerText)
+                .query('INSERT INTO triggers_profiles (profile_id, trigger_value) VALUES (@profile_id, @trigger_value)');
         }
 
         // 4. Insert time of day
         for (const timeText of timeOfDayList ?? []) {
-            const timeResult = await pool.request()
-                .input('content', sql.VarChar(30), timeText)
-                .query(`
-                    INSERT INTO time_of_day (content)
-                        OUTPUT INSERTED.time_id
-                    VALUES (@content)
-                `);
-            const time_id = timeResult.recordset[0].time_id;
-
             await pool.request()
                 .input('profile_id', sql.Int, profile_id)
-                .input('time_id', sql.Int, time_id)
-                .query('INSERT INTO time_profile (profile_id, time_id) VALUES (@profile_id, @time_id)');
+                .input('time_value', sql.VarChar(30), timeText)
+                .query('INSERT INTO time_profile (profile_id, time_value) VALUES (@profile_id, @time_value)');
         }
 
         // 5. Insert plan log
@@ -178,7 +151,6 @@ const getUserProfile = async (userAuth0Id) => {
             .query(`
         SELECT t.trig_content
         FROM triggers_profiles tp
-        JOIN smoke_triggers t ON tp.trigger_id = t.trigger_id
         WHERE tp.profile_id = @profileId
       `);
         const triggers = triggersResult.recordset.map(row => row.trig_content);

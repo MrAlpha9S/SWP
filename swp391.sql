@@ -49,18 +49,55 @@ CREATE TABLE [user_profiles] (
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
-  [is_public] bit default (1)
+  [is_public] bit default (1),
 )
 GO
 
-CREATE TABLE [journal_log] (
+CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [feeling] nvarchar(10),
-  [created_at] datetime default (CURRENT_TIMESTAMP),
-  [cigs_slipped] int,
-  
+  [logged_at] datetime default (CURRENT_TIMESTAMP),
+  [cigs_smoked] int,
+  [isFreeText] bit default(1) ,
 )
+
+ALTER TABLE [checkin_log] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [qna] (
+  [qna_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [qna_question] varchar(30),
+  [qna_answer] nvarchar(max),
+)
+
+ALTER TABLE [qna] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [free_text] (
+  [free_text_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [free_text_content] nvarchar(max)
+)
+
+ALTER TABLE [free_text] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [quittingItems] (
+  [item_id] int PRIMARY KEY IDENTITY(1, 1),
+  [item_name] nvarchar(30)
+)
+
+CREATE TABLE [journal_quit] (
+  [item_id] int,
+  [log_id] int,
+  PRIMARY KEY ([item_id], [log_id])
+)
+
+ALTER TABLE [journal_quit] ADD FOREIGN KEY ([item_id]) REFERENCES [quittingItems] ([item_id])
+ALTER TABLE [journal_quit] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
+GO
 
 CREATE TABLE [goals] (
   [goal_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -81,47 +118,24 @@ GO
 
 CREATE TABLE [time_profile] (
   [profile_id] int,
-  [time_id] int,
-  PRIMARY KEY ([profile_id], [time_id])
+  [time_value] varchar(30),
+  PRIMARY KEY ([profile_id], [time_value])
 )
 GO
-
-CREATE TABLE [time_of_day] (
-  [time_id] int PRIMARY KEY IDENTITY(1, 1),
-  [content] varchar(30)
-)
-GO
-
-
-CREATE TABLE [smoke_triggers] (
-  [trigger_id] int PRIMARY KEY IDENTITY(1, 1),
-  [trig_content] varchar(50)
-)
-GO
-
 
 CREATE TABLE [triggers_profiles] (
-  [trigger_id] int,
   [profile_id] int,
-  PRIMARY KEY ([trigger_id], [profile_id])
+  [trigger_value] varchar(30),
+  PRIMARY KEY ([trigger_value], [profile_id])
 )
 GO
-
-
 
 CREATE TABLE [profiles_reasons] (
   [profile_id] int,
-  [reason_id] int,
-  PRIMARY KEY ([profile_id], [reason_id])
+  [reason_value] varchar(30),
+  PRIMARY KEY ([profile_id], [reason_value])
 )
 GO
-
-CREATE TABLE [quit_reasons] (
-  [reason_id] int PRIMARY KEY IDENTITY(1, 1),
-  [reason] nvarchar(250)
-)
-GO
-
 
 CREATE TABLE [user_progresses] (
   [progress_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -305,15 +319,6 @@ GO
 ALTER TABLE [profiles_reasons] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
 GO
 
-ALTER TABLE [profiles_reasons] ADD FOREIGN KEY ([reason_id]) REFERENCES [quit_reasons] ([reason_id])
-GO
-
-ALTER TABLE [time_profile] ADD FOREIGN KEY ([time_id]) REFERENCES [time_of_day] ([time_id])
-GO
-
-ALTER TABLE [triggers_profiles] ADD FOREIGN KEY ([trigger_id]) REFERENCES [smoke_triggers] ([trigger_id])
-GO
-
 ALTER TABLE [time_profile] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id])
 GO
 
@@ -351,11 +356,15 @@ VALUES
   ('Pro - Yearly', 12, 199.99);
 
 
-INSERT INTO [users] ([auth0_id], [username], [email], [role])
+INSERT INTO [users] ([auth0_id], [username], [email])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com', 'Coach'),
-('auth0|xyz789', 'jane_smith', 'jane@example.com', 'Admin'),
-('auth0|lmn456', 'bob_lee', 'bob@example.com', 'Member');
+('auth0|abc123', 'john_doe', 'john@example.com'),
+('auth0|xyz789', 'jane_smith', 'jane@example.com'),
+('auth0|lmn456', 'bob_lee', 'bob@example.com'),
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com')
+
+
+
 
 
 SELECT * FROM users
@@ -365,5 +374,4 @@ select * from plan_log
 select * from quit_reasons
 select * from goals
 select * from time_of_day
-select * from smoke_triggers
 select * from triggers_profiles
