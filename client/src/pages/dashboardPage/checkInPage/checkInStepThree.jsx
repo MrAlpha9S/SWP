@@ -5,7 +5,7 @@ import CustomButton from "../../../components/ui/CustomButton.jsx";
 
 const CheckInStep3 = () => {
     const { handleJournal, handleStepThree, handleStepOneYes, handleStepOneNo } = useStepCheckInStore();
-    const {isStepOneOnYes} = useCheckInDataStore();
+    const {isStepOneOnYes, setIsJournalSelected} = useCheckInDataStore();
 
     const handleBackToStepTwo = () => {
         if (isStepOneOnYes) {
@@ -15,17 +15,22 @@ const CheckInStep3 = () => {
         }
     }
 
+    const handleNextStep = () => {
+        setIsJournalSelected(true)
+        handleJournal()
+    }
+
     return (
         <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white text-center">
 
-            <p className="text-lg font-semibold text-gray-800 mb-8">
+            <p className="text-sm md:text-base font-bold mb-8">
                 Bạn có muốn viết về cảm xúc của mình ngày hôm nay không?
             </p>
 
             <div className="flex justify-center gap-4">
                 <CustomButton type='secondary' onClick={handleBackToStepTwo}><FaArrowLeft/> Trở lại </CustomButton>
                 <CustomButton type='primary' onClick={handleStepThree}>Không - Tôi xong rồi </CustomButton>
-                <CustomButton type='primary' onClick={handleJournal}>Tiếp tục <FaArrowRight/></CustomButton>
+                <CustomButton type='primary' onClick={handleNextStep}>Tiếp tục <FaArrowRight/></CustomButton>
             </div>
         </div>
     );

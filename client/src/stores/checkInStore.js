@@ -54,6 +54,8 @@ export const useCheckInDataStore = create((set) => ({
     setIsStepOneOnYes: (value) => set({ isStepOneOnYes: value }),
     isFreeText: true,
     setIsFreeText: (value) => set({ isFreeText: value }),
+    isJournalSelected: false,
+    setIsJournalSelected: (value) => set({isJournalSelected : value}),
 }));
 
 

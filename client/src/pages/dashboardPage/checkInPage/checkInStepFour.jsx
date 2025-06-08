@@ -1,5 +1,5 @@
-import React from 'react';
-import {Progress, Typography, Divider} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Typography, Divider} from 'antd';
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -10,15 +10,28 @@ import {
     SmileFilled
 } from '@ant-design/icons';
 import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
+import CustomButton from "../../../components/ui/CustomButton.jsx";
+import {qnaOptions} from "../../../constants/constants.js";
 
-const {Title, Text, Paragraph} = Typography;
+const {Title, Text} = Typography;
 
 const CheckInStepFour = () => {
-    const {checkInDate, feel, checkedQuitItems, freeText, qna, cigsSmoked, isStepOneOnYes} = useCheckInDataStore();
-    const { handleBackToStepOne } = useStepCheckInStore();
+    const {
+        checkInDate,
+        feel,
+        checkedQuitItems,
+        freeText,
+        qna,
+        isFreeText,
+        cigsSmoked,
+        isStepOneOnYes,
+        isJournalSelected
+    } = useCheckInDataStore();
+    const {handleBackToStepOne} = useStepCheckInStore();
+    const [journalRender, setJournalRender] = useState('')
 
     let feelLabel = ''
-    switch(feel) {
+    switch (feel) {
         case 'terrible':
             feelLabel = 'tệ';
             break;
@@ -35,6 +48,21 @@ const CheckInStepFour = () => {
             feelLabel = 'tuyệt vời';
             break;
     }
+
+    useEffect(() => {
+        if (isJournalSelected) {
+            if (isFreeText) {
+                setJournalRender('freetext')
+            } else {
+                setJournalRender('qna')
+            }
+        }
+    }, [isFreeText, isJournalSelected])
+
+    useEffect(() => {
+        console.log(qna)
+    }, [qna])
+
 
     return (
         <div className="max-w-xl mx-auto rounded-md p-6 shadow-md bg-white">
@@ -81,7 +109,34 @@ const CheckInStepFour = () => {
                         Tôi cảm thấy {feelLabel} hôm nay!
                     </Text>
                 </div>
+                {journalRender === 'freetext' &&
+                    <>
+                        <Divider className="my-2"/>
+                        <div>
+                            <Title level={5}>Nhật ký của bạn</Title>
+                            <p>{freeText}</p>
+                        </div>
+                    </>
+                }
+                {journalRender === 'qna' &&
+                    <>
+                        <Divider className="my-2"/>
+                        <div>
+                            <Title level={5}>Nhật ký của bạn</Title>
+                            <div className="text-left space-y-6">
+                                {qnaOptions.map(({ value, label }) => (
+                                    <div key={value}>
+                                        <p className="text-xs md:text-sm font-bold mb-4">{label}</p>
+                                        <Text>{qna[value]}</Text>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
+                    </>
+                }
             </div>
+            <div className="flex justify-center w-full mt-6"><CustomButton>Lưu</CustomButton></div>
         </div>
     );
 };

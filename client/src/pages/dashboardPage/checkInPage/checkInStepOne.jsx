@@ -32,21 +32,21 @@ const CheckInStepOne = () => {
         }
     }
     return (
-        <div class="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
+        <div className="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
 
-            <p class="text-sm md:text-base mb-6">Check-in hàng ngày để theo dõi tiến trình của bạn và duy trì động lực trên hành trình cai thuốc lá.</p>
+            <p className="text-sm md:text-base mb-6">Check-in hàng ngày để theo dõi tiến trình của bạn và duy trì động lực trên hành trình cai thuốc lá.</p>
 
-            <div class="mb-6 text-left">
-                <label class="block text-sm mb-1 font-bold">Ngày Check-in</label>
+            <div className="mb-6 text-left">
+                <label className="block text-xs md:text-sm mb-1 font-bold">Ngày Check-in</label>
                 <input
                     type="date"
                     value={checkInDate}
                     disabled
                     onChange={handleDateChange}
-                    class="w-full border border-primary-500 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
+                    className="w-full border border-primary-500 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
             </div>
-            <div class="mb-6 pb-10">
-                <p class="text-sm md:text-base font-bold mb-4">Hôm nay bạn cảm thấy thế nào?</p>
+            <div className="mb-6 pb-10">
+                <p className="text-sm md:text-base font-bold mb-4">Hôm nay bạn cảm thấy thế nào?</p>
                 <Radio.Group
                     className="flex justify-between items-center gap-3 max-w-md mx-auto"
                     value={feel}
@@ -70,8 +70,8 @@ const CheckInStepOne = () => {
                 </Radio.Group>
             </div>
             <div>
-                <p class="font-semibold text-gray-800 mb-3">Hôm nay bạn có cai thuốc lá không?</p>
-                <div class="flex justify-center gap-6">
+                <p className="font-semibold text-gray-800 mb-3">Hôm nay bạn có cai thuốc lá không?</p>
+                <div className="flex justify-center gap-6">
                     <CustomButton type='primary' onClick={() => toStepTwo('yes')}>Có</CustomButton>
                     <CustomButton type='secondary' onClick={() => toStepTwo('no')}>Không</CustomButton>
                 </div>

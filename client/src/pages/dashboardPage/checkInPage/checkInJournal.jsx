@@ -1,14 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Tabs, Input, Typography} from 'antd';
+import {Tabs, Input} from 'antd';
 import {useStepCheckInStore, useCheckInDataStore} from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
 import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
-import {qnaFields, qnaQuestions} from "../../../constants/constants.js";
+import {qnaOptions} from "../../../constants/constants.js";
 
 
 const {TabPane} = Tabs;
 const {TextArea} = Input;
-const {Title, Paragraph} = Typography;
 
 const CheckInJournal = () => {
     const {handleStepThree, handleStepTwo} = useStepCheckInStore();
@@ -60,13 +59,11 @@ const CheckInJournal = () => {
     return (
         <div className="max-w-2xl mx-auto p-6 rounded-lg shadow bg-white">
 
-            <Title level={4}>Bạn cảm thấy thế nào khi bỏ thuốc</Title>
-            <Paragraph>
-                Viết và suy ngẫm thường xuyên về những trải nghiệm của bạn là một cách tuyệt vời để xác định các mô hình
+            <div className='text-base md:text-xl font-bold mb-6'>Bạn cảm thấy thế nào khi bỏ thuốc?</div>
+            <div className='text-sm md:text-base mb-6'>Viết và suy ngẫm thường xuyên về những trải nghiệm của bạn là một cách tuyệt vời để xác định các mô hình
                 và tác nhân gây nghiện.
                 Nó giúp bạn theo dõi thành công, duy trì động lực và điều chỉnh các chiến lược để vượt qua những thách
-                thức trên hành trình cai thuốc của bạn.
-            </Paragraph>
+                thức trên hành trình cai thuốc của bạn.</div>
 
             <Tabs defaultActiveKey="1" className="mt-4" onChange={(e) => handleTabChange(e)}>
                 {/* Free-text journal */}
@@ -90,15 +87,15 @@ const CheckInJournal = () => {
                 {/* Q&A journal */}
                 <TabPane tab="Q&A journal" key="2">
                     <div className="space-y-6 mt-4">
-                        {qnaQuestions.map((question, idx) => (
-                            <div key={qnaFields[idx]}>
-                                <label className="font-medium block mb-2">{question}</label>
+                        {qnaOptions.map(({ value, label }) => (
+                            <div key={value}>
+                                <label className="text-left font-medium block mb-2">{label}</label>
                                 <TextArea
                                     rows={4}
                                     maxLength={500}
                                     showCount
-                                    value={qna[qnaFields[idx]]}
-                                    onChange={handleQnAChange(qnaFields[idx])}
+                                    value={qna[value] || ''}
+                                    onChange={handleQnAChange(value)}
                                     placeholder="Nhập câu trả lời của bạn..."
                                 />
                             </div>
