@@ -137,6 +137,8 @@ CREATE TABLE [profiles_reasons] (
 )
 GO
 
+select * from profiles_reasons
+
 CREATE TABLE [user_progresses] (
   [progress_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
@@ -344,7 +346,7 @@ ALTER TABLE [social_comments]
 ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id]);
 
 
-
+--Sample subcription
 INSERT INTO [subcriptions] ([sub_type], [duration], [price])
 VALUES 
   ('Free', 0, 0.0),
@@ -355,23 +357,58 @@ VALUES
   ('Pro - Monthly', 1, 19.99),
   ('Pro - Yearly', 12, 199.99);
 
-
+--Sample user info
 INSERT INTO [users] ([auth0_id], [username], [email])
 VALUES 
 ('auth0|abc123', 'john_doe', 'john@example.com'),
 ('auth0|xyz789', 'jane_smith', 'jane@example.com'),
 ('auth0|lmn456', 'bob_lee', 'bob@example.com'),
-('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com')
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com');
 
+--Sample data for onboarding
+INSERT INTO user_profiles (
+    user_id, readiness_value, start_date, quit_date, expected_quit_date,
+    cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking, quitting_method,
+    cigs_reduced, custom_time_of_day, custom_trigger, created_at, updated_at, is_public
+) VALUES (
+    4, 'ready', '2025-05-25 00:00:00', NULL, '2025-06-29 00:00:00',
+    15, 15, 35000, 'within_5', 'gradual-weekly',
+    3, N'Ngủ', N'Chơi game', '2025-06-08 15:54:59', '2025-06-08 16:03:56', 1
+);
 
+-- Reasons
+INSERT INTO profiles_reasons (profile_id, reason_value) VALUES (1, 'cost');
+INSERT INTO profiles_reasons (profile_id, reason_value) VALUES (1, 'health');
+INSERT INTO profiles_reasons (profile_id, reason_value) VALUES (1, 'physical');
+INSERT INTO profiles_reasons (profile_id, reason_value) VALUES (1, 'pregnancy');
 
+-- Triggers
+INSERT INTO triggers_profiles (profile_id, trigger_value) VALUES (1, 'around_smokers');
+INSERT INTO triggers_profiles (profile_id, trigger_value) VALUES (1, 'other');
+INSERT INTO triggers_profiles (profile_id, trigger_value) VALUES (1, 'self_reward');
+INSERT INTO triggers_profiles (profile_id, trigger_value) VALUES (1, 'using_phone_computer');
+
+-- Time of day
+INSERT INTO time_profile (profile_id, time_value) VALUES (1, 'after_work');
+INSERT INTO time_profile (profile_id, time_value) VALUES (1, 'before_dinner');
+INSERT INTO time_profile (profile_id, time_value) VALUES (1, 'other');
+
+-- Plan log
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-05-25 00:00:00', 15);
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-01 00:00:00', 12);
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-08 00:00:00', 9);
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-15 00:00:00', 6);
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-22 00:00:00', 3);
+INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-29 00:00:00', 0);
+
+-- Goal
+INSERT INTO goals (goal_name, goal_amount, profile_id) VALUES (N'Du lịch Đà Lạt', 3000000, 1);
 
 
 SELECT * FROM users
 
 SELECT * FROM user_profiles
 select * from plan_log
-select * from quit_reasons
+select * from profiles_reasons
 select * from goals
-select * from time_of_day
 select * from triggers_profiles
