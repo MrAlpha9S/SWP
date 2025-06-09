@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {differenceInMilliseconds} from "date-fns";
@@ -10,7 +10,7 @@ import {
     Tooltip,
     XAxis,
     YAxis,
-    ReferenceLine, Legend
+    ReferenceLine, Legend, ReferenceArea
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
@@ -122,6 +122,40 @@ const ProgressBoard = ({
         if (!planLog || !checkInDataSet) return [];
         return mergeByDate(planLog, checkInDataSet, quittingMethod);
     }, [planLog, checkInDataSet]);
+
+
+    const getReferenceArea = useCallback(() => {
+        const arrayOfArrays = [];
+        const size = 7;
+
+        for (let i = 0; i < mergedDataSet.length - (size - 1); i += 6) {
+            arrayOfArrays.push(mergedDataSet.slice(i, i + size));
+        }
+
+        for (let i = 0; i < arrayOfArrays.length; i++) {
+            const found = arrayOfArrays[i].some(
+                data => data.date === currentDate.toISOString().split('T')[0]
+            );
+
+            if (found) {
+                const targetArray = arrayOfArrays[i];
+                const x1 = targetArray[0].date;
+                const x2 = targetArray[targetArray.length - 1].date;
+                const y1 = 0;
+
+                return (
+                    <ReferenceArea
+                        x1={x1}
+                        x2={x2}
+                        y1={y1}
+                        y2={cigsPerDay + 1}
+                        stroke="green"
+                        strokeOpacity={0.3}
+                    />
+                );
+            }
+        }
+    }, [cigsPerDay, currentDate, mergedDataSet]);
 
 
     return (
@@ -243,7 +277,7 @@ const ProgressBoard = ({
                                 />
 
                                 <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-
+                                {quittingMethod === 'gradual-weekly' && getReferenceArea()}
                                 <ReferenceLine
                                     x={
                                         currentDate < new Date(expectedQuitDate)
@@ -254,7 +288,7 @@ const ProgressBoard = ({
                                     label={'Hôm nay'}
                                 />
 
-                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={quittingMethod === 'gradual-weekly' ? 6 : 1}/>
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={quittingMethod === 'gradual-weekly' ? 5 : 1}/>
                                 <YAxis/>
                                 <Tooltip/>
                                 <Legend verticalAlign="top"/>
