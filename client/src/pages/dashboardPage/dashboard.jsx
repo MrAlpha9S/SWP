@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
+import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
 import {
     useCigsPerPackStore,
@@ -8,15 +8,17 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
 import {useQuery} from '@tanstack/react-query'
 import {useCheckInDataStore} from "../../stores/checkInStore.js";
 import {getCheckInDataSet} from "../../components/utils/checkInUtils.js";
+import CustomButton from "../../components/ui/CustomButton.jsx";
+import {Result, Typography} from "antd";
 
 function Dashboard() {
-
+    const {Title, Paragraph} = Typography;
     const {readinessValue} = useQuitReadinessStore();
     const {addError, removeError} = useErrorStore();
     const {reasonList} = useReasonStore();
@@ -30,6 +32,7 @@ function Dashboard() {
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const {setCheckInDataSet} = useCheckInDataStore()
+
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
@@ -63,6 +66,7 @@ function Dashboard() {
 
     useEffect(() => {
         if (isUserProfilePending || !userProfile) return;
+
         const syncStores = async () => {
             await syncProfileToStores();
         }
@@ -82,10 +86,34 @@ function Dashboard() {
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col p-4">
             <Hero/>
-            {isAuthenticated ? (
+            {userProfile?.data === null ? (
+                <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
+                    <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
+                        <h2 className='md:text-4xl lg:text-5xl font-bold'>
+                            Không tìm thấy thông tin kế hoạch của bạn
+                        </h2>
+                        <CustomButton onClick={() => navigate('/onboarding')} type='primary'>
+                            Tạo kế hoạch
+                        </CustomButton>
+                    </div>
+                    <Result
+                        status={404}
+                        title={
+                            <Title
+                                level={1}
+                                className="!text-gray-800 !mb-4 text-2xl md:text-3xl lg:text-4xl font-bold"
+                            />
+                        }
+                        subTitle={
+                            <Paragraph className="!text-gray-600 !text-lg md:!text-xl !mb-8 leading-relaxed"/>
+                        }
+                        className="!p-0"
+                    />
+                </div>
+            ) : isAuthenticated ? (
                 isUserProfilePending ? (
-                        <ProgressBoard isPending={true}/>
-                    ) :
+                    <ProgressBoard isPending={true}/>
+                ) : (
                     <ProgressBoard
                         startDate={startDate}
                         pricePerPack={pricePerPack}
@@ -98,12 +126,14 @@ function Dashboard() {
                         stoppedDate={stoppedDate}
                         isPending={false}
                         readinessValue={readinessValue}
-                        checkInDataSet={checkInDataset.data}
+                        checkInDataSet={checkInDataset?.data ?? []}
                     />
-            ) : isUserProfilePending && <ProgressBoard isPending={true}/>}
+                )
+            ) : (
+                isUserProfilePending && <ProgressBoard isPending={true}/>
+            )}
         </div>
     );
-
 
 }
 

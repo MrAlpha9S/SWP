@@ -54,7 +54,6 @@ createRoot(document.getElementById('root')).render(
                     audience: 'https://smokerecession.com'
                 }}
                 useRefreshTokens={true}
-                cacheLocation="localstorage"
             >
                 <QueryClientProvider client={queryClient}>
                     <App/>

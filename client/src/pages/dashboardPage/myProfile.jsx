@@ -1,17 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import {Result} from "antd";
+import { Typography } from "antd";
 
 import {useAuth0, withAuthenticationRequired} from "@auth0/auth0-react";
 import {useNavigate} from "react-router-dom";
-
-import Title from "antd/es/skeleton/Title.js";
-import Paragraph from "antd/es/skeleton/Paragraph.js";
 import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js"
 import Summary from "../../components/layout/signup/summary.jsx";
 import {useQuery} from "@tanstack/react-query";
 
 const MyProfile = () => {
+
+    const { Title, Paragraph } = Typography;
 
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [fetchStatus, setFetchStatus] = useState(null);

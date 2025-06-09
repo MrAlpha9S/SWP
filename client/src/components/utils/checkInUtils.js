@@ -51,6 +51,9 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 
 export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
     const map = new Map();
+    if (checkinLog.length === 0) {
+        return planLog;
+    }
 
     // Add actuals (check-ins)
     for (const {date, cigs} of checkinLog) {
