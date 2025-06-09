@@ -56,10 +56,9 @@ GO
 CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
-  [feeling] nvarchar(10),
+  [feeling] varchar(10),
   [logged_at] datetime default (CURRENT_TIMESTAMP),
   [cigs_smoked] int,
-  [isFreeText] bit default(1) ,
 )
 
 ALTER TABLE [checkin_log] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -67,36 +66,30 @@ GO
 
 CREATE TABLE [qna] (
   [qna_id] int PRIMARY KEY IDENTITY(1, 1),
-  [user_id] int,
+  [log_id] int,
   [qna_question] varchar(30),
   [qna_answer] nvarchar(max),
 )
 
-ALTER TABLE [qna] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [qna] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
 CREATE TABLE [free_text] (
   [free_text_id] int PRIMARY KEY IDENTITY(1, 1),
-  [user_id] int,
+  [log_id] int,
   [free_text_content] nvarchar(max)
 )
 
-ALTER TABLE [free_text] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [free_text] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
-CREATE TABLE [quittingItems] (
-  [item_id] int PRIMARY KEY IDENTITY(1, 1),
-  [item_name] nvarchar(30)
-)
-
-CREATE TABLE [journal_quit] (
-  [item_id] int,
+CREATE TABLE [quitting_items] (
+  [item_value] varchar(30),
   [log_id] int,
-  PRIMARY KEY ([item_id], [log_id])
+  PRIMARY KEY ([item_value], [log_id])
 )
 
-ALTER TABLE [journal_quit] ADD FOREIGN KEY ([item_id]) REFERENCES [quittingItems] ([item_id])
-ALTER TABLE [journal_quit] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
+ALTER TABLE [quitting_items] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
 CREATE TABLE [goals] (
@@ -404,6 +397,18 @@ INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (1, '2025-06-29 00:0
 -- Goal
 INSERT INTO goals (goal_name, goal_amount, profile_id) VALUES (N'Du lịch Đà Lạt', 3000000, 1);
 
+--Sample check-in data
+--Check in log
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-05-25 00:00:00.000', 15);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great','2025-05-26 00:00:00.000', 14);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad','2025-05-27 00:00:00.000', 15);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great','2025-05-28 00:00:00.000', 14);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-05-29 00:00:00.000', 13);
+
+DELETE FROM checkin_log
+WHERE log_id IN (2, 3, 4, 5, 6);
+--qna
+
 
 SELECT * FROM users
 
@@ -412,3 +417,7 @@ select * from plan_log
 select * from profiles_reasons
 select * from goals
 select * from triggers_profiles
+select * from checkin_log
+select * from qna
+select * from quitting_items
+select * from free_text
