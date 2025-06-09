@@ -120,7 +120,7 @@ const ProgressBoard = ({
 
     const mergedDataSet = useMemo(() => {
         if (!planLog || !checkInDataSet) return [];
-        return mergeByDate(planLog, checkInDataSet);
+        return mergeByDate(planLog, checkInDataSet, quittingMethod);
     }, [planLog, checkInDataSet]);
 
 
@@ -197,7 +197,7 @@ const ProgressBoard = ({
                 <p className="text-sm text-gray-600">
                     {isPending ?
                         <Skeleton.Input style={{width: 160}}
-                                        active/> : readinessValue === 'ready' ? localStartDate.toLocaleDateString('vi-VN') : stoppedDate}
+                                        active/> : readinessValue === 'ready' ? `${localStartDate.toLocaleDateString('vi-VN')} - ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}` : stoppedDate}
                 </p>
             </div>
             {readinessValue === 'ready' &&
@@ -239,6 +239,7 @@ const ProgressBoard = ({
                                     strokeDasharray="5 5"
                                     dot={false}
                                     name="Kế hoạch"
+                                    connectNulls={true}
                                 />
 
                                 <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
@@ -250,10 +251,10 @@ const ProgressBoard = ({
                                             : ''
                                     }
                                     stroke="#115e59"
-                                    label={quittingMethod === 'gradual-weekly' ? 'Tuần hiện tại' : 'Hôm nay'}
+                                    label={'Hôm nay'}
                                 />
 
-                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={6}/>
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={quittingMethod === 'gradual-weekly' ? 6 : 1}/>
                                 <YAxis/>
                                 <Tooltip/>
                                 <Legend verticalAlign="top"/>
