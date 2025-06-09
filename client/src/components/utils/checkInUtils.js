@@ -49,27 +49,41 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
-export function mergeByDate(planLog = [], checkinLog = []) {
+export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
     const map = new Map();
 
-    for (const { date, cigs } of checkinLog) {
+    // Add actuals (check-ins)
+    for (const {date, cigs} of checkinLog) {
         const day = new Date(date).toISOString().split('T')[0];
-        map.set(day, { date: day, actual: cigs, plan: null });
+        map.set(day, {date: day, actual: cigs, plan: null});
     }
-
+    // Populate the first day of each plan block with the value
+    // Remaining days in the interval will have plan: null
     for (let i = 0; i < planLog.length; i++) {
-        const { date, cigs } = planLog[i];
+        const {date, cigs} = planLog[i];
         const start = new Date(date);
         const end = planLog[i + 1] ? new Date(planLog[i + 1].date) : new Date(start);
-        if (!planLog[i + 1]) end.setDate(start.getDate() + 6); // final range
+        if (!planLog[i + 1]) {
+            if (quittingMethod === 'gradual-weekly') {
+                end.setDate(start.getDate() + 6);
+            } else {
+                end.setDate(start.getDate() + 1);
+            }
+        }
 
+        const firstDayStr = start.toISOString().split('T')[0];
+        const existing = map.get(firstDayStr) || {date: firstDayStr, actual: null};
+        map.set(firstDayStr, {...existing, plan: cigs});
+
+        // Fill the rest of the interval with plan: null
+        start.setDate(start.getDate() + 1);
         while (start < end) {
             const dayStr = start.toISOString().split('T')[0];
-            const existing = map.get(dayStr) || { date: dayStr, actual: null };
-            map.set(dayStr, { ...existing, plan: cigs });
+            const existing = map.get(dayStr) || {date: dayStr, actual: null};
+            map.set(dayStr, {...existing, plan: null});
             start.setDate(start.getDate() + 1);
         }
     }
 
-    return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+    return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date))
 }
