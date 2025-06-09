@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {differenceInMilliseconds} from "date-fns";
@@ -114,10 +114,15 @@ const ProgressBoard = ({
             cigsQuit = cigsPerDay * dayDifference;
         }
     }
+    cigsQuit = Math.round(cigsQuit)
 
-    const moneySaved = cigsQuit * pricePerCig;
+    const moneySaved = Math.round(cigsQuit * pricePerCig);
 
-    let mergedDataSet = mergeByDate(planLog, checkInDataSet)
+    const mergedDataSet = useMemo(() => {
+        if (!planLog || !checkInDataSet) return [];
+        return mergeByDate(planLog, checkInDataSet);
+    }, [planLog, checkInDataSet]);
+
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
