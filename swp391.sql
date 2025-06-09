@@ -404,12 +404,19 @@ INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'g
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad','2025-05-27 00:00:00.000', 15);
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great','2025-05-28 00:00:00.000', 14);
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-05-29 00:00:00.000', 13);
-
-DELETE FROM checkin_log
-WHERE log_id IN (2, 3, 4, 5, 6);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-01 00:00:00.000', 2);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-02 00:00:00.000', 3);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-03 00:00:00.000', 2);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-04 00:00:00.000', 2);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-05 00:00:00.000', 3);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-06 00:00:00.000', 2);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-06-08 00:00:00.000', 10);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-09 00:00:00.000', 9);
 --qna
 
+DELETE FROM checkin_log WHERE log_id = 18
 
+use SWP391
 SELECT * FROM users
 
 SELECT * FROM user_profiles

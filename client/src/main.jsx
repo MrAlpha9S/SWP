@@ -53,6 +53,8 @@ createRoot(document.getElementById('root')).render(
                     redirect_uri: window.location.origin + "/post-signup",
                     audience: 'https://smokerecession.com'
                 }}
+                useRefreshTokens={true}
+                cacheLocation="localstorage"
             >
                 <QueryClientProvider client={queryClient}>
                     <App/>
