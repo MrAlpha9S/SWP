@@ -252,47 +252,65 @@ const ProgressBoard = ({
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : mergedDataSet?.length > 0 ? (
                         <ResponsiveContainer width="100%" height={350}>
-                            <LineChart
-                                data={mergedDataSet}
-                                margin={{top: 20, right: 30, left: 20, bottom: 25}}
-                            >
-                                {/* Smoked line (actual check-ins) */}
-                                <Line
-                                    type="monotone"
-                                    dataKey="actual"
-                                    stroke="#ef4444"
-                                    dot={{r: 3}}
-                                    name="Đã hút"
-                                />
+                            {checkInDataSet.length > 0 ?
+                                <LineChart
+                                    data={mergedDataSet}
+                                    margin={{top: 20, right: 30, left: 20, bottom: 25}}
+                                >
+                                    {/* Smoked line (actual check-ins) */}
+                                    <Line
+                                        type="monotone"
+                                        dataKey="actual"
+                                        stroke="#ef4444"
+                                        dot={{r: 3}}
+                                        name="Đã hút"
+                                    />
 
-                                {/* Planned line (target plan) */}
-                                <Line
-                                    type="monotone"
-                                    dataKey="plan"
-                                    stroke="#14b8a6"
-                                    strokeDasharray="5 5"
-                                    dot={false}
-                                    name="Kế hoạch"
-                                    connectNulls={true}
-                                />
+                                    {/* Planned line (target plan) */}
+                                    <Line
+                                        type="monotone"
+                                        dataKey="plan"
+                                        stroke="#14b8a6"
+                                        strokeDasharray="5 5"
+                                        dot={false}
+                                        name="Kế hoạch"
+                                        connectNulls={true}
+                                    />
 
-                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                                {quittingMethod === 'gradual-weekly' && getReferenceArea()}
-                                <ReferenceLine
-                                    x={
-                                        currentDate < new Date(expectedQuitDate)
-                                            ? currentDate.toISOString().split('T')[0]
-                                            : ''
-                                    }
-                                    stroke="#115e59"
-                                    label={'Hôm nay'}
-                                />
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                    {quittingMethod === 'gradual-weekly' && getReferenceArea()}
+                                    <ReferenceLine
+                                        x={
+                                            currentDate < new Date(expectedQuitDate)
+                                                ? currentDate.toISOString().split('T')[0]
+                                                : ''
+                                        }
+                                        stroke="#115e59"
+                                        label={'Hôm nay'}
+                                    />
 
-                                <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={quittingMethod === 'gradual-weekly' ? 5 : 1}/>
-                                <YAxis/>
-                                <Tooltip/>
-                                <Legend verticalAlign="top"/>
-                            </LineChart>
+                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
+                                           interval={quittingMethod === 'gradual-weekly' ? 5 : 1}/>
+                                    <YAxis/>
+                                    <Tooltip/>
+                                    <Legend verticalAlign="top"/>
+                                </LineChart> :
+                                <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                    <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                    <ReferenceLine
+                                        x={
+                                            currentDate < new Date(expectedQuitDate)
+                                                ? currentDate.toISOString().split('T')[0]
+                                                : ''
+                                        }
+                                        stroke="#115e59"
+                                        label="Hôm nay"
+                                    />
+                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                    <YAxis/>
+                                    <Tooltip/>
+                                </LineChart>}
                         </ResponsiveContainer>
 
                     ) : null}
