@@ -13,6 +13,7 @@ import {
     ReferenceLine, Legend, ReferenceArea
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
+import moment from 'moment';
 
 import {Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
@@ -170,6 +171,7 @@ const ProgressBoard = ({
     }
 
     useEffect(() => {
+
         const isCheckedIn = checkInDataSet?.some((data) => data.date === currentDate.toISOString().split('T')[0]);
         if (isCheckedIn) {
             setAlreadyCheckedIn(true)
