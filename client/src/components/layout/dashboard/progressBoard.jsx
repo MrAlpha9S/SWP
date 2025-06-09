@@ -212,7 +212,7 @@ const ProgressBoard = ({
                     </div>
                     <div className="text-2xl flex justify-center"><BsGraphDown
                         className='size-7 text-primary-800 mb-1'/></div>
-                    <h3 className="text-lg font-semibold text-primary-800">Biểu đồ kế hoạch số điếu mỗi ngày</h3>
+                    <h3 className="text-lg font-semibold text-primary-800">Số điếu thuốc theo kế hoạch và thực tế</h3>
 
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>

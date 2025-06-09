@@ -13,8 +13,9 @@ import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInS
 import CustomButton from "../../../components/ui/CustomButton.jsx";
 import {qnaOptions} from "../../../constants/constants.js";
 import {useMutation} from "@tanstack/react-query";
+import {queryClient} from "../../../main.jsx"
 import {useAuth0} from "@auth0/auth0-react";
-import { postCheckIn } from "../../../components/utils/checkInUtils.js";
+import {postCheckIn} from "../../../components/utils/checkInUtils.js";
 import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
@@ -35,6 +36,7 @@ const CheckInStepFour = () => {
     const [journalRender, setJournalRender] = useState('')
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const navigate = useNavigate();
+
 
     let feelLabel = ''
     switch (feel) {
@@ -71,17 +73,15 @@ const CheckInStepFour = () => {
         mutationFn: () => {
             postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['dataset']});
+            navigate('/dashboard');
+        },
     })
 
     const handleSave = () => {
-
+        postCheckin.mutate()
     }
-
-    useEffect(() => {
-        if (postCheckin.isSuccess) {
-            navigate('/dashboard')
-        }
-    }, [postCheckin.isSuccess])
 
 
     return (

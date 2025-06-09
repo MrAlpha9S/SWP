@@ -9,7 +9,7 @@ import {
     QueryClientProvider,
 } from '@tanstack/react-query'
 
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(
     <ConfigProvider
