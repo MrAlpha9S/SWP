@@ -58,6 +58,8 @@ export const useCheckInDataStore = create((set) => ({
     setIsJournalSelected: (value) => set({isJournalSelected : value}),
     checkInDataSet: [],
     setCheckInDataSet: (value) => set({ checkInDataSet: value }),
+    alreadyCheckedIn: false,
+    setAlreadyCheckedIn: (value) => set({ alreadyCheckedIn: value }),
 }));
 
 

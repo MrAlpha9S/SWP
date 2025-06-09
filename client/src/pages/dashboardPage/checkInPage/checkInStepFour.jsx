@@ -30,7 +30,8 @@ const CheckInStepFour = () => {
         isFreeText,
         cigsSmoked,
         isStepOneOnYes,
-        isJournalSelected
+        isJournalSelected,
+        setAlreadyCheckedIn
     } = useCheckInDataStore();
     const {handleBackToStepOne} = useStepCheckInStore();
     const [journalRender, setJournalRender] = useState('')
@@ -65,8 +66,6 @@ const CheckInStepFour = () => {
                 setJournalRender('qna')
             }
         }
-        console.log('isJournalSelected', isJournalSelected)
-        console.log('isFreeText', isFreeText)
     }, [isFreeText, isJournalSelected])
 
     const postCheckin = useMutation({
@@ -81,6 +80,7 @@ const CheckInStepFour = () => {
 
     const handleSave = () => {
         postCheckin.mutate()
+        setAlreadyCheckedIn(true)
     }
 
 

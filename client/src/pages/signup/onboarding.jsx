@@ -20,6 +20,7 @@ import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
 import Summary from "../../components/layout/signup/summary.jsx";
 import {useNavigate} from "react-router-dom";
+import ModalFooter from "../../components/ui/modalFooter.jsx";
 
 const planTipsCollapseItems = [
     {
@@ -94,15 +95,6 @@ const Onboarding = () => {
         if (currentStep > 0) {
             setCurrentStep(currentStep - 1);
         }
-    }
-
-    const ModalFooter = () => {
-        return (
-            <div className='flex gap-2 justify-end'>
-                <CustomButton onClick={() => setIsModalOpen(false)}>Tôi đã hiểu</CustomButton>
-                <CustomButton onClick={() => navigate('/')} type='cancel'>Trở lại</CustomButton>
-            </div>
-        )
     }
 
     const toNextPage = () => {

@@ -20,6 +20,7 @@ import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
 import {BsGraphDown} from "react-icons/bs";
 import {mergeByDate} from "../../utils/checkInUtils.js";
+import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -36,6 +37,8 @@ const ProgressBoard = ({
                            checkInDataSet
                        }) => {
     const navigate = useNavigate();
+    const { handleStepThree } = useStepCheckInStore();
+    const {alreadyCheckedIn, setAlreadyCheckedIn} = useCheckInDataStore()
 
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -157,6 +160,23 @@ const ProgressBoard = ({
         }
     }, [cigsPerDay, currentDate, mergedDataSet]);
 
+    const handleCheckIn = () => {
+        if (checkInDataSet && checkInDataSet.length > 0) {
+            if (alreadyCheckedIn) {
+                handleStepThree()
+            }
+        }
+        navigate('/dashboard/check-in');
+    }
+
+    useEffect(() => {
+        const isCheckedIn = checkInDataSet?.some((data) => data.date === currentDate.toISOString().split('T')[0]);
+        if (isCheckedIn) {
+            setAlreadyCheckedIn(true)
+        } else {
+            setAlreadyCheckedIn(false)
+        }
+    }, [])
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
@@ -164,7 +184,7 @@ const ProgressBoard = ({
                 {isPending ? (
                     <Skeleton.Button active/>
                 ) : (
-                    <CustomButton onClick={() => navigate('/dashboard/check-in')}>Check-in hàng ngày →</CustomButton>
+                    <CustomButton onClick={() => handleCheckIn()}>Check-in hàng ngày →</CustomButton>
                 )}
                 {isPending ? (
                     <Skeleton.Input style={{width: 180}} active size="small"/>

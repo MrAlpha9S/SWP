@@ -1,17 +1,22 @@
-import React from 'react';
-import {Steps} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {Modal, Steps} from 'antd';
 import CheckInStepOne from './checkInStepOne';
 import CheckInStepTwoOnYes from './checkInStepTwoYes';
 import CheckInStepTwoOnNo from './checkInStepTwoNo';
 import CheckInStepThree from './checkInStepThree';
 import CheckInJournal from './checkInJournal';
 import CheckInStepFour from './checkInStepFour';
-import {useStepCheckInStore} from '../../../stores/checkInStore';
+import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import {useNavigate} from "react-router-dom";
+import ModalFooter from "../../../components/ui/modalFooter.jsx";
 
 function SmokeFreeCheckin() {
-    const {step, current} = useStepCheckInStore();
+    const {step, current, handleStepThree} = useStepCheckInStore();
     const [animateRef] = useAutoAnimate();
+    const {alreadyCheckedIn} = useCheckInDataStore()
+    const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const steps = [
         {
@@ -34,6 +39,11 @@ function SmokeFreeCheckin() {
 
     const items = steps.map(item => ({key: item.title, title: item.title}));
 
+    if (alreadyCheckedIn) {
+        handleStepThree()
+        setIsModalOpen(true);
+    }
+
     return (
         <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
             <div className="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
@@ -48,6 +58,26 @@ function SmokeFreeCheckin() {
                     {step === 'StepFour' && <CheckInStepFour />}
                 </div>
             </div>
+            <Modal
+                title="Bạn đã check-in ngày hôm nay"
+                closable={{'aria-label': 'Custom Close Button'}}
+                open={isModalOpen}
+                onOk={() => setIsModalOpen(false)}
+                onCancel={() => navigate('/')}
+                centered
+                maskClosable
+                closeIcon={null}
+                footer={<ModalFooter/>}
+            >
+                <p>
+                    Bạn đã thực hiện check in cho ngày hôm nay. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Lưu'</strong>, thông tin check-in mới <strong>sẽ thay thế</strong> thông tin cũ.
+                </p>
+                <p>
+                    Nếu bạn muốn giữ lại thông tin check-in cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang điều khiển.
+                </p>
+
+
+            </Modal>
         </div>
     );
 }
