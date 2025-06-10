@@ -16,6 +16,7 @@ import {
 } from "../../../constants/constants.js";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
+import {convertStrYYYYMMDDtoDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
 
 
 const Summary = () => {
@@ -187,7 +188,6 @@ const Summary = () => {
                     <CustomButton type='primary' onClick={() => setCurrentStep(2)}>Thay đổi</CustomButton>
 
 
-
                     {readinessValue === 'relapse-support' && (
                         <>
                             <Divider/>
@@ -195,12 +195,17 @@ const Summary = () => {
                                 Thống kê kết quả
                             </p>
                             <p className='text-sm md:text-base'>
-                                Kể từ khi bạn bỏ thuốc từ ngày <strong>{stoppedDate}</strong>, bạn đã: <br/>
-                                Bỏ thuốc được <strong>{Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
+                                Kể từ khi bạn bỏ thuốc từ
+                                ngày <strong>{convertStrYYYYMMDDtoDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn
+                                đã: <br/>
+                                Bỏ thuốc
+                                được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
                                 Bỏ được <strong>
-                                {Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
+                                {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
                             </strong> điếu thuốc <br/>
-                                Tiết kiệm được <strong>{(Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong> <br/>
+                                Tiết kiệm
+                                được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
+                                <br/>
                                 <em>Hãy giữ vững tinh thần nhé!</em>
 
                             </p>
@@ -215,14 +220,25 @@ const Summary = () => {
                             </p>
 
                             <p className='text-sm md:text-base'>
-                                Ngày bắt đầu: {startDate} <br/>
+                                Ngày bắt đầu: {convertStrYYYYMMDDtoDDMMYYYYStr(startDate.split('T')[0])} <br/>
                                 Số điếu hút mỗi ngày: {cigsPerDay} <br/>
                                 Phương
                                 pháp: {quittingMethodOptions.find(option => option.value === quittingMethod).label}
                                 <br/>
-                                {quittingMethod === 'gradual-daily' && 'Số điếu giảm mỗi ngày: ' + cigsReduced + '<br/>'}
-                                {quittingMethod === 'gradual-weekly' && 'Số điếu giảm mỗi tuần: ' + cigsReduced + '<br/>'}
-                                Ngày dự kiến bỏ thuốc: {expectedQuitDate}
+                                {quittingMethod === 'gradual-daily' && (
+                                    <>
+                                        Số điếu giảm mỗi ngày: {cigsReduced}
+                                        <br/>
+                                    </>
+                                )}
+
+                                {quittingMethod === 'gradual-weekly' && (
+                                    <>
+                                        Số điếu giảm mỗi tuần: {cigsReduced}
+                                        <br/>
+                                    </>
+                                )}
+                                Ngày dự kiến bỏ thuốc: {convertStrYYYYMMDDtoDDMMYYYYStr(expectedQuitDate.split('T')[0])}
                                 <br/>
                                 Biểu đồ theo dõi
                                 <ResponsiveContainer width="100%" height={300}>
