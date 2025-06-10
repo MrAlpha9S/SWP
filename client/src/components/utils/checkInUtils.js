@@ -57,8 +57,6 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         return planLog;
     }
 
-    console.log(checkinLog);
-
     // Add actuals (check-ins)
     for (const {date, cigs} of checkinLog) {
         const day = new Date(date).toISOString().split('T')[0];

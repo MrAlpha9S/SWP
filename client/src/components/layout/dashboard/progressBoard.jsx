@@ -47,8 +47,6 @@ const ProgressBoard = ({
 
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
 
-    console.log(convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0]))
-
     useEffect(() => {
         const timeout = setTimeout(() => {
             setCurrentDate(getCurrentUTCDateTime());

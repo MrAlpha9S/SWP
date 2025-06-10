@@ -10,14 +10,6 @@ const handlePostCheckIn = async (req, res) => {
         qna
     } = req.body;
 
-    console.log("auth0 id", userAuth0Id);
-    console.log("feel", feel);
-    console.log("checkedQuitItems", checkedQuitItems);
-    console.log("cigsSmoked", cigsSmoked)
-    console.log("freeText", freeText)
-    console.log("qna", qna);
-
-
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
 
     try {
