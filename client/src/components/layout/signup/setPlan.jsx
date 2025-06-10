@@ -11,7 +11,11 @@ import CustomButton from "../../ui/CustomButton.jsx";
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
-import {convertMMDDYYYYStrToYYYYMMDDObjISO, convertStrYYYYMMDDtoDDMMYYYYStr} from "../../utils/dateUtils.js";
+import {
+    clonePlanLogToDDMMYYYY,
+    convertDDMMYYYYStrToYYYYMMDDStr,
+    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate
+} from "../../utils/dateUtils.js";
 import dayjs from 'dayjs'
 
 
@@ -30,7 +34,9 @@ const SetPlan = () => {
         stoppedDate,
         setStoppedDate,
         planLog,
-        setPlanLog
+        setPlanLog,
+        planLogCloneDDMMYY,
+        setPlanLogCloneDDMMYY,
     } = usePlanStore();
 
     const {readinessValue} = useQuitReadinessStore();
@@ -65,6 +71,7 @@ const SetPlan = () => {
     useEffect(() => {
         if (planLog.length > 0 && readinessValue === 'ready' && quittingMethod !== 'target-date') {
             setExpectedQuitDate(planLog[planLog.length - 1].date)
+            setPlanLogCloneDDMMYY(planLog)
         }
     }, [planLog])
 
@@ -106,7 +113,7 @@ const SetPlan = () => {
                         </div>
 
                         <DatePicker className='h-[42px]' onChange={(date, dateString) => {
-                            setStartDate(convertMMDDYYYYStrToYYYYMMDDObjISO(dateString).toISOString());
+                            setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                         }} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>
 
                         <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
@@ -135,7 +142,7 @@ const SetPlan = () => {
                                 </div>
 
                                 <DatePicker className='h-[42px]' onChange={(date, dateString) => {
-                                    setExpectedQuitDate(convertMMDDYYYYStrToYYYYMMDDObjISO(dateString).toISOString());
+                                    setExpectedQuitDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                                 }} format={'DD-MM-YYYY'} value={expectedQuitDate ? dayjs(expectedQuitDate) : ''} allowClear={false}/>
 
                                 <div className='my-[-30]'>
@@ -210,20 +217,20 @@ const SetPlan = () => {
                             })}
                         </div>
                         <DatePicker className='h-[42px]' onChange={(date, dateString) => {
-                            setStoppedDate(convertMMDDYYYYStrToYYYYMMDDObjISO(dateString).toISOString());
+                            setStoppedDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                         }} format={'DD-MM-YYYY'} value={stoppedDate ? dayjs(stoppedDate) : ''} allowClear={false}/>
                         <p className='text-left font-bold text-base md:text-lg'>
                             Thống kê kết quả
                         </p>
                         <p className='text-sm md:text-base'>
-                            Kể từ khi bạn bỏ thuốc từ ngày <strong>{stoppedDate}</strong>, bạn đã: <br/>
+                            Kể từ khi bạn bỏ thuốc từ ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn đã: <br/>
                             Bỏ thuốc
-                            được <strong>{Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
+                            được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
                             Bỏ được <strong>
-                            {Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
+                            {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
                         </strong> điếu thuốc <br/>
                             Tiết kiệm
-                            được <strong>{(Math.floor((new Date() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
+                            được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
                             <br/>
                             <em>Hãy giữ vững tinh thần nhé!</em>
 
@@ -247,14 +254,14 @@ const SetPlan = () => {
                                         quittingMethod === "target-date"
                                             ? "giảm dần số lượng thuốc lá bạn hút mỗi ngày cho đến ngày bạn chọn"
                                             : `giảm dần số lượng thuốc lá bạn hút mỗi ${frequencyLabel}`
-                                    }, bắt đầu từ <strong>{convertStrYYYYMMDDtoDDMMYYYYStr(startDate.split('T')[0])}</strong> với mức ban đầu là{" "}
+                                    }, bắt đầu từ <strong>{convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])}</strong> với mức ban đầu là{" "}
                                     <strong>{cigsPerDay}</strong>,{" "}
                                     {
                                         quittingMethod === "target-date"
                                             ? "và sẽ giảm dần cho đến khi số điếu về 0"
                                             : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
                                     }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
-                                    <strong>{convertStrYYYYMMDDtoDDMMYYYYStr(planLog[planLog.length - 1].date.split('T')[0])}</strong>.
+                                    <strong>{convertYYYYMMDDStrToDDMMYYYYStr(planLog[planLog.length - 1].date.split('T')[0])}</strong>.
                                 </p>
 
                                 <ul>
@@ -276,7 +283,7 @@ const SetPlan = () => {
                             </div>
 
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                <LineChart data={planLogCloneDDMMYY} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                     <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>

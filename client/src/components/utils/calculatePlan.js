@@ -6,7 +6,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
     if (quittingMethod === 'gradual-daily') {
         while (currentCigs > 0) {
             planLog.push({
-                date: date.toISOString().split('T')[0],
+                date: date.toISOString(),
                 cigs: currentCigs,
             });
             currentCigs = Math.max(currentCigs - cigsReduced, 0);
@@ -14,7 +14,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
         }
         if (planLog[planLog.length -1] !== 0 ) {
             planLog.push({
-                date: date.toISOString().split('T')[0],
+                date: date.toISOString(),
                 cigs: 0
             })
         }
@@ -23,7 +23,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
     else if (quittingMethod === 'gradual-weekly') {
         while (currentCigs > 0) {
             planLog.push({
-                date: date.toISOString().split('T')[0],
+                date: date.toISOString(),
                 cigs: currentCigs,
             });
             currentCigs = Math.max(currentCigs - cigsReduced, 0);
@@ -31,7 +31,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
         }
         if (planLog[planLog.length -1] !== 0 ) {
             planLog.push({
-                date: date.toISOString().split('T')[0],
+                date: date.toISOString(),
                 cigs: 0
             })
         }
@@ -46,7 +46,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
             date.setDate(date.getDate() + 1);
             const remaining = Math.round(Math.max(cigsPerDay - dailyReduction * i, 0));
             planLog.push({
-                date: date.toISOString().split('T')[0],
+                date: date.toISOString(),
                 cigs: remaining,
             });
         }
@@ -57,6 +57,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
             lastDate = new Date(planLog[planLog.length - 1].date)
         }
     }
+
     return planLog;
 }
 

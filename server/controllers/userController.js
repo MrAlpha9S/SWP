@@ -13,6 +13,7 @@ const handlePostSignup = async (req, res) => {
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);
+        console.log(userData)
         await createUser(userAuth0Id, userData.name || '', userData.email || '');
 
         return res.status(201).json({success: true, message: 'User info inserted'});

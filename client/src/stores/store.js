@@ -1,4 +1,5 @@
 import {create} from 'zustand';
+import {convertYYYYMMDDStrToDDMMYYYYStr} from "../components/utils/dateUtils.js";
 
 export const useQuitReadinessStore = create((set) => ({
     readinessValue: '',
@@ -106,6 +107,13 @@ export const usePlanStore = create((set) => ({
     setStoppedDate: (value) => set({stoppedDate: value}),
     planLog: [],
     setPlanLog: (value) => set({planLog: value}),
+    planLogCloneDDMMYY: [],
+    setPlanLogCloneDDMMYY: (planLog) => set({
+        planLogCloneDDMMYY: planLog.map(entry => ({
+            ...entry,
+            date: convertYYYYMMDDStrToDDMMYYYYStr(entry.date.split('T')[0]),
+        }))
+    }),
 }))
 
 export const useQuittingMethodStore = create((set) => ({

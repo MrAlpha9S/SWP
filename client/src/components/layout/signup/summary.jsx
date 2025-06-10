@@ -16,7 +16,7 @@ import {
 } from "../../../constants/constants.js";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
-import {convertStrYYYYMMDDtoDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
+import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
 
 
 const Summary = () => {
@@ -30,7 +30,7 @@ const Summary = () => {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay} = useTimeOfDayStore();
     const {triggers, customTrigger} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog, planLogCloneDDMMYY} = usePlanStore();
     const {createGoalChecked, goalList} = useGoalsStore()
     const {setCurrentStep} = useCurrentStepStore()
 
@@ -196,7 +196,7 @@ const Summary = () => {
                             </p>
                             <p className='text-sm md:text-base'>
                                 Kể từ khi bạn bỏ thuốc từ
-                                ngày <strong>{convertStrYYYYMMDDtoDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn
+                                ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn
                                 đã: <br/>
                                 Bỏ thuốc
                                 được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
@@ -220,7 +220,7 @@ const Summary = () => {
                             </p>
 
                             <p className='text-sm md:text-base'>
-                                Ngày bắt đầu: {convertStrYYYYMMDDtoDDMMYYYYStr(startDate.split('T')[0])} <br/>
+                                Ngày bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])} <br/>
                                 Số điếu hút mỗi ngày: {cigsPerDay} <br/>
                                 Phương
                                 pháp: {quittingMethodOptions.find(option => option.value === quittingMethod).label}
@@ -238,11 +238,11 @@ const Summary = () => {
                                         <br/>
                                     </>
                                 )}
-                                Ngày dự kiến bỏ thuốc: {convertStrYYYYMMDDtoDDMMYYYYStr(expectedQuitDate.split('T')[0])}
+                                Ngày dự kiến bỏ thuốc: {convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}
                                 <br/>
                                 Biểu đồ theo dõi
                                 <ResponsiveContainer width="100%" height={300}>
-                                    <LineChart data={planLog} margin={{
+                                    <LineChart data={planLogCloneDDMMYY} margin={{
                                         top: 20,
                                         right: 30,
                                         left: 20,

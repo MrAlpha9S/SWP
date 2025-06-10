@@ -22,6 +22,12 @@ import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
 import {BsGraphDown} from "react-icons/bs";
 import {mergeByDate} from "../../utils/checkInUtils.js";
 import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
+import {
+    clonePlanLogToDDMMYYYY, convertUTCStringToLocalDate,
+    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime,
+    getCurrentUTCMidnightDate
+} from "../../utils/dateUtils.js";
+import dayjs from "dayjs";
 
 const ProgressBoard = ({
                            startDate,
@@ -41,7 +47,13 @@ const ProgressBoard = ({
     const { handleStepThree } = useStepCheckInStore();
     const {alreadyCheckedIn, setAlreadyCheckedIn} = useCheckInDataStore()
 
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
+
+    //console.log('currentDate13', getCurrentUTCDateTime().toISOString()); //get current date string
+
+    //console.log('currentDate2', convertUTCStringToLocalDate('2025-06-10T18:31:06.987Z').toISOString()); get correct date generated from db
+
+
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -68,11 +80,10 @@ const ProgressBoard = ({
     let differenceInMs
     let difference
     if (readinessValue === 'ready') {
-        differenceInMs = differenceInMilliseconds(currentDate, localStartDate);
+        differenceInMs = differenceInMilliseconds(getCurrentUTCDateTime(), convertUTCStringToLocalDate('2025-06-10T18:31:06.987Z'));
         difference = formatDateDifference(differenceInMs);
     } else {
         differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
-        console.log(differenceInMs);
         difference = formatDateDifference(differenceInMs);
     }
 
@@ -124,7 +135,7 @@ const ProgressBoard = ({
 
     const mergedDataSet = useMemo(() => {
         if (!planLog || !checkInDataSet) return [];
-        return mergeByDate(planLog, checkInDataSet, quittingMethod);
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod));
     }, [planLog, checkInDataSet]);
 
 
@@ -138,7 +149,7 @@ const ProgressBoard = ({
 
         for (let i = 0; i < arrayOfArrays.length; i++) {
             const found = arrayOfArrays[i].some(
-                data => data.date === currentDate.toISOString().split('T')[0]
+                data => data.date === convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
             );
 
             if (found) {
@@ -304,7 +315,7 @@ const ProgressBoard = ({
                                     <ReferenceLine
                                         x={
                                             currentDate < new Date(expectedQuitDate)
-                                                ? currentDate.toISOString().split('T')[0]
+                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
                                                 : ''
                                         }
                                         stroke="#115e59"
@@ -323,7 +334,7 @@ const ProgressBoard = ({
                                     <ReferenceLine
                                         x={
                                             currentDate < new Date(expectedQuitDate)
-                                                ? currentDate.toISOString().split('T')[0]
+                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
                                                 : ''
                                         }
                                         stroke="#115e59"

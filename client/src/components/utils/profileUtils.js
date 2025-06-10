@@ -52,6 +52,10 @@ export async function syncProfileToStores(profile) {
         }))
     );
 
+    usePlanStore.getState().setPlanLogCloneDDMMYY(
+        (profile.planLog ?? [])
+    );
+
     if (profile.goalList) {
         useGoalsStore.getState().setCreateGoalChecked(true);
         useGoalsStore.getState().setGoalList(profile.goalList);
