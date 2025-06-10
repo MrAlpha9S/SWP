@@ -1,23 +1,25 @@
 import React from 'react';
-import { Radio } from 'antd';
+import {DatePicker, Radio} from 'antd';
 import { useCheckInDataStore, useStepCheckInStore } from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
 import { FEELINGS } from "../../../constants/constants.js";
+import {getCurrentUTCDateTime} from "../../../components/utils/dateUtils.js";
+import dayjs from "dayjs";
 
 const CheckInStepOne = () => {
     const { handleStepOneNo, handleStepOneYes } = useStepCheckInStore();
 
     const { checkInDate, setCheckInDate, feel, setFeel, setIsStepOneOnYes } = useCheckInDataStore();
 
-    const handleDateChange = (event) => {
-        const selectedDate = new Date(event.target.value);
-        const today = new Date()
-        if (selectedDate >= today) {
-            setCheckInDate(today.toISOString().split('T')[0]);
-        } else {
-            setCheckInDate(event.target.value);
-        }
-    };
+    // const handleDateChange = (event) => {
+    //     const selectedDate = new Date(event.target.value);
+    //     const today = new Date()
+    //     if (selectedDate >= today) {
+    //         setCheckInDate(today.toISOString().split('T')[0]);
+    //     } else {
+    //         setCheckInDate(event.target.value);
+    //     }
+    // };
 
     const handleFeelChange = e => {
         setFeel(e.target.value);
@@ -38,13 +40,11 @@ const CheckInStepOne = () => {
 
             <div className="mb-6 text-left">
                 <label className="block text-xs md:text-sm mb-1 font-bold">Ngày Check-in</label>
-                <input
-                    type="date"
-                    value={checkInDate}
-                    disabled
-                    onChange={handleDateChange}
-                    className="w-full border border-primary-500 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500" />
+                <DatePicker className='h-[42px] w-full' onChange={() => {
+                    setCheckInDate(getCurrentUTCDateTime().toISOString());
+                }} format={'DD-MM-YYYY'} value={checkInDate ? dayjs(checkInDate) : ''} allowClear={false}/>
             </div>
+
             <div className="mb-6 pb-10">
                 <p className="text-sm md:text-base font-bold mb-4">Hôm nay bạn cảm thấy thế nào?</p>
                 <Radio.Group

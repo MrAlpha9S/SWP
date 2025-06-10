@@ -1,3 +1,5 @@
+import {getCurrentUTCDateTime} from "./dateUtils.js";
+
 export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected) {
 
     if (!isAuthenticated || !user) return;
@@ -55,10 +57,15 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         return planLog;
     }
 
+    console.log(checkinLog);
+
     // Add actuals (check-ins)
     for (const {date, cigs} of checkinLog) {
         const day = new Date(date).toISOString().split('T')[0];
-        map.set(day, {date: day, actual: cigs, plan: null});
+        if (new Date(date) <= getCurrentUTCDateTime())
+            map.set(day, {date: day, actual: cigs ?? 0, plan: null});
+        else
+            map.set(day, {date: day, actual: null, plan: null});
     }
     // Populate the first day of each plan block with the value
     // Remaining days in the interval will have plan: null

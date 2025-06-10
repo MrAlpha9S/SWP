@@ -11,12 +11,13 @@ import {
 } from '@ant-design/icons';
 import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
-import {qnaOptions} from "../../../constants/constants.js";
+import {qnaOptions, quitStrategies} from "../../../constants/constants.js";
 import {useMutation} from "@tanstack/react-query";
 import {queryClient} from "../../../main.jsx"
 import {useAuth0} from "@auth0/auth0-react";
 import {postCheckIn} from "../../../components/utils/checkInUtils.js";
 import {useNavigate} from "react-router-dom";
+import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../../components/utils/dateUtils.js";
 
 const {Title, Text} = Typography;
 
@@ -80,7 +81,7 @@ const CheckInStepFour = () => {
 
     const handleSave = () => {
         postCheckin.mutate()
-        setAlreadyCheckedIn(true)
+        //setAlreadyCheckedIn(true)
     }
 
 
@@ -97,13 +98,16 @@ const CheckInStepFour = () => {
                 <Title level={5}>Tóm tắt Check-in</Title>
                 <Divider className="my-2"/>
                 <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                    <Text>{checkInDate}</Text>
+                    <Text>Ngày check-in: {convertYYYYMMDDStrToDDMMYYYYStr(checkInDate.split('T')[0])}</Text>
                     <a onClick={handleBackToStepOne} className="text-primary-700 font-medium cursor-pointer">Sửa</a>
                 </div>
 
                 {isStepOneOnYes && <div className="flex items-start gap-2 mb-2">
                     <CheckCircleOutlined className="text-blue-500 mt-1"/>
-                    <Text className='text-left'>Tôi đã không hút thuốc vì: {checkedQuitItems.join(', ')}</Text>
+                    <Text className='text-left'>Tôi đã không hút thuốc vì: {checkedQuitItems.map((item, index) => {
+                        const option = quitStrategies.find(opt => opt.value === item);
+                        return option ? <span key={index}>{option.label}, </span> : '';
+                    })}</Text>
                 </div>}
 
                 {!isStepOneOnYes && (

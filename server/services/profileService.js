@@ -1,5 +1,6 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
 const {getUserIdFromAuth0Id} = require("./userService")
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const userProfileExists = async (auth0_id) => {
     try {
@@ -54,13 +55,14 @@ const postUserProfile = async (userAuth0Id,
                 .input('cigsReduced', sql.Int, cigsReduced ?? null)
                 .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
                 .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
+                .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
                 .query(`
                 INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
                                            cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
-                                           quitting_method, cigs_reduced, custom_time_of_day, custom_trigger)
+                                           quitting_method, cigs_reduced, custom_time_of_day, custom_trigger, created_at)
                     OUTPUT INSERTED.profile_id
                 VALUES (
-                    @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger
+                    @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at
                     );
             `);
 

@@ -1,4 +1,5 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
+const {convertUTCStringToLocalDate} = require("../utils/dateUtils");
 
 const userExists = async (auth0_id) => {
     try {
@@ -13,14 +14,15 @@ const userExists = async (auth0_id) => {
     }
 };
 
-const createUser = async (auth0_id, username, email) => {
+const createUser = async (auth0_id, username, email, created_at) => {
     try {
         const pool = await poolPromise;
         await pool.request()
             .input('auth0_id', sql.NVarChar, auth0_id)
             .input('username', sql.NVarChar, username)
             .input('email', sql.NVarChar, email)
-            .query('INSERT INTO users (auth0_id, username, email) VALUES (@auth0_id, @username, @email)');
+            .input('created_at', sql.DateTime, convertUTCStringToLocalDate(created_at).toISOString())
+            .query('INSERT INTO users (auth0_id, username, email, created_at) VALUES (@auth0_id, @username, @email, @created_at)');
         return true;
     } catch (error) {
         console.error('error in createUser', error);

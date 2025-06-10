@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import {getCurrentUTCDateTime} from "../components/utils/dateUtils.js";
 
 export const useStepCheckInStore = create((set) => ({
     step: 'StepOne',
@@ -32,7 +33,7 @@ export const useStepCheckInStore = create((set) => ({
 }));
 
 export const useCheckInDataStore = create((set) => ({
-    checkInDate: new Date().toISOString().split('T')[0],
+    checkInDate: getCurrentUTCDateTime().toISOString(),
     setCheckInDate: (value) => set({ checkInDate: value }),
     feel: 'okay',
     setFeel: (value) => set({ feel: value }),

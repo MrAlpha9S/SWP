@@ -27,7 +27,7 @@ function Dashboard() {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog, planLogCloneDDMMYY} = usePlanStore();
     const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
@@ -127,6 +127,7 @@ function Dashboard() {
                         isPending={false}
                         readinessValue={readinessValue}
                         checkInDataSet={checkInDataset?.data ?? []}
+                        planLogCloneDDMMYY={planLogCloneDDMMYY}
                     />
                 )
             ) : (

@@ -13,7 +13,6 @@ import {
     ReferenceLine, Legend, ReferenceArea
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
-import moment from 'moment';
 
 import {Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
@@ -23,11 +22,9 @@ import {BsGraphDown} from "react-icons/bs";
 import {mergeByDate} from "../../utils/checkInUtils.js";
 import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
 import {
-    clonePlanLogToDDMMYYYY, convertUTCStringToLocalDate,
+    clonePlanLogToDDMMYYYY,
     convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime,
-    getCurrentUTCMidnightDate
 } from "../../utils/dateUtils.js";
-import dayjs from "dayjs";
 
 const ProgressBoard = ({
                            startDate,
@@ -41,7 +38,8 @@ const ProgressBoard = ({
                            pricePerPack,
                            cigsPerPack,
                            readinessValue,
-                           checkInDataSet
+                           checkInDataSet,
+                           planLogCloneDDMMYY
                        }) => {
     const navigate = useNavigate();
     const { handleStepThree } = useStepCheckInStore();
@@ -49,15 +47,11 @@ const ProgressBoard = ({
 
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
 
-    //console.log('currentDate13', getCurrentUTCDateTime().toISOString()); //get current date string
-
-    //console.log('currentDate2', convertUTCStringToLocalDate('2025-06-10T18:31:06.987Z').toISOString()); get correct date generated from db
-
-
+    console.log(convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0]))
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setCurrentDate(new Date());
+            setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
         return () => clearTimeout(timeout);
     }, [currentDate]);
@@ -80,7 +74,7 @@ const ProgressBoard = ({
     let differenceInMs
     let difference
     if (readinessValue === 'ready') {
-        differenceInMs = differenceInMilliseconds(getCurrentUTCDateTime(), convertUTCStringToLocalDate('2025-06-10T18:31:06.987Z'));
+        differenceInMs = differenceInMilliseconds(currentDate, new Date(startDate));
         difference = formatDateDifference(differenceInMs);
     } else {
         differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
@@ -328,7 +322,7 @@ const ProgressBoard = ({
                                     <Tooltip/>
                                     <Legend verticalAlign="top"/>
                                 </LineChart> :
-                                <LineChart data={planLog} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                <LineChart data={planLogCloneDDMMYY} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                     <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     <ReferenceLine

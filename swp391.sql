@@ -17,7 +17,8 @@ CREATE TABLE [users] (
   [username] nvarchar(100),
   [email] varchar(255),
   [role] nvarchar(50) DEFAULT ('Member'),
-  [created_at] datetime DEFAULT (CURRENT_TIMESTAMP),
+  [created_at] datetime,
+  [updated_at] datetime,
   [sub_id] int DEFAULT (1),
   [vip_end_date] datetime DEFAULT (null),
   [isBanned] int DEFAULT (0)
@@ -57,7 +58,7 @@ CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [feeling] varchar(10),
-  [logged_at] datetime default (CURRENT_TIMESTAMP),
+  [logged_at] datetime,
   [cigs_smoked] int,
 )
 
@@ -355,7 +356,7 @@ INSERT INTO [users] ([auth0_id], [username], [email])
 VALUES 
 ('auth0|abc123', 'john_doe', 'john@example.com'),
 ('auth0|xyz789', 'jane_smith', 'jane@example.com'),
-('auth0|lmn456', 'bob_lee', 'bob@example.com'),
+('auth0|lmn456', 'bob_lee', 'bob@example.com');
 ('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com');
 
 --Sample data for onboarding
@@ -399,22 +400,20 @@ INSERT INTO goals (goal_name, goal_amount, profile_id) VALUES (N'Du lịch Đà 
 
 --Sample check-in data
 --Check in log
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-05-25 00:00:00.000', 15);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great','2025-05-26 00:00:00.000', 14);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad','2025-05-27 00:00:00.000', 15);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great','2025-05-28 00:00:00.000', 14);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-05-29 00:00:00.000', 13);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-01 00:00:00.000', 2);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-02 00:00:00.000', 3);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-03 00:00:00.000', 2);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-04 00:00:00.000', 2);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-05 00:00:00.000', 3);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-06 00:00:00.000', 2);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-06-08 00:00:00.000', 10);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible','2025-07-09 00:00:00.000', 9);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'good', '2025-06-01 00:00:00.000', 12);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad', '2025-06-02 00:00:00.000', 8);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great', '2025-06-03 00:00:00.000', 5);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible', '2025-06-04 00:00:00.000', 15);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-06-05 00:00:00.000', 7);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'good', '2025-06-06 00:00:00.000', 3);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad', '2025-06-07 00:00:00.000', 11);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-06-08 00:00:00.000', null);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great', '2025-06-09 00:00:00.000', 2);
+INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible', '2025-06-10 00:00:00.000', null);
 --qna
 
-DELETE FROM checkin_log WHERE log_id = 18
+delete from checkin_log where user_id=4
+
 
 use SWP391
 SELECT * FROM users

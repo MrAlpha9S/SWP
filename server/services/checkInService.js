@@ -1,5 +1,6 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
 const {getUserIdFromAuth0Id} = require("./userService")
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 
 const postCheckIn = async (userAuth0Id,
@@ -16,10 +17,11 @@ const postCheckIn = async (userAuth0Id,
         const result = await pool.request()
             .input('user_id', sql.Int, userId)
             .input('feeling', sql.VarChar(10), feel)
+            .input('logged_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
             .input('cigs_smoked', sql.Int, cigsSmoked !== 0 ? cigsSmoked : null)
-            .query(`INSERT INTO checkin_log (user_id, feeling, cigs_smoked)
+            .query(`INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked)
                         OUTPUT INSERTED.log_id
-                    VALUES (@user_id, @feeling, @cigs_smoked)`);
+                    VALUES (@user_id, @feeling, @logged_at, @cigs_smoked)`);
 
         const log_id = result.recordset[0].log_id;
 
@@ -37,7 +39,6 @@ const postCheckIn = async (userAuth0Id,
       `);
             }
         }
-
 
         //Insert quit items
         for (const quitItem of checkedQuitItems ?? []) {
