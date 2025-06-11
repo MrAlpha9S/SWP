@@ -2,7 +2,7 @@ import React from "react";
 import {useAuth0} from "@auth0/auth0-react";
 import {Skeleton} from "antd";
 
-function Hero() {
+function Hero({title}) {
 
     const {user, isAuthenticated} = useAuth0()
 
@@ -16,7 +16,7 @@ function Hero() {
                     </div>
                 ) : <div className="w-[20%]"><Skeleton active/></div>}
                 <p className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                    Bảng điều khiển
+                    {title}
                 </p>
             </div>
         </section>
