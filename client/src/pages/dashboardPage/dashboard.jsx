@@ -16,6 +16,8 @@ import {useCheckInDataStore} from "../../stores/checkInStore.js";
 import {getCheckInDataSet} from "../../components/utils/checkInUtils.js";
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import {Result, Typography} from "antd";
+import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
+import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 
 function Dashboard() {
     const {Title, Paragraph} = Typography;
@@ -27,7 +29,16 @@ function Dashboard() {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog, planLogCloneDDMMYY} = usePlanStore();
+    const {
+        startDate,
+        cigsPerDay,
+        quittingMethod,
+        cigsReduced,
+        expectedQuitDate,
+        stoppedDate,
+        planLog,
+        planLogCloneDDMMYY
+    } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
@@ -85,54 +96,38 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col p-4">
-            <Hero/>
-            {userProfile?.data === null ? (
-                <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
-                    <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
-                        <h2 className='md:text-4xl lg:text-5xl font-bold'>
-                            Không tìm thấy thông tin kế hoạch của bạn
-                        </h2>
-                        <CustomButton onClick={() => navigate('/onboarding')} type='primary'>
-                            Tạo kế hoạch
-                        </CustomButton>
-                    </div>
-                    <Result
-                        status={404}
-                        title={
-                            <Title
-                                level={1}
-                                className="!text-gray-800 !mb-4 text-2xl md:text-3xl lg:text-4xl font-bold"
-                            />
-                        }
-                        subTitle={
-                            <Paragraph className="!text-gray-600 !text-lg md:!text-xl !mb-8 leading-relaxed"/>
-                        }
-                        className="!p-0"
-                    />
-                </div>
-            ) : isAuthenticated ? (
-                isUserProfilePending ? (
-                    <ProgressBoard isPending={true}/>
+            <Hero title='Bảng điều khiển'/>
+            <div className="flex">
+                <div className='w-[30%]'><Sidebar/></div>
+                <div className='w-[70%] p-5'>{userProfile?.data === null ? (
+                    <NotFoundBanner title='Không tìm thấy thông tin kế hoạch của bạn'
+                                    content={<CustomButton onClick={() => navigate('/onboarding')} type='primary'>
+                                        Tạo kế hoạch
+                                    </CustomButton>}/>
+                ) : isAuthenticated ? (
+                    isUserProfilePending ? (
+                        <ProgressBoard isPending={true}/>
+                    ) : (
+                        <ProgressBoard
+                            startDate={startDate}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            cigsReduced={cigsReduced}
+                            quittingMethod={quittingMethod}
+                            planLog={planLog}
+                            cigsPerDay={cigsPerDay}
+                            expectedQuitDate={expectedQuitDate}
+                            stoppedDate={stoppedDate}
+                            isPending={false}
+                            readinessValue={readinessValue}
+                            checkInDataSet={checkInDataset?.data ?? []}
+                            planLogCloneDDMMYY={planLogCloneDDMMYY}
+                        />
+                    )
                 ) : (
-                    <ProgressBoard
-                        startDate={startDate}
-                        pricePerPack={pricePerPack}
-                        cigsPerPack={cigsPerPack}
-                        cigsReduced={cigsReduced}
-                        quittingMethod={quittingMethod}
-                        planLog={planLog}
-                        cigsPerDay={cigsPerDay}
-                        expectedQuitDate={expectedQuitDate}
-                        stoppedDate={stoppedDate}
-                        isPending={false}
-                        readinessValue={readinessValue}
-                        checkInDataSet={checkInDataset?.data ?? []}
-                        planLogCloneDDMMYY={planLogCloneDDMMYY}
-                    />
-                )
-            ) : (
-                isUserProfilePending && <ProgressBoard isPending={true}/>
-            )}
+                    isUserProfilePending && <ProgressBoard isPending={true}/>
+                )}</div>
+            </div>
         </div>
     );
 

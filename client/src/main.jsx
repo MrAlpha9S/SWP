@@ -43,6 +43,15 @@ createRoot(document.getElementById('root')).render(
                     "hoverBorderColor": "rgb(13,148, 136)",
                     "activeBorderColor": "rgb(13,148, 136)",
                 },
+                "Menu": {
+                    "itemActiveBg": "rgb(13,148, 136)",
+                    "itemHoverBg": "rgb(204 251 241)",
+                    "itemSelectedBg": "rgb(13,148, 136)",
+                    "itemSelectedColor": "rgb(255,255,255)",
+                    "subMenuItemBg": "rgba(179,26,26,0.02)",
+                    "colorBgElevated": "rgb(234,27,27)",
+                    "itemBg": "rgba(255,255,255,0)"
+                }
             }
         }}>
         <BrowserRouter>
