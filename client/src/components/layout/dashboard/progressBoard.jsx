@@ -105,23 +105,48 @@ const ProgressBoard = ({
         totalDaysPhrase = 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
     }
 
-    let cigsQuit = 0;
-    if (differenceInMs > 0) {
-        if (quittingMethod === 'gradual-daily') {
-            cigsQuit = cigsReduced * dayDifference;
-        } else if (quittingMethod === 'gradual-weekly') {
-            cigsQuit = (cigsReduced * dayDifference) / 7;
-        } else if (quittingMethod === 'target-date') {
-            const todayStr = currentDate.toISOString().split('T')[0];
-            const todayEntry = planLog.find((log) => log.date === todayStr);
-            if (todayEntry) {
-                cigsQuit = cigsPerDay - todayEntry.cigs;
+    const cigsQuit = useMemo(() => {
+        const currentDay = new Date(localStartDate);
+        const endDate = new Date(currentDate);
+        let total = 0;
+        let i = 0;
+        let lastCigsSmoked = cigsPerDay;
+
+        while (currentDay <= endDate) {
+            if (currentDay.toDateString() === new Date(localStartDate).toDateString()) {
+                currentDay.setDate(currentDay.getDate() + 1);
+                continue;
             }
-        } else if (readinessValue === 'relapse-support') {
-            cigsQuit = cigsPerDay * dayDifference;
+
+            const checkin = checkInDataSet[i];
+            const cigsSmoked = checkin?.cigs ?? lastCigsSmoked;
+
+            total += Math.max(0, cigsPerDay - cigsSmoked);
+            lastCigsSmoked = cigsSmoked;
+
+            currentDay.setDate(currentDay.getDate() + 1);
+            i++;
         }
-    }
-    cigsQuit = Math.round(cigsQuit)
+
+        return total;
+    }, [localStartDate, currentDate, checkInDataSet, cigsPerDay]);
+
+    // if (differenceInMs > 0) {
+    //     if (quittingMethod === 'gradual-daily') {
+    //         cigsQuit = cigsReduced * dayDifference;
+    //     } else if (quittingMethod === 'gradual-weekly') {
+    //         cigsQuit = (cigsReduced * dayDifference) / 7;
+    //     } else if (quittingMethod === 'target-date') {
+    //         const todayStr = currentDate.toISOString().split('T')[0];
+    //         const todayEntry = planLog.find((log) => log.date === todayStr);
+    //         if (todayEntry) {
+    //             cigsQuit = cigsPerDay - todayEntry.cigs;
+    //         }
+    //     } else if (readinessValue === 'relapse-support') {
+    //         cigsQuit = cigsPerDay * dayDifference;
+    //     }
+    // }
+    // cigsQuit = Math.round(cigsQuit)
 
     const moneySaved = Math.round(cigsQuit * pricePerCig);
 
@@ -182,6 +207,8 @@ const ProgressBoard = ({
             setAlreadyCheckedIn(false)
         }
     }, [])
+
+
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
