@@ -18,6 +18,7 @@ import {useAuth0} from "@auth0/auth0-react";
 import {postCheckIn} from "../../../components/utils/checkInUtils.js";
 import {useNavigate} from "react-router-dom";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../../components/utils/dateUtils.js";
+import {useCurrentStepDashboard} from "../../../stores/store.js";
 
 const {Title, Text} = Typography;
 
@@ -31,9 +32,9 @@ const CheckInStepFour = () => {
         isFreeText,
         cigsSmoked,
         isStepOneOnYes,
-        isJournalSelected,
-        setAlreadyCheckedIn
+        isJournalSelected
     } = useCheckInDataStore();
+    const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const {handleBackToStepOne} = useStepCheckInStore();
     const [journalRender, setJournalRender] = useState('')
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
@@ -82,12 +83,12 @@ const CheckInStepFour = () => {
 
     const handleSave = () => {
         postCheckin.mutate()
-        //setAlreadyCheckedIn(true)
+        setCurrentStepDashboard('dashboard')
     }
 
 
     return (
-        <div className="max-w-xl mx-auto rounded-md p-6 shadow-md bg-white">
+        <div className="w-full mx-auto rounded-md p-6 shadow-md bg-white">
 
             {/* Congratulatory Message */}
             <Title level={4} className="text-center text-primary-700">

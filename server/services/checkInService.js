@@ -4,11 +4,11 @@ const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 
 const postCheckIn = async (userAuth0Id,
-                                  feel,
-                                  checkedQuitItems,
-                                  cigsSmoked,
-                                  freeText,
-                                  qna) => {
+                           feel,
+                           checkedQuitItems,
+                           cigsSmoked,
+                           freeText,
+                           qna) => {
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
@@ -20,7 +20,7 @@ const postCheckIn = async (userAuth0Id,
             .input('logged_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
             .input('cigs_smoked', sql.Int, typeof cigsSmoked === 'number' ? cigsSmoked : null)
             .query(`INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked)
-                        OUTPUT INSERTED.log_id
+                    OUTPUT INSERTED.log_id
                     VALUES (@user_id, @feeling, @logged_at, @cigs_smoked)`);
 
         const log_id = result.recordset[0].log_id;
@@ -34,9 +34,9 @@ const postCheckIn = async (userAuth0Id,
                     .input('qna_question', sql.VarChar(30), key)
                     .input('qna_answer', sql.NVarChar(sql.MAX), value ?? null)
                     .query(`
-        INSERT INTO qna (log_id, qna_question, qna_answer)
-        VALUES (@log_id, @qna_question, @qna_answer)
-      `);
+                        INSERT INTO qna (log_id, qna_question, qna_answer)
+                        VALUES (@log_id, @qna_question, @qna_answer)
+                    `);
             }
         }
 
@@ -77,4 +77,24 @@ const getCheckInLogDataset = async (userAuth0Id) => {
     }
 }
 
-module.exports = {postCheckIn, getCheckInLogDataset};
+const getCheckInStatus = async (userAuth0Id) => {
+    const today = getCurrentUTCDateTime().toISOString().split('T')[0];
+
+    try {
+        const pool = await poolPromise;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+        const result = await pool.request()
+            .input('today', sql.Date, today)
+            .input('user_id', sql.Int, userId)
+            .query('SELECT COUNT(*) AS checked_in FROM checkin_log WHERE user_id = @user_id AND CAST(logged_at AS DATE) = @today');
+
+        return result.recordset[0].checked_in > 0;
+
+    } catch (error) {
+        console.error('error in getCheckInStatus', error);
+        return false;
+    }
+}
+
+module.exports = {postCheckIn, getCheckInLogDataset, getCheckInStatus};

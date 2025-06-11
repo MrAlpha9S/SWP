@@ -48,9 +48,12 @@ createRoot(document.getElementById('root')).render(
                     "itemHoverBg": "rgb(204 251 241)",
                     "itemSelectedBg": "rgb(13,148, 136)",
                     "itemSelectedColor": "rgb(255,255,255)",
-                    "subMenuItemBg": "rgba(179,26,26,0.02)",
-                    "colorBgElevated": "rgb(234,27,27)",
-                    "itemBg": "rgba(255,255,255,0)"
+                    "itemBg": "rgba(255,255,255,0)",
+                    "iconSize": 25,
+                    "fontSize": 16,
+                    "horizontalItemSelectedBg": "rgb(13,148, 136)",
+                    "horizontalItemSelectedColor": "rgb(255,255,255)",
+                    "colorBgElevated": "rgb(255,255,255)",
                 }
             }
         }}>
@@ -62,7 +65,6 @@ createRoot(document.getElementById('root')).render(
                     redirect_uri: window.location.origin + "/post-signup",
                     audience: 'https://smokerecession.com'
                 }}
-                useRefreshTokens={true}
             >
                 <QueryClientProvider client={queryClient}>
                     <App/>

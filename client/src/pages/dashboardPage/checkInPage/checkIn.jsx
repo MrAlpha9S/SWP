@@ -7,16 +7,45 @@ import CheckInStepThree from './checkInStepThree';
 import CheckInJournal from './checkInJournal';
 import CheckInStepFour from './checkInStepFour';
 import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import {useAutoAnimate} from "@formkit/auto-animate/react";
 import {useNavigate} from "react-router-dom";
 import ModalFooter from "../../../components/ui/modalFooter.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {useQuery} from "@tanstack/react-query";
+import {getUserProfile} from "../../../components/utils/profileUtils.js";
+import {getCheckinStatus} from "../../../components/utils/checkInUtils.js";
 
 function SmokeFreeCheckin() {
     const {step, current, handleStepThree} = useStepCheckInStore();
     const [animateRef] = useAutoAnimate();
-    const {alreadyCheckedIn} = useCheckInDataStore()
+    const {alreadyCheckedIn, setAlreadyCheckedIn} = useCheckInDataStore()
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+
+    const {
+        isPending: isCheckInStatusPending,
+        error: checkInStatusError,
+        data: checkInStatus,
+        isFetching: isFetchingCheckInStatus,
+    } = useQuery({
+        queryKey: ['checkin-status'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getCheckinStatus(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isCheckInStatusPending) {
+            if (checkInStatus.data) {
+                setIsModalOpen(true);
+                handleStepThree()
+            }
+        }
+    }, [isCheckInStatusPending]);
 
     const steps = [
         {
@@ -39,23 +68,23 @@ function SmokeFreeCheckin() {
 
     const items = steps.map(item => ({key: item.title, title: item.title}));
 
-    if (alreadyCheckedIn) {
-        handleStepThree()
-        setIsModalOpen(true);
-    }
+    // if (alreadyCheckedIn) {
+    //     handleStepThree()
+    //     setIsModalOpen(true);
+    // }
 
     return (
-        <div className="bg-primary-50 min-h-screen flex items-center justify-center p-4">
-            <div className="bg-white max-w-xl mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
+        <div className=" flex justify-center p-4">
+            <div className="bg-white mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
                 <Steps className='pb-5' current={current} items={items}/>
                 <h1 className="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
                 <div ref={animateRef}>
-                    {step === 'StepOne' && <CheckInStepOne />}
-                    {step === 'StepTwoOnYes' && <CheckInStepTwoOnYes />}
-                    {step === 'StepTwoOnNo' && <CheckInStepTwoOnNo />}
-                    {step === 'StepThree' && <CheckInStepThree />}
-                    {step === 'StepJournal' && <CheckInJournal />}
-                    {step === 'StepFour' && <CheckInStepFour />}
+                    {step === 'StepOne' && <CheckInStepOne/>}
+                    {step === 'StepTwoOnYes' && <CheckInStepTwoOnYes/>}
+                    {step === 'StepTwoOnNo' && <CheckInStepTwoOnNo/>}
+                    {step === 'StepThree' && <CheckInStepThree/>}
+                    {step === 'StepJournal' && <CheckInJournal/>}
+                    {step === 'StepFour' && <CheckInStepFour/>}
                 </div>
             </div>
             <Modal
@@ -63,20 +92,20 @@ function SmokeFreeCheckin() {
                 closable={{'aria-label': 'Custom Close Button'}}
                 open={isModalOpen}
                 onOk={() => setIsModalOpen(false)}
-                onCancel={() => navigate('/')}
+                onCancel={() => navigate('/dashboard')}
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter/>}
+                footer={<ModalFooter setIsModalOpen={setIsModalOpen}/>}
             >
                 <p>
-                    Bạn đã thực hiện check in cho ngày hôm nay. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Lưu'</strong>, thông tin check-in mới <strong>sẽ thay thế</strong> thông tin cũ.
+                    Bạn đã thực hiện check in cho ngày hôm nay. Nếu bạn <strong>thực hiện thay đổi</strong> và
+                    nhấn <strong>'Lưu'</strong>, thông tin check-in mới <strong>sẽ thay thế</strong> thông tin cũ.
                 </p>
                 <p>
-                    Nếu bạn muốn giữ lại thông tin check-in cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang điều khiển.
+                    Nếu bạn muốn giữ lại thông tin check-in cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang
+                    điều khiển.
                 </p>
-
-
             </Modal>
         </div>
     );

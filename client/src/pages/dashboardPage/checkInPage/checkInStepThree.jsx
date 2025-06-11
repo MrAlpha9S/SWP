@@ -21,7 +21,7 @@ const CheckInStep3 = () => {
     }
 
     return (
-        <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white text-center">
+        <div className=" mx-auto rounded-lg p-8 shadow-sm bg-white text-center">
 
             <p className="text-sm md:text-base font-bold mb-8">
                 Bạn có muốn viết về cảm xúc của mình ngày hôm nay không?

@@ -31,7 +31,6 @@ const ProgressBoard = ({
                            planLog,
                            expectedQuitDate,
                            stoppedDate,
-                           cigsReduced,
                            cigsPerDay,
                            quittingMethod,
                            isPending,
@@ -39,11 +38,11 @@ const ProgressBoard = ({
                            cigsPerPack,
                            readinessValue,
                            checkInDataSet,
-                           planLogCloneDDMMYY
+                           planLogCloneDDMMYY,
+                           setCurrentStepDashboard
                        }) => {
     const navigate = useNavigate();
-    const { handleStepThree } = useStepCheckInStore();
-    const {alreadyCheckedIn, setAlreadyCheckedIn} = useCheckInDataStore()
+    const {handleStepThree} = useStepCheckInStore();
 
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
 
@@ -155,11 +154,6 @@ const ProgressBoard = ({
         return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod));
     }, [planLog, checkInDataSet]);
 
-    useEffect(() => {
-        console.log(mergedDataSet)
-    }, [mergedDataSet])
-
-
     const getReferenceArea = useCallback(() => {
         const arrayOfArrays = [];
         const size = 7;
@@ -194,28 +188,12 @@ const ProgressBoard = ({
     }, [cigsPerDay, currentDate, mergedDataSet]);
 
     const handleCheckIn = () => {
-        if (checkInDataSet && checkInDataSet.length > 0) {
-            if (alreadyCheckedIn) {
-                handleStepThree()
-            }
-        }
-        navigate('/dashboard/check-in');
+        setCurrentStepDashboard('check-in');
+        handleStepThree()
     }
 
-    useEffect(() => {
-
-        const isCheckedIn = checkInDataSet?.some((data) => data.date === currentDate.toISOString().split('T')[0]);
-        if (isCheckedIn) {
-            setAlreadyCheckedIn(true)
-        } else {
-            setAlreadyCheckedIn(false)
-        }
-    }, [])
-
-
-
     return (
-        <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4">
+        <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
             <div className="flex items-center justify-between">
                 {isPending ? (
                     <Skeleton.Button active/>
@@ -351,7 +329,8 @@ const ProgressBoard = ({
                                     <Tooltip/>
                                     <Legend verticalAlign="top"/>
                                 </LineChart> :
-                                <LineChart data={planLogCloneDDMMYY} margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                <LineChart data={planLogCloneDDMMYY}
+                                           margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                     <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     <ReferenceLine

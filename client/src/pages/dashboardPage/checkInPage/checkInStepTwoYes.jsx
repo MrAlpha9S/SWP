@@ -27,7 +27,7 @@ const CheckInStep2Yes = () => {
   }, [checkedQuitItems]);
 
   return (
-    <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white">
+    <div className=" mx-auto rounded-lg p-8 shadow-sm bg-white">
 
       <p className="text-sm md:text-base mb-6">
         <strong>Xin chúc mừng vì bạn đã không hút thuốc!</strong> Ghi chú những chiến lược nào đang hiệu quả sẽ giúp bạn đi đúng hướng.

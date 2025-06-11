@@ -57,7 +57,7 @@ const CheckInJournal = () => {
     }, [isFreeText, qna, freeText]);
 
     return (
-        <div className="max-w-2xl mx-auto p-6 rounded-lg shadow bg-white">
+        <div className=" mx-auto p-6 rounded-lg shadow bg-white">
 
             <div className='text-base md:text-xl font-bold mb-6'>Bạn cảm thấy thế nào khi bỏ thuốc?</div>
             <div className='text-sm md:text-base mb-6'>Viết và suy ngẫm thường xuyên về những trải nghiệm của bạn là một cách tuyệt vời để xác định các mô hình

@@ -27,7 +27,7 @@ const CheckInStep2No = () => {
 
 
     return (
-        <div className="max-w-xl mx-auto rounded-lg p-8 shadow-sm bg-white">
+        <div className=" mx-auto rounded-lg p-8 shadow-sm bg-white">
 
             <p className="text-gray-700 text-base mb-4">
                 Hãy nhập số điếu thuốc bạn đã hút kể từ lần check-in trước. Việc ghi lại sẽ giúp bạn theo dõi tiến trình của mình một cách chính xác và hiệu quả hơn.

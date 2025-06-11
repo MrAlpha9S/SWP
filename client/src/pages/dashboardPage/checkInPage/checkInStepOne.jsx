@@ -34,7 +34,7 @@ const CheckInStepOne = () => {
         }
     }
     return (
-        <div className="bg-white max-w-xl mx-auto p-6 rounded-xl shadow-sm text-center">
+        <div className="w-full bg-white mx-auto p-6 rounded-xl shadow-sm text-center">
 
             <p className="text-sm md:text-base mb-6">Check-in hàng ngày để theo dõi tiến trình của bạn và duy trì động lực trên hành trình cai thuốc lá.</p>
 

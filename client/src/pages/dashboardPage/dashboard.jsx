@@ -1,8 +1,8 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
 import {
-    useCigsPerPackStore,
+    useCigsPerPackStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore, useProfileExists,
     useQuitReadinessStore,
@@ -18,6 +18,7 @@ import CustomButton from "../../components/ui/CustomButton.jsx";
 import {Result, Typography} from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
+import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
 
 function Dashboard() {
     const {Title, Paragraph} = Typography;
@@ -43,6 +44,9 @@ function Dashboard() {
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const {setCheckInDataSet} = useCheckInDataStore()
+    const [heroHeight, setHeroHeight] = useState(188);
+    const [heroTitle, setHeroTitle] = useState("");
+    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
 
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -86,28 +90,99 @@ function Dashboard() {
 
     useEffect(() => {
         if (!isDatasetPending) {
-            setCheckInDataSet(checkInDataset.data)
+            setCheckInDataSet(checkInDataset?.data)
         }
     }, [checkInDataset, isDatasetPending])
 
     useEffect(() => {
-        if (isUserProfilePending && isDatasetPending) return
-    })
+        const handleScroll = () => {
+            if (window.scrollY > 0) {
+                setHeroHeight(50)
+            } else {
+                setHeroHeight(188)
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener("scroll", handleScroll);
+
+            return () => {
+                window.removeEventListener("scroll", handleScroll);
+            };
+        }
+    }, []);
+
+    useEffect(() => {
+        switch (currentStepDashboard) {
+            case 'dashboard':
+                setHeroTitle('Bảng điều khiển');
+                break;
+            case 'notifications':
+                setHeroTitle('Thông báo');
+                break;
+            case 'check-in':
+                setHeroTitle('Check-in hàng ngày');
+                break;
+            case 'goals':
+                setHeroTitle('Mục tiêu');
+                break;
+            case 'savings':
+                setHeroTitle('Tiết kiệm');
+                break;
+            case 'distraction-tools':
+                setHeroTitle('Quản lý cơn thèm');
+                break;
+            case 'badges':
+                setHeroTitle('Huy hiệu');
+                break;
+            default:
+                setHeroTitle('');
+                break;
+        }
+    }, [currentStepDashboard]);
+
 
     return (
-        <div className="bg-primary-50 min-h-screen flex flex-col p-4">
-            <Hero title='Bảng điều khiển'/>
-            <div className="flex">
-                <div className='w-[30%]'><Sidebar/></div>
-                <div className='w-[70%] p-5'>{userProfile?.data === null ? (
-                    <NotFoundBanner title='Không tìm thấy thông tin kế hoạch của bạn'
-                                    content={<CustomButton onClick={() => navigate('/onboarding')} type='primary'>
-                                        Tạo kế hoạch
-                                    </CustomButton>}/>
-                ) : isAuthenticated ? (
-                    isUserProfilePending ? (
+        <div className="bg-primary-50 min-h-screen flex flex-col">
+            <Hero title={heroTitle} heroHeight={heroHeight}/>
+            <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
+                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} mode="inline"/></div>
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
+                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} collapse={true} mode="horizontal"/></div>
+                {/*<div className='w-full'>*/}
+                {/*    {currentMenu === 'dashboard' && userProfile?.data === null ? (*/}
+                {/*        <NotFoundBanner title='Không tìm thấy thông tin kế hoạch của bạn'*/}
+                {/*                        content={<CustomButton onClick={() => navigate('/onboarding')} type='primary'>*/}
+                {/*                            Tạo kế hoạch*/}
+                {/*                        </CustomButton>}/>*/}
+                {/*    ) : isAuthenticated ? (*/}
+                {/*        isUserProfilePending ? (*/}
+                {/*            <ProgressBoard isPending={true}/>*/}
+                {/*        ) : (*/}
+                {/*            <ProgressBoard*/}
+                {/*                startDate={startDate}*/}
+                {/*                pricePerPack={pricePerPack}*/}
+                {/*                cigsPerPack={cigsPerPack}*/}
+                {/*                cigsReduced={cigsReduced}*/}
+                {/*                quittingMethod={quittingMethod}*/}
+                {/*                planLog={planLog}*/}
+                {/*                cigsPerDay={cigsPerDay}*/}
+                {/*                expectedQuitDate={expectedQuitDate}*/}
+                {/*                stoppedDate={stoppedDate}*/}
+                {/*                isPending={false}*/}
+                {/*                readinessValue={readinessValue}*/}
+                {/*                checkInDataSet={checkInDataset?.data ?? []}*/}
+                {/*                planLogCloneDDMMYY={planLogCloneDDMMYY}*/}
+                {/*            />*/}
+                {/*        )*/}
+                {/*    ) : (*/}
+                {/*        isUserProfilePending && <ProgressBoard isPending={true}/>*/}
+                {/*    )}</div>*/}
+                <div className="w-full">
+                    {!isAuthenticated || isUserProfilePending ? (
                         <ProgressBoard isPending={true}/>
-                    ) : (
+                    ) : currentStepDashboard === 'dashboard' ? (
                         <ProgressBoard
                             startDate={startDate}
                             pricePerPack={pricePerPack}
@@ -122,11 +197,13 @@ function Dashboard() {
                             readinessValue={readinessValue}
                             checkInDataSet={checkInDataset?.data ?? []}
                             planLogCloneDDMMYY={planLogCloneDDMMYY}
+                            setCurrentStepDashboard={setCurrentStepDashboard}
                         />
-                    )
-                ) : (
-                    isUserProfilePending && <ProgressBoard isPending={true}/>
-                )}</div>
+                    ) : currentStepDashboard === 'check-in' && (
+                        <CheckinBoard/>
+                    )}
+                </div>
+
             </div>
         </div>
     );

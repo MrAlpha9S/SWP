@@ -172,6 +172,16 @@ export const useProfileExists = create((set) => ({
     setIsProfileExist: (value) => set({isProfileExist: value}),
 }))
 
+export const useCurrentStepDashboard = create((set) => ({
+    currentStepDashboard: 'dashboard',
+    setCurrentStepDashboard: (value) => set({currentStepDashboard: value}),
+}))
+
+export const alreadyCheckedIn = create((set) => ({
+    alreadyCheckedIn: false,
+    setAlreadyCheckedIn: (value) => set({alreadyCheckedIn: value}),
+}))
+
 
 
 
