@@ -40,9 +40,9 @@ const CheckInStepOne = () => {
 
             <div className="mb-6 text-left">
                 <label className="block text-xs md:text-sm mb-1 font-bold">Ngày Check-in</label>
-                <DatePicker className='h-[42px] w-full' onChange={() => {
+                <DatePicker disabled className='h-[42px] w-full' onChange={() => {
                     setCheckInDate(getCurrentUTCDateTime().toISOString());
-                }} format={'DD-MM-YYYY'} value={checkInDate ? dayjs(checkInDate) : ''} allowClear={false}/>
+                }} format={'DD-MM-YYYY'} value={checkInDate ? dayjs(new Date()) : ''} allowClear={false}/>
             </div>
 
             <div className="mb-6 pb-10">

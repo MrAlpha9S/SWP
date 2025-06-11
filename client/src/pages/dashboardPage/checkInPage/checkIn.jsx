@@ -74,8 +74,8 @@ function SmokeFreeCheckin() {
     // }
 
     return (
-        <div className=" flex justify-center p-4">
-            <div className="bg-white mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
+        <div className="w-full flex justify-center p-4">
+            <div className="w-full bg-white mx-auto p-6 border rounded-xl shadow-sm border-primary-500 text-center">
                 <Steps className='pb-5' current={current} items={items}/>
                 <h1 className="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
                 <div ref={animateRef}>

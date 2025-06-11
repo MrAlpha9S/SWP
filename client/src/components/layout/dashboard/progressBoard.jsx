@@ -19,12 +19,14 @@ import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
 import {BsGraphDown} from "react-icons/bs";
-import {mergeByDate} from "../../utils/checkInUtils.js";
+import {getCheckInDataSet, mergeByDate} from "../../utils/checkInUtils.js";
 import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
 import {
     clonePlanLogToDDMMYYYY,
     convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime,
 } from "../../utils/dateUtils.js";
+import {useQuery} from "@tanstack/react-query";
+import {useAuth0} from "@auth0/auth0-react";
 
 const ProgressBoard = ({
                            startDate,
@@ -37,14 +39,34 @@ const ProgressBoard = ({
                            pricePerPack,
                            cigsPerPack,
                            readinessValue,
-                           checkInDataSet,
                            planLogCloneDDMMYY,
-                           setCurrentStepDashboard
+                           setCurrentStepDashboard,
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
-
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
+    const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
+
+
+    const {
+        isPending: isDatasetPending,
+        error: datasetError,
+        data: checkInDataset,
+        isFetching: isDatasetFetching,
+    } = useQuery({
+        queryKey: ['dataset'],
+        queryFn: async () => {
+            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isDatasetPending && checkInDataset?.data) {
+            setLocalCheckInDataSet(checkInDataset.data);
+        }
+    }, [checkInDataset, isDatasetPending]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -79,7 +101,6 @@ const ProgressBoard = ({
     }
 
     const pricePerCig = Math.round(pricePerPack / cigsPerPack);
-    const dayDifference = difference.days;
 
 
     let totalDaysPhrase = ''
@@ -108,51 +129,39 @@ const ProgressBoard = ({
         const currentDay = new Date(localStartDate);
         const endDate = new Date(currentDate);
         let total = 0;
-        let i = 0;
         let lastCigsSmoked = cigsPerDay;
 
         while (currentDay <= endDate) {
-            if (currentDay.toDateString() === new Date(localStartDate).toDateString()) {
-                currentDay.setDate(currentDay.getDate() + 1);
-                total += cigsPerDay
-                continue;
-            }
+            const dateStr = currentDay.toISOString().split('T')[0];
 
-            const checkin = checkInDataSet[i];
-            const cigsSmoked = checkin?.cigs ?? lastCigsSmoked
+            // Match check-in by date
+            const checkin = localCheckInDataSet.find(entry =>
+                new Date(entry.date).toISOString().split('T')[0] === dateStr
+            );
+
+            // Preserve 0 if it's a real check-in
+            const cigsSmoked =
+                checkin && checkin.cigs !== null && checkin.cigs !== undefined
+                    ? checkin.cigs
+                    : lastCigsSmoked;
+
             total += cigsPerDay - cigsSmoked;
             lastCigsSmoked = cigsSmoked;
 
             currentDay.setDate(currentDay.getDate() + 1);
-            i++;
         }
 
         return total;
-    }, [localStartDate, currentDate, checkInDataSet, cigsPerDay]);
+    }, [localStartDate, currentDate, localCheckInDataSet, cigsPerDay]);
 
-    // if (differenceInMs > 0) {
-    //     if (quittingMethod === 'gradual-daily') {
-    //         cigsQuit = cigsReduced * dayDifference;
-    //     } else if (quittingMethod === 'gradual-weekly') {
-    //         cigsQuit = (cigsReduced * dayDifference) / 7;
-    //     } else if (quittingMethod === 'target-date') {
-    //         const todayStr = currentDate.toISOString().split('T')[0];
-    //         const todayEntry = planLog.find((log) => log.date === todayStr);
-    //         if (todayEntry) {
-    //             cigsQuit = cigsPerDay - todayEntry.cigs;
-    //         }
-    //     } else if (readinessValue === 'relapse-support') {
-    //         cigsQuit = cigsPerDay * dayDifference;
-    //     }
-    // }
-    // cigsQuit = Math.round(cigsQuit)
 
     const moneySaved = Math.round(cigsQuit * pricePerCig);
 
     const mergedDataSet = useMemo(() => {
-        if (!planLog || !checkInDataSet) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod));
-    }, [planLog, checkInDataSet]);
+        if (isDatasetPending) return
+        if (!planLog || !localCheckInDataSet) return [];
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod));
+    }, [planLog, localCheckInDataSet, quittingMethod]);
 
     const getReferenceArea = useCallback(() => {
         const arrayOfArrays = [];
@@ -185,7 +194,7 @@ const ProgressBoard = ({
                 );
             }
         }
-    }, [cigsPerDay, currentDate, mergedDataSet]);
+    }, [cigsPerDay, currentDate, mergedDataSet, localCheckInDataSet]);
 
     const handleCheckIn = () => {
         setCurrentStepDashboard('check-in');
@@ -286,7 +295,7 @@ const ProgressBoard = ({
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : mergedDataSet?.length > 0 ? (
                         <ResponsiveContainer width="100%" height={350}>
-                            {checkInDataSet.length > 0 ?
+                            {localCheckInDataSet.length > 0 ?
                                 <LineChart
                                     data={mergedDataSet}
                                     margin={{top: 20, right: 30, left: 20, bottom: 25}}

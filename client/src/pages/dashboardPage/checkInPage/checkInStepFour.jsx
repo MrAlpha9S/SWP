@@ -77,7 +77,6 @@ const CheckInStepFour = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['dataset']});
-            navigate('/dashboard');
         },
     })
 

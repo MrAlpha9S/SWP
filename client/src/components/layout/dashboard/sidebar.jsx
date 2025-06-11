@@ -40,7 +40,7 @@ const items = [
         icon: <IoMedalOutline className="mr-4"/>,
     },
 ];
-const Sidebar = ({setCurrentStepDashboard, collapse = false, mode}) => {
+const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
     return (
         <Menu
             onClick={(e) => {
@@ -50,6 +50,7 @@ const Sidebar = ({setCurrentStepDashboard, collapse = false, mode}) => {
             mode= {mode}
             items={items}
             inlineCollapsed={collapse}
+            selectedKeys={currentStepDashboard}
         />
     );
 };

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
 import {
@@ -8,20 +8,18 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
 import {useQuery} from '@tanstack/react-query'
 import {useCheckInDataStore} from "../../stores/checkInStore.js";
-import {getCheckInDataSet} from "../../components/utils/checkInUtils.js";
-import CustomButton from "../../components/ui/CustomButton.jsx";
-import {Result, Typography} from "antd";
+import {Typography} from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
+import {queryClient} from "../../main.jsx";
 
 function Dashboard() {
-    const {Title, Paragraph} = Typography;
     const {readinessValue} = useQuitReadinessStore();
     const {addError, removeError} = useErrorStore();
     const {reasonList} = useReasonStore();
@@ -65,19 +63,9 @@ function Dashboard() {
         enabled: isAuthenticated && !!user,
     })
 
-    const {
-        isPending: isDatasetPending,
-        error: datasetError,
-        data: checkInDataset,
-        isFetching: isDatasetFetching,
-    } = useQuery({
-        queryKey: ['dataset'],
-        queryFn: async () => {
-            if (!isAuthenticated || !user) return;
-            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated);
-        },
-        enabled: isAuthenticated && !!user,
-    })
+    useEffect(() => {
+        queryClient.invalidateQueries({queryKey: ['checkin-status']});
+    }, []);
 
     useEffect(() => {
         if (isUserProfilePending || !userProfile) return;
@@ -88,11 +76,11 @@ function Dashboard() {
         syncStores();
     }, [userProfile, isUserProfilePending])
 
-    useEffect(() => {
-        if (!isDatasetPending) {
-            setCheckInDataSet(checkInDataset?.data)
-        }
-    }, [checkInDataset, isDatasetPending])
+    // useEffect(() => {
+    //     if (!isDatasetPending) {
+    //         setCheckInDataSet(checkInDataset?.data)
+    //     }
+    // }, [checkInDataset, isDatasetPending])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -195,9 +183,11 @@ function Dashboard() {
                             stoppedDate={stoppedDate}
                             isPending={false}
                             readinessValue={readinessValue}
-                            checkInDataSet={checkInDataset?.data ?? []}
                             planLogCloneDDMMYY={planLogCloneDDMMYY}
                             setCurrentStepDashboard={setCurrentStepDashboard}
+                            user={user}
+                            isAuthenticated={isAuthenticated}
+                            getAccessTokenSilently={getAccessTokenSilently}
                         />
                     ) : currentStepDashboard === 'check-in' && (
                         <CheckinBoard/>
