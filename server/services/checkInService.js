@@ -18,7 +18,7 @@ const postCheckIn = async (userAuth0Id,
             .input('user_id', sql.Int, userId)
             .input('feeling', sql.VarChar(10), feel)
             .input('logged_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
-            .input('cigs_smoked', sql.Int, cigsSmoked !== 0 ? cigsSmoked : null)
+            .input('cigs_smoked', sql.Int, typeof cigsSmoked === 'number' ? cigsSmoked : null)
             .query(`INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked)
                         OUTPUT INSERTED.log_id
                     VALUES (@user_id, @feeling, @logged_at, @cigs_smoked)`);

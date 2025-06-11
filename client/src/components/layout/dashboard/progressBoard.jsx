@@ -155,6 +155,10 @@ const ProgressBoard = ({
         return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod));
     }, [planLog, checkInDataSet]);
 
+    useEffect(() => {
+        console.log(mergedDataSet)
+    }, [mergedDataSet])
+
 
     const getReferenceArea = useCallback(() => {
         const arrayOfArrays = [];

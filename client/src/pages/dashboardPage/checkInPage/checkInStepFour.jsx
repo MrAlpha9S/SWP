@@ -71,6 +71,7 @@ const CheckInStepFour = () => {
 
     const postCheckin = useMutation({
         mutationFn: () => {
+            console.log(cigsSmoked)
             postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
         },
         onSuccess: () => {

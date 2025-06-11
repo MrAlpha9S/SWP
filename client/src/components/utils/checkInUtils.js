@@ -13,6 +13,7 @@ export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated,
 
     if (isStepOneOnYes) {
         bodyPayLoad.checkedQuitItems = checkedQuitItems;
+        bodyPayLoad.cigsSmoked = cigsSmoked
     } else {
         bodyPayLoad.cigsSmoked = cigsSmoked
     }
@@ -51,47 +52,73 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
-export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
+export function mergeByDate(planLog = [], checkinLog = [], quittingMethod, cigsPerDay) {
     const map = new Map();
+
     if (checkinLog.length === 0) {
         return planLog;
     }
 
-    // Add actuals (check-ins)
-    for (const {date, cigs} of checkinLog) {
-        const day = new Date(date).toISOString().split('T')[0];
-        if (new Date(date) <= getCurrentUTCDateTime())
-            map.set(day, {date: day, actual: cigs ?? 0, plan: null});
-        else
-            map.set(day, {date: day, actual: null, plan: null});
+    for (let i = 0; i < checkinLog.length; i++) {
+        const { date, cigs } = checkinLog[i];
+
+        const currentUTCDate = getCurrentUTCDateTime().toISOString().split('T')[0];
+        const checkinDay = new Date(date).toISOString().split('T')[0];
+
+        if (checkinDay <= currentUTCDate) {
+            const isMissingCheckin = cigs === null || cigs === undefined;
+
+            let fallback = cigsPerDay;
+            for (let j = i - 1; j >= 0; j--) {
+                const prev = checkinLog[j]?.cigs;
+                if (prev !== null && prev !== undefined) {
+                    fallback = prev;
+                    break;
+                }
+            }
+
+            map.set(checkinDay, {
+                date: checkinDay,
+                actual: isMissingCheckin ? fallback : cigs,
+                plan: null,
+                isMissingCheckin
+            });
+        } else {
+            map.set(checkinDay, {
+                date: checkinDay,
+                actual: null,
+                plan: null,
+                isMissingCheckin: true
+            });
+        }
     }
-    // Populate the first day of each plan block with the value
-    // Remaining days in the interval will have plan: null
+
     for (let i = 0; i < planLog.length; i++) {
-        const {date, cigs} = planLog[i];
+        const { date, cigs } = planLog[i];
         const start = new Date(date);
         const end = planLog[i + 1] ? new Date(planLog[i + 1].date) : new Date(start);
+
         if (!planLog[i + 1]) {
-            if (quittingMethod === 'gradual-weekly') {
-                end.setDate(start.getDate() + 6);
-            } else {
-                end.setDate(start.getDate() + 1);
-            }
+            end.setDate(
+                quittingMethod === 'gradual-weekly'
+                    ? start.getDate() + 6
+                    : start.getDate() + 1
+            );
         }
 
         const firstDayStr = start.toISOString().split('T')[0];
-        const existing = map.get(firstDayStr) || {date: firstDayStr, actual: null};
-        map.set(firstDayStr, {...existing, plan: cigs});
+        const existing = map.get(firstDayStr) || { date: firstDayStr, actual: null, isMissingCheckin: true };
+        map.set(firstDayStr, { ...existing, plan: cigs });
 
-        // Fill the rest of the interval with plan: null
         start.setDate(start.getDate() + 1);
         while (start < end) {
             const dayStr = start.toISOString().split('T')[0];
-            const existing = map.get(dayStr) || {date: dayStr, actual: null};
-            map.set(dayStr, {...existing, plan: null});
+            const existing = map.get(dayStr) || { date: dayStr, actual: null, isMissingCheckin: true };
+            map.set(dayStr, { ...existing, plan: null });
             start.setDate(start.getDate() + 1);
         }
     }
 
-    return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date))
+    return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+

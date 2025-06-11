@@ -8,7 +8,7 @@ import {quitStrategies} from "../../../constants/constants.js";
 
 const CheckInStep2Yes = () => {
   const { handleBackToStepOne, handleStepTwo } = useStepCheckInStore();
-  const { checkedQuitItems, setCheckedQuitItems } = useCheckInDataStore();
+  const { checkedQuitItems, setCheckedQuitItems, setCigsSmoked } = useCheckInDataStore();
   const [showError, setShowError] = useState(false);
 
   const handleNext = () => {
@@ -16,6 +16,7 @@ const CheckInStep2Yes = () => {
           setShowError(true);
           return
       }
+      setCigsSmoked(0)
     handleStepTwo();
   };
 
