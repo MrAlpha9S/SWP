@@ -115,13 +115,13 @@ const ProgressBoard = ({
         while (currentDay <= endDate) {
             if (currentDay.toDateString() === new Date(localStartDate).toDateString()) {
                 currentDay.setDate(currentDay.getDate() + 1);
+                total += cigsPerDay
                 continue;
             }
 
             const checkin = checkInDataSet[i];
-            const cigsSmoked = checkin?.cigs ?? lastCigsSmoked;
-
-            total += Math.max(0, cigsPerDay - cigsSmoked);
+            const cigsSmoked = checkin?.cigs ?? lastCigsSmoked
+            total += cigsPerDay - cigsSmoked;
             lastCigsSmoked = cigsSmoked;
 
             currentDay.setDate(currentDay.getDate() + 1);
