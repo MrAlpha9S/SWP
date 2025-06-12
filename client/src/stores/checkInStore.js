@@ -29,6 +29,9 @@ export const useStepCheckInStore = create((set) => ({
     handleStepThree: () => set({
         step: 'StepFour',
         current: 3
+    }),
+    handleStepOne: () => set({
+        step: 'StepOne',
     })
 }));
 
@@ -59,8 +62,6 @@ export const useCheckInDataStore = create((set) => ({
     setIsJournalSelected: (value) => set({isJournalSelected : value}),
     checkInDataSet: [],
     setCheckInDataSet: (value) => set({ checkInDataSet: value }),
-    alreadyCheckedIn: false,
-    setAlreadyCheckedIn: (value) => set({ alreadyCheckedIn: value }),
 }));
 
 

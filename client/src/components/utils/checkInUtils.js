@@ -122,12 +122,13 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod, cigsP
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-export async function getCheckinStatus(user, getAccessTokenSilently, isAuthenticated) {
+export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, today) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/check-in/check-in-status?userAuth0Id=${user.sub}`, {
+
+    const res = await fetch(`http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${today}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,

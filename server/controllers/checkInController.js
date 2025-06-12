@@ -1,4 +1,9 @@
-const {postCheckIn, getCheckInLogDataset, getCheckInStatus} = require("../services/checkInService");
+const {
+    postCheckIn,
+    getCheckInLogDataset,
+    getCheckInDataOnDate,
+    getAllCheckInData
+} = require("../services/checkInService");
 
 const handlePostCheckIn = async (req, res) => {
     const {
@@ -52,15 +57,19 @@ const handleGetDataSet = async (req, res) => {
     }
 }
 
-const isCheckedIn = async (req, res) => {
+const getCheckInData = async (req, res) => {
     const {
-        userAuth0Id
+        userAuth0Id, date
     } = req.query;
-    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
+    let result = []
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: result});
 
     try {
-        const result = await getCheckInStatus(userAuth0Id);
-        console.log(result)
+
+        if (date)
+            result = await getCheckInDataOnDate(userAuth0Id, date);
+        else
+            result = await getAllCheckInData(userAuth0Id);
 
         if (!result) {
             return res.status(404).json({success: false, message: 'Check-in not found', data: result});
@@ -69,8 +78,8 @@ const isCheckedIn = async (req, res) => {
         }
     } catch (err) {
         console.error('isCheckedIn error:', err);
-        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: result});
     }
 }
 
-module.exports = {handlePostCheckIn, handleGetDataSet, isCheckedIn};
+module.exports = {handlePostCheckIn, handleGetDataSet, getCheckInData};

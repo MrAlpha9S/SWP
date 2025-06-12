@@ -38,7 +38,6 @@ const CheckInStepFour = () => {
     const {handleBackToStepOne} = useStepCheckInStore();
     const [journalRender, setJournalRender] = useState('')
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
-    const navigate = useNavigate();
 
 
     let feelLabel = ''
@@ -72,7 +71,6 @@ const CheckInStepFour = () => {
 
     const postCheckin = useMutation({
         mutationFn: () => {
-            console.log(cigsSmoked)
             postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
         },
         onSuccess: () => {

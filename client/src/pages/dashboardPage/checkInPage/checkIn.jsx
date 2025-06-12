@@ -6,46 +6,53 @@ import CheckInStepTwoOnNo from './checkInStepTwoNo';
 import CheckInStepThree from './checkInStepThree';
 import CheckInJournal from './checkInJournal';
 import CheckInStepFour from './checkInStepFour';
-import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
+import { useStepCheckInStore} from '../../../stores/checkInStore';
 import {useAutoAnimate} from "@formkit/auto-animate/react";
 import {useNavigate} from "react-router-dom";
 import ModalFooter from "../../../components/ui/modalFooter.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {useQuery} from "@tanstack/react-query";
-import {getUserProfile} from "../../../components/utils/profileUtils.js";
-import {getCheckinStatus} from "../../../components/utils/checkInUtils.js";
+
+import {getCheckInData} from "../../../components/utils/checkInUtils.js";
+
+import {getCurrentUTCDateTime} from "../../../components/utils/dateUtils.js";
+import {useCurrentStepDashboard} from "../../../stores/store.js";
 
 function SmokeFreeCheckin() {
-    const {step, current, handleStepThree} = useStepCheckInStore();
+    const {step, current, handleStepThree, handleStepOne} = useStepCheckInStore();
     const [animateRef] = useAutoAnimate();
-    const {alreadyCheckedIn, setAlreadyCheckedIn} = useCheckInDataStore()
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const {setCurrentStepDashboard} = useCurrentStepDashboard();
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
     const {
-        isPending: isCheckInStatusPending,
-        error: checkInStatusError,
-        data: checkInStatus,
-        isFetching: isFetchingCheckInStatus,
+        isPending: isCheckInDataPending,
+        error: CheckInDataError,
+        data: CheckInData,
+        isFetching: isFetchingCheckInData,
     } = useQuery({
         queryKey: ['checkin-status'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getCheckinStatus(user, getAccessTokenSilently, isAuthenticated);
+            const today = getCurrentUTCDateTime().toISOString()
+            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, today);
         },
         enabled: isAuthenticated && !!user,
     })
 
     useEffect(() => {
-        if (!isCheckInStatusPending) {
-            if (checkInStatus.data) {
+        if (!isCheckInDataPending) {
+            console.log('checkin', CheckInData)
+            if (CheckInData.data) {
                 setIsModalOpen(true);
                 handleStepThree()
+            } else {
+                handleStepOne()
             }
         }
-    }, [isCheckInStatusPending]);
+    }, [isCheckInDataPending]);
 
     const steps = [
         {
@@ -67,11 +74,6 @@ function SmokeFreeCheckin() {
     ];
 
     const items = steps.map(item => ({key: item.title, title: item.title}));
-
-    // if (alreadyCheckedIn) {
-    //     handleStepThree()
-    //     setIsModalOpen(true);
-    // }
 
     return (
         <div className="w-full flex justify-center p-4">
@@ -96,7 +98,10 @@ function SmokeFreeCheckin() {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter setIsModalOpen={setIsModalOpen}/>}
+                footer={<ModalFooter setIsModalOpen={setIsModalOpen} onCancel={() => {
+                    setIsModalOpen(false)
+                    setCurrentStepDashboard('dashboard')
+                }}/>}
             >
                 <p>
                     Bạn đã thực hiện check in cho ngày hôm nay. Nếu bạn <strong>thực hiện thay đổi</strong> và

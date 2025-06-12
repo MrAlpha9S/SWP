@@ -1,13 +1,12 @@
 import CustomButton from "./CustomButton.jsx";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
-const ModalFooter = ({setIsModalOpen}) => {
-    const navigate = useNavigate();
+const ModalFooter = ({setIsModalOpen, onCancel}) => {
+
     return (
         <div className='flex gap-2 justify-end'>
             <CustomButton onClick={() => setIsModalOpen(false)}>Tôi đã hiểu</CustomButton>
-            <CustomButton onClick={() => navigate('/')} type='cancel'>Trở lại</CustomButton>
+            <CustomButton onClick={() => onCancel()} type='cancel'>Trở lại</CustomButton>
         </div>
     )
 }

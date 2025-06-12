@@ -412,7 +412,10 @@ const Onboarding = () => {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter setIsModalOpen={setIsModalOpen} />}
+                footer={<ModalFooter setIsModalOpen={setIsModalOpen} onCancel={() => {
+                    setIsModalOpen(false)
+                    navigate('/')
+                }} />}
             >
                 <p>
                     Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.

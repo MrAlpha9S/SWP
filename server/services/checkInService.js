@@ -77,24 +77,108 @@ const getCheckInLogDataset = async (userAuth0Id) => {
     }
 }
 
-const getCheckInStatus = async (userAuth0Id) => {
-    const today = getCurrentUTCDateTime().toISOString().split('T')[0];
+const getCheckInDataOnDate = async (userAuth0Id, date) => {
+    const onDate = date.split('T')[0];
 
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
 
-        const result = await pool.request()
-            .input('today', sql.Date, today)
+        const checkinLogResult = await pool.request()
+            .input('onDate', sql.Date, onDate)
             .input('user_id', sql.Int, userId)
-            .query('SELECT COUNT(*) AS checked_in FROM checkin_log WHERE user_id = @user_id AND CAST(logged_at AS DATE) = @today');
+            .query('SELECT * FROM checkin_log WHERE user_id = @user_id AND CAST(logged_at AS DATE) = @onDate');
 
-        return result.recordset[0].checked_in > 0;
+        if (checkinLogResult.recordset.length > 0) {
+            const log_id = checkinLogResult.recordset[0].log_id;
+
+            const qnaResult = await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query('SELECT * FROM qna WHERE log_id = @log_id')
+
+            const freetextResult = await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query('SELECT * FROM free_text WHERE log_id = @log_id')
+
+            const quittingItemsResult = await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query('SELECT * FROM quitting_items WHERE log_id = @log_id')
+            const qnaList = qnaResult.recordset;
+            const freetextList = freetextResult.recordset;
+            const quittingItemsList = quittingItemsResult.recordset;
+
+            return ({
+                ...checkinLogResult.recordset[0],
+                qnaList,
+                freetextList,
+                quittingItemsList
+            })
+        }
 
     } catch (error) {
-        console.error('error in getCheckInStatus', error);
+        console.error('error in getCheckInDataOnDate', error);
         return false;
     }
 }
 
-module.exports = {postCheckIn, getCheckInLogDataset, getCheckInStatus};
+const getAllCheckInData = async (userAuth0Id) => {
+    try {
+        const pool = await poolPromise;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+        const query = `
+            SELECT cl.log_id,
+                   cl.user_id,
+                   cl.feeling,
+                   cl.logged_at,
+                   cl.cigs_smoked,
+                   u.username,
+                   u.email,
+                   u.role,
+                   CAST((
+                       SELECT qna_question, qna_answer
+                       FROM qna q
+                       WHERE q.log_id = cl.log_id
+                       FOR JSON PATH
+                   ) AS NVARCHAR(MAX)) AS qna,
+                   ft.free_text_content,
+                   CAST((
+                       SELECT item_value
+                       FROM quitting_items qi
+                       WHERE qi.log_id = cl.log_id
+                       FOR JSON PATH
+                   ) AS NVARCHAR(MAX)) AS quitting_items
+            FROM checkin_log cl
+                     LEFT JOIN users u ON cl.user_id = u.user_id
+                     LEFT JOIN free_text ft ON cl.log_id = ft.log_id
+            WHERE cl.user_id = @userId
+            ORDER BY cl.logged_at DESC;
+
+        `;
+
+        const result = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(query);
+
+        return result.recordset.map(row => ({
+            log_id: row.log_id,
+            user_id: row.user_id,
+            feeling: row.feeling,
+            logged_at: row.logged_at,
+            cigs_smoked: row.cigs_smoked,
+            username: row.username,
+            email: row.email,
+            role: row.role,
+            qna: row.qna ? JSON.parse(row.qna) : [],
+            free_text_content: row.free_text_content || null,
+            quitting_items: row.quitting_items ? JSON.parse(row.quitting_items).map(item => item.item_value) : []
+        }));
+
+    } catch (err) {
+        console.error('Error fetching checkin logs by user ID:', err);
+        return false
+    }
+
+}
+
+module.exports = {postCheckIn, getCheckInLogDataset, getCheckInDataOnDate, getAllCheckInData};
