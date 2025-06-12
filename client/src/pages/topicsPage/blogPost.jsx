@@ -1,5 +1,9 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { Typography, Table } from 'antd';
+import { useParams } from 'react-router-dom';
+import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
+import { useQuery } from '@tanstack/react-query';
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -45,60 +49,63 @@ const columns = [
 ];
 
 const BlogPost = () => {
-  return (
-    <div className="bg-primary-50 max-w-5xl mx-auto p-6">
-      <section className="bg-primary-50 p-6 rounded-md shadow-sm mb-10">
-        <Title level={1} className="!text-primary-800">Common concerns about quitting</Title>
-        <Paragraph>
-          Quitting smoking is one of the best things you can do for your health,
-          your family and your lifestyle. The journey can be challenging, with
-          peaks and troughs along the way, but with the support of your friends,
-          family and iCanQuit, you’ll get there.
-        </Paragraph>
-      </section>
+  const { topicId, blogId } = useParams();
 
-      <section className="mb-10">
-        <Title level={3}>The effect on your appearance</Title>
-        <Paragraph>One of the biggest benefits of quitting smoking is the positive impact it can have on the way you look.</Paragraph>
-        <ul className="list-disc ml-6 text-gray-700">
-          <li>Healthier hair, skin, nails and eyes</li>
-          <li>Fewer wrinkles</li>
-          <li>Reduced risk of macular degeneration or cataracts</li>
-          <li>Lower chance of acne and psoriasis</li>
-          <li>Less risk of losing your teeth, having yellow teeth, or having bad breath</li>
-        </ul>
-      </section>
+  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
-      <section className="mb-10">
-        <Title level={3}>Weight gain</Title>
-        <Paragraph>
-          It’s understandable to have concerns about <Link href="#">gaining weight</Link> when you quit smoking.
-          But don’t be too concerned – the benefits to your health and appearance when you quit are amazing.
-          In the longer term, people who used to smoke don’t tend to weigh more than people who’ve never smoked.
-        </Paragraph>
-        <Paragraph>
-          Most people seem to gain about 4kg – but some people don’t put on any extra kilos at all.
-          Around 60% of this weight is added in the first year after quitting.
-          Putting on excessive weight (over 10kg) isn’t common.
-        </Paragraph>
-      </section>
+  const { isPending, error, data } = useQuery({
+    queryKey: ['Blog', topicId],
+    queryFn: async () => {
+      const token = await getAccessTokenSilently();
+      if (!isAuthenticated || !user || !token) return;
+      const result = await fetch(`http://localhost:3000/topics/${topicId}/${blogId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return await result.json();
+    },
+    enabled: isAuthenticated && !!user && !!topicId,
+  });
 
-      <section>
-        <Title level={3}>The effect on mental wellbeing</Title>
-        <Paragraph>
-          Quitting can improve <Link href="#">mental health</Link>, and reduce feelings of anxiety and stress.
-          You’ll feel a positive improvement in your wellbeing that’s chemical-free.
-        </Paragraph>
-        <Table
-          dataSource={dataSource}
-          columns={columns}
-          pagination={false}
-          bordered
-          className="mt-4"
-        />
-      </section>
-    </div>
-  );
+
+  useEffect(() => {
+    if (isPending || !data) return;
+    console.log('Fetched blog data:', data);
+  }, [data, isPending])
+
+  if (isPending || !data || !data.data) {
+    console.log('Loading or no data available');
+    return null;
+  } else {
+    const blogTitle = data.data.title;
+    const blogDescription = data.data.description;
+    const blogContent = data.data.content;
+    console.log('blogContent:', blogContent);
+    return (
+      <div className="bg-primary-50 min-h-screen pb-16">
+        <div className="bg-white max-w-5xl mx-auto p-6">
+          <section className="bg-white-50 p-6 rounded-md shadow-sm mb-10">
+            <Title level={1} className="!text-primary-800">{blogTitle}</Title>
+            <Paragraph>
+              {blogDescription}
+            </Paragraph>
+          </section>
+
+          <section className="mb-10">
+            <div dangerouslySetInnerHTML={{ __html: blogContent }} />
+            
+          </section>
+
+          
+        </div>
+      </div>
+    );
+  }
+
+
 };
 
 export default BlogPost;

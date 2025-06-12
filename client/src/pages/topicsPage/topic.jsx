@@ -4,28 +4,10 @@ import { Card } from 'antd';
 import { useParams } from 'react-router-dom';
 import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
 import { useQuery } from '@tanstack/react-query';
-
-const topics = [
-    {
-        title: 'Health risks of smoking',
-        description:
-            'Learn the health risks of smoking and the life-changing benefits of quitting. See how smoking harms your body and how quitting lowers risks like cancer, lung disease and heart problems - at any age or stage.',
-    },
-    {
-        title: 'Chemicals in tobacco products',
-        description:
-            'Explore the 7,000+ chemicals in tobacco smoke, including 69 cancer-causing substances. Learn how additives like ammonia boost addiction in tobacco products.',
-    },
-    {
-        title: 'How smoking affects the body',
-        description:
-            'Discover how smoking harms nearly every part of your body. Learn the effects of smoking on your organs and why quitting is the best choice for your health.',
-    },
-];
-
-
+import { useNavigate } from 'react-router-dom';
 
 const Topic = () => {
+    const navigate = useNavigate();
     const { topicId } = useParams();
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
@@ -52,31 +34,50 @@ const Topic = () => {
         console.log('Fetched topic data:', data);
     }, [data, isPending])
 
-    console.log('Fetched topic data:', data);
-    return (
-        <div className="bg-primary-50 min-h-screen pb-16">
-            {/* Header */}
-            <div className="px-6 md:px-20 py-12 bg-primary-100 text-primary-900">
-                <h1 className="text-4xl font-bold mb-4">a</h1>
-                <p className="text-lg max-w-3xl">
-                    ad
-                </p>
-            </div>
 
-            {/* Topics */}
-            <div className="max-w-5xl mx-auto mt-10 space-y-6 px-4">
-                {topics.map((topic, index) => (
-                    <Card key={index} className="shadow-sm border border-gray-200">
-                        <div className="space-y-1">
-                            <p className="text-sm text-gray-500 font-medium">Topics</p>
-                            <h2 className="text-xl font-semibold text-primary-900">{topic.title}</h2>
-                            <p className="text-gray-700">{topic.description}</p>
-                        </div>
-                    </Card>
-                ))}
+    if (isPending || !data || !data.data) {
+        console.log('Loading or no data available');
+        return null;
+    } else {
+        // data.data.map((blog) => {
+        //     console.log('Blog ID:', blog.blog_id);
+        //     console.log('Topic Name:', blog.title);
+        //     console.log('Topic Content:', blog.content);
+        // });
+        const blogs = data.data;
+        //console.log('Topic data:', data.data[0]);
+        const topicTitle = data.data[0].topic_name;
+        const topicContent = data.data[0].topic_content;
+        // console.log('Topic title:', topicTitle);
+        // console.log('Topic content:', topicContent);
+
+        return (
+            <div className="bg-primary-50 min-h-screen pb-16">
+                {/* Header */}
+                <div className="px-6 md:px-20 py-12 bg-primary-100 text-primary-900">
+                    <h1 className="text-4xl font-bold mb-4">{topicTitle}</h1>
+                    <p className="text-lg max-w-3xl">
+                        {topicContent}
+                    </p>
+                </div>
+
+                {/* Topics */}
+                <div className="max-w-5xl mx-auto mt-10 space-y-6 px-4">
+                    {blogs.map((blog, index) => (
+                        <Card hoverable onClick={() => navigate(`/topics/${topicId}/${blog.blog_id}`)} key={index} className="shadow-sm border border-gray-200">
+                            <div className="space-y-1">
+                                <p className="text-sm text-gray-500 font-medium">Topics</p>
+                                <h2 className="text-xl font-semibold text-primary-900">{blog.title}</h2>
+                                <p className="text-gray-700">{blog.description}</p>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+
 };
 
 const AuthTopic = withAuthenticationRequired(Topic);
