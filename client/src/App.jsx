@@ -21,6 +21,7 @@ import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
 import Tiptap from './test.jsx'
+import Editor from './editor.jsx'
 
 function App() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -50,7 +51,7 @@ function App() {
                 <Route path="/topics/:topicId" element={<Topic />} />
 
                 <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
-                <Route path="/editor" element={<Tiptap />} />
+                <Route path="/editor" element={<Editor />} />
 
                 {/* Auth0 Callback Routes */}
 
