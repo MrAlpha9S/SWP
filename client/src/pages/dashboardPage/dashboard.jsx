@@ -133,32 +133,35 @@ function Dashboard() {
             <Hero title={heroTitle} heroHeight={heroHeight}/>
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
                 <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} mode="inline"/></div>
+                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                    mode="inline"/></div>
                 <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} collapse={true} mode="horizontal"/></div>
+                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                    collapse={true} mode="horizontal"/></div>
 
                 <div className="w-full">
                     {!isAuthenticated || isUserProfilePending ? (
                         <ProgressBoard isPending={true}/>
                     ) : currentStepDashboard === 'dashboard' ? (
-                        <ProgressBoard
-                            startDate={startDate}
-                            pricePerPack={pricePerPack}
-                            cigsPerPack={cigsPerPack}
-                            cigsReduced={cigsReduced}
-                            quittingMethod={quittingMethod}
-                            planLog={planLog}
-                            cigsPerDay={cigsPerDay}
-                            expectedQuitDate={expectedQuitDate}
-                            stoppedDate={stoppedDate}
-                            isPending={false}
-                            readinessValue={readinessValue}
-                            planLogCloneDDMMYY={planLogCloneDDMMYY}
-                            setCurrentStepDashboard={setCurrentStepDashboard}
-                            user={user}
-                            isAuthenticated={isAuthenticated}
-                            getAccessTokenSilently={getAccessTokenSilently}
-                        />
+                        userProfile.data ? <ProgressBoard
+                                startDate={startDate}
+                                pricePerPack={pricePerPack}
+                                cigsPerPack={cigsPerPack}
+                                cigsReduced={cigsReduced}
+                                quittingMethod={quittingMethod}
+                                planLog={planLog}
+                                cigsPerDay={cigsPerDay}
+                                expectedQuitDate={expectedQuitDate}
+                                stoppedDate={stoppedDate}
+                                isPending={false}
+                                readinessValue={readinessValue}
+                                planLogCloneDDMMYY={planLogCloneDDMMYY}
+                                setCurrentStepDashboard={setCurrentStepDashboard}
+                                user={user}
+                                isAuthenticated={isAuthenticated}
+                                getAccessTokenSilently={getAccessTokenSilently}
+                            /> :
+                            <NotFoundBanner title='Không tìm thấy kế hoạch của bạn'/>
                     ) : currentStepDashboard === 'check-in' && (
                         <CheckinBoard/>
                     )}
