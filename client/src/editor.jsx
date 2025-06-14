@@ -26,7 +26,7 @@ export default function Editor() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-4">
+    <div className="bg-white max-w-3xl mx-auto rounded-lg mt-10 p-4">
       <div className="mb-2 font-semibold text-lg">Post</div>
 
       <div className="border rounded-md shadow-sm">
