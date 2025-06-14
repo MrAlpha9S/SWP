@@ -21,7 +21,7 @@ export default function Editor() {
   const handleSubmit = () => {
     if (editor) {
       const html = editor.getHTML()
-      console.log('Submitted content:', html)
+      console.log('', html)
     }
   }
 
