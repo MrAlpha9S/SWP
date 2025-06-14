@@ -32,6 +32,7 @@ export const useStepCheckInStore = create((set) => ({
     }),
     handleStepOne: () => set({
         step: 'StepOne',
+        current: 0
     })
 }));
 

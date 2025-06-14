@@ -53,7 +53,9 @@ function SmokeFreeCheckin() {
     })
 
     useEffect(() => {
-        if (date) return
+        if (date) {
+            handleStepOne();
+        }
         if (CheckInDataSuccess) {
             if (CheckInData && CheckInData.data) {
                 setCheckInDate(CheckInData.data.logged_at);
