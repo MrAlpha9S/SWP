@@ -354,12 +354,17 @@ VALUES
   ('Pro - Yearly', 12, 199.99);
 
 --Sample user info
-INSERT INTO [users] ([auth0_id], [username], [email])
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com'),
-('auth0|xyz789', 'jane_smith', 'jane@example.com'),
-('auth0|lmn456', 'bob_lee', 'bob@example.com'),
-('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com');
+('auth0|abc123', 'john_doe', 'john@example.com', null),
+('auth0|xyz789', 'jane_smith', 'jane@example.com', null),
+('auth0|lmn456', 'bob_lee', 'bob@example.com', null),
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00');
+
+--UPDATE users
+--SET created_at = '2025-05-01 00:00:00'
+--WHERE user_id = 4;
+
 
 --Sample data for onboarding
 INSERT INTO user_profiles (
@@ -371,6 +376,7 @@ INSERT INTO user_profiles (
     15, 15, 35000, 'within_5', 'gradual-weekly',
     3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 16:03:56', 1
 );
+
 
 -- Reasons
 INSERT INTO profiles_reasons (profile_id, reason_value) VALUES (1, 'cost');
@@ -410,9 +416,7 @@ INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 't
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-06-05 00:00:00.000', 10);
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'good', '2025-06-06 00:00:00.000', 0);
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'bad', '2025-06-07 00:00:00.000', 10);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'okay', '2025-06-08 00:00:00.000', null);
 INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'great', '2025-06-09 00:00:00.000', 9);
-INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked) VALUES (4, 'terrible', '2025-06-10 00:00:00.000', null);
 
 --qna
 INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (1, 'smokeCraving', 'awfwafaw');
@@ -441,43 +445,27 @@ INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (4, 'exercise', N'Tôi
 INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (4, 'cravings', N'Tôi uống trà nóng khi cảm thấy thèm.');
 INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (4, 'encourage', N'Đồng nghiệp tôi khen tôi cố gắng, tôi rất vui.');
 
--- log_id = 6
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (6, 'smokeCraving', N'Tôi thèm khi căng thẳng nhưng đã nghe nhạc thư giãn.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (6, 'healthChanges', N'Tôi thấy đầu óc tỉnh táo hơn khi làm việc.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (6, 'exercise', N'Tôi tập yoga buổi tối, thấy tâm trạng ổn định hơn.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (6, 'cravings', N'Tôi nhai cà rốt khi thấy miệng trống trải.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (6, 'encourage', N'Bạn cùng phòng tôi nhắc nhở tôi rất nhiều, tôi biết ơn điều đó.');
-
--- log_id = 8
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (8, 'smokeCraving', N'Không, hôm nay tôi cảm thấy ổn.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (8, 'healthChanges', N'Tôi ít mệt khi leo cầu thang.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (8, 'exercise', N'Tôi dọn dẹp nhà cửa, đổ mồ hôi khá nhiều.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (8, 'cravings', N'Tôi ngậm kẹo bạc hà.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (8, 'encourage', N'Mẹ tôi rất vui khi tôi bỏ thuốc.');
-
--- log_id = 10
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (10, 'smokeCraving', N'Không nhiều, tôi bận rộn nên không nghĩ đến.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (10, 'healthChanges', N'Tôi không còn thấy hụt hơi khi chạy.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (10, 'exercise', N'Tôi đi bộ cùng chó cưng.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (10, 'cravings', N'Tôi ăn bánh gạo thay vì hút thuốc.');
-INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (10, 'encourage', N'Một người bạn lâu ngày gọi điện động viên.');
+-- log_id = 5
+INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (5, 'smokeCraving', N'Tôi thèm khi căng thẳng nhưng đã nghe nhạc thư giãn.');
+INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (5, 'healthChanges', N'Tôi thấy đầu óc tỉnh táo hơn khi làm việc.');
+INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (5, 'exercise', N'Tôi tập yoga buổi tối, thấy tâm trạng ổn định hơn.');
+INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (5, 'cravings', N'Tôi nhai cà rốt khi thấy miệng trống trải.');
+INSERT INTO qna (log_id, qna_question, qna_answer) VALUES (5, 'encourage', N'Bạn cùng phòng tôi nhắc nhở tôi rất nhiều, tôi biết ơn điều đó.');
 
 --free text
 INSERT INTO free_text (log_id, free_text_content) VALUES 
-(5, N'Gần đây tôi cảm thấy khá ổn, dù vẫn còn thèm thuốc vào buổi tối. Tôi đang cố gắng giữ bản thân bận rộn để không nghĩ đến việc hút.'),
+(6, N'Gần đây tôi cảm thấy khá ổn, dù vẫn còn thèm thuốc vào buổi tối. Tôi đang cố gắng giữ bản thân bận rộn để không nghĩ đến việc hút.'),
 (7, N'Có một vài ngày tôi cảm thấy rất mệt mỏi và dễ cáu, nhưng tôi biết đó là một phần của quá trình cai. Tôi đã viết nhật ký để giải tỏa cảm xúc.'),
-(9, N'Tuần trước tôi bị cám dỗ khi gặp lại nhóm bạn cũ hay hút thuốc, nhưng tôi đã từ chối và cảm thấy rất tự hào về bản thân.'),
-(11, N'Tôi cảm thấy nhẹ nhõm và tự tin hơn vì đã vượt qua được tuần khó khăn nhất. Gia đình tôi cũng nhận ra sự thay đổi tích cực ở tôi.');
+(8, N'Tuần trước tôi bị cám dỗ khi gặp lại nhóm bạn cũ hay hút thuốc, nhưng tôi đã từ chối và cảm thấy rất tự hào về bản thân.');
 
 --quitting_items
 INSERT INTO quitting_items(item_value, log_id) VALUES ('positive_mindset', 3);
 INSERT INTO quitting_items(item_value, log_id) VALUES ('social_support', 3);
-INSERT INTO quitting_items(item_value, log_id) VALUES ('positive_mindset', 3);
+INSERT INTO quitting_items(item_value, log_id) VALUES ('craving_management', 3);
 INSERT INTO quitting_items(item_value, log_id) VALUES ('trigger_avoidance', 3);
 INSERT INTO quitting_items(item_value, log_id) VALUES ('quit_plan', 6);
 INSERT INTO quitting_items(item_value, log_id) VALUES ('positive_mindset', 6);
 INSERT INTO quitting_items(item_value, log_id) VALUES ('mindfulness', 6);
-
 
 use SWP391
 SELECT * FROM users

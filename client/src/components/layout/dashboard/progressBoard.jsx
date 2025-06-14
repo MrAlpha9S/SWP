@@ -129,7 +129,6 @@ const ProgressBoard = ({
         const currentDay = new Date(localStartDate);
         const endDate = new Date(currentDate);
         let total = 0;
-        let lastCigsSmoked = cigsPerDay;
 
         while (currentDay <= endDate) {
             const dateStr = currentDay.toISOString().split('T')[0];
@@ -139,16 +138,11 @@ const ProgressBoard = ({
                 new Date(entry.date).toISOString().split('T')[0] === dateStr
             );
 
-            // Preserve 0 if it's a real check-in
-            const cigsSmoked =
-                checkin && checkin.cigs !== null && checkin.cigs !== undefined
-                    ? checkin.cigs
-                    : lastCigsSmoked;
+            if (checkin) {
+                total += cigsPerDay - checkin?.cigs;
+            }
 
-            total += cigsPerDay - cigsSmoked;
-            lastCigsSmoked = cigsSmoked;
-
-            currentDay.setDate(currentDay.getDate() + 1);
+            currentDay.setDate(currentDay.getUTCDate() + 1);
         }
 
         return total;

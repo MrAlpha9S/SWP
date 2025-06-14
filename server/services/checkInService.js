@@ -69,7 +69,8 @@ const getCheckInLogDataset = async (userAuth0Id) => {
         const checkin_logs = await pool.request()
             .input('user_id', sql.Int, userId)
             .query('SELECT logged_at as date, cigs_smoked as cigs FROM checkin_log WHERE user_id = @user_id');
-        return checkin_logs.recordset;
+
+        return checkin_logs.recordset.sort((a, b) =>new Date(a.date) - new Date(b.date));
 
     } catch (error) {
         console.error('error in getCheckInLogDataset', error);

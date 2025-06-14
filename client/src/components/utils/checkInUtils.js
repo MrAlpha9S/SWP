@@ -53,75 +53,76 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
-export function mergeByDate(planLog = [], checkinLog = [], quittingMethod, cigsPerDay) {
+export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
     const map = new Map();
 
-    if (checkinLog.length === 0) {
-        return planLog;
-    }
-
+    const checkinMap = new Map();
     for (let i = 0; i < checkinLog.length; i++) {
-        const { date, cigs } = checkinLog[i];
-
-        const currentUTCDate = getCurrentUTCDateTime().toISOString().split('T')[0];
-        const checkinDay = new Date(date).toISOString().split('T')[0];
-
-        if (checkinDay <= currentUTCDate) {
-            const isMissingCheckin = cigs === null || cigs === undefined;
-
-            let fallback = cigsPerDay;
-            for (let j = i - 1; j >= 0; j--) {
-                const prev = checkinLog[j]?.cigs;
-                if (prev !== null && prev !== undefined) {
-                    fallback = prev;
-                    break;
-                }
-            }
-
-            map.set(checkinDay, {
-                date: checkinDay,
-                actual: isMissingCheckin ? fallback : cigs,
-                plan: null,
-                isMissingCheckin
-            });
-        } else {
-            map.set(checkinDay, {
-                date: checkinDay,
-                actual: null,
-                plan: null,
-                isMissingCheckin: true
-            });
-        }
+        const dateStr = new Date(checkinLog[i].date).toISOString().split('T')[0];
+        checkinMap.set(dateStr, checkinLog[i].cigs);
     }
 
+    // Define plan ranges
+    const planRanges = [];
     for (let i = 0; i < planLog.length; i++) {
-        const { date, cigs } = planLog[i];
-        const start = new Date(date);
-        const end = planLog[i + 1] ? new Date(planLog[i + 1].date) : new Date(start);
+        const start = new Date(planLog[i].date);
+        const end = planLog[i + 1]
+            ? new Date(planLog[i + 1].date)
+            : new Date(start);
 
         if (!planLog[i + 1]) {
-            end.setDate(
+            end.setUTCDate(
                 quittingMethod === 'gradual-weekly'
-                    ? start.getDate() + 6
-                    : start.getDate() + 1
+                    ? start.getUTCDate() + 6
+                    : start.getUTCDate() + 1
             );
         }
 
-        const firstDayStr = start.toISOString().split('T')[0];
-        const existing = map.get(firstDayStr) || { date: firstDayStr, actual: null, isMissingCheckin: true };
-        map.set(firstDayStr, { ...existing, plan: cigs });
+        planRanges.push({
+            start,
+            end,
+            cigs: planLog[i].cigs
+        });
+    }
 
-        start.setDate(start.getDate() + 1);
-        while (start < end) {
-            const dayStr = start.toISOString().split('T')[0];
-            const existing = map.get(dayStr) || { date: dayStr, actual: null, isMissingCheckin: true };
-            map.set(dayStr, { ...existing, plan: null });
-            start.setDate(start.getDate() + 1);
+    const firstDate = new Date(Math.min(
+        ...checkinLog.map(e => new Date(e.date)),
+        ...planLog.map(e => new Date(e.date))
+    ));
+
+    const lastDate = new Date(Math.max(
+        ...checkinLog.map(e => new Date(e.date)),
+        ...planLog.map(e => new Date(e.date)),
+        new Date()
+    ));
+
+    const current = new Date(firstDate);
+    while (current <= lastDate) {
+        const dayStr = current.toISOString().split('T')[0];
+        const actual = checkinMap.get(dayStr) ?? null;
+
+        // Default plan is null unless it's the first day of a plan range
+        let plan = null;
+        for (const range of planRanges) {
+            if (dayStr === range.start.toISOString().split('T')[0]) {
+                plan = range.cigs;
+                break;
+            }
         }
+
+        map.set(dayStr, {
+            date: dayStr,
+            actual,
+            plan
+        });
+
+        current.setUTCDate(current.getUTCDate() + 1);
     }
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
+
 
 export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null) {
     if (!isAuthenticated || !user) return;

@@ -17,8 +17,6 @@ export default function PostSignUpCallback() {
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 const profile = profileRes?.data;
 
-                console.log(profile);
-
                 await syncProfileToStores(profile)
 
                 navigate('/dashboard');

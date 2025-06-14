@@ -116,9 +116,10 @@ const Journal = () => {
     }, [startDate, searchDate, allCheckInData, userCreationDate]);
 
     useEffect(() => {
-        console.log(dropdownItems);
-
-    }, [dropdownItems]);
+        if (dropdownItems.length > 1) {
+            dropdownItems.sort((a, b) => b.key - a.key)
+        }
+    }, [dropdownItems, dropdownItems.length]);
 
 
     return <>
@@ -130,7 +131,7 @@ const Journal = () => {
                             placeholder='Chọn ngày để tìm kiếm'/>
                 <CustomButton onClick={() => setSearchDate('')}>Xóa tìm kiếm</CustomButton>
             </div>
-            <Collapse items={dropdownItems} defaultActiveKey={['1']}/>
+            <Collapse items={dropdownItems} defaultActiveKey={[`${dropdownItems.length}`]}/>
         </div>
     </>
 };
