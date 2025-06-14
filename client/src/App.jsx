@@ -20,7 +20,6 @@ import Footer from "./components/layout/footer.jsx";
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
-import Tiptap from './test.jsx'
 import Editor from './editor.jsx'
 
 function App() {
