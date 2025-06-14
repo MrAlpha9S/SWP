@@ -51,9 +51,7 @@ function Dashboard() {
 
     const {
         isPending: isUserProfilePending,
-        error: userProfileError,
         data: userProfile,
-        isFetching: isUserProfileFetching,
     } = useQuery({
         queryKey: ['userProfile'],
         queryFn: async () => {
@@ -84,7 +82,7 @@ function Dashboard() {
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 0) {
+            if (window.scrollY > 20) {
                 setHeroHeight(50)
             } else {
                 setHeroHeight(188)

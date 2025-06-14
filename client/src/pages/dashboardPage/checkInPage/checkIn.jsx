@@ -8,7 +8,7 @@ import CheckInJournal from './checkInJournal';
 import CheckInStepFour from './checkInStepFour';
 import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
 import {useAutoAnimate} from "@formkit/auto-animate/react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import ModalFooter from "../../../components/ui/modalFooter.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {useQuery} from "@tanstack/react-query";
@@ -19,6 +19,8 @@ import {getCurrentUTCDateTime} from "../../../components/utils/dateUtils.js";
 import {useCurrentStepDashboard} from "../../../stores/store.js";
 
 function SmokeFreeCheckin() {
+    const {date} = useParams()
+
     const {step, current, handleStepThree, handleStepOne} = useStepCheckInStore();
     const [animateRef] = useAutoAnimate();
     const navigate = useNavigate();
@@ -33,14 +35,11 @@ function SmokeFreeCheckin() {
         setIsStepOneOnYes,
         setIsFreeText,
         setCigsSmoked,
-        setIsJournalSelected
     } = useCheckInDataStore();
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
     const {
-        isPending: isCheckInDataPending,
-        error: CheckInDataError,
         data: CheckInData,
         isSuccess: CheckInDataSuccess,
     } = useQuery({
@@ -54,6 +53,7 @@ function SmokeFreeCheckin() {
     })
 
     useEffect(() => {
+        if (date) return
         if (CheckInDataSuccess) {
             if (CheckInData && CheckInData.data) {
                 setCheckInDate(CheckInData.data.logged_at);
@@ -109,7 +109,7 @@ function SmokeFreeCheckin() {
                 <Steps className='pb-5' current={current} items={items}/>
                 <h1 className="text-2xl font-bold text-primary-800 mb-2">Check-in</h1>
                 <div ref={animateRef}>
-                    {step === 'StepOne' && <CheckInStepOne/>}
+                    {step === 'StepOne' && <CheckInStepOne date={date}/>}
                     {step === 'StepTwoOnYes' && <CheckInStepTwoOnYes/>}
                     {step === 'StepTwoOnNo' && <CheckInStepTwoOnNo/>}
                     {step === 'StepThree' && <CheckInStepThree/>}

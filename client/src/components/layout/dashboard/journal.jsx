@@ -1,37 +1,80 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {Collapse, DatePicker, Timeline} from 'antd';
+import {Collapse, DatePicker} from 'antd';
 import {useQuery} from "@tanstack/react-query";
 import {convertDDMMYYYYStrToYYYYMMDDStr, getCurrentUTCDateTime} from "../../utils/dateUtils.js";
 import {getCheckInData} from "../../utils/checkInUtils.js";
 import {useAuth0} from "@auth0/auth0-react";
 import {useCheckInDataStore} from "../../../stores/checkInStore.js";
-import {usePlanStore} from "../../../stores/store.js";
-import TimeLineEachMonth from "../../ui/timeLineEachMonth.jsx";
+import {usePlanStore, useUserCreationDate} from "../../../stores/store.js";
+import TimeLineEachMonth from "./timeLineEachMonth.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
 import dayjs from "dayjs";
+import {getUserCreationDate} from "../../utils/userUtils.js";
 
 const Journal = () => {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {allCheckInData, setAllCheckInData} = useCheckInDataStore();
     const {startDate} = usePlanStore()
     const [searchDate, setSearchDate] = useState('')
+    const {setUserCreationDate} = useUserCreationDate();
 
+
+    const {
+        isPending: isCheckInDataPending,
+        error: CheckInDataError,
+        data: CheckInData,
+    } = useQuery({
+        queryKey: ['all-checkin-data'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal');
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isCheckInDataPending) {
+            if (CheckInDataError && !CheckInData.success) {
+                return <div>Check in data not found</div>
+            } else {
+                setAllCheckInData(CheckInData.data);
+            }
+        }
+    }, [isCheckInDataPending, CheckInData]);
+
+    const {
+        isPending: isUserCreationDatePending,
+        data: userCreationDate,
+    } = useQuery({
+        queryKey: ['user-creation-date'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isUserCreationDatePending) {
+            setUserCreationDate(userCreationDate.data)
+        }
+    }, [isUserCreationDatePending])
 
 
     const dropdownItems = useMemo(() => {
         let dropdownItems = [];
-        const localStartDate = new Date(startDate);
+        const startDate = new Date(userCreationDate?.data);
         const localCurrentDate = getCurrentUTCDateTime()
 
         let i = 1
         while (
-            localStartDate.getFullYear() < localCurrentDate.getFullYear() ||
-            (localStartDate.getFullYear() === localCurrentDate.getFullYear() &&
-                localStartDate.getMonth() <= localCurrentDate.getMonth())
+            startDate.getUTCFullYear() < localCurrentDate.getUTCFullYear() ||
+            (startDate.getUTCFullYear() === localCurrentDate.getUTCFullYear() &&
+                startDate.getUTCMonth() <= localCurrentDate.getUTCMonth())
             ) {
-            let displayMonth = localStartDate.toLocaleString('vi-VN', { month: 'short' });
-            const baseMonth = localStartDate.getMonth();
-            const baseYear = localStartDate.getFullYear();
+            let displayMonth = startDate.toLocaleString('vi-VN', {month: 'short'});
+            const baseMonth = startDate.getUTCMonth();
+            const baseYear = startDate.getUTCFullYear();
 
             let finalDay = 0;
             let finalMonth = baseMonth;
@@ -39,11 +82,11 @@ const Journal = () => {
 
             if (searchDate.length > 0) {
                 const parsedSearchDate = new Date(searchDate);
-                const parsedMonth = parsedSearchDate.getMonth();
-                const parsedYear = parsedSearchDate.getFullYear();
+                const parsedMonth = parsedSearchDate.getUTCMonth();
+                const parsedYear = parsedSearchDate.getUTCFullYear();
 
                 if (parsedMonth === baseMonth && parsedYear === baseYear) {
-                    finalDay = parsedSearchDate.getDate();
+                    finalDay = parsedSearchDate.getUTCDate();
                     finalMonth = parsedMonth;
                     finalYear = parsedYear;
                 } else {
@@ -62,50 +105,29 @@ const Journal = () => {
                         month={finalMonth}
                         year={finalYear}
                         allCheckInData={allCheckInData}
+                        userCreationDate={userCreationDate?.data}
                     />
                 ),
             });
 
-            localStartDate.setMonth(localStartDate.getMonth() + 1);
+            startDate.setMonth(startDate.getUTCMonth() + 1);
         }
         return dropdownItems;
-    }, [startDate, searchDate, allCheckInData]);
-
-
-    const {
-        isPending: isCheckInDataPending,
-        error: CheckInDataError,
-        data: CheckInData,
-        isFetching: isFetchingCheckInData,
-    } = useQuery({
-        queryKey: ['all-checkin-data'],
-        queryFn: async () => {
-            if (!isAuthenticated || !user) return;
-            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated);
-        },
-        enabled: isAuthenticated && !!user,
-    })
+    }, [startDate, searchDate, allCheckInData, userCreationDate]);
 
     useEffect(() => {
-        if (!isCheckInDataPending) {
-            if (CheckInDataError && !CheckInData.success) {
-                return <div>Check in data not found</div>
-            } else {
-                setAllCheckInData(CheckInData.data);
-            }
-        }
-    }, [isCheckInDataPending, CheckInData]);
+        console.log(dropdownItems);
 
-    useEffect(() => {
+    }, [dropdownItems]);
 
-    }, [allCheckInData]);
 
     return <>
         <div className="flex flex-col gap-4">
             <div className='flex gap-5'>
                 <DatePicker className='h-[42px] w-[40%]' onChange={(date, dateString) => {
                     setSearchDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
-                }} format={'DD-MM-YYYY'} value={searchDate ? dayjs(searchDate) : ''} allowClear={false} placeholder='Chọn ngày để tìm kiếm'/>
+                }} format={'DD-MM-YYYY'} value={searchDate ? dayjs(searchDate) : ''} allowClear={false}
+                            placeholder='Chọn ngày để tìm kiếm'/>
                 <CustomButton onClick={() => setSearchDate('')}>Xóa tìm kiếm</CustomButton>
             </div>
             <Collapse items={dropdownItems} defaultActiveKey={['1']}/>

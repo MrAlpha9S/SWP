@@ -55,4 +55,17 @@ const getUserIdFromAuth0Id = async (auth0_id) => {
     }
 }
 
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id};
+const getUserCreationDateFromAuth0Id = async (auth0_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('auth0_id', auth0_id)
+            .query('SELECT created_at from users WHERE auth0_id = @auth0_id');
+        return result.recordset[0].created_at;
+    } catch (error) {
+        console.error('error in getUserIdFromAuth0Id', error);
+        return null;
+    }
+}
+
+module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id};

@@ -47,3 +47,10 @@ h1, h2, h3, h4, h5, h6 {
         @apply py-12 md:py-24;
     }
 }
+
+.truncate-multiline {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* change number of lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

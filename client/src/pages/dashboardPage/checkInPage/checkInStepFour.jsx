@@ -16,9 +16,9 @@ import {useMutation} from "@tanstack/react-query";
 import {queryClient} from "../../../main.jsx"
 import {useAuth0} from "@auth0/auth0-react";
 import {postCheckIn} from "../../../components/utils/checkInUtils.js";
-import {useNavigate} from "react-router-dom";
-import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../../components/utils/dateUtils.js";
+import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime} from "../../../components/utils/dateUtils.js";
 import {useCurrentStepDashboard} from "../../../stores/store.js";
+import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
 
@@ -38,6 +38,7 @@ const CheckInStepFour = () => {
     const {handleBackToStepOne} = useStepCheckInStore();
     const [journalRender, setJournalRender] = useState('')
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
+    const navigate = useNavigate();
 
 
     let feelLabel = ''
@@ -79,7 +80,10 @@ const CheckInStepFour = () => {
             await queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
 
             setTimeout(() => {
-                setCurrentStepDashboard('dashboard');
+                setCurrentStepDashboard('dashboard')
+                if (new Date(checkInDate) < getCurrentUTCDateTime()) {
+                       navigate('/dashboard')
+                }
             }, 100);
         }
     })

@@ -1,6 +1,11 @@
 import {create} from 'zustand';
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../components/utils/dateUtils.js";
 
+export const useUserCreationDate = create((set) => ({
+    userCreationDate: '',
+    setUserCreationDate: (value) => set({userCreationDate: value}),
+}));
+
 export const useQuitReadinessStore = create((set) => ({
     readinessValue: '',
     setReadinessValue: (value) => set({readinessValue: value}),

@@ -1,8 +1,7 @@
 const {
     postCheckIn,
     getCheckInLogDataset,
-    getCheckInDataOnDate,
-    getAllCheckInData
+    getCheckInDataService
 } = require("../services/checkInService");
 
 const handlePostCheckIn = async (req, res) => {
@@ -12,7 +11,7 @@ const handlePostCheckIn = async (req, res) => {
         checkedQuitItems,
         cigsSmoked,
         freeText,
-        qna
+        qna, checkInDate
     } = req.body;
 
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
@@ -23,7 +22,7 @@ const handlePostCheckIn = async (req, res) => {
             checkedQuitItems,
             cigsSmoked,
             freeText,
-            qna);
+            qna, checkInDate);
 
         if (!result) {
             return res.status(404).json({success: false, message: 'Check-in data insert failed', data: null});
@@ -59,17 +58,14 @@ const handleGetDataSet = async (req, res) => {
 
 const getCheckInData = async (req, res) => {
     const {
-        userAuth0Id, date
+        userAuth0Id, date, action
     } = req.query;
     let result = []
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: result});
 
     try {
 
-        if (date)
-            result = await getCheckInDataOnDate(userAuth0Id, date);
-        else
-            result = await getAllCheckInData(userAuth0Id);
+        let result = await getCheckInDataService(userAuth0Id, date, action);
 
         if (!result) {
             return res.status(404).json({success: false, message: 'Check-in not found', data: result});

@@ -9,6 +9,7 @@ export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated,
     const bodyPayLoad = {
         userAuth0Id: user.sub,
         feel: feel,
+        checkInDate: checkInDate,
     }
 
     if (isStepOneOnYes) {
@@ -122,12 +123,16 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod, cigsP
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, today) {
+export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const fetchURL = today ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${today}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}`
+    let fetchURL = searchDate ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${searchDate}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}`
+
+    if (action !== null) {
+        fetchURL += `&action=${action}`;
+    }
 
     const res = await fetch(fetchURL, {
         method: 'GET',

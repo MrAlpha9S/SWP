@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {DatePicker, Radio} from 'antd';
 import { useCheckInDataStore, useStepCheckInStore } from '../../../stores/checkInStore';
 import CustomButton from "../../../components/ui/CustomButton.jsx";
@@ -6,7 +6,7 @@ import { FEELINGS } from "../../../constants/constants.js";
 import {getCurrentUTCDateTime} from "../../../components/utils/dateUtils.js";
 import dayjs from "dayjs";
 
-const CheckInStepOne = () => {
+const CheckInStepOne = ({date}) => {
     const { handleStepOneNo, handleStepOneYes } = useStepCheckInStore();
 
     const { checkInDate, setCheckInDate, feel, setFeel, setIsStepOneOnYes } = useCheckInDataStore();
@@ -21,6 +21,12 @@ const CheckInStepOne = () => {
     //     }
     // };
 
+    useEffect(() => {
+        if (date) {
+            setCheckInDate(date);
+        }
+    }, [date]);
+
     const handleFeelChange = e => {
         setFeel(e.target.value);
     };
@@ -33,6 +39,7 @@ const CheckInStepOne = () => {
             handleStepOneNo();
         }
     }
+
     return (
         <div className="w-full bg-white mx-auto p-6 rounded-xl shadow-sm text-center">
 
@@ -42,7 +49,7 @@ const CheckInStepOne = () => {
                 <label className="block text-xs md:text-sm mb-1 font-bold">Ngày Check-in</label>
                 <DatePicker disabled className='h-[42px] w-full' onChange={() => {
                     setCheckInDate(getCurrentUTCDateTime().toISOString());
-                }} format={'DD-MM-YYYY'} value={checkInDate ? dayjs(new Date()) : ''} allowClear={false}/>
+                }} format={'DD-MM-YYYY'} value={date ? dayjs(date) : checkInDate ? dayjs(new Date()) : ''} allowClear={false}/>
             </div>
 
             <div className="mb-6 pb-10">

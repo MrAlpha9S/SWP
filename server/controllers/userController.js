@@ -1,6 +1,6 @@
 const { getAllUsers } = require('../services/userService');
 
-const {userExists, createUser} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 
 const handlePostSignup = async (req, res) => {
@@ -32,4 +32,20 @@ const getAllUsersController = async (req, res) => {
     }
 };
 
-module.exports = { getAllUsersController, handlePostSignup };
+const getUserCreationDate = async (req, res) => {
+    const {userAuth0Id} = req.query;
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
+
+    try {
+
+        const creationDate = await getUserCreationDateFromAuth0Id(userAuth0Id);
+
+
+        return res.status(201).json({success: true, message: 'User creation date fetched', data: creationDate});
+    } catch (err) {
+        console.error('post signup error:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+    }
+}
+
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate };

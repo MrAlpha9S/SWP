@@ -10,7 +10,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
                 cigs: currentCigs,
             });
             currentCigs = Math.max(currentCigs - cigsReduced, 0);
-            date.setDate(date.getDate() + 1);
+            date.setDate(date.getUTCDate() + 1);
         }
         if (planLog[planLog.length -1] !== 0 ) {
             planLog.push({
@@ -27,7 +27,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
                 cigs: currentCigs,
             });
             currentCigs = Math.max(currentCigs - cigsReduced, 0);
-            date.setDate(date.getDate() + 7);
+            date.setDate(date.getUTCDate() + 7);
         }
         if (planLog[planLog.length -1] !== 0 ) {
             planLog.push({
@@ -43,7 +43,7 @@ function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expec
         const dailyReduction = cigsPerDay / days;
 
         for (let i = 0; i <= days; i++) {
-            date.setDate(date.getDate() + 1);
+            date.setDate(date.getUTCDate() + 1);
             const remaining = Math.round(Math.max(cigsPerDay - dailyReduction * i, 0));
             planLog.push({
                 date: date.toISOString(),

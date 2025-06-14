@@ -39,7 +39,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Homepage/>}/>
                     <Route path="/dashboard" element={<DashBoard/>}/>
-                    <Route path="/dashboard/check-in" element={<CheckIn/>}/>
+                    <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
                     <Route path="/post-signup" element={<PostSignUpCallback/>}/>
                     <Route path="/onboarding" element={<Onboarding/>}/>
                     <Route path="/error" element={<ErrorPage/>}/>
