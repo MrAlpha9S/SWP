@@ -1,9 +1,12 @@
 import React from 'react';
 import {Tabs} from "antd";
 import CheckIn from "../../../pages/dashboardPage/checkInPage/checkIn.jsx";
+import Journal from "./journal.jsx";
+import AboutCheckin from "./aboutCheckin.jsx";
 
 
 const CheckinBoard = () => {
+
     const items = [
         {
             key: '1',
@@ -13,21 +16,18 @@ const CheckinBoard = () => {
         {
             key: '2',
             label: 'Nhật ký',
-            children: 'Nhật ký',
+            children: <Journal/>,
         },
         {
             key: '3',
-            label: 'Tab 3',
-            children: 'Về check-in',
+            label: 'Về check-in',
+            children: <AboutCheckin/>,
         },
     ];
 
-    const onChange = key => {
-        console.log(key);
-    };
     return (
         <div>
-            <Tabs defaultActiveKey="1" items={items} onChange={onChange}/>
+            <Tabs defaultActiveKey="2" items={items}/>
         </div>
     );
 };

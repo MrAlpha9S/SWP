@@ -62,6 +62,8 @@ export const useCheckInDataStore = create((set) => ({
     setIsJournalSelected: (value) => set({isJournalSelected : value}),
     checkInDataSet: [],
     setCheckInDataSet: (value) => set({ checkInDataSet: value }),
+    allCheckInData: [],
+    setAllCheckInData: (value) => set({ allCheckInData: value }),
 }));
 
 

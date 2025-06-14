@@ -103,16 +103,18 @@ const getCheckInDataOnDate = async (userAuth0Id, date) => {
             const quittingItemsResult = await pool.request()
                 .input('log_id', sql.Int, log_id)
                 .query('SELECT * FROM quitting_items WHERE log_id = @log_id')
-            const qnaList = qnaResult.recordset;
-            const freetextList = freetextResult.recordset;
-            const quittingItemsList = quittingItemsResult.recordset;
+            const qna = qnaResult.recordset;
+            const free_text = freetextResult.recordset;
+            const quitting_items = quittingItemsResult.recordset;
 
             return ({
                 ...checkinLogResult.recordset[0],
-                qnaList,
-                freetextList,
-                quittingItemsList
+                qna,
+                free_text,
+                quitting_items
             })
+        } else {
+            return false
         }
 
     } catch (error) {

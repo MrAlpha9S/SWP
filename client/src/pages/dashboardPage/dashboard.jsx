@@ -138,35 +138,7 @@ function Dashboard() {
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} mode="inline"/></div>
                 <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard} collapse={true} mode="horizontal"/></div>
-                {/*<div className='w-full'>*/}
-                {/*    {currentMenu === 'dashboard' && userProfile?.data === null ? (*/}
-                {/*        <NotFoundBanner title='Không tìm thấy thông tin kế hoạch của bạn'*/}
-                {/*                        content={<CustomButton onClick={() => navigate('/onboarding')} type='primary'>*/}
-                {/*                            Tạo kế hoạch*/}
-                {/*                        </CustomButton>}/>*/}
-                {/*    ) : isAuthenticated ? (*/}
-                {/*        isUserProfilePending ? (*/}
-                {/*            <ProgressBoard isPending={true}/>*/}
-                {/*        ) : (*/}
-                {/*            <ProgressBoard*/}
-                {/*                startDate={startDate}*/}
-                {/*                pricePerPack={pricePerPack}*/}
-                {/*                cigsPerPack={cigsPerPack}*/}
-                {/*                cigsReduced={cigsReduced}*/}
-                {/*                quittingMethod={quittingMethod}*/}
-                {/*                planLog={planLog}*/}
-                {/*                cigsPerDay={cigsPerDay}*/}
-                {/*                expectedQuitDate={expectedQuitDate}*/}
-                {/*                stoppedDate={stoppedDate}*/}
-                {/*                isPending={false}*/}
-                {/*                readinessValue={readinessValue}*/}
-                {/*                checkInDataSet={checkInDataset?.data ?? []}*/}
-                {/*                planLogCloneDDMMYY={planLogCloneDDMMYY}*/}
-                {/*            />*/}
-                {/*        )*/}
-                {/*    ) : (*/}
-                {/*        isUserProfilePending && <ProgressBoard isPending={true}/>*/}
-                {/*    )}</div>*/}
+
                 <div className="w-full">
                     {!isAuthenticated || isUserProfilePending ? (
                         <ProgressBoard isPending={true}/>

@@ -6,7 +6,7 @@ import CheckInStepTwoOnNo from './checkInStepTwoNo';
 import CheckInStepThree from './checkInStepThree';
 import CheckInJournal from './checkInJournal';
 import CheckInStepFour from './checkInStepFour';
-import { useStepCheckInStore} from '../../../stores/checkInStore';
+import {useCheckInDataStore, useStepCheckInStore} from '../../../stores/checkInStore';
 import {useAutoAnimate} from "@formkit/auto-animate/react";
 import {useNavigate} from "react-router-dom";
 import ModalFooter from "../../../components/ui/modalFooter.jsx";
@@ -24,6 +24,17 @@ function SmokeFreeCheckin() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
+    const {
+        setCheckInDate,
+        setFeel,
+        setCheckedQuitItems,
+        setFreeText,
+        setQna,
+        setIsStepOneOnYes,
+        setIsFreeText,
+        setCigsSmoked,
+        setIsJournalSelected
+    } = useCheckInDataStore();
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
@@ -31,7 +42,7 @@ function SmokeFreeCheckin() {
         isPending: isCheckInDataPending,
         error: CheckInDataError,
         data: CheckInData,
-        isFetching: isFetchingCheckInData,
+        isSuccess: CheckInDataSuccess,
     } = useQuery({
         queryKey: ['checkin-status'],
         queryFn: async () => {
@@ -43,16 +54,33 @@ function SmokeFreeCheckin() {
     })
 
     useEffect(() => {
-        if (!isCheckInDataPending) {
-            console.log('checkin', CheckInData)
-            if (CheckInData.data) {
+        if (CheckInDataSuccess) {
+            if (CheckInData && CheckInData.data) {
+                setCheckInDate(CheckInData.data.logged_at);
+                setFeel(CheckInData.data.feeling);
+                setQna(CheckInData.data.qna);
+                if (CheckInData.data.quitting_items.length > 0) {
+                    setIsStepOneOnYes(true)
+                    setCheckedQuitItems(CheckInData.data.quitting_items);
+                } else {
+                    setIsStepOneOnYes(false)
+                    setCigsSmoked(CheckInData.data.cigs_smoked)
+                }
+                if (CheckInData.data.qna.length > 0) {
+                    setIsFreeText(false)
+                    setQna(CheckInData.data.qna);
+                } else if (CheckInData.data.free_text[0].free_text_content) {
+                    setIsFreeText(true)
+                    setFreeText(CheckInData.data.free_text[0].free_text_content)
+                }
                 setIsModalOpen(true);
                 handleStepThree()
             } else {
                 handleStepOne()
             }
         }
-    }, [isCheckInDataPending]);
+    }, [CheckInData, CheckInDataSuccess])
+
 
     const steps = [
         {

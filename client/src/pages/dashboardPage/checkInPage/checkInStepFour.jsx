@@ -70,17 +70,22 @@ const CheckInStepFour = () => {
     }, [isFreeText, isJournalSelected])
 
     const postCheckin = useMutation({
-        mutationFn: () => {
-            postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
+        mutationFn: async () => {
+            return await postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected);
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['dataset']});
-        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['dataset'] });
+            await queryClient.invalidateQueries({ queryKey: ['all-checkin-data'] });
+            await queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
+
+            setTimeout(() => {
+                setCurrentStepDashboard('dashboard');
+            }, 100);
+        }
     })
 
     const handleSave = () => {
         postCheckin.mutate()
-        setCurrentStepDashboard('dashboard')
     }
 
 

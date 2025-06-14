@@ -127,8 +127,9 @@ export async function getCheckInData(user, getAccessTokenSilently, isAuthenticat
 
     const token = await getAccessTokenSilently();
 
+    const fetchURL = today ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${today}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}`
 
-    const res = await fetch(`http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${today}`, {
+    const res = await fetch(fetchURL, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
