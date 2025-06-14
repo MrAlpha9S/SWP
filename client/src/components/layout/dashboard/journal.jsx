@@ -17,7 +17,7 @@ const Journal = () => {
     const {startDate} = usePlanStore()
     const [searchDate, setSearchDate] = useState('')
     const {setUserCreationDate} = useUserCreationDate();
-
+    const [activeKeys, setActiveKeys] = useState(['1']);
 
     const {
         isPending: isCheckInDataPending,
@@ -60,13 +60,42 @@ const Journal = () => {
         }
     }, [isUserCreationDatePending])
 
-
     const dropdownItems = useMemo(() => {
-        let dropdownItems = [];
-        const startDate = new Date(userCreationDate?.data);
-        const localCurrentDate = getCurrentUTCDateTime()
+        if (!userCreationDate?.data) return [];
 
-        let i = 1
+        let dropdownItems = [];
+
+        // If there's a search date, only show that specific month
+        if (searchDate.length > 0) {
+            const parsedSearchDate = new Date(searchDate);
+            const searchMonth = parsedSearchDate.getUTCMonth();
+            const searchYear = parsedSearchDate.getUTCFullYear();
+            const searchDay = parsedSearchDate.getUTCDate();
+
+            const displayMonth = parsedSearchDate.toLocaleString('vi-VN', {month: 'short'});
+
+            dropdownItems.push({
+                key: '1',
+                label: `${displayMonth} ${searchYear}`,
+                children: (
+                    <TimeLineEachMonth
+                        day={searchDay}
+                        month={searchMonth}
+                        year={searchYear}
+                        allCheckInData={allCheckInData}
+                        userCreationDate={userCreationDate.data}
+                    />
+                ),
+            });
+
+            return dropdownItems;
+        }
+
+        // If no search date, show all months from user creation to current date
+        const startDate = new Date(userCreationDate.data);
+        const localCurrentDate = getCurrentUTCDateTime();
+        let i = 1;
+
         while (
             startDate.getUTCFullYear() < localCurrentDate.getUTCFullYear() ||
             (startDate.getUTCFullYear() === localCurrentDate.getUTCFullYear() &&
@@ -76,51 +105,32 @@ const Journal = () => {
             const baseMonth = startDate.getUTCMonth();
             const baseYear = startDate.getUTCFullYear();
 
-            let finalDay = 0;
-            let finalMonth = baseMonth;
-            let finalYear = baseYear;
-
-            if (searchDate.length > 0) {
-                const parsedSearchDate = new Date(searchDate);
-                const parsedMonth = parsedSearchDate.getUTCMonth();
-                const parsedYear = parsedSearchDate.getUTCFullYear();
-
-                if (parsedMonth === baseMonth && parsedYear === baseYear) {
-                    finalDay = parsedSearchDate.getUTCDate();
-                    finalMonth = parsedMonth;
-                    finalYear = parsedYear;
-                } else {
-                    finalDay = 0;
-                    finalMonth = baseMonth;
-                    finalYear = baseYear;
-                }
-            }
-
             dropdownItems.push({
                 key: `${i++}`,
                 label: `${displayMonth} ${baseYear}`,
                 children: (
                     <TimeLineEachMonth
-                        day={finalDay}
-                        month={finalMonth}
-                        year={finalYear}
+                        day={0}
+                        month={baseMonth}
+                        year={baseYear}
                         allCheckInData={allCheckInData}
-                        userCreationDate={userCreationDate?.data}
+                        userCreationDate={userCreationDate.data}
                     />
                 ),
             });
 
-            startDate.setMonth(startDate.getUTCMonth() + 1);
+            startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
-        return dropdownItems;
-    }, [startDate, searchDate, allCheckInData, userCreationDate]);
 
+        return dropdownItems.reverse();
+    }, [searchDate, allCheckInData, userCreationDate?.data]);
+
+    // Auto-expand when search results are found
     useEffect(() => {
-        if (dropdownItems.length > 1) {
-            dropdownItems.sort((a, b) => b.key - a.key)
+        if (searchDate.length > 0 && dropdownItems.length > 0) {
+            setActiveKeys(['1']); // Expand the search result
         }
-    }, [dropdownItems, dropdownItems.length]);
-
+    }, [searchDate, dropdownItems]);
 
     return <>
         <div className="flex flex-col gap-4">
@@ -129,9 +139,16 @@ const Journal = () => {
                     setSearchDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                 }} format={'DD-MM-YYYY'} value={searchDate ? dayjs(searchDate) : ''} allowClear={false}
                             placeholder='Chọn ngày để tìm kiếm'/>
-                <CustomButton onClick={() => setSearchDate('')}>Xóa tìm kiếm</CustomButton>
+                <CustomButton onClick={() => {
+                    setSearchDate('')
+                    setActiveKeys(['2']);
+                }}>Xóa tìm kiếm</CustomButton>
             </div>
-            <Collapse items={dropdownItems} defaultActiveKey={[`${dropdownItems.length}`]}/>
+            <Collapse
+                items={dropdownItems}
+                activeKey={activeKeys}
+                onChange={setActiveKeys}
+            />
         </div>
     </>
 };
