@@ -1,12 +1,12 @@
 import CustomButton from "./CustomButton.jsx";
 import React from "react";
 
-const ModalFooter = ({setIsModalOpen, onCancel}) => {
+const ModalFooter = ({onOk, onCancel, okText, cancelText}) => {
 
     return (
         <div className='flex gap-2 justify-end'>
-            <CustomButton onClick={() => setIsModalOpen(false)}>Tôi đã hiểu</CustomButton>
-            <CustomButton onClick={() => onCancel()} type='cancel'>Trở lại</CustomButton>
+            <CustomButton onClick={() => onOk()}>{okText}</CustomButton>
+            <CustomButton onClick={() => onCancel()} type='cancel'>{cancelText}</CustomButton>
         </div>
     )
 }

@@ -65,7 +65,6 @@ const Journal = () => {
 
         let dropdownItems = [];
 
-        // If there's a search date, only show that specific month
         if (searchDate.length > 0) {
             const parsedSearchDate = new Date(searchDate);
             const searchMonth = parsedSearchDate.getUTCMonth();

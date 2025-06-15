@@ -27,6 +27,7 @@ import {
 } from "../../utils/dateUtils.js";
 import {useQuery} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
+import {getUserCreationDate} from "../../utils/userUtils.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -41,12 +42,14 @@ const ProgressBoard = ({
                            readinessValue,
                            planLogCloneDDMMYY,
                            setCurrentStepDashboard,
+                           setMoneySaved,
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
+    const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
 
 
     const {
@@ -62,9 +65,28 @@ const ProgressBoard = ({
         enabled: isAuthenticated && !!user,
     })
 
+    const {
+        isPending: isUserCreationDatePending,
+        data: userCreationDate,
+    } = useQuery({
+        queryKey: ['user-creation-date'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isUserCreationDatePending) {
+            setLocalUserCreationDate(userCreationDate.data)
+        }
+    }, [isUserCreationDatePending])
+
     useEffect(() => {
         if (!isDatasetPending && checkInDataset?.data) {
             setLocalCheckInDataSet(checkInDataset.data);
+            useCheckInDataStore.getState().setCheckInDataSet(checkInDataset.data);
         }
     }, [checkInDataset, isDatasetPending]);
 
@@ -126,14 +148,14 @@ const ProgressBoard = ({
     }
 
     const cigsQuit = useMemo(() => {
-        const currentDay = new Date(localStartDate);
+        if (typeof localUserCreationDate !== 'string') return
+        const currentDay = new Date(localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
 
         while (currentDay <= endDate) {
             const dateStr = currentDay.toISOString().split('T')[0];
 
-            // Match check-in by date
             const checkin = localCheckInDataSet.find(entry =>
                 new Date(entry.date).toISOString().split('T')[0] === dateStr
             );
@@ -146,10 +168,16 @@ const ProgressBoard = ({
         }
 
         return total;
-    }, [localStartDate, currentDate, localCheckInDataSet, cigsPerDay]);
+    }, [localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay]);
 
 
     const moneySaved = Math.round(cigsQuit * pricePerCig);
+
+    useMemo(() => {
+        if (typeof setMoneySaved === 'function' && moneySaved !== undefined) {
+            setMoneySaved(moneySaved);
+        }
+    }, [moneySaved, setMoneySaved]);
 
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return

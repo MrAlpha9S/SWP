@@ -16,8 +16,9 @@ import {useCheckInDataStore} from "../../stores/checkInStore.js";
 import {Typography} from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
-import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
+import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
 import {queryClient} from "../../main.jsx";
+import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -38,7 +39,7 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY
     } = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
+    const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const {setCheckInDataSet} = useCheckInDataStore()
@@ -72,6 +73,7 @@ function Dashboard() {
             await syncProfileToStores();
         }
         syncStores();
+        console.log(userProfile);
     }, [userProfile, isUserProfilePending])
 
     // useEffect(() => {
@@ -109,11 +111,8 @@ function Dashboard() {
             case 'check-in':
                 setHeroTitle('Check-in hàng ngày');
                 break;
-            case 'goals':
-                setHeroTitle('Mục tiêu');
-                break;
-            case 'savings':
-                setHeroTitle('Tiết kiệm');
+            case 'goalsNSavings':
+                setHeroTitle('Mục tiêu và Tiết kiệm');
                 break;
             case 'distraction-tools':
                 setHeroTitle('Quản lý cơn thèm');
@@ -126,6 +125,53 @@ function Dashboard() {
                 break;
         }
     }, [currentStepDashboard]);
+
+    const renderBoard = () => {
+        if (!isAuthenticated || isUserProfilePending) {
+            return <ProgressBoard isPending={true} />;
+        }
+
+        switch (currentStepDashboard) {
+            case 'dashboard':
+                return userProfile.data ? (
+                    <ProgressBoard
+                        startDate={startDate}
+                        pricePerPack={pricePerPack}
+                        cigsPerPack={cigsPerPack}
+                        cigsReduced={cigsReduced}
+                        quittingMethod={quittingMethod}
+                        planLog={planLog}
+                        cigsPerDay={cigsPerDay}
+                        expectedQuitDate={expectedQuitDate}
+                        stoppedDate={stoppedDate}
+                        isPending={false}
+                        readinessValue={readinessValue}
+                        planLogCloneDDMMYY={planLogCloneDDMMYY}
+                        setCurrentStepDashboard={setCurrentStepDashboard}
+                        user={user}
+                        isAuthenticated={isAuthenticated}
+                        getAccessTokenSilently={getAccessTokenSilently}
+                        setMoneySaved={setMoneySaved}
+                    />
+                ) : (
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" />
+                );
+
+            case 'check-in':
+                return <CheckinMenu />;
+
+            case 'goalsNSavings':
+                return <GoalsMenu />;
+
+            // case 'tips':
+            //     return <TipsBoard />;
+
+            default:
+                return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
+        }
+    };
+
+
 
 
     return (
@@ -140,31 +186,7 @@ function Dashboard() {
                     collapse={true} mode="horizontal"/></div>
 
                 <div className="w-full">
-                    {!isAuthenticated || isUserProfilePending ? (
-                        <ProgressBoard isPending={true}/>
-                    ) : currentStepDashboard === 'dashboard' ? (
-                        userProfile.data ? <ProgressBoard
-                                startDate={startDate}
-                                pricePerPack={pricePerPack}
-                                cigsPerPack={cigsPerPack}
-                                cigsReduced={cigsReduced}
-                                quittingMethod={quittingMethod}
-                                planLog={planLog}
-                                cigsPerDay={cigsPerDay}
-                                expectedQuitDate={expectedQuitDate}
-                                stoppedDate={stoppedDate}
-                                isPending={false}
-                                readinessValue={readinessValue}
-                                planLogCloneDDMMYY={planLogCloneDDMMYY}
-                                setCurrentStepDashboard={setCurrentStepDashboard}
-                                user={user}
-                                isAuthenticated={isAuthenticated}
-                                getAccessTokenSilently={getAccessTokenSilently}
-                            /> :
-                            <NotFoundBanner title='Không tìm thấy kế hoạch của bạn'/>
-                    ) : currentStepDashboard === 'check-in' && (
-                        <CheckinBoard/>
-                    )}
+                    {renderBoard()}
                 </div>
 
             </div>

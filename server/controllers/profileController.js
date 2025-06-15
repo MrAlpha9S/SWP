@@ -1,4 +1,4 @@
-const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile} = require("../services/profileService");
+const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal} = require("../services/profileService");
 const {getUserFromAuth0} = require("../services/auth0Service");
 
 
@@ -29,6 +29,7 @@ const handlePostOnboarding = async (req, res) => {
 
     try {
         if (await userProfileExists(userAuth0Id)) {
+
             result = updateUserProfile(userAuth0Id,
                 readiness,
                 reasonList,
@@ -94,5 +95,26 @@ const handleGetProfile = async (req, res) => {
     }
 }
 
+const handleGoalPost = async (req, res) => {
+    const {userAuth0Id, goalName, goalAmount, goalId} = req.body;
 
-module.exports = {handlePostOnboarding, handleGetProfile};
+    console.log(goalId);
+
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: false});
+
+    try {
+        const postResult = await postGoal(userAuth0Id, goalName, goalAmount, goalId);
+        if (postResult === false) {
+            return res.status(404).json({success: false, message: 'Post goal failed', data: false});
+        } else {
+            return res.status(200).json({success: true, message: 'Goal posted', data: postResult});
+        }
+    } catch (err) {
+        console.error('handleGoalPost error:', err);
+        console.log("✅ Sent 500 response");
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: false});
+    }
+}
+
+
+module.exports = {handlePostOnboarding, handleGetProfile, handleGoalPost};

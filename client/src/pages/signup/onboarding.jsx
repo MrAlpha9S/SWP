@@ -412,7 +412,7 @@ const Onboarding = () => {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter setIsModalOpen={setIsModalOpen} onCancel={() => {
+                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={setIsModalOpen(false)} onCancel={() => {
                     setIsModalOpen(false)
                     navigate('/')
                 }} />}

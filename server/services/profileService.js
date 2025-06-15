@@ -9,8 +9,12 @@ const userProfileExists = async (auth0_id) => {
 
         const result = await pool.request()
             .input('userId', sql.Int, userId)
-            .query('SELECT * FROM user_profiles WHERE user_id = @userId');
-        return result.recordset.length > 0;
+            .query('SELECT profile_id FROM user_profiles WHERE user_id = @userId');
+        if (result.recordset.length > 0) {
+            return result.recordset[0].profile_id;
+        } else {
+            return false
+        }
     } catch (error) {
         console.error('error in userProfileExists', error);
         return false;
@@ -110,7 +114,8 @@ const postUserProfile = async (userAuth0Id,
                 .input('profile_id', sql.Int, profile_id)
                 .input('goal_name', sql.NVarChar(50), goal.goalName)
                 .input('goal_amount', sql.Float, goal.goalAmount)
-                .query('INSERT INTO goals (goal_name, goal_amount, profile_id) VALUES (@goal_name, @goal_amount, @profile_id)');
+                .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
+                .query('INSERT INTO goals (goal_name, goal_amount, profile_id, created_at) VALUES (@goal_name, @goal_amount, @profile_id, @created_at)');
         }
 
         return true;
@@ -184,7 +189,7 @@ const getUserProfile = async (userAuth0Id) => {
         const goalsResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT goal_name AS goalName, goal_amount AS goalAmount
+        SELECT goal_id as goalId, goal_name AS goalName, goal_amount as goalAmount, created_at AS createdAt
         FROM goals
         WHERE profile_id = @profileId
       `);
@@ -302,5 +307,45 @@ const updateUserProfile = async (
     }
 };
 
+const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null) => {
+    try {
+        const pool = await poolPromise;
+        const userProfileId = await userProfileExists(userAuth0Id);
 
-module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile}
+        if (!userProfileId) {
+            throw new Error("User profile not found");
+        }
+
+        let result;
+
+        if (goalId) {
+            result = await pool.request()
+                .input('goal_id', sql.Int, goalId)
+                .input('goal_name', sql.NVarChar(50), goalName)
+                .input('goal_amount', sql.Float, goalAmount)
+                .query('UPDATE goals SET goal_name = @goal_name, goal_amount = @goal_amount WHERE goal_id = @goal_id');
+        } else {
+            result = await pool.request()
+                .input('goal_name', sql.NVarChar(50), goalName)
+                .input('goal_amount', sql.Float, goalAmount)
+                .input('profile_id', sql.Int, userProfileId)
+                .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
+                .query('INSERT INTO goals (goal_name, goal_amount, profile_id, created_at) VALUES (@goal_name, @goal_amount, @profile_id, @created_at)');
+        }
+
+        // Throw if the insert/update did not affect any rows
+        if (result.rowsAffected[0] === 0) {
+            throw new Error("Database write failed");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("postGoal error:", error);
+        throw error;
+    }
+};
+
+
+
+
+module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal}

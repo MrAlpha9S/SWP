@@ -29,6 +29,34 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
     return await res.json();
 }
 
+export async function postGoal(goalId = null, goalName, goalAmount, user, getAccessTokenSilently, isAuthenticated) {
+
+    if (!isAuthenticated || !user) return;
+
+    try {
+        const token = await getAccessTokenSilently();
+
+        const res = await fetch('http://localhost:3000/profiles/postGoal', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({userAuth0Id: user.sub, goalId: goalId, goalName: goalName, goalAmount: goalAmount})
+        });
+
+        if (!res.ok) {
+            const errorMessage = await res.text(); // or res.json() if your server always responds with JSON
+            throw new Error(errorMessage || `Request failed with status ${res.status}`);
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('post goal error', error);
+        throw error;
+    }
+}
+
 export async function syncProfileToStores(profile) {
     if (!profile) return;
 

@@ -5,7 +5,7 @@ import Journal from "./journal.jsx";
 import AboutCheckin from "./aboutCheckin.jsx";
 
 
-const CheckinBoard = () => {
+const CheckinMenu = () => {
 
     const items = [
         {
@@ -32,4 +32,4 @@ const CheckinBoard = () => {
     );
 };
 
-export default CheckinBoard;
+export default CheckinMenu;

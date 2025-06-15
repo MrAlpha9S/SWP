@@ -71,7 +71,7 @@ function SmokeFreeCheckin() {
                 if (CheckInData.data.qna.length > 0) {
                     setIsFreeText(false)
                     setQna(CheckInData.data.qna);
-                } else if (CheckInData.data.free_text[0].free_text_content) {
+                } else if (CheckInData.data.free_text && CheckInData.data.free_text[0].free_text_content) {
                     setIsFreeText(true)
                     setFreeText(CheckInData.data.free_text[0].free_text_content)
                 }
@@ -128,7 +128,7 @@ function SmokeFreeCheckin() {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter setIsModalOpen={setIsModalOpen} onCancel={() => {
+                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOK={setIsModalOpen(false)} onCancel={() => {
                     setIsModalOpen(false)
                     setCurrentStepDashboard('dashboard')
                 }}/>}
