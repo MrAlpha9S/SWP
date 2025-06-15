@@ -29,7 +29,7 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
     return await res.json();
 }
 
-export async function postGoal(goalId = null, goalName, goalAmount, user, getAccessTokenSilently, isAuthenticated) {
+export async function postGoal(goalId = null, goalName, goalAmount, user, getAccessTokenSilently, isAuthenticated, completedDate = null, isCompleted = false) {
 
     if (!isAuthenticated || !user) return;
 
@@ -42,7 +42,7 @@ export async function postGoal(goalId = null, goalName, goalAmount, user, getAcc
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({userAuth0Id: user.sub, goalId: goalId, goalName: goalName, goalAmount: goalAmount})
+            body: JSON.stringify({userAuth0Id: user.sub, goalId: goalId, goalName: goalName, goalAmount: goalAmount, completedDate : completedDate, isCompleted: isCompleted})
         });
 
         if (!res.ok) {

@@ -52,6 +52,8 @@ const CurrentGoal = ({ type = "onGoing" }) => {
                         cigsPerPack={cigsPerPack}
                         cigsPerDay={cigsPerDay}
                         goalId={goal.goalId}
+                        isCompleted={goal.isCompleted}
+                        completedDate={goal.completedDate}
                     />
                 ))}
             </div>

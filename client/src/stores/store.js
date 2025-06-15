@@ -165,10 +165,10 @@ export const useGoalsStore = create((set) => ({
     setGoalAmount: (amount) => set({goalAmount: amount}),
     moneySaved: 0,
     setMoneySaved: (saved) => set({moneySaved: saved}),
-    updateGoal: (goalId, newName, newAmount) =>
+    updateGoal: (goalId, newName, newAmount, isCompleted, completedDate) =>
         set((state) => ({
             goalList: state.goalList.map((g) =>
-                g.goalId === goalId ? { ...g, goalName: newName, goalAmount: newAmount } : g
+                g.goalId === goalId ? { ...g, goalName: newName, goalAmount: newAmount, isCompleted: isCompleted, completedDate: completedDate } : g
             )
         })),
 

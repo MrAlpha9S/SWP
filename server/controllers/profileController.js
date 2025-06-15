@@ -1,5 +1,4 @@
 const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal} = require("../services/profileService");
-const {getUserFromAuth0} = require("../services/auth0Service");
 
 
 const handlePostOnboarding = async (req, res) => {
@@ -96,14 +95,14 @@ const handleGetProfile = async (req, res) => {
 }
 
 const handleGoalPost = async (req, res) => {
-    const {userAuth0Id, goalName, goalAmount, goalId} = req.body;
+    const {userAuth0Id, goalName, goalAmount, goalId, isCompleted, completedDate} = req.body;
 
     console.log(goalId);
 
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: false});
 
     try {
-        const postResult = await postGoal(userAuth0Id, goalName, goalAmount, goalId);
+        const postResult = await postGoal(userAuth0Id, goalName, goalAmount, goalId, isCompleted, completedDate);
         if (postResult === false) {
             return res.status(404).json({success: false, message: 'Post goal failed', data: false});
         } else {

@@ -189,7 +189,7 @@ const getUserProfile = async (userAuth0Id) => {
         const goalsResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT goal_id as goalId, goal_name AS goalName, goal_amount as goalAmount, created_at AS createdAt
+        SELECT goal_id as goalId, goal_name AS goalName, goal_amount as goalAmount, created_at AS createdAt, is_completed AS isCompleted, completed_date AS completedDate
         FROM goals
         WHERE profile_id = @profileId
       `);
@@ -307,7 +307,7 @@ const updateUserProfile = async (
     }
 };
 
-const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null) => {
+const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null, isCompleted = false, completedDate = null) => {
     try {
         const pool = await poolPromise;
         const userProfileId = await userProfileExists(userAuth0Id);
@@ -323,7 +323,9 @@ const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null) => {
                 .input('goal_id', sql.Int, goalId)
                 .input('goal_name', sql.NVarChar(50), goalName)
                 .input('goal_amount', sql.Float, goalAmount)
-                .query('UPDATE goals SET goal_name = @goal_name, goal_amount = @goal_amount WHERE goal_id = @goal_id');
+                .input('is_completed', sql.Bit, isCompleted)
+                .input('completed_date', sql.DateTime, completedDate)
+                .query('UPDATE goals SET goal_name = @goal_name, goal_amount = @goal_amount, is_completed = @is_completed, completed_date = @completed_date WHERE goal_id = @goal_id');
         } else {
             result = await pool.request()
                 .input('goal_name', sql.NVarChar(50), goalName)
