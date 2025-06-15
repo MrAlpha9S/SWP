@@ -9,7 +9,7 @@ const GoalsMenu = () => {
         {
             key: '1',
             label: 'Mục tiêu hiện tại',
-            children: <CurrentGoal/>,
+            children: <CurrentGoal type='onGoing'/>,
         },
         {
             key: '2',
@@ -19,7 +19,7 @@ const GoalsMenu = () => {
         {
             key: '3',
             label: 'Đã hoàn thành',
-            children: <></>,
+            children: <CurrentGoal type='completed'/>,
         },
     ];
 

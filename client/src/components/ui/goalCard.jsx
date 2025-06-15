@@ -32,7 +32,7 @@ const GoalCard = ({
     const [editableGoalAmount, setEditableGoalAmount] = useState(goalAmount);
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    const realityPercentage = Math.round((moneySaved / goalAmount) * 100);
+    const realityPercentage = Math.min(100, Math.round((moneySaved / goalAmount) * 100));
     const pricePerCig = Math.round(pricePerPack / cigsPerPack);
     let daysToGoalComplete = 0
     if (avgCigs > 0) {
@@ -98,18 +98,18 @@ const GoalCard = ({
             <img src='/goal.png' alt='' className='w-[25%] h-auto'/>
             <div className='w-full h-full flex flex-col justify-center'>
                 <div className='flex justify-between'>
-                    <p className='text-1xl md:text-2xl font-bold text-gray-900 my-3'>{goalName}</p>
+                    <p className='text-1xl md:text-2xl font-bold text-gray-900 my-3'>{goalName} {realityPercentage === 100 && <span className='text-green-600'>(đã hoàn thành)</span>}</p>
                     <button className='underline' onClick={() => showModal()}>Chỉnh sửa</button>
                 </div>
                 <p className='mb-1'>Bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(goalStartDate.split('T')[0])}</p>
-                <div className='flex justify-between'>
+                {realityPercentage !== 100 && <div className='flex justify-between'>
                     <p>Tiến trình thực tế: {moneySaved.toLocaleString()} VNĐ</p>
                     {avgCigs > 0 && <Popover content={content}>
                         <p>Dự kiến hoàn
                             thành: {convertYYYYMMDDStrToDDMMYYYYStr(expectedCompleteDate.toISOString().split('T')[0])}</p>
                     </Popover>}
-                </div>
-                <Progress percent={realityPercentage} status="active" strokeColor='#0d9488'/>
+                </div>}
+                <Progress percent={realityPercentage} status={realityPercentage !== 100 ? 'active' : ''} strokeColor='#0d9488'/>
                 <div className='flex justify-end w-full mt-1'>
                     <p><strong>Mục tiêu: {goalAmount.toLocaleString()} VNĐ</strong></p>
                 </div>
