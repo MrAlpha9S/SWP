@@ -16,6 +16,10 @@ import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
 
+import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
+import Topic from "./pages/topicsPage/topic.jsx";
+import BlogPost from "./pages/topicsPage/blogPost.jsx";
+import Editor from './editor.jsx'
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -34,6 +38,32 @@ function App() {
 
     return (
         <>
+            <Navbar />
+            <Routes>
+                <Route path="/" element={<Homepage />} />
+
+                <Route path="/dashboard" element={<DashBoard />} />
+                <Route path="/dashboard/check-in" element={<CheckIn />} />
+
+                <Route path="/topics" element={<TopicsPage />} />
+                <Route path="/topics/:topicId" element={<Topic />} />
+
+                <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
+                <Route path="/editor" element={<Editor />} />
+
+                {/* Auth0 Callback Routes */}
+
+                <Route path="/post-signup" element={<PostSignUpCallback />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/error" element={<ErrorPage />} />
+                <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
+                <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/forum" element={<ForumPage />}></Route>
+                <Route path="/forum/thread/:threadId" element={<ThreadDiscussion />} />
+                <Route path="*" element={<div>404 Not Found</div>} />
+                <Route path="/post-onboarding" element={<PostOnboardingCallback />}></Route>
+            </Routes>
+            <Footer />
             <Navbar/>
             <div className="max-w-[1280px] mx-auto bg-[#fff7e5]">
                 <Routes>
