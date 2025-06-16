@@ -20,6 +20,8 @@ import Coachsidebar from "../../components/layout/dashboard/coachsidebar.jsx";
 import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
 import {queryClient} from "../../main.jsx";
 
+import PostBlog from '../../components/layout/coachboard/postblog.jsx'
+
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
     const {addError, removeError} = useErrorStore();
@@ -166,7 +168,7 @@ function Dashboard() {
                     ) : currentStepDashboard === 'check-in' ? (
                         <CheckinBoard/>
                     ) : currentStepDashboard === 'post-blog' && (
-                        <CheckinBoard/>
+                        <PostBlog/>
                     )}
                 </div>
 
@@ -177,4 +179,4 @@ function Dashboard() {
 }
 
 
-export default withAuthenticationRequired(Dashboard);
+export default (Dashboard);
