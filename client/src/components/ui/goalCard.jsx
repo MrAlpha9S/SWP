@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Popover, Progress, notification} from "antd";
 import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime} from "../utils/dateUtils.js";
 import ErrorText from "./errorText.jsx";
@@ -18,6 +18,8 @@ const Context = React.createContext({name: 'Default'});
 
 const GoalCard = (props) => {
 
+    const [goalNameError, setGoalNameError] = useState('');
+    const [goalAmountError, setGoalAmountError] = useState('');
     const {goal, cigsPerDay, avgCigs, cigsPerPack, moneySaved, pricePerPack} = props;
     const {goalId, goalName, goalAmount, completedDate, isCompleted, createdAt} = goal;
     const {updateGoal, removeGoal} = useGoalsStore()
@@ -62,6 +64,15 @@ const GoalCard = (props) => {
 
     const handleOk = async () => {
         try {
+            if (editableGoalName.length === 0 || editableGoalAmount <= 0) {
+                if (editableGoalName.length === 0) {
+                    setGoalNameError('Không để trống mục này')
+                }
+                if (editableGoalAmount <= 0) {
+                    setGoalAmountError('Số tiền không hợp lệ')
+                }
+                return
+            }
             const newGoalAmount = editableGoalAmount;
             const percent = Math.min(100, Math.round((moneySaved / newGoalAmount) * 100));
 
@@ -97,6 +108,19 @@ const GoalCard = (props) => {
             console.error("Error deleting goal:", err);
         }
     }
+
+    useEffect(() => {
+        if (editableGoalName.length > 0) {
+            setGoalNameError('')
+        }
+    }, [editableGoalName]);
+
+    useEffect(() => {
+        if (editableGoalAmount > 0) {
+            setGoalAmountError('')
+        }
+    }, [editableGoalAmount]);
+
 
 
     const handleCancel = () => {
@@ -143,7 +167,8 @@ const GoalCard = (props) => {
             <GoalPostModal title='Chỉnh sửa mục tiêu' isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}
                            editableGoalAmount={editableGoalAmount} editableGoalName={editableGoalName}
                            setEditableGoalAmount={setEditableGoalAmount} setEditableGoalName={setEditableGoalName}
-                           handleCancel={handleCancel} handleOk={handleOk}/>
+                           handleCancel={handleCancel} handleOk={handleOk} goalNameError={goalNameError}
+                           goalAmountError={goalAmountError}/>
             <ConfirmationModal title='Xác nhận xóa' content='Bạn có chắc chắn muốn xóa mục tiêu này?' isModalOpen={isDelModalOpen} setIsModalOpen={setIsDelModalOpen}
                                handleCancel={() => setIsDelModalOpen(false)} handleOk={handleDelOk}/>
             <Context.Provider value={contextValue}>

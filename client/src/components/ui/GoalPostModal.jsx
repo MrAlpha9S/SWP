@@ -1,10 +1,11 @@
 import React from 'react';
 import ModalFooter from "./modalFooter.jsx";
 import {Modal} from "antd";
+import ErrorText from "./errorText.jsx";
 
-const GoalPostModal = ({title, isModalOpen, handleCancel, handleOk, setIsModalOpen = null, editableGoalName = null, setEditableGoalName = null, editableGoalAmount = null, setEditableGoalAmount = null}) => {
+const GoalPostModal = ({title, isModalOpen, handleCancel, handleOk, setIsModalOpen = null, editableGoalName = null, setEditableGoalName = null, editableGoalAmount = null, setEditableGoalAmount = null, goalNameError, goalAmountError}) => {
 
-    
+
 
     return (
         <Modal
@@ -23,6 +24,7 @@ const GoalPostModal = ({title, isModalOpen, handleCancel, handleOk, setIsModalOp
                         Mục tiêu tiết kiệm của bạn?
                     </label>
                     <p className="text-xs md:text-sm">Ví dụ: tour vòng quanh Châu Âu</p>
+                    {goalNameError?.length > 0 && <ErrorText>{goalNameError}</ErrorText>}
                     <input
                         id="goal"
                         type="text"
@@ -36,6 +38,7 @@ const GoalPostModal = ({title, isModalOpen, handleCancel, handleOk, setIsModalOp
                         Tổng số tiền bạn cần tiết kiệm?
                     </label>
                     <p className="block text-xs md:text-sm">Nhập vào số tiền (VND) mà bạn cần tiết kiệm</p>
+                    {goalAmountError?.length > 0 && <ErrorText>{goalAmountError}</ErrorText>}
                     <input
                         id="moneyGoal"
                         type="number"

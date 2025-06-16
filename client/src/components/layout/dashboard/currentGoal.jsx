@@ -24,6 +24,8 @@ const CurrentGoal = ({type = "onGoing"}) => {
     const [editableGoalName, setEditableGoalName] = useState('');
     const [editableGoalAmount, setEditableGoalAmount] = useState(0);
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const [goalNameError, setGoalNameError] = useState('');
+    const [goalAmountError, setGoalAmountError] = useState('');
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
@@ -41,11 +43,13 @@ const CurrentGoal = ({type = "onGoing"}) => {
             Array.isArray(checkInDataSet) &&
             typeof pricePerPack === 'number' &&
             typeof cigsPerPack === 'number' &&
-            typeof cigsPerDay === 'number'
+            typeof cigsPerDay === 'number' &&
+            typeof goalNameError === 'string' &&
+            typeof goalAmountError === 'string'
         ) {
             setRender(true);
         }
-    }, [checkInDataSet, cigsPerDay, cigsPerPack, goalList, moneySaved, pricePerPack]);
+    }, [checkInDataSet, cigsPerDay, cigsPerPack, goalAmountError, goalList, goalNameError, moneySaved, pricePerPack]);
 
     const filteredGoals = goalList.filter(goal => {
         const percent = Math.min(100, Math.round((moneySaved / goal.goalAmount) * 100));
@@ -60,6 +64,15 @@ const CurrentGoal = ({type = "onGoing"}) => {
 
     const handleOk = async () => {
         try {
+            if (editableGoalName.length === 0 || editableGoalAmount <= 0) {
+                if (editableGoalName.length === 0) {
+                    setGoalNameError('Không để trống mục này')
+                }
+                if (editableGoalAmount <= 0) {
+                    setGoalAmountError('Số tiền không hợp lệ')
+                }
+                return
+            }
 
             const percent = Math.min(100, Math.round((moneySaved / editableGoalAmount) * 100));
 
@@ -88,6 +101,18 @@ const CurrentGoal = ({type = "onGoing"}) => {
         }
     };
 
+    useEffect(() => {
+        if (editableGoalName.length > 0) {
+            setGoalNameError('')
+        }
+    }, [editableGoalName]);
+
+    useEffect(() => {
+        if (editableGoalAmount > 0) {
+            setGoalAmountError('')
+        }
+    }, [editableGoalAmount]);
+
 
     return (
         <div>
@@ -111,12 +136,17 @@ const CurrentGoal = ({type = "onGoing"}) => {
                         <NotFoundBanner title='Bạn đang không có mục tiêu đang diễn ra. Hãy tạo mục tiêu mới.'/>
                     </div>
                 }
-                <GoalPostModal setIsModalOpen={setIsModalOpen} handleOk={handleOk}
-                               handleCancel={() => setIsModalOpen(false)} isModalOpen={isModalOpen}
-                               title='Tạo mục tiêu mới' setEditableGoalName={setEditableGoalName}
-                               editableGoalName={editableGoalName} setEditableGoalAmount={setEditableGoalAmount}
-                               editableGoalAmount={editableGoalAmount}/>
-                {type === 'onGoing' && <div className='w-[25%]'><CustomButton onClick={() => showModal()}>Tạo mục tiêu mới</CustomButton></div>}
+                {render && <GoalPostModal setIsModalOpen={setIsModalOpen} handleOk={handleOk}
+                                          handleCancel={() => setIsModalOpen(false)} isModalOpen={isModalOpen}
+                                          title='Tạo mục tiêu mới' setEditableGoalName={setEditableGoalName}
+                                          editableGoalName={editableGoalName}
+                                          setEditableGoalAmount={setEditableGoalAmount}
+                                          editableGoalAmount={editableGoalAmount} goalNameError={goalNameError}
+                                          goalAmountError={goalAmountError}
+                />}
+                {type === 'onGoing' &&
+                    <div className='w-[25%]'><CustomButton onClick={() => showModal()}>Tạo mục tiêu mới</CustomButton>
+                    </div>}
             </div>
             <Context.Provider value={contextValue}>
                 {contextHolder}
