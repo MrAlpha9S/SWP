@@ -135,9 +135,15 @@ const GoalCard = (props) => {
                     <p className='text-1xl md:text-2xl font-bold text-gray-900 my-3'>{goalName} {realityPercentage === 100 &&
                         <span className='text-green-600'>(đã hoàn thành)</span>}</p>
                     {realityPercentage !== 100 && (
-                        <div className='flex gap-5'>
-                            <button className='underline' onClick={() => showModal()}>Chỉnh sửa</button>
-                            <button className='underline text-red-500' onClick={() => showDeleteModal()}>Xóa</button>
+                        <div className='flex gap-5 items-center'>
+                            <button onClick={() => showModal()}
+                               className="text-sm text-primary-700 hover:underline cursor-pointer">
+                                Chỉnh sửa
+                            </button>
+                            <button onClick={() => showModal()}
+                               className="text-sm text-red-500 hover:underline cursor-pointer">
+                                Xóa
+                            </button>
                         </div>)}
                 </div>
                 <div>

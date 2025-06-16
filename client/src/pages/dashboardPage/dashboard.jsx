@@ -19,6 +19,7 @@ import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
 import {queryClient} from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
+import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -111,8 +112,11 @@ function Dashboard() {
             case 'check-in':
                 setHeroTitle('Check-in hàng ngày');
                 break;
-            case 'goalsNSavings':
-                setHeroTitle('Mục tiêu và Tiết kiệm');
+            case 'goals':
+                setHeroTitle('Mục tiêu');
+                break;
+            case 'savings':
+                setHeroTitle('Tiết kiệm');
                 break;
             case 'distraction-tools':
                 setHeroTitle('Quản lý cơn thèm');
@@ -128,7 +132,7 @@ function Dashboard() {
 
     const renderBoard = () => {
         if (!isAuthenticated || isUserProfilePending) {
-            return <ProgressBoard isPending={true} />;
+            return <ProgressBoard isPending={true}/>;
         }
 
         switch (currentStepDashboard) {
@@ -154,24 +158,25 @@ function Dashboard() {
                         setMoneySaved={setMoneySaved}
                     />
                 ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" />
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
                 );
 
             case 'check-in':
-                return <CheckinMenu />;
+                return <CheckinMenu/>;
 
-            case 'goalsNSavings':
-                return <GoalsMenu />;
+            case 'goals':
+                return <GoalsMenu/>;
+
+            case 'savings':
+                return <SavingsMenu/>
 
             // case 'tips':
             //     return <TipsBoard />;
 
             default:
-                return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
+                return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
         }
     };
-
-
 
 
     return (

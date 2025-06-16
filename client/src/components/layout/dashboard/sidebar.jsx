@@ -20,9 +20,14 @@ const items = [
         icon: <EditOutlined className="mr-4"/>,
     },
     {
-        key: 'goalsNSavings',
-        label: 'Mục tiêu và Tiết kiệm',
+        key: 'goals',
+        label: 'Mục tiêu',
         icon: <UnorderedListOutlined className="mr-4"/>,
+    },
+    {
+        key: 'savings',
+        label: 'Tiết kiệm',
+        icon: <DollarOutlined className="mr-4"/>,
     },
     {
         key: 'distraction-tools',

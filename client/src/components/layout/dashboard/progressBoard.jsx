@@ -285,7 +285,7 @@ const ProgressBoard = ({
             <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
                 <div className="absolute right-3 top-3">
                     {!isPending && (
-                        <a onClick={() => navigate('/onboarding')} className="text-sm text-primary-700 hover:underline">
+                        <a onClick={() => navigate('/onboarding/progress-board-startdate')} className="text-sm text-primary-700 hover:underline">
                             Chỉnh sửa?
                         </a>
                     )}
@@ -303,7 +303,7 @@ const ProgressBoard = ({
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
                     <div className="absolute right-3 top-3">
                         {!isPending && (
-                            <a onClick={() => navigate('/onboarding')}
+                            <a onClick={() => navigate('/onboarding/progress-board-plan')}
                                className="text-sm text-primary-700 hover:underline">
                                 Chỉnh sửa?
                             </a>

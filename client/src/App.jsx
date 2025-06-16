@@ -41,7 +41,7 @@ function App() {
                     <Route path="/dashboard" element={<DashBoard/>}/>
                     <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
                     <Route path="/post-signup" element={<PostSignUpCallback/>}/>
-                    <Route path="/onboarding" element={<Onboarding/>}/>
+                    <Route path="/onboarding/:from?" element={<Onboarding/>}/>
                     <Route path="/error" element={<ErrorPage/>}/>
                     <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                     <Route path="/my-profile" element={<MyProfile/>}></Route>

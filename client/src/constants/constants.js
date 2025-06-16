@@ -124,3 +124,17 @@ export const qnaOptions = [
     { value: 'encourage', label: 'Có ai ủng hộ hoặc động viên bạn không? Điều đó khiến bạn cảm thấy thế nào?' },
 ];
 
+export const savingsTiers = [
+    { label: '100,000 VNĐ', amount: 100000, suggestions: ['Cà phê và bánh ngọt tại Highlands', 'Gửi xe cả tuần', 'Mua sổ tay/sách nhỏ'] },
+    { label: '300,000 VNĐ', amount: 300000, suggestions: ['1 buổi xem phim', 'Sách kỹ năng', 'Mỹ phẩm cơ bản'] },
+    { label: '500,000 VNĐ', amount: 500000, suggestions: ['Đi ăn buffet', 'Thanh toán điện/nước', 'Quần áo mới'] },
+    { label: '1,000,000 VNĐ', amount: 1000000, suggestions: ['Đăng ký phòng gym', 'Tai nghe bluetooth', 'Khoá học online'] },
+    { label: '2,000,000 VNĐ', amount: 2000000, suggestions: ['Mua đồ nội thất nhỏ', 'Du lịch gần', 'Tặng quà người thân'] },
+    { label: '3,000,000 VNĐ', amount: 3000000, suggestions: ['Smartwatch', 'Khoá học chuyên sâu', 'Gửi tiết kiệm'] },
+    { label: '5,000,000 VNĐ', amount: 5000000, suggestions: ['Du lịch nội địa', 'Nâng cấp điện thoại', 'Thiết bị làm việc'] },
+    { label: '10,000,000 VNĐ', amount: 10000000, suggestions: ['Du lịch nước ngoài', 'Laptop/máy tính bảng', 'Quà cho gia đình'] },
+    { label: '20,000,000 VNĐ', amount: 20000000, suggestions: ['Đầu tư học tập', 'Cọc thuê nhà', 'Đổi thiết bị văn phòng'] },
+    { label: '50,000,000 VNĐ', amount: 50000000, suggestions: ['Mua xe máy', 'Khởi nghiệp nhỏ', 'Kỳ nghỉ dài'] },
+    { label: '100,000,000 VNĐ', amount: 100000000, suggestions: ['Du lịch nước ngoài dài hạn', 'Tiết kiệm dài hạn', 'Học cao học'] },
+];
+

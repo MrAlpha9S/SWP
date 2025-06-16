@@ -19,7 +19,7 @@ import {
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
 import Summary from "../../components/layout/signup/summary.jsx";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import ModalFooter from "../../components/ui/modalFooter.jsx";
 
 const planTipsCollapseItems = [
@@ -67,12 +67,22 @@ const Onboarding = () => {
     const {isProfileExist} = useProfileExists();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const {from} = useParams();
+
     useEffect(() => {
         if (isProfileExist) {
-            setCurrentStep(6)
-            setIsModalOpen(true);
-        } else {
-            setCurrentStep(0)
+            if (from) {
+                if (from === 'savings') {
+                    setCurrentStep(2);
+                } else if (from === 'progress-board-startdate' || from === 'progress-board-plan') {
+                    setCurrentStep(4);
+                } else {
+                    setCurrentStep(6)
+                }
+                setIsModalOpen(true);
+            } else {
+                setCurrentStep(0)
+            }
         }
     }, [])
 
@@ -375,9 +385,9 @@ const Onboarding = () => {
 
     useEffect(() => {
         if (createGoalChecked) {
-                if (goalAmount > 0) {
-                    removeError(errorMap["goalAmount"]);
-                }
+            if (goalAmount > 0) {
+                removeError(errorMap["goalAmount"]);
+            }
         }
     }, [goalAmount]);
 
@@ -412,13 +422,15 @@ const Onboarding = () => {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={setIsModalOpen(false)} onCancel={() => {
-                    setIsModalOpen(false)
-                    navigate('/')
-                }} />}
+                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
+                                     onCancel={() => {
+                                         setIsModalOpen(false)
+                                         navigate('/')
+                                     }}/>}
             >
                 <p>
-                    Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
+                    Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn
+                    tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
                 </p>
                 <p>
                     Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
