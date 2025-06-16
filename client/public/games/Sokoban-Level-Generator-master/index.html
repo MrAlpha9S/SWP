@@ -1,0 +1,57 @@
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+    <script src="index.js"></script>
+    <script src="lib/utils.js"></script>
+    <script src="lib/draw.js"></script>
+    <script src="lib/level.js"></script>
+    <script src="lib/pathfinder.js"></script>
+    <script src="lib/playerControls.js"></script>
+    <script src="lib/optimizer.js"></script>
+    <script src="lib/generator.js"></script>
+    <title>Trình tạo màn chơi Sokoban</title>
+</head>
+
+<body>
+
+<div>
+    <div class="title">
+        <h1>Trình tạo màn chơi ngẫu nhiên Sokoban</h1>
+        <h3>Tạo màn chơi ngẫu nhiên và giải đố nó</h3>
+    </div>
+</div>
+
+<div class="container">
+    <div class="instructions buttonbox">
+        <div id="buttoncontainer">
+            <br>
+            <button id="generateButton" class="btn" color="white" onClick="randomLevel()">
+                <b>Tạo màn ngẫu nhiên</b>
+            </button>
+            <br>
+            <button id="optimizeButton" class="btn" color="white" onClick="optimize(500)">
+                <b>Tối ưu màn chơi</b>
+            </button>
+        </div>
+
+        <div class="slideContainer">
+            <div id="sizeTxt" style="color: rgb(255, 255, 255)">Kích thước màn chơi</div>
+            <input type="range" min="7" max="20" value="10" class="slider" id="sizeSlider"
+                   onchange="displayHtmlValues()">
+
+            <div id="boxTxt" style="color: rgb(255, 255, 255)">Số lượng hộp</div>
+            <input type="range" min="1" max="10" value="3" class="slider" id="numSlider"
+                   onchange="displayHtmlValues()">
+        </div>
+    </div>
+
+    <div id="canvas1" class="canv"></div>
+    <img src="assets/instructions.jpg" alt="Di chuyển: phím mũi tên; Màn tiếp theo: Enter; Hoàn tác bước: Z"
+         class="instructions">
+</div>
+</body>
+
+</html>

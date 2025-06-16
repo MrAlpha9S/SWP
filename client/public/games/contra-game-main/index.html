@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="shortcut icon" href="images/favicon.ico" />
+  <link rel="icon" type="image/gif" href="images/favicon.ico" />
+  <title>Contra</title>
+  <link href="css/templatemo_style.css" rel="stylesheet" type="text/css" />
+  <script src="lib/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="lib/dynamicaudio-min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/nes.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/utils.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/cpu.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/keyboard.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/mappers.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/papu.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/ppu.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/rom.js" type="text/javascript" charset="utf-8"></script>
+  <script src="source/ui.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" charset="utf-8">
+    var nes;
+    $(function () {
+      nes = new JSNES({
+        'ui': $('#emulator').JSNESUI({
+          "Contra": [
+            ['Contra (U)', 'roms/Contra/Contra1(U)30.nes']
+          ],
+        }),
+        'audio': {
+          'enabled': true,
+          'volume': 1.0
+        },
+        'opts': {
+          'emulateSound': true
+        }
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div class="game-container">
+    <div id="emulator"></div>
+  </div>
+
+  <div class="sound-control" id="soundControl">
+    <span class="sound-icon" id="soundIcon">🔇</span>
+    <span class="sound-text" id="soundText">Sound Off</span>
+  </div>
+
+  <script>
+    // Execute after page load
+    $(function () {
+      // Select first ROM option
+      $('.nes-roms select').val('roms/Contra/Contra1(U)30.nes');
+      // Trigger change event to load ROM
+      $('.nes-roms select').trigger('change');
+      // Trigger fullscreen button click
+      $('.nes-zoom').trigger('click');
+      
+      // 显示控制按钮
+      $('.nes-controls').show();
+      $('.nes-status').show();
+      
+      // 声音控制点击事件
+      $('#soundControl').click(function() {
+        $('.nes-enablesound').trigger('click');
+        // 切换图标和文字
+        if ($('#soundIcon').text() === '🔇') {
+          $('#soundIcon').text('🔊');
+          $('#soundText').text('Sound On');
+        } else {
+          $('#soundIcon').text('🔇');
+          $('#soundText').text('Sound Off');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

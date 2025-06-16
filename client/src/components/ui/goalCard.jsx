@@ -131,11 +131,11 @@ const GoalCard = (props) => {
         <div className='w-full min-h-[250px] border border-primary-600 rounded-md p-5 flex gap-5 items-center'>
             <img src='/goal.png' alt='' className='w-[25%] h-auto'/>
             <div className='w-full h-full flex flex-col justify-center'>
-                <div className='flex justify-between'>
+                <div className='flex flex-col md:flex-row md:justify-between'>
                     <p className='text-1xl md:text-2xl font-bold text-gray-900 my-3'>{goalName} {realityPercentage === 100 &&
                         <span className='text-green-600'>(đã hoàn thành)</span>}</p>
                     {realityPercentage !== 100 && (
-                        <div className='flex gap-5 items-center'>
+                        <div className='flex flex-col md:flex-row gap-5 md:items-center'>
                             <button onClick={() => showModal()}
                                className="text-sm text-primary-700 hover:underline cursor-pointer">
                                 Chỉnh sửa
@@ -157,7 +157,7 @@ const GoalCard = (props) => {
                     )}
 
                 </div>
-                {realityPercentage !== 100 && <div className='flex justify-between'>
+                {realityPercentage !== 100 && <div className='flex flex-col md:flex-row justify-between'>
                     <p>Tiến trình thực tế: {moneySaved.toLocaleString()} VNĐ</p>
                     {avgCigs > 0 && <Popover content={content}>
                         <p>Dự kiến hoàn

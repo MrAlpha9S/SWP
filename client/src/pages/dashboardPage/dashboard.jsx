@@ -20,6 +20,8 @@ import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
 import {queryClient} from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
+import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
+import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -170,8 +172,11 @@ function Dashboard() {
             case 'savings':
                 return <SavingsMenu/>
 
-            // case 'tips':
-            //     return <TipsBoard />;
+            case 'distraction-tools':
+                return <DistractionTools/>
+
+            case 'badges':
+                return <BadgesMenu/>;
 
             default:
                 return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
@@ -190,7 +195,7 @@ function Dashboard() {
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
                     collapse={true} mode="horizontal"/></div>
 
-                <div className="w-full">
+                <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
                     {renderBoard()}
                 </div>
 

@@ -38,7 +38,7 @@ const SavingsMenu = () => {
     });
 
     return (
-        <div className="max-w-4xl space-y-10">
+        <div className="w-full flex flex-col gap-4 px-1 pb-4 md:px-4">
             <div className='flex justify-between'>
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Bạn có thể tiết kiệm bao nhiêu tiền?</h1>

@@ -26,7 +26,7 @@ const CheckinMenu = () => {
     ];
 
     return (
-        <div>
+        <div className="w-full flex flex-col gap-4 px-1 pb-4 md:px-4">
             <Tabs defaultActiveKey="2" items={items}/>
         </div>
     );

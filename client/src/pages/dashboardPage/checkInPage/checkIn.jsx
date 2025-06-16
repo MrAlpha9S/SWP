@@ -128,7 +128,7 @@ function SmokeFreeCheckin() {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOK={setIsModalOpen(false)} onCancel={() => {
+                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOK={() => setIsModalOpen(false)} onCancel={() => {
                     setIsModalOpen(false)
                     setCurrentStepDashboard('dashboard')
                 }}/>}
