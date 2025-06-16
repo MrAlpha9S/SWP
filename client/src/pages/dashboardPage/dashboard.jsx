@@ -16,6 +16,7 @@ import {useCheckInDataStore} from "../../stores/checkInStore.js";
 import {Typography} from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
+import Coachsidebar from "../../components/layout/dashboard/coachsidebar.jsx";
 import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
 import {queryClient} from "../../main.jsx";
 
@@ -132,10 +133,10 @@ function Dashboard() {
         <div className="bg-primary-50 min-h-screen flex flex-col">
             <Hero title={heroTitle} heroHeight={heroHeight}/>
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Coachsidebar
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
                     mode="inline"/></div>
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Coachsidebar
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
                     collapse={true} mode="horizontal"/></div>
 
@@ -162,7 +163,9 @@ function Dashboard() {
                                 getAccessTokenSilently={getAccessTokenSilently}
                             /> :
                             <NotFoundBanner title='Không tìm thấy kế hoạch của bạn'/>
-                    ) : currentStepDashboard === 'check-in' && (
+                    ) : currentStepDashboard === 'check-in' ? (
+                        <CheckinBoard/>
+                    ) : currentStepDashboard === 'post-blog' && (
                         <CheckinBoard/>
                     )}
                 </div>
