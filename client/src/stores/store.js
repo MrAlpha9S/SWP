@@ -149,9 +149,9 @@ export const useGoalsStore = create((set) => ({
     setCreateGoalChecked: (value) => set({createGoalChecked: value}),
     goalList: [],
     setGoalList: (value) => set({goalList: value}),
-    removeGoal: (goal) =>
+    removeGoal: (goalId) =>
         set((state) => ({
-            goalList: state.goalList.filter((g) => g !== goal)
+            goalList: state.goalList.filter((g) => g.goalId !== goalId)
         })),
     addGoal: (goal) =>
         set((state) =>

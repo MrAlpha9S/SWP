@@ -1,4 +1,5 @@
 
+
 export const checkboxStyle = {
     display: 'flex',
     flexDirection: 'column',
@@ -122,5 +123,4 @@ export const qnaOptions = [
     { value: 'cravings', label: 'Bạn có thèm ăn không? Điều gì giúp bạn đối phó với chúng?' },
     { value: 'encourage', label: 'Có ai ủng hộ hoặc động viên bạn không? Điều đó khiến bạn cảm thấy thế nào?' },
 ];
-
 

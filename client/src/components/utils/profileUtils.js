@@ -42,11 +42,45 @@ export async function postGoal(goalId = null, goalName, goalAmount, user, getAcc
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({userAuth0Id: user.sub, goalId: goalId, goalName: goalName, goalAmount: goalAmount, completedDate : completedDate, isCompleted: isCompleted})
+            body: JSON.stringify({
+                userAuth0Id: user.sub,
+                goalId: goalId,
+                goalName: goalName,
+                goalAmount: goalAmount,
+                completedDate: completedDate,
+                isCompleted: isCompleted
+            })
         });
 
         if (!res.ok) {
-            const errorMessage = await res.text(); // or res.json() if your server always responds with JSON
+            const errorMessage = await res.text();
+            throw new Error(errorMessage || `Request failed with status ${res.status}`);
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('post goal error', error);
+        throw error;
+    }
+}
+
+export const deleteGoal = async (goalId, user, getAccessTokenSilently, isAuthenticated) => {
+    if (!isAuthenticated || !user) return;
+
+    try {
+        const token = await getAccessTokenSilently();
+
+        const res = await fetch('http://localhost:3000/profiles/delete-goal', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({goalId: goalId})
+        });
+
+        if (!res.ok) {
+            const errorMessage = await res.text();
             throw new Error(errorMessage || `Request failed with status ${res.status}`);
         }
 

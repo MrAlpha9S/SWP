@@ -1,4 +1,4 @@
-const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal} = require("../services/profileService");
+const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal} = require("../services/profileService");
 
 
 const handlePostOnboarding = async (req, res) => {
@@ -97,8 +97,6 @@ const handleGetProfile = async (req, res) => {
 const handleGoalPost = async (req, res) => {
     const {userAuth0Id, goalName, goalAmount, goalId, isCompleted, completedDate} = req.body;
 
-    console.log(goalId);
-
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: false});
 
     try {
@@ -110,10 +108,24 @@ const handleGoalPost = async (req, res) => {
         }
     } catch (err) {
         console.error('handleGoalPost error:', err);
-        console.log("✅ Sent 500 response");
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: false});
+    }
+}
+
+const handleGoalDelete = async (req, res) => {
+    const {goalId} = req.body;
+    try {
+        const deleteResult = await deleteGoal(goalId);
+        if (deleteResult === false) {
+            return res.status(404).json({success: false, message: 'Post goal failed', data: false});
+        } else {
+            return res.status(200).json({success: true, message: 'Goal posted', data: deleteResult});
+        }
+    } catch (err) {
+        console.error('Delete goal error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: false});
     }
 }
 
 
-module.exports = {handlePostOnboarding, handleGetProfile, handleGoalPost};
+module.exports = {handlePostOnboarding, handleGetProfile, handleGoalPost, handleGoalDelete};

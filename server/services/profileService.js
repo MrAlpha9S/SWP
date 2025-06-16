@@ -61,14 +61,15 @@ const postUserProfile = async (userAuth0Id,
                 .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
                 .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
                 .query(`
-                INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
-                                           cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
-                                           quitting_method, cigs_reduced, custom_time_of_day, custom_trigger, created_at)
-                    OUTPUT INSERTED.profile_id
-                VALUES (
-                    @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at
-                    );
-            `);
+                    INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
+                                               cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
+                                               quitting_method, cigs_reduced, custom_time_of_day, custom_trigger,
+                                               created_at)
+                        OUTPUT INSERTED.profile_id
+                    VALUES (
+                        @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at
+                        );
+                `);
 
             profile_id = result.recordset[0].profile_id;
         }
@@ -135,10 +136,10 @@ const getUserProfile = async (userAuth0Id) => {
         const profileResult = await pool.request()
             .input("userId", userId)
             .query(`
-        SELECT *
-        FROM user_profiles
-        WHERE user_id = @userId
-      `);
+                SELECT *
+                FROM user_profiles
+                WHERE user_id = @userId
+            `);
 
         if (profileResult.rowsAffected[0] !== 1) return null;
         const profile = profileResult.recordset[0];
@@ -148,51 +149,56 @@ const getUserProfile = async (userAuth0Id) => {
         const reasonsResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT pr.reason_value
-        FROM profiles_reasons pr
-        WHERE pr.profile_id = @profileId
-      `);
+                SELECT pr.reason_value
+                FROM profiles_reasons pr
+                WHERE pr.profile_id = @profileId
+            `);
         const reasonList = reasonsResult.recordset.map(row => row.reason_value);
 
         // 3. Get smoke triggers
         const triggersResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT tp.trigger_value
-        FROM triggers_profiles tp
-        WHERE tp.profile_id = @profileId
-      `);
+                SELECT tp.trigger_value
+                FROM triggers_profiles tp
+                WHERE tp.profile_id = @profileId
+            `);
         const triggers = triggersResult.recordset.map(row => row.trigger_value);
 
         // 4. Get time of day
         const timeResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT tp.time_value
-        FROM time_profile tp
-        WHERE tp.profile_id = @profileId
-      `);
+                SELECT tp.time_value
+                FROM time_profile tp
+                WHERE tp.profile_id = @profileId
+            `);
         const timeOfDayList = timeResult.recordset.map(row => row.time_value);
 
         // 5. Get plan log
         const planLogResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT date, num_of_cigs AS cigs
-        FROM plan_log
-        WHERE profile_id = @profileId
-        ORDER BY date ASC
-      `);
+                SELECT date, num_of_cigs AS cigs
+                FROM plan_log
+                WHERE profile_id = @profileId
+                ORDER BY date ASC
+            `);
         const planLog = planLogResult.recordset;
 
         // 6. Get goals
         const goalsResult = await pool.request()
             .input("profileId", profileId)
             .query(`
-        SELECT goal_id as goalId, goal_name AS goalName, goal_amount as goalAmount, created_at AS createdAt, is_completed AS isCompleted, completed_date AS completedDate
-        FROM goals
-        WHERE profile_id = @profileId
-      `);
+                SELECT goal_id        as goalId,
+                       goal_name      AS goalName,
+                       goal_amount    as goalAmount,
+                       created_at     AS createdAt,
+                       is_completed   AS isCompleted,
+                       completed_date AS completedDate
+                FROM goals
+                WHERE profile_id = @profileId
+            `);
         const goalList = goalsResult.recordset;
 
         return {
@@ -250,22 +256,22 @@ const updateUserProfile = async (
             .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
             .input('updatedAt', sql.DateTime, updatedAt)
             .query(`
-        UPDATE user_profiles
-        SET readiness_value = @readiness,
-            start_date = @startDate,
-            quit_date = @quitDate,
-            expected_quit_date = @expectedQuitDate,
-            cigs_per_day = @cigsPerDay,
-            cigs_per_pack = @cigsPerPack,
-            price_per_pack = @pricePerPack,
-            time_after_waking = @timeAfterWaking,
-            quitting_method = @quittingMethod,
-            cigs_reduced = @cigsReduced,
-            custom_time_of_day = @customTimeOfDay,
-            custom_trigger = @customTrigger,
-            updated_at = @updatedAt
-        WHERE user_id = @userId
-      `);
+                UPDATE user_profiles
+                SET readiness_value    = @readiness,
+                    start_date         = @startDate,
+                    quit_date          = @quitDate,
+                    expected_quit_date = @expectedQuitDate,
+                    cigs_per_day       = @cigsPerDay,
+                    cigs_per_pack      = @cigsPerPack,
+                    price_per_pack     = @pricePerPack,
+                    time_after_waking  = @timeAfterWaking,
+                    quitting_method    = @quittingMethod,
+                    cigs_reduced       = @cigsReduced,
+                    custom_time_of_day = @customTimeOfDay,
+                    custom_trigger     = @customTrigger,
+                    updated_at         = @updatedAt
+                WHERE user_id = @userId
+            `);
 
         // Get profile_id
         const result = await pool.request()
@@ -274,11 +280,13 @@ const updateUserProfile = async (
         const profile_id = result.recordset[0].profile_id;
 
         // Clear related tables
-        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals' ];
+        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals'];
         for (const table of tablesToClear) {
             await pool.request()
                 .input('profile_id', profile_id)
-                .query(`DELETE FROM ${table} WHERE profile_id = @profile_id`);
+                .query(`DELETE
+                        FROM ${table}
+                        WHERE profile_id = @profile_id`);
         }
 
         //re-insert new data
@@ -347,7 +355,27 @@ const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null, isComp
     }
 };
 
+const deleteGoal = async (goalId) => {
+    try {
+        const pool = await poolPromise;
+
+        let result;
+
+        result = await pool.request()
+            .input('goal_id', sql.Int, goalId)
+            .query('DELETE FROM goals WHERE goal_id = @goal_id');
+
+        if (result.rowsAffected[0] === 0) {
+            throw new Error("Database delete failed");
+        }
+
+        return true;
+    } catch
+        (error) {
+        console.error("postGoal error:", error);
+        throw error;
+    }
+}
 
 
-
-module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal}
+module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal}
