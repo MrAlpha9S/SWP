@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {useAuth0} from "@auth0/auth0-react";
-import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
+import React, { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
 import {
     useCigsPerPackStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
@@ -8,29 +8,29 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
-import {useQuery} from '@tanstack/react-query'
-import {useCheckInDataStore} from "../../stores/checkInStore.js";
-import {Typography} from "antd";
+import { useQuery } from '@tanstack/react-query'
+import { useCheckInDataStore } from "../../stores/checkInStore.js";
+import { Typography } from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import Coachsidebar from "../../components/layout/dashboard/coachsidebar.jsx";
 import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
-import {queryClient} from "../../main.jsx";
+import { queryClient } from "../../main.jsx";
 
 import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 
 function Dashboard() {
-    const {readinessValue} = useQuitReadinessStore();
-    const {addError, removeError} = useErrorStore();
-    const {reasonList} = useReasonStore();
-    const {pricePerPack} = usePricePerPackStore();
-    const {cigsPerPack} = useCigsPerPackStore();
-    const {timeAfterWaking} = useTimeAfterWakingStore();
-    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
-    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
+    const { readinessValue } = useQuitReadinessStore();
+    const { addError, removeError } = useErrorStore();
+    const { reasonList } = useReasonStore();
+    const { pricePerPack } = usePricePerPackStore();
+    const { cigsPerPack } = useCigsPerPackStore();
+    const { timeAfterWaking } = useTimeAfterWakingStore();
+    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
+    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -41,16 +41,16 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY
     } = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
+    const { createGoalChecked, goalAmount, goalList } = useGoalsStore()
     const navigate = useNavigate();
-    const {isProfileExist} = useProfileExists();
-    const {setCheckInDataSet} = useCheckInDataStore()
+    const { isProfileExist } = useProfileExists();
+    const { setCheckInDataSet } = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
+    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
 
 
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     const {
         isPending: isUserProfilePending,
@@ -65,7 +65,7 @@ function Dashboard() {
     })
 
     useEffect(() => {
-        queryClient.invalidateQueries({queryKey: ['checkin-status']});
+        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
     }, []);
 
     useEffect(() => {
@@ -133,42 +133,42 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col">
-            <Hero title={heroTitle} heroHeight={heroHeight}/>
+            <Hero title={heroTitle} heroHeight={heroHeight} />
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
                 <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Coachsidebar
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    mode="inline"/></div>
+                    mode="inline" /></div>
                 <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Coachsidebar
                     currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    collapse={true} mode="horizontal"/></div>
+                    collapse={true} mode="horizontal" /></div>
 
                 <div className="w-full">
                     {!isAuthenticated || isUserProfilePending ? (
-                        <ProgressBoard isPending={true}/>
+                        <ProgressBoard isPending={true} />
                     ) : currentStepDashboard === 'dashboard' ? (
                         userProfile.data ? <ProgressBoard
-                                startDate={startDate}
-                                pricePerPack={pricePerPack}
-                                cigsPerPack={cigsPerPack}
-                                cigsReduced={cigsReduced}
-                                quittingMethod={quittingMethod}
-                                planLog={planLog}
-                                cigsPerDay={cigsPerDay}
-                                expectedQuitDate={expectedQuitDate}
-                                stoppedDate={stoppedDate}
-                                isPending={false}
-                                readinessValue={readinessValue}
-                                planLogCloneDDMMYY={planLogCloneDDMMYY}
-                                setCurrentStepDashboard={setCurrentStepDashboard}
-                                user={user}
-                                isAuthenticated={isAuthenticated}
-                                getAccessTokenSilently={getAccessTokenSilently}
-                            /> :
-                            <NotFoundBanner title='Không tìm thấy kế hoạch của bạn'/>
+                            startDate={startDate}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            cigsReduced={cigsReduced}
+                            quittingMethod={quittingMethod}
+                            planLog={planLog}
+                            cigsPerDay={cigsPerDay}
+                            expectedQuitDate={expectedQuitDate}
+                            stoppedDate={stoppedDate}
+                            isPending={false}
+                            readinessValue={readinessValue}
+                            planLogCloneDDMMYY={planLogCloneDDMMYY}
+                            setCurrentStepDashboard={setCurrentStepDashboard}
+                            user={user}
+                            isAuthenticated={isAuthenticated}
+                            getAccessTokenSilently={getAccessTokenSilently}
+                        /> :
+                            <NotFoundBanner title='Không tìm thấy kế hoạch của bạn' />
                     ) : currentStepDashboard === 'check-in' ? (
-                        <CheckinBoard/>
+                        <CheckinBoard />
                     ) : currentStepDashboard === 'post-blog' && (
-                        <PostBlog/>
+                        <PostBlog user_id={userProfile.data.user_id[0]} />
                     )}
                 </div>
 

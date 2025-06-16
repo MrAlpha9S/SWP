@@ -130,9 +130,9 @@ const getUserProfile = async (userAuth0Id) => {
         const profileResult = await pool.request()
             .input("userId", userId)
             .query(`
-        SELECT *
-        FROM user_profiles
-        WHERE user_id = @userId
+        SELECT * FROM user_profiles up
+JOIN users u ON u.user_id = up.user_id
+WHERE up.user_id = @userId
       `);
 
         if (profileResult.rowsAffected[0] !== 1) return null;
