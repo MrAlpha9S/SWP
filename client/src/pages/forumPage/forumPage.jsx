@@ -1,116 +1,113 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ForumHeader from '../../components/layout/forum/ForumHeader.jsx';
-import ThreadList from '../../components/layout/forum/ThreadList';
+import React, {useEffect} from 'react';
+import {Card, Divider, Input} from 'antd';
+import {
+    SearchOutlined,
+    UserOutlined,
+    BookOutlined,
+    FlagOutlined,
+    AppstoreOutlined,
+    EditOutlined,
+    MessageOutlined,
+    ProfileOutlined,
+    StarOutlined,
+    CompassOutlined
+} from '@ant-design/icons';
+import Hero from "../../components/layout/forum/hero.jsx";
+import {useQuery} from "@tanstack/react-query";
+import {getForumCategoryMetadata} from "../../components/utils/forumUtils.js";
 
-const ForumPage = () => {
-    const navigate = useNavigate();
+const SidebarLinks = [
+    {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
+    {icon: <BookOutlined/>, label: 'Chia sẻ trải nghiệm'},
+    {icon: <CompassOutlined/>, label: 'Bắt đầu hành trình'},
+    {icon: <FlagOutlined/>, label: 'Duy trì cai thuốc'},
+    {icon: <AppstoreOutlined/>, label: 'Mẹo và lời khuyên'},
+    {icon: <ProfileOutlined/>, label: 'Lý do bỏ thuốc'},
+    {icon: <EditOutlined/>, label: 'Hướng dẫn cộng đồng'},
+    {icon: <UserOutlined/>, label: 'Bài viết của tôi'},
+    {icon: <StarOutlined/>, label: 'Yêu thích của tôi'},
+];
 
-    const [threads, setThreads] = useState([
-        {
-            id: 1,
-            title: "Welcome to our community! Let's get started with introductions",
-            author: {
-                name: "Sarah Johnson",
-                avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face&auto=format"
-            },
-            timestamp: "2 tiếng trước",
-            likes: 24,
-            comments: 8,
-            isLiked: false
+export default function ForumPage() {
+
+    const [categoryMetadata, setCategoryMetadata] = React.useState([]);
+
+    const {
+        isPending: isforumCategoryMetadataPending,
+        data: forumCategoryMetadata,
+    } = useQuery({
+        queryKey: ['forum-category-metadata'],
+        queryFn: async () => {
+            return await getForumCategoryMetadata()
         },
-        {
-            id: 2,
-            title: "Best practices for React development in 2024",
-            author: {
-                name: "Michael Chen",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format"
-            },
-            timestamp: "4 tiếng trước",
-            likes: 42,
-            comments: 15,
-            isLiked: true
-        },
-        {
-            id: 3,
-            title: "How to optimize your Tailwind CSS workflow",
-            author: {
-                name: "Emma Rodriguez",
-                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face&auto=format"
-            },
-            timestamp: "1 ngày trước",
-            likes: 18,
-            comments: 6,
-            isLiked: false
-        },
-        {
-            id: 4,
-            title: "Discussion: The future of web development frameworks",
-            author: {
-                name: "David Kim",
-                avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format"
-            },
-            timestamp: "2 ngày trước",
-            likes: 67,
-            comments: 23,
-            isLiked: true
-        },
-        {
-            id: 5,
-            title: "Help needed: Debugging async/await issues",
-            author: {
-                name: "Lisa Zhang",
-                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face&auto=format"
-            },
-            timestamp: "3 ngày trước",
-            likes: 12,
-            comments: 9,
-            isLiked: false
+    })
+
+    useEffect(() => {
+        if (!isforumCategoryMetadataPending) {
+            setCategoryMetadata(forumCategoryMetadata.data)
         }
-    ]);
-
-    const handleCreateThread = () => {
-        console.log('Create thread clicked');
-        // In a real app, this would open a modal or navigate to create thread page
-    };
-
-    const handleThreadClick = (threadId) => {
-        console.log('Thread clicked:', threadId);
-        navigate(`/forum/thread/${threadId}`);
-    };
-
-    const handleLike = (threadId) => {
-        setThreads(prevThreads =>
-            prevThreads.map(thread =>
-                thread.id === threadId
-                    ? {
-                        ...thread,
-                        isLiked: !thread.isLiked,
-                        likes: thread.isLiked ? thread.likes - 1 : thread.likes + 1
-                    }
-                    : thread
-            )
-        );
-    };
-
-    const handleReport = (threadId) => {
-        console.log('Report thread:', threadId);
-        // In a real app, this would open a report modal
-    };
+    }, [forumCategoryMetadata, isforumCategoryMetadataPending])
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            <div className="max-w-4xl mx-auto">
-                <ForumHeader onCreateThread={handleCreateThread} />
-                <ThreadList
-                    threads={threads}
-                    onThreadClick={handleThreadClick}
-                    onLike={handleLike}
-                    onReport={handleReport}
-                />
+        <div className="w-full h-full">
+            <Hero/>
+            <div className="max-w-7xl bg-primary-50 mx-auto px-14 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Left Section */}
+                <div className="md:col-span-3 space-y-6">
+                    {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
+                        <Card key={idx} hoverable className="bg-primary-100 border-0">
+                            <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">
+                            <img src={section.img_path} alt={section.category_name} className="size-56 object-contain"/>
+                                <div className="flex-1 space-y-4">
+                                    <h3 className="text-lg font-bold text-primary-900">{section.category_name}</h3>
+                                    <p className="text-gray-700">{section.description}</p>
+                                    <Divider orientation="horizontal"/>
+                                    <div className="flex gap-10 text-sm text-purple-900 font-semibold">
+                                        <div>
+                                            Thảo luận:
+                                            <p>{section.post_count.toLocaleString()}</p>
+                                        </div>
+
+                                        <div>
+                                            Bình luận:
+                                            <p>{section.comment_count.toLocaleString()}</p>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Right Sidebar */}
+                <div className="space-y-6">
+                    <button
+                        className="w-full bg-primary-700 hover:bg-primary-800 text-white font-semibold py-2 px-4 rounded-md">
+                        Đăng bài
+                    </button>
+
+                    <Input
+                        placeholder="Tìm kiếm từ khóa hoặc người dùng"
+                        prefix={<SearchOutlined/>}
+                        className="w-full"
+                    />
+
+                    <div>
+                        <h4 className="font-semibold text-gray-800 mb-2">Đi đến mục</h4>
+                        <ul className="space-y-2">
+                            {SidebarLinks.map((item, idx) => (
+                                <li key={idx}
+                                    className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer">
+                                    {item.icon}
+                                    <span>{item.label}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
-    );
-};
 
-export default ForumPage;
+    );
+}
