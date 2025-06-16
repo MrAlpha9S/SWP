@@ -40,20 +40,15 @@ const CurrentGoal = ({ type = "onGoing" }) => {
                 Mục tiêu {type === 'onGoing' ? 'hiện tại' : 'đã hoàn thành'}
             </h2>
             <div className="flex flex-col gap-5">
-                {render && filteredGoals.length > 0 && filteredGoals.map((goal, index) => (
+                {render && filteredGoals.length > 0 && filteredGoals.map((goal) => (
                     <GoalCard
-                        key={index}
+                        key={goal.goalId}
                         moneySaved={moneySaved}
-                        goalName={goal.goalName}
-                        goalAmount={goal.goalAmount}
                         avgCigs={averageCigs}
-                        goalStartDate={goal.createdAt}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}
                         cigsPerDay={cigsPerDay}
-                        goalId={goal.goalId}
-                        isCompleted={goal.isCompleted}
-                        completedDate={goal.completedDate}
+                        goal={goal}
                     />
                 ))}
             </div>

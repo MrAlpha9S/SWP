@@ -17,20 +17,14 @@ const content = (
 
 const Context = React.createContext({name: 'Default'});
 
-const GoalCard = ({
-                      goalName,
-                      goalAmount,
-                      moneySaved,
-                      goalStartDate,
-                      avgCigs,
-                      cigsPerPack,
-                      pricePerPack, cigsPerDay, goalId, isCompleted, completedDate
-                  }) => {
+const GoalCard = (props) => {
+
+    const {goal, cigsPerDay, avgCigs, cigsPerPack, moneySaved, pricePerPack} = props;
+    const {goalId, goalName, goalAmount, completedDate, isCompleted, createdAt} = goal;
     const {updateGoal} = useGoalsStore()
     const [editableGoalName, setEditableGoalName] = useState(goalName);
     const [editableGoalAmount, setEditableGoalAmount] = useState(goalAmount);
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
-
     const realityPercentage = Math.min(100, Math.round((moneySaved / goalAmount) * 100));
     const pricePerCig = Math.round(pricePerPack / cigsPerPack);
     let daysToGoalComplete = 0
@@ -39,9 +33,10 @@ const GoalCard = ({
     } else {
         daysToGoalComplete = Math.round((goalAmount - moneySaved) / (cigsPerDay * pricePerCig));
     }
-    const parsedStartDate = new Date(goalStartDate);
+    const parsedStartDate = new Date(createdAt);
     const expectedCompleteDate = new Date(parsedStartDate);
     expectedCompleteDate.setUTCDate(parsedStartDate.getUTCDate() + daysToGoalComplete);
+
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
@@ -62,6 +57,7 @@ const GoalCard = ({
                                completedDate,
                                isCompleted
                            }) => {
+            console.log(goalId, editableGoalName, editableGoalAmount, completedDate, isCompleted)
             return await postGoal(goalId, editableGoalName, editableGoalAmount, user, getAccessTokenSilently, isAuthenticated, completedDate, isCompleted);
         },
         onSuccess: () => {
@@ -74,49 +70,43 @@ const GoalCard = ({
         }
     })
 
-    const [hasPostedCompletion, setHasPostedCompletion] = useState(false);
 
-    useEffect(() => {
-        if (realityPercentage === 100 && !completedDate && !isCompleted && !hasPostedCompletion) {
-            const completionDate = getCurrentUTCDateTime().toISOString();
+    const handleOk = async () => {
+        try {
+            const newGoalAmount = editableGoalAmount;
+            const percent = Math.min(100, Math.round((moneySaved / newGoalAmount) * 100));
+
+            const shouldComplete = percent === 100 && !isCompleted && !completedDate;
+
+            const completedStatus = shouldComplete ? true : isCompleted;
+            const completionDate = shouldComplete ? getCurrentUTCDateTime().toISOString() : completedDate;
+
+            console.log("📌 updateGoal args", {
+                goalId,
+                name: editableGoalName,
+                amount: newGoalAmount,
+                isCompleted: completedStatus,
+                completedDate: completionDate,
+            });
+
+            updateGoal(goalId, editableGoalName, newGoalAmount, completedStatus, completionDate);
+
 
             postGoalMutation.mutate({
                 goalId,
                 editableGoalName,
-                editableGoalAmount,
+                editableGoalAmount: newGoalAmount,
                 user,
                 getAccessTokenSilently,
                 isAuthenticated,
                 completedDate: completionDate,
-                isCompleted: true
+                isCompleted: completedStatus
             });
-
-            updateGoal(goalId, editableGoalName, editableGoalAmount, completionDate, true);
-            setHasPostedCompletion(true);
-        }
-    }, [realityPercentage, completedDate, isCompleted, hasPostedCompletion]);
-
-
-
-    const handleOk = async () => {
-        try {
-            updateGoal(goalId, editableGoalName, editableGoalAmount);
-
-            postGoalMutation.mutate({
-                goalId,
-                editableGoalName,
-                editableGoalAmount,
-                user,
-                getAccessTokenSilently,
-                isAuthenticated,
-                completedDate,
-                isCompleted
-            })
-
         } catch (err) {
             console.error("Error saving goal:", err);
         }
     };
+
 
     const handleCancel = () => {
         setIsModalOpen(false);
@@ -146,8 +136,14 @@ const GoalCard = ({
                         <button className='underline' onClick={() => showModal()}>Chỉnh sửa</button>)}
                 </div>
                 <div>
-                    <p className='mb-1'>Bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(goalStartDate.split('T')[0])}</p>
-                    {(isCompleted && completedDate.length > 0) && `Ngày hoàn thành: ${convertYYYYMMDDStrToDDMMYYYYStr(completedDate?.split('T')[0])}`}
+                    <p className='mb-1'>Bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(createdAt.split('T')[0])}</p>
+                    {isCompleted && completedDate && (
+                        <p className='text-green-700'>
+                            Ngày hoàn thành: {convertYYYYMMDDStrToDDMMYYYYStr(completedDate.split('T')[0])}
+                        </p>
+                    )}
+                    <p>completedDate raw: {String(completedDate)}</p>
+
                 </div>
                 {realityPercentage !== 100 && <div className='flex justify-between'>
                     <p>Tiến trình thực tế: {moneySaved.toLocaleString()} VNĐ</p>
