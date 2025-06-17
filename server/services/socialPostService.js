@@ -87,9 +87,8 @@ async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null }) {
+async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null, postId = null }) {
     try {
-        console.log('service', keyword)
         const pool = await poolPromise;
         const offset = (page - 1) * pageSize;
 
@@ -107,7 +106,6 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
         }
 
         if (fromDate) {
-            console.log('fromDate', new Date(fromDate).toISOString());
             filters.push(`sp.created_at >= @fromDate`);
             request.input('fromDate', sql.DateTime, new Date(fromDate));
         }
@@ -115,6 +113,11 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
         if (toDate) {
             filters.push(`sp.created_at <= @toDate`);
             request.input('toDate', sql.DateTime, new Date(toDate));
+        }
+
+        if (postId) {
+            filters.push(`sp.post_id = @postId`);
+            request.input('postId', sql.Int, postId);
         }
 
         const whereClause = filters.length ? 'WHERE ' + filters.join(' AND ') : '';
@@ -134,7 +137,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
 
         const dataResult = await request.query(`
             SELECT 
-              sp.title, sp.content, sp.created_at, sp.is_pinned,
+              sp.post_id, sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
               u.user_id, u.username, u.role, u.avatar,
               COUNT(DISTINCT sl.like_id) AS likes,
@@ -148,7 +151,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             GROUP BY 
               sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
-              u.user_id, u.username, u.role, u.avatar
+              u.user_id, u.username, u.role, u.avatar, sp.post_id
             ORDER BY sp.created_at DESC
             OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
         `);
@@ -166,6 +169,54 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
     }
 }
 
+const getPostComments = async (postId) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('postId', sql.Int, postId)
+            .query(`
+                WITH CommentTree AS (SELECT scmt.comment_id,
+                                            scmt.parent_comment_id,
+                                            scmt.post_id,
+                                            scmt.user_id,
+                                            scmt.content,
+                                            scmt.created_at,
+                                            CAST(0 AS INT) AS depth
+                                     FROM social_comments scmt
+                                     WHERE scmt.post_id = @postId
+                                       AND scmt.parent_comment_id IS NULL
+
+                                     UNION ALL
+
+                                     SELECT scmt.comment_id,
+                                            scmt.parent_comment_id,
+                                            scmt.post_id,
+                                            scmt.user_id,
+                                            scmt.content,
+                                            scmt.created_at,
+                                            ct.depth + 1
+                                     FROM social_comments scmt
+                                              INNER JOIN CommentTree ct ON scmt.parent_comment_id = ct.comment_id)
+                SELECT ct.*,
+                       u.username, u.avatar,
+                       u.role,
+                       COALESCE(COUNT(sl.like_id), 0) AS like_count
+                FROM CommentTree ct
+                         LEFT JOIN users u ON ct.user_id = u.user_id
+                         LEFT JOIN social_likes sl ON ct.comment_id = sl.comment_id
+                GROUP BY ct.comment_id, ct.parent_comment_id, ct.post_id, ct.user_id,
+                         ct.content, ct.created_at, ct.depth, u.username, u.avatar,
+                         u.role
+                ORDER BY ct.created_at;
+            `);
+
+        return result.recordset;
+    } catch (err) {
+        console.error('SQL error', err);
+        throw err;
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts };
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments };

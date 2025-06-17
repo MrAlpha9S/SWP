@@ -1,11 +1,11 @@
 const express = require('express');
 const socialPostRouter = express.Router();
 
-const {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts} = require("../controllers/socialPostController");
+const {getPostAndCommentCount, handleGetPosts, handleGetPostComments} = require("../controllers/socialPostController");
 
 socialPostRouter.get('/get-post-comment-count', getPostAndCommentCount)
-socialPostRouter.get('/:category_tag', handleGetPostByCategory)
 socialPostRouter.get('/', handleGetPosts)
+socialPostRouter.get('/comments/:postId', handleGetPostComments)
 
 
 module.exports = socialPostRouter;

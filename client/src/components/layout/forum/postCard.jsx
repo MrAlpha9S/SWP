@@ -1,13 +1,14 @@
 // components/forum/PostCard.jsx
 import React from 'react';
 import {Card, Divider} from 'antd';
-import {FaCommentAlt, FaRegClock} from "react-icons/fa";
-import {FcLikePlaceholder} from "react-icons/fc";
+import {FaCommentAlt, FaRegClock, FaRegHeart} from "react-icons/fa";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from '../../utils/dateUtils.js';
+import {useNavigate} from "react-router-dom";
 
-export default function PostCard({title, username, created_at, content, category_name, isPinned, comments, likes, avatar}) {
+export default function PostCard({post_id, title, username, created_at, content, category_name, category_tag, isPinned, comments, likes, avatar}) {
+    const navigate = useNavigate();
     return (
-        <Card hoverable style={{borderColor: '#0f766e'}}>
+        <Card hoverable style={{borderColor: '#0f766e'}} onClick={() => navigate(`/forum/${category_tag}/${post_id}`)}>
             <div className='flex'>
                 <div className='w-[13%]'>
                     <img className='size-50 rounded-full' src={avatar} alt={username}/>
@@ -30,7 +31,7 @@ export default function PostCard({title, username, created_at, content, category
                     <div className="flex gap-4 text-sm text-primary-600 items-center">
                         <p className="text-xs text-gray-500">Đăng trong <span className='underline font-bold'>{category_name}</span></p>
                         <span className='flex gap-2 items-center'><FaCommentAlt/> {comments}</span>
-                        <span className='flex gap-2 items-center'><FcLikePlaceholder className='size-4'/> {likes}</span>
+                        <span className='flex gap-2 items-center'><FaRegHeart className='size-4'/> {likes}</span>
                     </div>
                 </div>
             </div>

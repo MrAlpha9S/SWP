@@ -38,7 +38,8 @@ const SideBar = ({
                      fromDate,
                      setFromDate,
                      toDate,
-                     setToDate
+                     setToDate,
+                     isInPost = false
                  }) => {
     const navigate = useNavigate();
 
@@ -80,17 +81,18 @@ const SideBar = ({
     ];
 
     return (
-            <div className="space-y-4">
-                <Input
-                    placeholder="Tìm kiếm từ khóa hoặc người dùng"
-                    prefix={<SearchOutlined/>}
-                    className="w-full"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                />
+        <div className="space-y-4">
+            <Input
+                placeholder="Tìm kiếm từ khóa hoặc người dùng"
+                prefix={<SearchOutlined/>}
+                className="w-full"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+            />
 
-                <Divider className="my-2"/>
+            <Divider className="my-2"/>
 
+            {!isInPost ? <>
                 <button
                     onClick={() => {
                         setSelectedCategory('');
@@ -103,33 +105,33 @@ const SideBar = ({
                     Xóa bộ lọc
                 </button>
 
-                <Collapse items={filters} defaultActiveKey={['1', '2']}/>
+                <Collapse items={filters} defaultActiveKey={['1', '2']}/></> : null}
 
-                <div className="space-y-6">
-                    <button
-                        className="w-full bg-primary-700 hover:bg-primary-800 text-white font-semibold py-2 px-4 rounded-md">
-                        Đăng bài
-                    </button>
+            <div className="space-y-6">
+                {!isInPost && <button
+                    className="w-full bg-primary-700 hover:bg-primary-800 text-white font-semibold py-2 px-4 rounded-md">
+                    Đăng bài
+                </button>}
 
-                    <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">Đi đến mục</h4>
-                        <ul className="space-y-2">
-                            {SidebarLinks.map((item, idx) => (
-                                <React.Fragment key={idx}>
-                                    <li
-                                        onClick={() => navigate(item.dest)}
-                                        className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer"
-                                    >
-                                        {item.icon}
-                                        <span>{item.label}</span>
-                                    </li>
-                                    <Divider/>
-                                </React.Fragment>
-                            ))}
-                        </ul>
-                    </div>
+                <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Đi đến mục</h4>
+                    <ul className="space-y-2">
+                        {SidebarLinks.map((item, idx) => (
+                            <React.Fragment key={idx}>
+                                <li
+                                    onClick={() => navigate(item.dest)}
+                                    className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer"
+                                >
+                                    {item.icon}
+                                    <span>{item.label}</span>
+                                </li>
+                                <Divider/>
+                            </React.Fragment>
+                        ))}
+                    </ul>
                 </div>
             </div>
+        </div>
     )
 };
 
