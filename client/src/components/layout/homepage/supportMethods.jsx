@@ -23,10 +23,10 @@ function SupportMethods() {
       <section className="py-16 ">
         <div className="container-custom">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
-            QuitEase giúp bạn cai thuốc như thế nào
+            EzQuit giúp bạn cai thuốc như thế nào
           </h2>
           <p className="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-            QuitEase kết hợp các phương pháp đã được chứng minh với công nghệ hiện đại để giúp bạn cai thuốc hiệu quả và lâu dài.
+            EzQuit kết hợp các phương pháp đã được chứng minh với công nghệ hiện đại để giúp bạn cai thuốc hiệu quả và lâu dài.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

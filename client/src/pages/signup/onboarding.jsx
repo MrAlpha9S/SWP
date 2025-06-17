@@ -454,7 +454,7 @@ const Onboarding = () => {
                     ref={scrollRef}
                     className='bg-white'
                     current={currentStep}
-                    onChange={onChangeSteps}
+                    // onChange={onChangeSteps}
                     labelPlacement="vertical"
                     items={stepsItems}
                 />

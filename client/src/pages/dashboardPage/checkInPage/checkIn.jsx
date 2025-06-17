@@ -55,8 +55,7 @@ function SmokeFreeCheckin() {
     useEffect(() => {
         if (date) {
             handleStepOne();
-        }
-        if (CheckInDataSuccess) {
+        } else if (CheckInDataSuccess) {
             if (CheckInData && CheckInData.data) {
                 setCheckInDate(CheckInData.data.logged_at);
                 setFeel(CheckInData.data.feeling);
@@ -128,10 +127,11 @@ function SmokeFreeCheckin() {
                 centered
                 maskClosable
                 closeIcon={null}
-                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOK={() => setIsModalOpen(false)} onCancel={() => {
-                    setIsModalOpen(false)
-                    setCurrentStepDashboard('dashboard')
-                }}/>}
+                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
+                                     onCancel={() => {
+                                         setIsModalOpen(false)
+                                         setCurrentStepDashboard('dashboard')
+                                     }}/>}
             >
                 <p>
                     Bạn đã thực hiện check in cho ngày hôm nay. Nếu bạn <strong>thực hiện thay đổi</strong> và

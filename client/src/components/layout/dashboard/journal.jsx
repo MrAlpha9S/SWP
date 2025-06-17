@@ -17,7 +17,7 @@ const Journal = () => {
     const {startDate} = usePlanStore()
     const [searchDate, setSearchDate] = useState('')
     const {setUserCreationDate} = useUserCreationDate();
-    const [activeKeys, setActiveKeys] = useState(['1']);
+    const [activeKeys, setActiveKeys] = useState(['2']);
 
     const {
         isPending: isCheckInDataPending,
