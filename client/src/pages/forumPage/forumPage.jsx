@@ -50,7 +50,15 @@ export default function ForumPage() {
 
     return (
         <div className="w-full h-full">
-            <Hero/>
+            <Hero title='Cộng đồng' img='/community.png'>
+                Cộng đồng QuitEz luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
+                thuốc. Hãy khám phá những câu chuyện của người khác để tìm cảm hứng, sự động viên và động lực cho
+                riêng mình.
+                <br/>
+                Bạn cũng có thể chia sẻ trải nghiệm của bản thân, xin lời khuyên hoặc tiếp thêm sức mạnh cho người
+                khác. Đừng quên xem qua nội quy cộng đồng để giữ cho nơi đây luôn tích cực và an toàn cho tất cả mọi
+                người nhé!
+            </Hero>
             <div className="max-w-7xl bg-primary-50 mx-auto px-14 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
                 {/* Left Section */}
                 <div className="md:col-span-3 space-y-6">
