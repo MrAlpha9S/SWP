@@ -48,7 +48,7 @@ const TopicsDropdown = () => {
     <div className="relative group">
       {/* Trigger Button */}
       <div className="cursor-pointer">
-        Topics <DownOutlined />
+        Bài viết <DownOutlined />
       </div>
 
       {/* Dropdown block - stays open when hovering over dropdown too */}

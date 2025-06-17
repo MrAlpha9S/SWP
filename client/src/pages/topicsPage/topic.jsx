@@ -66,7 +66,7 @@ const Topic = () => {
                     {blogs.map((blog, index) => (
                         <Card hoverable onClick={() => navigate(`/topics/${topicId}/${blog.blog_id}`)} key={index} className="shadow-sm border border-gray-200">
                             <div className="space-y-1">
-                                <p className="text-sm text-gray-500 font-medium">Topics</p>
+                                <p className="text-sm text-gray-500 font-medium">Bài viết</p>
                                 <h2 className="text-xl font-semibold text-primary-900">{blog.title}</h2>
                                 <p className="text-gray-700">{blog.description}</p>
                             </div>
