@@ -3,8 +3,9 @@ import SideBar from "./sideBar.jsx";
 import {useParams} from "react-router-dom";
 import {useQuery} from "@tanstack/react-query";
 import {getComments, getPosts} from "../../utils/forumUtils.js";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
+import {FaCommentAlt, FaRegHeart, FaFlag} from "react-icons/fa";
 
 export default function PostPage() {
 
@@ -44,8 +45,8 @@ export default function PostPage() {
     }, [commentsData, isCommentsPending])
 
     return (
-        <div className="flex min-h-screen mx-auto px-4 py-8 gap-8">
-            <div className="space-y-6 w-[95%]">
+        <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+            <div className="space-y-6 w-[92%]">
                 <div>
                     <h1 className="text-3xl font-bold text-primary-800 mb-2">{post?.title}</h1>
                     <p className="text-sm text-gray-600">
@@ -69,10 +70,9 @@ export default function PostPage() {
                     </div>
 
                     <div className="flex gap-6 text-sm text-gray-500 pt-2 border-t">
-                        <button>💜 {post?.likes} Likes</button>
-                        <button>💬 {post?.comments} Reply</button>
-                        <button>🔖 Save</button>
-                        <button>🚩 Report</button>
+                        <button className='flex items-center gap-2'><FaRegHeart className='size-4'/> {post?.likes} Likes</button>
+                        <button className='flex items-center gap-2'><FaCommentAlt/> {post?.comments} Reply</button>
+                        <button className='flex items-center gap-2'><FaFlag/> Report</button>
                     </div>
                 </div>
 
@@ -110,9 +110,9 @@ export function Comment({ author, date, content, role , likes, avatar  }) {
             </div>
             <p className="text-sm text-gray-800">{content}</p>
             <div className="flex gap-4 text-xs text-gray-500 pt-2">
-                <button>💜 {likes} Likes</button>
-                <button>💬 Reply</button>
-                <button>🚩 Report</button>
+                <button className='flex items-center gap-2'><FaRegHeart className='size-4'/> {likes} Likes</button>
+                <button className='flex items-center gap-2'><FaCommentAlt/> Reply</button>
+                <button className='flex items-center gap-2'><FaFlag/> Report</button>
             </div>
         </div>
     );

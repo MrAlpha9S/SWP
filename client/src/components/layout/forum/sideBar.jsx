@@ -18,7 +18,7 @@ const categoryOptions = [
     {label: 'Chia sẻ trải nghiệm', value: 'quit-experiences'},
     {label: 'Bắt đầu hành trình', value: 'getting-started'},
     {label: 'Duy trì cai thuốc', value: 'staying-quit'},
-    {label: 'Mẹo và lời khuyên', value: 'tips-and-advice'},
+    {label: 'Mẹo và lời khuyên', value: 'hints-and-tips'},
     {label: 'Lý do bỏ thuốc', value: 'reasons-to-quit'}
 ];
 
@@ -82,17 +82,18 @@ const SideBar = ({
 
     return (
         <div className="space-y-4">
-            <Input
-                placeholder="Tìm kiếm từ khóa hoặc người dùng"
-                prefix={<SearchOutlined/>}
-                className="w-full"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-            />
 
-            <Divider className="my-2"/>
 
             {!isInPost ? <>
+                <Input
+                    placeholder="Tìm kiếm từ khóa hoặc người dùng"
+                    prefix={<SearchOutlined/>}
+                    className="w-full"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                />
+
+                <Divider className="my-2"/>
                 <button
                     onClick={() => {
                         setSelectedCategory('');

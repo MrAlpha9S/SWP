@@ -112,7 +112,7 @@ export default function ForumPage() {
                         </Card>
                     ))}
                 </div>
-                <SideBar/>
+                <SideBar isInPost={true}/>
             </div>
         </div>
 

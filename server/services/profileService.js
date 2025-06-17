@@ -377,5 +377,24 @@ const deleteGoal = async (goalId) => {
     }
 }
 
+const getLeaderboard = async () => {
+    try {
+        const pool = await poolPromise;
+
+        const totalCigs = await pool.request()
+            .query('SELECT u.user_id, u.username, COALESCE(SUM(cl.cigs_smoked), 0) AS totalCigs FROM users u LEFT JOIN user_profiles p ON u.user_id = p.user_id LEFT JOIN checkin_log cl ON u.user_id = cl.user_id GROUP BY u.user_id, u.username')
+
+        const userCreationDateList = await pool.request()
+            .query('SELECT user_id, username, created_at FROM users')
+
+        const daysWithoutSmokeList = await pool.request()
+            .query('SELECT u.user_id, u.username, COUNT(cl.log_id) AS days_without_smoke FROM users u LEFT JOIN checkin_log cl ON u.user_id = cl.user_id AND cl.cigs_smoked = 0 GROUP BY u.user_id, u.username')
+
+
+    } catch (error) {
+        console.error("postGoal error:", error);
+    }
+}
+
 
 module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal}

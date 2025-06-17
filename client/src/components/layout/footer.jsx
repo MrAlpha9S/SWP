@@ -57,7 +57,7 @@ function Footer() {
             <div className="space-y-4">
               <div className="flex items-start">
                 <FiMail className="text-primary-400 mt-1 mr-3" />
-                <span className="text-gray-400">support@quitease.com</span>
+                <span className="text-gray-400">support@ezquit.com</span>
               </div>
               <div className="flex items-start">
                 <FiPhone className="text-primary-400 mt-1 mr-3" />
@@ -68,7 +68,7 @@ function Footer() {
         </div>
         
         <div className="pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} QuitEase. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} EzQuit. All rights reserved.</p>
           <div className="mt-2 space-x-4">
             <a href="#" className="hover:text-gray-400 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-gray-400 transition-colors">Terms of Service</a>

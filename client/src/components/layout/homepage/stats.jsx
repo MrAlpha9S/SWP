@@ -23,7 +23,7 @@ function Stats() {
   ]
 
   return (
-      <section className="py-12 bg-white">
+      <section className="py-12 ">
         <div className="container-custom">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
             Tại sao chọn chương trình của chúng tôi
