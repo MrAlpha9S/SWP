@@ -173,7 +173,7 @@ const ProgressBoard = ({
 
     const moneySaved = Math.round(cigsQuit * pricePerCig);
 
-    useMemo(() => {
+    useEffect(() => {
         if (typeof setMoneySaved === 'function' && moneySaved !== undefined) {
             setMoneySaved(moneySaved);
         }
@@ -293,11 +293,11 @@ const ProgressBoard = ({
                 <div className="text-2xl flex justify-center"><FaRegCalendarCheck
                     className='size-9 text-primary-800 mb-1'/></div>
                 <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
-                <p className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600">
                     {isPending ?
                         <Skeleton.Input style={{width: 160}}
                                         active/> : readinessValue === 'ready' ? `${localStartDate.toLocaleDateString('vi-VN')} - ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}` : stoppedDate}
-                </p>
+                </div>
             </div>
             {readinessValue === 'ready' &&
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
