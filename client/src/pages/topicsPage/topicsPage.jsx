@@ -61,7 +61,7 @@ const TopicsPage = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="max-w-2xl">
-          <h1 className="text-4xl font-bold text-primary-800 mb-4">Topics</h1>
+          <h1 className="text-4xl font-bold text-primary-800 mb-4">Bài viết</h1>
           <p className="text-gray-700 text-lg">
             Bỏ thuốc lá là một hành trình, và việc có thông tin đúng vào đúng thời điểm sẽ rất hữu ích. Cho dù bạn
 chỉ đang nghĩ đến việc bỏ thuốc hay đã thực hiện bước đầu tiên, các chủ đề của chúng tôi ở đây để hướng dẫn và hỗ trợ
