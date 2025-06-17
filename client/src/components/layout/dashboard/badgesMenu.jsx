@@ -5,7 +5,7 @@ import {Popover} from "antd";
 const achievedBadges = [
     { label: '7 Ngày Không Hút Thuốc', icon: '/7-days-smoke-free.svg', description: '7 ngày không khói thuốc.', },
     { label: 'Bắt đầu nào!', icon: '/streak-starter.svg', description: 'Hoàn thành check-in đầu tiên.' },
-    { label: 'Thành Viên Mới', icon: '/badge-support-3.png', description: 'Tham gia QuitEz.' },
+    { label: 'Thành Viên Mới', icon: '/badge-support-3.png', description: 'Tham gia EzQuit.' },
 ];
 
 const lockedBadges = [

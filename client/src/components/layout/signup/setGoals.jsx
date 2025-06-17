@@ -22,7 +22,7 @@ const goalTipsCollapseItems = [
             <p>Tăng sự tự tin trong giai đoạn đầu cai thuốc bằng cách đặt ra các mục tiêu ngắn hạn. Ví dụ, tiết kiệm 2.5
                 triệu đồng cho một buổi tối đi chơi, hoặc đi bộ vào giờ nghỉ trưa 10 phút, hai lần mỗi tuần.</p>
 
-            <p>Nếu bạn là thành viên đã đăng ký của iCanQuit, bạn có thể thêm nhiều mục tiêu hơn hoặc điều chỉnh các mục
+            <p>Nếu bạn là thành viên đã đăng ký của EzQuit, bạn có thể thêm nhiều mục tiêu hơn hoặc điều chỉnh các mục
                 tiêu hiện tại trong bảng điều khiển Kế hoạch Cai thuốc của mình.</p>
 
         </div>

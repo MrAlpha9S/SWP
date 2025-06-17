@@ -40,3 +40,24 @@ export async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
+export async function getPosts({categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = ''}) {
+    try {
+
+        const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!res.ok) {
+            const errorMessage = await res.text();
+            throw new Error(errorMessage || `Request failed with status ${res.status}`);
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('getForumCategoryMetadata error', error);
+        throw error;
+    }
+}

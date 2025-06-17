@@ -1,21 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {Card, Divider, Input} from 'antd';
 import {
-    SearchOutlined,
-    UserOutlined,
     BookOutlined,
     FlagOutlined,
     AppstoreOutlined,
     EditOutlined,
     MessageOutlined,
     ProfileOutlined,
-    StarOutlined,
     CompassOutlined
 } from '@ant-design/icons';
 import Hero from "../../components/layout/forum/hero.jsx";
 import {useQuery} from "@tanstack/react-query";
 import {getForumCategoryMetadata} from "../../components/utils/forumUtils.js";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
+import SideBar from "../../components/layout/forum/sideBar.jsx";
 
 const SidebarLinks = [
     {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
@@ -25,8 +23,6 @@ const SidebarLinks = [
     {icon: <AppstoreOutlined/>, label: 'Mẹo và lời khuyên'},
     {icon: <ProfileOutlined/>, label: 'Lý do bỏ thuốc'},
     {icon: <EditOutlined/>, label: 'Hướng dẫn cộng đồng'},
-    {icon: <UserOutlined/>, label: 'Bài viết của tôi'},
-    {icon: <StarOutlined/>, label: 'Yêu thích của tôi'},
 ];
 
 export default function ForumPage() {
@@ -53,26 +49,32 @@ export default function ForumPage() {
     const [heroHeight, setHeroHeight] = useState(472);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const scrollY = window.scrollY;
+        let timeoutId;
 
-            if (scrollY > 20) {
-                setHeroHeight(30);
-            } else if (scrollY < 10) {
-                setHeroHeight(472);
-            }
+        const handleScroll = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if (window.scrollY > 30) {
+                    setHeroHeight(30);
+                } else {
+                    setHeroHeight(472);
+                }
+            }, 10); // Small delay
         };
 
         if (typeof window !== 'undefined') {
             window.addEventListener("scroll", handleScroll);
-            return () => window.removeEventListener("scroll", handleScroll);
+            return () => {
+                window.removeEventListener("scroll", handleScroll);
+                clearTimeout(timeoutId);
+            };
         }
     }, []);
 
     return (
         <div className="w-full h-full">
             <Hero title='Cộng đồng' img='/community.png' heroHeight={heroHeight}>
-                Cộng đồng QuitEz luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
+                Cộng đồng EzQuit luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
                 thuốc. Hãy khám phá những câu chuyện của người khác để tìm cảm hứng, sự động viên và động lực cho
                 riêng mình.
                 <br/>
@@ -84,9 +86,11 @@ export default function ForumPage() {
                 {/* Left Section */}
                 <div className="md:col-span-3 space-y-6">
                     {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
-                        <Card key={idx} hoverable className="bg-primary-100 border-0" onClick={() => navigate(`/forum/${section.category_tag}`)}>
+                        <Card key={idx} hoverable className="bg-primary-100 border-0"
+                              onClick={() => navigate(`/forum/${section.category_tag}`)}>
                             <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">
-                            <img src={section.img_path} alt={section.category_name} className="size-56 object-contain"/>
+                                <img src={section.img_path} alt={section.category_name}
+                                     className="size-56 object-contain"/>
                                 <div className="flex-1 space-y-4">
                                     <h3 className="text-lg font-bold text-primary-900">{section.category_name}</h3>
                                     <p className="text-gray-700">{section.description}</p>
@@ -108,33 +112,7 @@ export default function ForumPage() {
                         </Card>
                     ))}
                 </div>
-
-                {/* Right Sidebar */}
-                <div className="space-y-6">
-                    <button
-                        className="w-full bg-primary-700 hover:bg-primary-800 text-white font-semibold py-2 px-4 rounded-md">
-                        Đăng bài
-                    </button>
-
-                    <Input
-                        placeholder="Tìm kiếm từ khóa hoặc người dùng"
-                        prefix={<SearchOutlined/>}
-                        className="w-full"
-                    />
-
-                    <div>
-                        <h4 className="font-semibold text-gray-800 mb-2">Đi đến mục</h4>
-                        <ul className="space-y-2">
-                            {SidebarLinks.map((item, idx) => (
-                                <li key={idx}
-                                    className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer">
-                                    {item.icon}
-                                    <span>{item.label}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
+                <SideBar/>
             </div>
         </div>
 

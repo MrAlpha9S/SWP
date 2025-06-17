@@ -1,28 +1,41 @@
-import React, {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import ForumLayout from '../../components/layout/forum/forumLayout.jsx';
-import {getPostsByCategoryTag} from "../../components/utils/forumUtils.js";
-
+// pages/StayingQuit.jsx
+import React from 'react';
+import useForumPage from '../../components/hooks/useForumPage.js';
+import ForumLayout from '../../components/layout/forum/forumLayout';
 
 export default function StayingQuit() {
-    const [posts, setPosts] = useState([]);
-    const {isPending, data} = useQuery({
-        queryKey: ['posts-staying-quit'],
-        queryFn: () => getPostsByCategoryTag('staying-quit'),
-    });
-
-    useEffect(() => {
-        if (!isPending && data?.data) {
-            setPosts(data.data);
-        }
-    }, [isPending, data]);
+    const {
+        posts,
+        total,
+        currentPage,
+        setCurrentPage,
+        keyword,
+        setKeyword,
+        selectedCategory,
+        setSelectedCategory,
+        fromDate,
+        setFromDate,
+        toDate,
+        setToDate
+    } = useForumPage('staying-quit', 'posts-staying-quit');
 
     return (
         <ForumLayout
-            title="Chia sẻ kinh nghiệm"
+            title="Duy trì cai thuốc"
             heroImg="/staying-quit.svg"
-            heroDesc="Lập kế hoạch và chuyển bị để bắt đầu hành trình cai thuốc hiệu quả."
+            heroDesc="Lập kế hoạch và chuẩn bị để bắt đầu hành trình cai thuốc hiệu quả."
             posts={posts}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalItems={total}
+            keyword={keyword}
+            setKeyword={setKeyword}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            fromDate={fromDate}
+            setFromDate={setFromDate}
+            toDate={toDate}
+            setToDate={setToDate}
         />
     );
 }

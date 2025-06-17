@@ -1,28 +1,40 @@
-import React, {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import ForumLayout from '../../components/layout/forum/forumLayout.jsx';
-import {getPostsByCategoryTag} from "../../components/utils/forumUtils.js";
+import React from 'react';
+import useForumPage from '../../components/hooks/useForumPage.js';
+import ForumLayout from '../../components/layout/forum/forumLayout';
 
-
-export default function GettingStartedPage() {
-    const [posts, setPosts] = useState([]);
-    const {isPending, data} = useQuery({
-        queryKey: ['posts-getting-started'],
-        queryFn: () => getPostsByCategoryTag('getting-started')
-    });
-
-    useEffect(() => {
-        if (!isPending && data?.data) {
-            setPosts(data.data);
-        }
-    }, [isPending, data]);
+export default function GettingStarted() {
+    const {
+        posts,
+        total,
+        currentPage,
+        setCurrentPage,
+        keyword,
+        setKeyword,
+        selectedCategory,
+        setSelectedCategory,
+        fromDate,
+        setFromDate,
+        toDate,
+        setToDate
+    } = useForumPage('getting-started', 'posts-getting-started');
 
     return (
         <ForumLayout
             title="Bắt đầu hành trình"
             heroImg="/getting-started.svg"
-            heroDesc="Lập kế hoạch và chuyển bị để bắt đầu hành trình cai thuốc hiệu quả."
+            heroDesc="Lập kế hoạch và chuẩn bị để bắt đầu hành trình cai thuốc hiệu quả."
             posts={posts}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalItems={total}
+            keyword={keyword}
+            setKeyword={setKeyword}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            fromDate={fromDate}
+            setFromDate={setFromDate}
+            toDate={toDate}
+            setToDate={setToDate}
         />
     );
 }

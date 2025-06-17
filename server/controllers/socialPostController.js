@@ -1,4 +1,4 @@
-const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag} = require("../services/socialPostService");
+const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts} = require("../services/socialPostService");
 
 const getPostAndCommentCount = async (req, res) => {
 
@@ -80,5 +80,38 @@ const handleGetPostByCategory = async (req, res) => {
     }
 };
 
+const handleGetPosts = async (req, res) => {
+    const { categoryTag, keyword, page, fromDate, toDate } = req.query;
 
-module.exports = {getPostAndCommentCount, handleGetPostByCategory};
+    console.log(keyword)
+
+    try {
+        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate});
+
+        if (!result || result.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No posts found',
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Successfully fetched posts',
+            data: result
+        });
+
+    } catch (err) {
+        console.error('handleGetPosts error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error: ' + err.message,
+            data: null
+        });
+    }
+};
+
+
+
+module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts};

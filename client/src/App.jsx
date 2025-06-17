@@ -19,6 +19,7 @@ import GettingStarted from "./pages/forumPage/gettingStarted.jsx";
 import StayingQuit from "./pages/forumPage/stayingQuit.jsx";
 import HintsAndTips from "./pages/forumPage/hintsAndTips.jsx";
 import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
+import AllPosts from "./pages/forumPage/allPosts.jsx";
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                     <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
                     <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
                     <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
+                    <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 </Routes>
             </div>
             <Footer/>

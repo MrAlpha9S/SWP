@@ -95,7 +95,7 @@ const Summary = () => {
                     <div
                         className="w-full bg-[#fff7e5] p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                         <p className='text-left md:text-2xl lg:text-3xl font-bold'>
-                            Gia nhập QuitEz để lưu thông tin kế hoạch của bạn
+                            Gia nhập EzQuit để lưu thông tin kế hoạch của bạn
                         </p>
                         <p className='text-sm md:text-base'>
                             Đăng ký để lưu kế hoạch của bạn và theo dõi tiến trình cai thuốc. Nếu bạn đã có tài khoản?

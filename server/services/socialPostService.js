@@ -87,5 +87,85 @@ async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
+async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null }) {
+    try {
+        console.log('service', keyword)
+        const pool = await poolPromise;
+        const offset = (page - 1) * pageSize;
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag };
+        const filters = [];
+        const request = pool.request();
+
+        if (categoryTag) {
+            filters.push(`sc.category_tag = @categoryTag`);
+            request.input('categoryTag', sql.VarChar(50), categoryTag);
+        }
+
+        if (keyword) {
+            filters.push(`(sp.title LIKE @keyword OR sp.content LIKE @keyword OR u.username LIKE @keyword)`);
+            request.input('keyword', sql.NVarChar, `%${keyword}%`);
+        }
+
+        if (fromDate) {
+            console.log('fromDate', new Date(fromDate).toISOString());
+            filters.push(`sp.created_at >= @fromDate`);
+            request.input('fromDate', sql.DateTime, new Date(fromDate));
+        }
+
+        if (toDate) {
+            filters.push(`sp.created_at <= @toDate`);
+            request.input('toDate', sql.DateTime, new Date(toDate));
+        }
+
+        const whereClause = filters.length ? 'WHERE ' + filters.join(' AND ') : '';
+
+        const countResult = await request.query(`
+            SELECT COUNT(DISTINCT sp.post_id) AS total
+            FROM social_posts sp
+            JOIN social_category sc ON sc.category_id = sp.category_id
+            JOIN users u ON sp.user_id = u.user_id
+            ${whereClause}
+        `);
+
+        const total = countResult.recordset[0].total;
+
+        request.input('offset', sql.Int, offset);
+        request.input('pageSize', sql.Int, pageSize);
+
+        const dataResult = await request.query(`
+            SELECT 
+              sp.title, sp.content, sp.created_at, sp.is_pinned,
+              sc.category_tag, sc.category_name,
+              u.user_id, u.username, u.role, u.avatar,
+              COUNT(DISTINCT sl.like_id) AS likes,
+              COUNT(DISTINCT scmt.comment_id) AS comments
+            FROM social_posts sp
+            JOIN social_category sc ON sc.category_id = sp.category_id
+            LEFT JOIN social_likes sl ON sp.post_id = sl.post_id
+            LEFT JOIN social_comments scmt ON sp.post_id = scmt.post_id
+            JOIN users u ON sp.user_id = u.user_id
+            ${whereClause}
+            GROUP BY 
+              sp.title, sp.content, sp.created_at, sp.is_pinned,
+              sc.category_tag, sc.category_name,
+              u.user_id, u.username, u.role, u.avatar
+            ORDER BY sp.created_at DESC
+            OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
+        `);
+
+        return {
+            records: dataResult.recordset,
+            total,
+            page,
+            pageSize
+        };
+
+    } catch (err) {
+        console.error('Error fetching posts:', err);
+        throw err;
+    }
+}
+
+
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts };
