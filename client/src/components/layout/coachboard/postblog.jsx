@@ -6,11 +6,18 @@ import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import { Select } from 'antd'
 import Swal from 'sweetalert2'
+import { getCurrentUTCDateTime } from '../../utils/dateUtils'
+import { useMutation } from '@tanstack/react-query';
+import { postBlog } from '../../utils/blogUtils'
+import { useAuth0 } from "@auth0/auth0-react";
 
-export default function PostBlog({user_id}) {
+
+export default function PostBlog({ user_id }) {
     const [currentTopic, setCurrentTopic] = useState('')
     const [currentTitle, setCurrentTitle] = useState('')
     const [currentDescription, setCurrentDescription] = useState('')
+
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     const editor = useEditor({
         extensions: [
@@ -35,6 +42,24 @@ export default function PostBlog({user_id}) {
         )
     }
 
+    
+    const postBlogMutation = useMutation({
+        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at }) => {
+            return await postBlog(user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at);
+        },
+        onSuccess: () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Đăng bài thành công',
+                text: 'Bài viết của bạn đã được lưu!',
+            })
+        },
+        onError: () => {
+
+        },
+    });
+
+
     const handleSubmit = () => {
         if (!isFormValid()) {
             Swal.fire({
@@ -45,24 +70,23 @@ export default function PostBlog({user_id}) {
             return
         }
 
+
         const post = {
             user_id,
             topic: currentTopic,
             title: currentTitle,
             description: currentDescription,
             content: editor.getHTML(),
+            created_at: getCurrentUTCDateTime().toISOString()
         }
-
         console.log('Submit:', post)
+        postBlogMutation.mutate(user, getAccessTokenSilently, isAuthenticated, post.topic, post.title, post.description, post.content, post.created_at)
 
-        Swal.fire({
-            icon: 'success',
-            title: 'Đăng bài thành công',
-            text: 'Bài viết của bạn đã được lưu!',
-        })
+
 
         // Gửi lên API hoặc lưu Firestore ở đây nếu cần
     }
+
 
     return (
         <div>
@@ -167,11 +191,10 @@ export default function PostBlog({user_id}) {
                 <button
                     onClick={handleSubmit}
                     disabled={!isFormValid()}
-                    className={`mt-3 px-4 py-2 rounded text-white ${
-                        isFormValid()
+                    className={`mt-3 px-4 py-2 rounded text-white ${isFormValid()
                             ? 'bg-black hover:bg-gray-800'
                             : 'bg-gray-400 cursor-not-allowed'
-                    }`}
+                        }`}
                 >
                     Xong
                 </button>
