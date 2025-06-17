@@ -21,6 +21,7 @@ import CheckinBoard from "../../components/layout/dashboard/checkinBoard.jsx";
 import { queryClient } from "../../main.jsx";
 
 import PostBlog from '../../components/layout/coachboard/postblog.jsx'
+import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 
 function Dashboard() {
     const { readinessValue } = useQuitReadinessStore();
@@ -124,6 +125,12 @@ function Dashboard() {
             case 'badges':
                 setHeroTitle('Huy hiệu');
                 break;
+            case 'post-blog':
+                setHeroTitle('Đăng Bài Blog');
+                break;
+            case 'messager':
+                setHeroTitle('Trò Chuyện');
+                break;
             default:
                 setHeroTitle('');
                 break;
@@ -167,6 +174,8 @@ function Dashboard() {
                             <NotFoundBanner title='Không tìm thấy kế hoạch của bạn' />
                     ) : currentStepDashboard === 'check-in' ? (
                         <CheckinBoard />
+                    ) : currentStepDashboard === 'messager' ? (
+                        <MessageBox />
                     ) : currentStepDashboard === 'post-blog' && (
                         <PostBlog user_id={userProfile.data.user_id[0]} />
                     )}
