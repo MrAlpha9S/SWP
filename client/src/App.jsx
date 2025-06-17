@@ -15,6 +15,7 @@ import ForumPage from "./pages/forumPage/forumPage.jsx";
 import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
+import QuitExperiences from "./components/layout/forum/quitExperiences.jsx";
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
                     <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                     <Route path="/my-profile" element={<MyProfile/>}></Route>
                     <Route path="/forum" element={<ForumPage/>}></Route>
+                    <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
                     <Route path="/forum/thread/:threadId" element={<ThreadDiscussion/>}/>
                 </Routes>
             </div>

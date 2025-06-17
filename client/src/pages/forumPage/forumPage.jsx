@@ -15,6 +15,7 @@ import {
 import Hero from "../../components/layout/forum/hero.jsx";
 import {useQuery} from "@tanstack/react-query";
 import {getForumCategoryMetadata} from "../../components/utils/forumUtils.js";
+import { useNavigate } from "react-router-dom";
 
 const SidebarLinks = [
     {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
@@ -31,6 +32,7 @@ const SidebarLinks = [
 export default function ForumPage() {
 
     const [categoryMetadata, setCategoryMetadata] = React.useState([]);
+    const navigate = useNavigate();
 
     const {
         isPending: isforumCategoryMetadataPending,
