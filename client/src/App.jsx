@@ -60,12 +60,12 @@ function App() {
                 {/* Auth0 Callback Routes */}
 
                 <Route path="/post-signup" element={<PostSignUpCallback />} />
-                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/onboarding/:from?" element={<Onboarding />} />
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                 <Route path="/my-profile" element={<MyProfile/>}></Route>
                 <Route path="/forum" element={<ForumPage />}></Route>
-                <Route path="*" element={<div>404 Not Found</div>} />
+
                 <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
                 <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
                 <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>

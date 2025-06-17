@@ -81,7 +81,8 @@ const Onboarding = () => {
                 }
                 setIsModalOpen(true);
             } else {
-                setCurrentStep(0)
+                setCurrentStep(6)
+                setIsModalOpen(true);
             }
         }
     }, [])
