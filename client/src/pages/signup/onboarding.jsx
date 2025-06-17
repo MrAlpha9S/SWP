@@ -21,6 +21,7 @@ import SetGoals from "../../components/layout/signup/setGoals.jsx";
 import Summary from "../../components/layout/signup/summary.jsx";
 import {useNavigate, useParams} from "react-router-dom";
 import ModalFooter from "../../components/ui/modalFooter.jsx";
+import {useAuth0} from "@auth0/auth0-react";
 
 const planTipsCollapseItems = [
     {
@@ -66,6 +67,7 @@ const Onboarding = () => {
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const {user, isAuthenticated} = useAuth0();
 
     const {from} = useParams();
 
@@ -84,6 +86,9 @@ const Onboarding = () => {
                 setCurrentStep(6)
                 setIsModalOpen(true);
             }
+        }
+        if (from === 'newUser') {
+            setCurrentStep(6);
         }
     }, [])
 
@@ -411,6 +416,22 @@ const Onboarding = () => {
         }
     }, [currentStep]);
 
+    const handleSave = () => {
+        if (!user || !isAuthenticated) {
+            const timeout = setTimeout(() => {
+                if (!scrollRef.current) return
+                const yOffset = -130;
+                const y = scrollRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }, 100)
+            return () => {
+                clearTimeout(timeout);
+            }
+        } else {
+            navigate('/post-onboarding')
+        }
+    }
+
     const scrollRef = useRef(null);
     return (
         <>
@@ -475,7 +496,7 @@ const Onboarding = () => {
                         </CustomButton>
                     )}
                     <CustomButton type="primary" onClick={() => {
-                        currentStep !== 6 ? toNextPage() : navigate('/post-onboarding')
+                        currentStep !== 6 ? toNextPage() : handleSave();
                     }}>
                         {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                     </CustomButton>

@@ -30,9 +30,18 @@ const Summary = () => {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay} = useTimeOfDayStore();
     const {triggers, customTrigger} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog, planLogCloneDDMMYY} = usePlanStore();
+    const {
+        startDate,
+        cigsPerDay,
+        quittingMethod,
+        cigsReduced,
+        expectedQuitDate,
+        stoppedDate,
+        planLog,
+        planLogCloneDDMMYY
+    } = usePlanStore();
     const {createGoalChecked, goalList} = useGoalsStore()
-    const {setCurrentStep} = useCurrentStepStore()
+    const {currentStep, setCurrentStep} = useCurrentStepStore()
 
     const calculatePrice = (type, numberOfYears = 1) => {
         const pricePerCigs = pricePerPack / cigsPerPack
@@ -101,7 +110,40 @@ const Summary = () => {
                             Đăng ký để lưu kế hoạch của bạn và theo dõi tiến trình cai thuốc. Nếu bạn đã có tài khoản?
                             Hãy đăng nhập.
                         </p>
-                        <CustomButton onClick={() => loginWithRedirect()}>Tham gia</CustomButton>
+                        <CustomButton
+                            onClick={() => {
+                                const state = {
+                                    readiness_value: useQuitReadinessStore.getState().readinessValue,
+                                    reasonList: useReasonStore.getState().reasonList,
+                                    price_per_pack: usePricePerPackStore.getState().pricePerPack,
+                                    cigs_per_pack: useCigsPerPackStore.getState().cigsPerPack,
+                                    time_after_waking: useTimeAfterWakingStore.getState().timeAfterWaking,
+                                    timeOfDayList: useTimeOfDayStore.getState().timeOfDayList,
+                                    custom_time_of_day: useTimeOfDayStore.getState().customTimeOfDay,
+                                    customTimeOfDayChecked: useTimeOfDayStore.getState().customTimeOfDayChecked,
+                                    triggers: useTriggersStore.getState().triggers,
+                                    custom_trigger: useTriggersStore.getState().customTrigger,
+                                    customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
+                                    start_date: usePlanStore.getState().startDate,
+                                    cigs_per_day: usePlanStore.getState().cigsPerDay,
+                                    quitting_method: usePlanStore.getState().quittingMethod,
+                                    cigs_reduced: usePlanStore.getState().cigsReduced,
+                                    expected_quit_date: usePlanStore.getState().expectedQuitDate,
+                                    quit_date: usePlanStore.getState().stoppedDate,
+                                    planLog: usePlanStore.getState().planLog,
+                                    planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
+                                    createGoalChecked: useGoalsStore.getState().createGoalChecked,
+                                    goalList: useGoalsStore.getState().goalList,
+                                    currentStep: currentStep
+                                };
+
+                                localStorage.setItem('onboarding_profile', JSON.stringify(state));
+
+                                loginWithRedirect();
+                            }}
+                        >
+                            Tham gia
+                        </CustomButton>
                     </div>
                 }
                 <div
