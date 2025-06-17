@@ -1,4 +1,4 @@
-export async function postBlog(user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, create_at) {
+export async function postBlog(user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at) {
 
     if (!isAuthenticated || !user) return;
 
@@ -10,8 +10,9 @@ export async function postBlog(user, getAccessTokenSilently, isAuthenticated, to
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({auth0_id: user.sub, topic: topic, title: title, description: description, content: content, create_at: create_at})
+        body: JSON.stringify({auth0_id: user.sub, topic: topic, title: title, description: description, content: content, created_at: created_at})
     });
+    
 
     return await res.json();
 }

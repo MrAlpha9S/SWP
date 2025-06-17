@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -42,7 +42,7 @@ export default function PostBlog({ user_id }) {
         )
     }
 
-    
+
     const postBlogMutation = useMutation({
         mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at }) => {
             return await postBlog(user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at);
@@ -72,7 +72,6 @@ export default function PostBlog({ user_id }) {
 
 
         const post = {
-            user_id,
             topic: currentTopic,
             title: currentTitle,
             description: currentDescription,
@@ -80,7 +79,7 @@ export default function PostBlog({ user_id }) {
             created_at: getCurrentUTCDateTime().toISOString()
         }
         console.log('Submit:', post)
-        postBlogMutation.mutate(user, getAccessTokenSilently, isAuthenticated, post.topic, post.title, post.description, post.content, post.created_at)
+        postBlogMutation.mutate({user, getAccessTokenSilently, isAuthenticated, ...post})
 
 
 
@@ -192,8 +191,8 @@ export default function PostBlog({ user_id }) {
                     onClick={handleSubmit}
                     disabled={!isFormValid()}
                     className={`mt-3 px-4 py-2 rounded text-white ${isFormValid()
-                            ? 'bg-black hover:bg-gray-800'
-                            : 'bg-gray-400 cursor-not-allowed'
+                        ? 'bg-black hover:bg-gray-800'
+                        : 'bg-gray-400 cursor-not-allowed'
                         }`}
                 >
                     Xong

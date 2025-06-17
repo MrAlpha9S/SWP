@@ -19,7 +19,7 @@ const PostBlog = async (auth0_id, topic, title, description, content, created_at
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('user_id', getUserIdFromAuth0Id(auth0_id))
+            .input('user_id', await getUserIdFromAuth0Id(auth0_id))
             .input('topic_id', topic)
             .input('title', title)
             .input('description', description)
