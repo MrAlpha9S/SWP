@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {useAuth0} from "@auth0/auth0-react";
-import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
+import React, { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
 import {
     useCigsPerPackStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
@@ -8,12 +8,12 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
-import {useQuery} from '@tanstack/react-query'
-import {useCheckInDataStore} from "../../stores/checkInStore.js";
-import {Typography} from "antd";
+import { useQuery } from '@tanstack/react-query'
+import { useCheckInDataStore } from "../../stores/checkInStore.js";
+import { Typography } from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
@@ -23,15 +23,18 @@ import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
 import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 
+import PostBlog from '../../components/layout/coachboard/postblog.jsx'
+import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
+
 function Dashboard() {
-    const {readinessValue} = useQuitReadinessStore();
-    const {addError, removeError} = useErrorStore();
-    const {reasonList} = useReasonStore();
-    const {pricePerPack} = usePricePerPackStore();
-    const {cigsPerPack} = useCigsPerPackStore();
-    const {timeAfterWaking} = useTimeAfterWakingStore();
-    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
-    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
+    const { readinessValue } = useQuitReadinessStore();
+    const { addError, removeError } = useErrorStore();
+    const { reasonList } = useReasonStore();
+    const { pricePerPack } = usePricePerPackStore();
+    const { cigsPerPack } = useCigsPerPackStore();
+    const { timeAfterWaking } = useTimeAfterWakingStore();
+    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
+    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -44,14 +47,14 @@ function Dashboard() {
     } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
-    const {isProfileExist} = useProfileExists();
-    const {setCheckInDataSet} = useCheckInDataStore()
+    const { isProfileExist } = useProfileExists();
+    const { setCheckInDataSet } = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
+    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
 
 
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     const {
         isPending: isUserProfilePending,
@@ -66,7 +69,7 @@ function Dashboard() {
     })
 
     useEffect(() => {
-        queryClient.invalidateQueries({queryKey: ['checkin-status']});
+        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
     }, []);
 
     useEffect(() => {
@@ -76,7 +79,6 @@ function Dashboard() {
             await syncProfileToStores();
         }
         syncStores();
-        console.log(userProfile);
     }, [userProfile, isUserProfilePending])
 
     // useEffect(() => {
@@ -125,6 +127,12 @@ function Dashboard() {
                 break;
             case 'badges':
                 setHeroTitle('Huy hiệu');
+                break;
+            case 'post-blog':
+                setHeroTitle('Đăng Bài Blog');
+                break;
+            case 'messager':
+                setHeroTitle('Trò Chuyện');
                 break;
             default:
                 setHeroTitle('');
@@ -177,6 +185,10 @@ function Dashboard() {
 
             case 'badges':
                 return <BadgesMenu/>;
+            case 'messager':
+                return <MessageBox/>
+            case 'post-blog':
+                return <PostBlog user_id={userProfile.data.user_id[0]}/>
 
             default:
                 return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;

@@ -22,6 +22,9 @@ import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 import AllPosts from "./pages/forumPage/allPosts.jsx";
 import PostPage from "./components/layout/forum/postPage.jsx";
 
+import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
+import Topic from "./pages/topicsPage/topic.jsx";
+import BlogPost from "./pages/topicsPage/blogPost.jsx";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -40,28 +43,39 @@ function App() {
 
     return (
         <>
-            <Navbar/>
+            <Navbar />
             <div className="max-w-[1280px] mx-auto bg-[#fff7e5]">
-                <Routes>
-                    <Route path="/" element={<Homepage/>}/>
-                    <Route path="/dashboard" element={<DashBoard/>}/>
-                    <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
-                    <Route path="/post-signup" element={<PostSignUpCallback/>}/>
-                    <Route path="/onboarding/:from?" element={<Onboarding/>}/>
-                    <Route path="/error" element={<ErrorPage/>}/>
-                    <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
-                    <Route path="/my-profile" element={<MyProfile/>}></Route>
-                    <Route path="/forum" element={<ForumPage/>}></Route>
-                    <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
-                    <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
-                    <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
-                    <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
-                    <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
-                    <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
-                    <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
-                </Routes>
+            <Routes>
+                <Route path="/" element={<Homepage />} />
+
+                <Route path="/dashboard" element={<DashBoard />} />
+                <Route path="/dashboard/check-in" element={<CheckIn />} />
+                <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
+
+                <Route path="/topics" element={<TopicsPage />} />
+                <Route path="/topics/:topicId" element={<Topic />} />
+
+                <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
+
+                {/* Auth0 Callback Routes */}
+
+                <Route path="/post-signup" element={<PostSignUpCallback />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/error" element={<ErrorPage />} />
+                <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
+                <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/forum" element={<ForumPage />}></Route>
+                <Route path="*" element={<div>404 Not Found</div>} />
+                <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
+                <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
+                <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
+                <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
+                <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
+                <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
+                <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
+            </Routes>
             </div>
-            <Footer/>
+            <Footer />
         </>
     )
 }
