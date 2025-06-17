@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Card, Divider, Input} from 'antd';
 import {
     SearchOutlined,
@@ -50,9 +50,28 @@ export default function ForumPage() {
         }
     }, [forumCategoryMetadata, isforumCategoryMetadataPending])
 
+    const [heroHeight, setHeroHeight] = useState(472);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+
+            if (scrollY > 20) {
+                setHeroHeight(30);
+            } else if (scrollY < 10) {
+                setHeroHeight(472);
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener("scroll", handleScroll);
+            return () => window.removeEventListener("scroll", handleScroll);
+        }
+    }, []);
+
     return (
         <div className="w-full h-full">
-            <Hero title='Cộng đồng' img='/community.png'>
+            <Hero title='Cộng đồng' img='/community.png' heroHeight={heroHeight}>
                 Cộng đồng QuitEz luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
                 thuốc. Hãy khám phá những câu chuyện của người khác để tìm cảm hứng, sự động viên và động lực cho
                 riêng mình.
@@ -65,7 +84,7 @@ export default function ForumPage() {
                 {/* Left Section */}
                 <div className="md:col-span-3 space-y-6">
                     {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
-                        <Card key={idx} hoverable className="bg-primary-100 border-0">
+                        <Card key={idx} hoverable className="bg-primary-100 border-0" onClick={() => navigate(`/forum/${section.category_tag}`)}>
                             <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">
                             <img src={section.img_path} alt={section.category_name} className="size-56 object-contain"/>
                                 <div className="flex-1 space-y-4">

@@ -49,7 +49,7 @@ const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = fals
             defaultSelectedKeys={['dashboard']}
             mode= {mode}
             items={items}
-            inlineCollapsed={collapse}
+            //inlineCollapsed={collapse}
             selectedKeys={currentStepDashboard}
         />
     );

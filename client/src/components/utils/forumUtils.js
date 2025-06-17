@@ -18,3 +18,25 @@ export async function getForumCategoryMetadata() {
         throw error;
     }
 }
+
+export async function getPostsByCategoryTag(categoryTag) {
+    try {
+        const res = await fetch(`http://localhost:3000/social-posts/${categoryTag}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!res.ok) {
+            const errorMessage = await res.text();
+            throw new Error(errorMessage || `Request failed with status ${res.status}`);
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('getForumCategoryMetadata error', error);
+        throw error;
+    }
+}
+

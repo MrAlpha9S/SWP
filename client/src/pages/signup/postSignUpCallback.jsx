@@ -12,6 +12,8 @@ export default function PostSignUpCallback() {
         const handlePostSignup = async () => {
             if (!isAuthenticated || !user) return;
 
+            console.log(user);
+
             const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
             if (data.success) {
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);

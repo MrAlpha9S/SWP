@@ -14,7 +14,7 @@ const userExists = async (auth0_id) => {
     }
 };
 
-const createUser = async (auth0_id, username, email, created_at) => {
+const createUser = async (auth0_id, username, email, created_at, picture) => {
     try {
         const pool = await poolPromise;
         await pool.request()
@@ -22,7 +22,8 @@ const createUser = async (auth0_id, username, email, created_at) => {
             .input('username', sql.NVarChar, username)
             .input('email', sql.NVarChar, email)
             .input('created_at', sql.DateTime, convertUTCStringToLocalDate(created_at).toISOString())
-            .query('INSERT INTO users (auth0_id, username, email, created_at) VALUES (@auth0_id, @username, @email, @created_at)');
+            .input('avatar', sql.NVarChar(sql.MAX), picture)
+            .query('INSERT INTO users (auth0_id, username, email, created_at, avatar) VALUES (@auth0_id, @username, @email, @created_at, @avatar)');
         return true;
     } catch (error) {
         console.error('error in createUser', error);

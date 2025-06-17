@@ -12,10 +12,13 @@ import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
 import {useEffect} from "react";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
-import ThreadDiscussion from "./components/layout/forum/ThreadDiscussion.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
-import QuitExperiences from "./components/layout/forum/quitExperiences.jsx";
+import QuitExperiences from "./pages/forumPage/quitExperiences.jsx";
+import GettingStarted from "./pages/forumPage/gettingStarted.jsx";
+import StayingQuit from "./pages/forumPage/stayingQuit.jsx";
+import HintsAndTips from "./pages/forumPage/hintsAndTips.jsx";
+import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 
 
 function App() {
@@ -48,7 +51,10 @@ function App() {
                     <Route path="/my-profile" element={<MyProfile/>}></Route>
                     <Route path="/forum" element={<ForumPage/>}></Route>
                     <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
-                    <Route path="/forum/thread/:threadId" element={<ThreadDiscussion/>}/>
+                    <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
+                    <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
+                    <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
+                    <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
                 </Routes>
             </div>
             <Footer/>

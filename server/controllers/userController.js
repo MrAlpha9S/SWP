@@ -9,11 +9,14 @@ const handlePostSignup = async (req, res) => {
 
     try {
         if (await userExists(userAuth0Id)) {
+            const userData = await getUserFromAuth0(userAuth0Id);
+            console.log(userData);
             return res.status(200).json({success: true, message: 'User info already exist'});
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);
-        await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at);
+        console.log(userData);
+        await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at, userData.picture);
 
         return res.status(201).json({success: true, message: 'User info inserted'});
     } catch (err) {
