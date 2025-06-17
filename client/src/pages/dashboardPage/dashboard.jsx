@@ -43,7 +43,7 @@ function Dashboard() {
         expectedQuitDate,
         stoppedDate,
         planLog,
-        planLogCloneDDMMYY
+        planLogCloneDDMMYY,
     } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
@@ -149,6 +149,7 @@ function Dashboard() {
             case 'dashboard':
                 return userProfile.data ? (
                     <ProgressBoard
+
                         startDate={startDate}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}

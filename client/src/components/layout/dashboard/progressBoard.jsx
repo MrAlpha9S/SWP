@@ -149,7 +149,7 @@ const ProgressBoard = ({
 
     const cigsQuit = useMemo(() => {
         if (typeof localUserCreationDate !== 'string') return
-        const currentDay = new Date(localUserCreationDate);
+        const currentDay = (readinessValue === 'relapse-support' ? new Date(stoppedDate) : new Date(localUserCreationDate));
         const endDate = new Date(currentDate);
         let total = 0;
 
@@ -162,6 +162,9 @@ const ProgressBoard = ({
 
             if (checkin) {
                 total += cigsPerDay - checkin?.cigs;
+            }
+            if (readinessValue === 'relapse-support') {
+                total += cigsPerDay
             }
 
             currentDay.setDate(currentDay.getUTCDate() + 1);
