@@ -56,11 +56,11 @@ const TopicsDropdown = () => {
     opacity-0 invisible group-hover:opacity-100 group-hover:visible hover:opacity-100 hover:visible transition-all duration-200">
         <div className="flex items-center justify-between mb-2">
           <a onClick={() => navigate('/topics')} className="text-lg font-semibold text-primary-700 flex items-center gap-1 hover:underline">
-            Topics <ArrowRightOutlined />
+            Bài viết <ArrowRightOutlined />
           </a>
         </div>
         <p className="text-gray-500 mb-4 text-sm">
-          Learn about withdrawal symptoms, managing slip-ups, how to quit while pregnant and much more.
+          Tìm hiểu về các triệu chứng cai nghiện, cách xử lý khi tái hút, cách bỏ thuốc khi mang thai và nhiều điều khác.
         </p>
         <br />
         <div className="grid grid-cols-3 gap-6 text-sm text-primary-700">
