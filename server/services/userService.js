@@ -43,6 +43,20 @@ const getAllUsers = async () => {
     }
 }
 
+const getUser = async (auth0_id) => {
+    try {
+        const user_id = await getUserIdFromAuth0Id(auth0_id)
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', user_id)
+            .query('SELECT * FROM users WHERE user_id=@user_id');
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getUser', error);
+        return [];
+    }
+}
+
 const getUserIdFromAuth0Id = async (auth0_id) => {
     try {
         const pool = await poolPromise;
@@ -69,4 +83,4 @@ const getUserCreationDateFromAuth0Id = async (auth0_id) => {
     }
 }
 
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id};
+module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUser};

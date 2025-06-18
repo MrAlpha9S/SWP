@@ -1,6 +1,6 @@
 const { getAllUsers } = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 
 const handlePostSignup = async (req, res) => {
@@ -10,18 +10,29 @@ const handlePostSignup = async (req, res) => {
     try {
         if (await userExists(userAuth0Id)) {
             const userData = await getUserFromAuth0(userAuth0Id);
-            console.log(userData);
+
             return res.status(200).json({success: true, message: 'User info already exist'});
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);
-        console.log(userData);
+
         await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at, userData.picture);
 
         return res.status(201).json({success: true, message: 'User info inserted'});
     } catch (err) {
         console.error('post signup error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
+    }
+};
+
+const getUserController = async (req, res) => {
+    try {
+        const auth0_id = req.params.auth0_id
+        const user = await getUser(auth0_id);
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error in getUserController:', error);
+        res.status(500).json({ error: 'Failed to fetch user' });
     }
 };
 
@@ -51,4 +62,4 @@ const getUserCreationDate = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate };
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController };
