@@ -33,7 +33,7 @@ export default function Messenger() {
   };
 
   return (
-    <div className="flex h-screen bg-black text-white">
+    <div className="w-full flex h-screen bg-black text-white">
       <ChatList
         contacts={contacts}
         selectedContactId={selectedContactId}
