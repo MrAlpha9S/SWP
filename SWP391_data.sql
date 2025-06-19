@@ -664,7 +664,7 @@ INSERT INTO [messages] ([conversation_id], [user_id], [content], [created_at]) V
 (7, 3, '8 PM works perfect. I''ll create the lobby', '2024-06-19 19:52:00'),
 (7, 4, 'See you both then!', '2024-06-19 19:55:00');
 
-SELECT * FROM [messages]
+SELECT * FROM [messages] WHERE conversation_id = 1;
 --Topic and blog sample
 INSERT INTO [Topics] ([topic_id], [topic_name], [topic_content]) VALUES
 ('preparing-to-quit',                    N'Chuẩn bị để bỏ thuốc', N'Nếu bạn đang nghĩ đến việc bỏ thuốc lá, việc có những câu hỏi hoặc lo lắng về việc cai thuốc lá sẽ như thế nào là điều bình thường. ' + CHAR(13) + CHAR(10) + N'Tìm hiểu sự thật về nicotine và cách hút thuốc lá và thuốc lá điện tử ảnh hưởng đến bạn và những người xung quanh có thể giúp bạn cảm thấy sẵn sàng và tự tin hơn để thực hiện bước đầu tiên.'),
