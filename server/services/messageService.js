@@ -32,16 +32,24 @@ const CreateConversation = async (auth0_id, conversation_name, created_at, user_
     }
 };
 
-const GetMessageConversation = async (conversation_id) => {
+const GetMessageConversation = async (auth0_id) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('conversation_id', conversation_id)
-            .query(`SELECT * FROM [messages] WHERE conversation_id = @conversation_id;`);
+            .input('user_id', await getUserIdFromAuth0Id(auth0_id))
+            .query(`SELECT DISTINCT m.conversation_id, u.user_id, u.username, m.created_at, m.content, m.message_id, u.auth0_id
+FROM messages m
+JOIN users u ON m.user_id = u.user_id
+WHERE m.conversation_id IN (
+    SELECT DISTINCT conversation_id
+    FROM messages
+    WHERE user_id = @user_id
+)
+    ORDER BY m.created_at ASC;`);
         if(result.rowsAffected[0] === 0) {
             throw new Error('error in insert GetMessageConversation');
         }
-        return true;
+        return result.recordset;
     } catch (error) {
         console.error('error in GetMessageConversation', error);
         return false;
@@ -53,13 +61,13 @@ const GetUserConversations = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', await getUserIdFromAuth0Id(auth0_id))
-            .query(`Select * from user_conversation uc
+            .query(`Select uc.conversation_id, c.conversation_name, c.created_at, uc.user_id from user_conversation uc
 Join conversations c ON c.conversation_id = uc.conversation_id
 Where uc.user_id = @user_id`);
         if(result.rowsAffected[0] === 0) {
             throw new Error('error in insert GetUserConversations');
         }
-        return true;
+        return result.recordset;
     } catch (error) {
         console.error('error in GetUserConversations', error);
         return false;

@@ -69,12 +69,6 @@ function Dashboard() {
         enabled: isAuthenticated && !!user,
     })
 
-    useEffect(() => {
-        if (isUserIn4Pending === false) {
-            console.log(userIn4[0].role)
-        }
-    }, [isUserIn4Pending]);
-
     const {
         isPending: isUserProfilePending,
         data: userProfile,
@@ -213,7 +207,7 @@ function Dashboard() {
         if (role === 'Member') {
             return (
                 <div>
-                    <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
+                    <div className='sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
                         currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
                         mode="inline" /></div>
                     <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
