@@ -69,6 +69,7 @@ export default function Messenger() {
     if (!isUserConversationsPending && userConversations) {
       setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
+      console.log(userConversations.data);
     }
   }, [isUserConversationsPending, userConversations]);
 

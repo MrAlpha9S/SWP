@@ -29,14 +29,14 @@ import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 
 function Dashboard() {
-    const { readinessValue } = useQuitReadinessStore();
-    const { addError, removeError } = useErrorStore();
-    const { reasonList } = useReasonStore();
-    const { pricePerPack } = usePricePerPackStore();
-    const { cigsPerPack } = useCigsPerPackStore();
-    const { timeAfterWaking } = useTimeAfterWakingStore();
-    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
-    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
+    const {readinessValue} = useQuitReadinessStore();
+    const {addError, removeError} = useErrorStore();
+    const {reasonList} = useReasonStore();
+    const {pricePerPack} = usePricePerPackStore();
+    const {cigsPerPack} = useCigsPerPackStore();
+    const {timeAfterWaking} = useTimeAfterWakingStore();
+    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
+    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -47,15 +47,15 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY,
     } = usePlanStore();
-    const { createGoalChecked, goalAmount, goalList, setMoneySaved } = useGoalsStore()
+    const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
-    const { isProfileExist } = useProfileExists();
-    const { setCheckInDataSet } = useCheckInDataStore()
+    const {isProfileExist} = useProfileExists();
+    const {setCheckInDataSet} = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
+    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
 
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
     const {
         data: userIn4,
@@ -82,7 +82,7 @@ function Dashboard() {
     })
 
     useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
+        queryClient.invalidateQueries({queryKey: ['checkin-status']});
     }, []);
 
     useEffect(() => {
@@ -148,8 +148,8 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending || !userIn4) {
-            return <ProgressBoard isPending={true} />;
+        if (!isAuthenticated || isUserProfilePending || isUserIn4Pending) {
+            return <ProgressBoard isPending={true}/>;
         }
 
         switch (currentStepDashboard) {
@@ -176,77 +176,84 @@ function Dashboard() {
                         setMoneySaved={setMoneySaved}
                     />
                 ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" />
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
                 );
 
             case 'check-in':
-                return <CheckinMenu />;
+                return <CheckinMenu/>;
 
             case 'goals':
-                return <GoalsMenu />;
+                return <GoalsMenu/>;
 
             case 'savings':
-                return <SavingsMenu />
+                return <SavingsMenu/>
 
             case 'distraction-tools':
-                return <DistractionTools />
+                return <DistractionTools/>
 
             case 'badges':
-                return <BadgesMenu />;
+                return <BadgesMenu/>;
             case 'messager':
-                return <MessageBox />
+                return <MessageBox/>
             case 'post-blog':
-                return <PostBlog />
+                return <PostBlog/>
 
             default:
-                return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
+                return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
         }
     };
 
+    const renderSidebar = (SidebarComponent, currentStepDashboard, setCurrentStepDashboard) => {
+        const commonProps = {
+            currentStepDashboard,
+            setCurrentStepDashboard
+        };
+
+        return (
+            <>
+                {/* Desktop Sidebar */}
+                <div className='sticky top-[155px] self-start h-fit hidden md:block'>
+                    <SidebarComponent
+                        {...commonProps}
+                        mode="inline"
+                    />
+                </div>
+
+                {/* Mobile Sidebar */}
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'>
+                    <SidebarComponent
+                        {...commonProps}
+                        collapse={true}
+                        mode="horizontal"
+                    />
+                </div>
+            </>
+        );
+    };
+
+    const userRole = userIn4?.[0]?.role;
+
     const dashboardHandle = (role) => {
         if (role === 'Member') {
-            return (
-                <div>
-                    <div className='sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
-                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                        mode="inline" /></div>
-                    <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
-                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                        collapse={true} mode="horizontal" /></div>
-                </div>
-            )
+            return renderSidebar(Sidebar, currentStepDashboard, setCurrentStepDashboard);
         } else if (role === 'Coach') {
-            return (
-                <div>
-                    {/* <CoachSideBar></CoachSideBar> */}
-                    <div className='sticky top-[155px] self-start h-fit hidden md:block'><CoachSideBar
-                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                        mode="inline" /></div>
-                    <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><CoachSideBar
-                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                        collapse={true} mode="horizontal" /></div>
-                </div>
-            )
-
+            return renderSidebar(CoachSideBar, currentStepDashboard, setCurrentStepDashboard);
         }
+        return null;
     }
 
-    if (!isAuthenticated || isUserProfilePending || !userIn4) {
-        return <div>Đang tải...</div>
-    } else {
-        return (
-            <div className="bg-primary-50 min-h-screen flex flex-col">
-                <Hero title={heroTitle} heroHeight={heroHeight} role={userIn4[0].role} />
-                <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
-                    {dashboardHandle(userIn4[0].role)}
-                    <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
-                        {renderBoard()}
-                    </div>
+    return (
+        <div className="bg-primary-50 min-h-screen flex flex-col">
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} />
+            <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
+                {dashboardHandle(userRole)}
 
+                <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                    {renderBoard()}
                 </div>
             </div>
-        );
-    }
+        </div>
+    )
 
 }
 

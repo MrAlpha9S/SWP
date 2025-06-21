@@ -49,11 +49,6 @@ const items = [
         label: 'Đăng Bài Blog',
         icon: <FileTextOutlined className="mr-4"/>,
     },
-    {
-        key: 'messager',
-        label: 'Trò Chuyện',
-        icon: <WechatOutlined className="mr-4"/>,
-    },
 ];
 const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
     return (
