@@ -17,8 +17,9 @@ import { useCheckInDataStore } from "../../stores/checkInStore.js";
 import { Typography } from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
+import CoachSideBar from "../../components/layout/dashboard/coachsidebar.jsx"
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
-import {queryClient} from "../../main.jsx";
+import { queryClient } from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
@@ -46,7 +47,7 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY,
     } = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
+    const { createGoalChecked, goalAmount, goalList, setMoneySaved } = useGoalsStore()
     const navigate = useNavigate();
     const { isProfileExist } = useProfileExists();
     const { setCheckInDataSet } = useCheckInDataStore()
@@ -67,12 +68,6 @@ function Dashboard() {
         },
         enabled: isAuthenticated && !!user,
     })
-
-    useEffect(() => {
-        if(isUserIn4Pending === false) {
-            console.log(userIn4)
-        }
-    }, [isUserIn4Pending]);
 
     const {
         isPending: isUserProfilePending,
@@ -153,14 +148,15 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending) {
-            return <ProgressBoard isPending={true}/>;
+        if (!isAuthenticated || isUserProfilePending || !userIn4) {
+            return <ProgressBoard isPending={true} />;
         }
 
         switch (currentStepDashboard) {
             case 'dashboard':
                 return userProfile.data ? (
                     <ProgressBoard
+
                         startDate={startDate}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}
@@ -180,51 +176,77 @@ function Dashboard() {
                         setMoneySaved={setMoneySaved}
                     />
                 ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" />
                 );
 
             case 'check-in':
-                return <CheckinMenu/>;
+                return <CheckinMenu />;
 
             case 'goals':
-                return <GoalsMenu/>;
+                return <GoalsMenu />;
 
             case 'savings':
-                return <SavingsMenu/>
+                return <SavingsMenu />
 
             case 'distraction-tools':
-                return <DistractionTools/>
+                return <DistractionTools />
 
             case 'badges':
-                return <BadgesMenu/>;
+                return <BadgesMenu />;
             case 'messager':
-                return <MessageBox/>
+                return <MessageBox />
             case 'post-blog':
-                return <PostBlog user_id={userProfile.data.user_id[0]}/>
+                return <PostBlog />
+
             default:
-                return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
+                return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
         }
     };
 
-
-    return (
-        <div className="bg-primary-50 min-h-screen flex flex-col">
-            <Hero title={heroTitle} heroHeight={heroHeight}/>
-            <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    mode="inline"/></div>
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    collapse={true} mode="horizontal"/></div>
-
-                <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
-                    {renderBoard()}
+    const dashboardHandle = (role) => {
+        if (role === 'Member') {
+            return (
+                <div>
+                    <div className='sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
+                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                        mode="inline" /></div>
+                    <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
+                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                        collapse={true} mode="horizontal" /></div>
                 </div>
+            )
+        } else if (role === 'Coach') {
+            return (
+                <div>
+                    {/* <CoachSideBar></CoachSideBar> */}
+                    <div className='sticky top-[155px] self-start h-fit hidden md:block'><CoachSideBar
+                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                        mode="inline" /></div>
+                    <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><CoachSideBar
+                        currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
+                        collapse={true} mode="horizontal" /></div>
+                </div>
+            )
 
+        }
+    }
+
+    if (!isAuthenticated || isUserProfilePending || !userIn4) {
+        return <div>Đang tải...</div>
+    } else {
+        return (
+            <div className="bg-primary-50 min-h-screen flex flex-col">
+                <Hero title={heroTitle} heroHeight={heroHeight} role={userIn4[0].role} />
+                <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
+                    {dashboardHandle(userIn4[0].role)}
+                    <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                        {renderBoard()}
+                    </div>
+
+                </div>
             </div>
-        </div>
-    );
+        );
+    }
 
 }
 

@@ -21,8 +21,13 @@ VALUES
 ('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c'),
 ('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c'),
 ('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c'),
-('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c');
+('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c')
+('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc');
 
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role])
+VALUES
+('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach');
+SELECT * FROM users
 --Sample data for onboarding
 INSERT INTO user_profiles (
     user_id, readiness_value, start_date, quit_date, expected_quit_date,
@@ -32,7 +37,7 @@ INSERT INTO user_profiles (
     4, 'ready', '2025-06-01 00:00:00', NULL, '2025-07-06 00:00:00',
     15, 15, 35000, 'within_5', 'gradual-weekly',
     3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 16:03:56', 1
-)
+);
 
 
 -- Reasons
@@ -583,6 +588,83 @@ INSERT INTO [social_likes] ([user_id], [post_id], [comment_id], [created_at]) VA
 (7, NULL, 6, '2025-06-08 11:10:00.000'),
 (7, NULL, 41, '2025-06-09 17:25:00.000');
 
+--mesager-data
+INSERT INTO [conversations] ([conversation_name], [created_at]) VALUES
+('Project Alpha Discussion', '2024-06-15 09:30:00'),
+('Weekend Plans', '2024-06-16 14:22:00'),
+('Book Club Meeting', '2024-06-17 10:15:00'),
+('Team Standup', '2024-06-18 08:45:00'),
+('Recipe Exchange', '2024-06-18 16:30:00'),
+('Travel Planning', '2024-06-19 11:20:00'),
+('Gaming Session', '2024-06-19 19:45:00');
+
+-- Sample data for user_conversation table (assuming users with IDs 1-8 exist)
+INSERT INTO [user_conversation] ([conversation_id], [user_id]) VALUES
+-- Project Alpha Discussion (conversation_id: 1)
+(1, 1), (1, 2), (1, 3),
+-- Weekend Plans (conversation_id: 2)
+(2, 1), (2, 10), (2, 9),
+-- Book Club Meeting (conversation_id: 3)
+(3, 2), (3, 6), (3, 7), (3, 9),
+-- Team Standup (conversation_id: 4)
+(4, 1), (4, 2), (4, 10), (4, 9),
+-- Recipe Exchange (conversation_id: 5)
+(5, 5), (5, 6),
+-- Travel Planning (conversation_id: 6)
+(6, 1), (6, 10),
+-- Gaming Session (conversation_id: 7)
+(7, 3), (7, 4), (7, 8);
+
+-- Sample data for messages table
+INSERT INTO [messages] ([conversation_id], [user_id], [content], [created_at]) VALUES
+-- Project Alpha Discussion messages
+(1, 1, 'Hey team, let''s discuss the timeline for Project Alpha', '2024-06-15 09:31:00'),
+(1, 2, 'I think we can finish the backend by Friday', '2024-06-15 09:35:00'),
+(1, 3, 'Frontend will need another week. The designs are complex', '2024-06-15 09:38:00'),
+(1, 1, 'Sounds good. Let''s schedule a review meeting for next Monday', '2024-06-15 09:42:00'),
+
+-- Weekend Plans messages
+(2, 1, 'Anyone up for hiking this weekend?', '2024-06-16 14:23:00'),
+(2, 10, 'Count me in! What trail are you thinking?', '2024-06-16 14:25:00'),
+(2, 9, 'I''d love to join but I have family plans on Saturday', '2024-06-16 14:28:00'),
+(2, 1, 'How about Sunday morning? We could do the Blue Ridge trail', '2024-06-16 14:30:00'),
+(2, 10, 'Perfect! What time should we meet?', '2024-06-16 14:32:00'),
+
+-- Book Club Meeting messages
+(3, 2, 'Did everyone finish reading "The Seven Husbands of Evelyn Hugo"?', '2024-06-17 10:16:00'),
+(3, 6, 'Yes! What a fantastic book. I loved the plot twists', '2024-06-17 10:18:00'),
+(3, 7, 'I''m about 3/4 through. Almost done!', '2024-06-17 10:20:00'),
+(3, 9, 'Finished last week. Can''t wait to discuss the ending', '2024-06-17 10:25:00'),
+(3, 2, 'Great! Let''s meet Thursday evening as planned', '2024-06-17 10:30:00'),
+
+-- Team Standup messages
+(4, 1, 'Good morning everyone! Daily standup time', '2024-06-18 08:46:00'),
+(4, 2, 'Yesterday: Fixed the login bug. Today: Working on user profiles', '2024-06-18 08:47:00'),
+(4, 10, 'Yesterday: Completed API documentation. Today: Code review and testing', '2024-06-18 08:48:00'),
+(4, 9, 'Yesterday: Database optimization. Today: Deployment preparation', '2024-06-18 08:49:00'),
+(4, 1, 'Thanks everyone. Any blockers?', '2024-06-18 08:50:00'),
+(4, 10, 'Need approval on the new database schema changes', '2024-06-18 08:51:00'),
+
+-- Recipe Exchange messages
+(5, 5, 'Just made the most amazing pasta sauce! Want the recipe?', '2024-06-18 16:31:00'),
+(5, 6, 'Yes please! Was it the one with roasted tomatoes?', '2024-06-18 16:35:00'),
+(5, 5, 'Exactly! Roasted cherry tomatoes, garlic, basil, and a touch of balsamic', '2024-06-18 16:38:00'),
+(5, 6, 'Sounds delicious! I''ll try it this weekend', '2024-06-18 16:40:00'),
+
+-- Travel Planning messages
+(6, 1, 'Thinking about a trip to Japan next spring. Any recommendations?', '2024-06-19 11:21:00'),
+(6, 10, 'Oh you must visit Kyoto during cherry blossom season!', '2024-06-19 11:25:00'),
+(6, 1, 'That sounds perfect! How long should I plan to stay?', '2024-06-19 11:28:00'),
+(6, 10, 'I''d suggest at least 10 days to see Tokyo and Kyoto properly', '2024-06-19 11:32:00'),
+
+-- Gaming Session messages
+(7, 3, 'Anyone free for some Rocket League tonight?', '2024-06-19 19:46:00'),
+(7, 4, 'I''m in! What time?', '2024-06-19 19:48:00'),
+(7, 8, 'Can we start around 8 PM? Just finishing dinner', '2024-06-19 19:50:00'),
+(7, 3, '8 PM works perfect. I''ll create the lobby', '2024-06-19 19:52:00'),
+(7, 4, 'See you both then!', '2024-06-19 19:55:00');
+
+SELECT * FROM [messages] WHERE conversation_id = 1;
 --Topic and blog sample
 INSERT INTO [Topics] ([topic_id], [topic_name], [topic_content]) VALUES
 ('preparing-to-quit',                    N'Chuẩn bị để bỏ thuốc', N'Nếu bạn đang nghĩ đến việc bỏ thuốc lá, việc có những câu hỏi hoặc lo lắng về việc cai thuốc lá sẽ như thế nào là điều bình thường. ' + CHAR(13) + CHAR(10) + N'Tìm hiểu sự thật về nicotine và cách hút thuốc lá và thuốc lá điện tử ảnh hưởng đến bạn và những người xung quanh có thể giúp bạn cảm thấy sẵn sàng và tự tin hơn để thực hiện bước đầu tiên.'),

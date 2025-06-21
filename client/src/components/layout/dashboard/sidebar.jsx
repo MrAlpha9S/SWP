@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-    NotificationOutlined,
-    DashboardOutlined,
-    EditOutlined,
-    UnorderedListOutlined,
-    DollarOutlined,
-    FileTextOutlined, WechatOutlined
-} from '@ant-design/icons';
+import { FileTextOutlined, NotificationOutlined, WechatOutlined, DashboardOutlined, EditOutlined, UnorderedListOutlined, DollarOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import {IoExtensionPuzzleOutline, IoMedalOutline} from "react-icons/io5";
 
@@ -45,6 +38,11 @@ const items = [
         key: 'badges',
         label: 'Huy hiệu',
         icon: <IoMedalOutline className="mr-4"/>,
+    },
+    {
+        key: 'messager',
+        label: 'Trò Chuyện',
+        icon: <WechatOutlined className="mr-4"/>,
     },
     {
         key: 'post-blog',
