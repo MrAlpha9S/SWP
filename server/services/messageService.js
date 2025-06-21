@@ -46,9 +46,9 @@ WHERE m.conversation_id IN (
     WHERE user_id = @user_id
 )
     ORDER BY m.created_at ASC;`);
-        if(result.rowsAffected[0] === 0) {
-            throw new Error('error in insert GetMessageConversation');
-        }
+        // if(result.rowsAffected[0] === 0) {
+        //     throw new Error('error in insert GetMessageConversation');
+        // }
         return result.recordset;
     } catch (error) {
         console.error('error in GetMessageConversation', error);
@@ -64,9 +64,9 @@ const GetUserConversations = async (auth0_id) => {
             .query(`Select uc.conversation_id, c.conversation_name, c.created_at, uc.user_id from user_conversation uc
 Join conversations c ON c.conversation_id = uc.conversation_id
 Where uc.user_id = @user_id`);
-        if(result.rowsAffected[0] === 0) {
-            throw new Error('error in insert GetUserConversations');
-        }
+        // if(result.rowsAffected[0] === 0) {
+        //     throw new Error('error in insert GetUserConversations');
+        // }
         return result.recordset;
     } catch (error) {
         console.error('error in GetUserConversations', error);
