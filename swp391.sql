@@ -364,6 +364,9 @@ ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id])
 use SWP391
 SELECT * FROM users
 
+
+DELETE FROM users where user_id = 17
+
 SELECT * FROM user_profiles
 select * from plan_log
 select * from profiles_reasons
@@ -388,3 +391,27 @@ JOIN social_posts sp ON sc.category_id = sp.category_id
 JOIN social_comments scmt ON sp.post_id = scmt.post_id
 GROUP BY sc.category_id, sc.category_name, sc.description
 ORDER BY sc.category_id;
+
+SELECT 
+  u.user_id,
+  u.username,
+  COALESCE(SUM(cl.cigs_smoked), 0) AS totalCigs
+FROM users u
+LEFT JOIN user_profiles p ON u.user_id = p.user_id
+LEFT JOIN checkin_log cl ON u.user_id = cl.user_id
+GROUP BY u.user_id, u.username
+
+SELECT user_id, username, created_at FROM users
+
+SELECT 
+  u.user_id,
+  u.username,
+  COUNT(cl.log_id) AS days_without_smoke
+FROM users u
+LEFT JOIN checkin_log cl 
+  ON u.user_id = cl.user_id AND cl.cigs_smoked = 0
+GROUP BY u.user_id, u.username;
+
+SELECT cigs_per_day, cigs_per_pack, price_per_pack FROM user_profiles
+
+

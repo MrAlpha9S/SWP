@@ -51,7 +51,6 @@ const ProgressBoard = ({
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
 
-
     const {
         isPending: isDatasetPending,
         error: datasetError,
@@ -77,11 +76,12 @@ const ProgressBoard = ({
         enabled: isAuthenticated && !!user,
     })
 
+    // FIX: Add missing dependency and null check
     useEffect(() => {
-        if (!isUserCreationDatePending) {
-            setLocalUserCreationDate(userCreationDate.data)
+        if (!isUserCreationDatePending && userCreationDate?.data) {
+            setLocalUserCreationDate(userCreationDate.data);
         }
-    }, [isUserCreationDatePending])
+    }, [isUserCreationDatePending, userCreationDate?.data]);
 
     useEffect(() => {
         if (!isDatasetPending && checkInDataset?.data) {
@@ -90,14 +90,16 @@ const ProgressBoard = ({
         }
     }, [checkInDataset, isDatasetPending]);
 
+    // FIX: Remove infinite timer loop
     useEffect(() => {
-        const timeout = setTimeout(() => {
+        const interval = setInterval(() => {
             setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
-        return () => clearTimeout(timeout);
-    }, [currentDate]);
 
-    const formatDateDifference = (ms) => {
+        return () => clearInterval(interval);
+    }, []); // Empty dependency array prevents infinite loop
+
+    const formatDateDifference = useCallback((ms) => {
         const seconds = Math.abs(Math.floor(ms / 1000));
         const minutes = Math.abs(Math.floor(seconds / 60));
         const hours = Math.abs(Math.floor(minutes / 60));
@@ -109,86 +111,101 @@ const ProgressBoard = ({
             minutes: minutes % 60,
             seconds: seconds % 60
         };
-    };
+    }, []);
 
-    const localStartDate = new Date(startDate);
-    let differenceInMs
-    let difference
-    if (readinessValue === 'ready') {
-        differenceInMs = differenceInMilliseconds(currentDate, new Date(startDate));
-        difference = formatDateDifference(differenceInMs);
-    } else {
-        differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
-        difference = formatDateDifference(differenceInMs);
-    }
+    const timeDifference = useMemo(() => {
+        const localStartDate = new Date(startDate);
+        let differenceInMs;
 
-    const pricePerCig = Math.round(pricePerPack / cigsPerPack);
+        if (readinessValue === 'ready') {
+            differenceInMs = differenceInMilliseconds(currentDate, new Date(startDate));
+        } else {
+            differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
+        }
 
+        return formatDateDifference(differenceInMs);
+    }, [currentDate, startDate, stoppedDate, readinessValue, formatDateDifference]);
 
-    let totalDaysPhrase = ''
+    const pricePerCig = useMemo(() => {
+        return Math.round(pricePerPack / cigsPerPack);
+    }, [pricePerPack, cigsPerPack]);
 
-    if (readinessValue === 'relapse-support') {
-        totalDaysPhrase = (
-            <>
-                Chúc mừng bạn đã cai thuốc <br/>
-                Tổng thời gian kể từ khi bạn cai thuốc
-            </>
-        )
-    } else if (currentDate > new Date(expectedQuitDate)) {
-        totalDaysPhrase = (
-            <>
-                Chúc mừng bạn đã hoàn thành kế hoạch cai thuốc <br/>
-                Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc
-            </>
-        )
-    } else if (localStartDate > currentDate) {
-        totalDaysPhrase = 'Thời gian cho đến khi bắt đầu hành trình cai thuốc';
-    } else if (currentDate < new Date(expectedQuitDate)) {
-        totalDaysPhrase = 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
-    }
+    const totalDaysPhrase = useMemo(() => {
+        const localStartDate = new Date(startDate);
 
+        if (readinessValue === 'relapse-support') {
+            return (
+                <>
+                    Chúc mừng bạn đã cai thuốc <br/>
+                    Tổng thời gian kể từ khi bạn cai thuốc
+                </>
+            );
+        } else if (currentDate > new Date(expectedQuitDate)) {
+            return (
+                <>
+                    Chúc mừng bạn đã hoàn thành kế hoạch cai thuốc <br/>
+                    Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc
+                </>
+            );
+        } else if (localStartDate > currentDate) {
+            return 'Thời gian cho đến khi bắt đầu hành trình cai thuốc';
+        } else if (currentDate < new Date(expectedQuitDate)) {
+            return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
+        }
+        return '';
+    }, [readinessValue, currentDate, expectedQuitDate, startDate]);
+
+    // FIX: Prevent date mutation that caused infinite loops
     const cigsQuit = useMemo(() => {
-        if (typeof localUserCreationDate !== 'string') return
-        const currentDay = (readinessValue === 'relapse-support' ? new Date(stoppedDate) : new Date(localUserCreationDate));
+        if (typeof localUserCreationDate !== 'string') return 0;
+
+        const startDay = new Date(readinessValue === 'relapse-support' ? stoppedDate : localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
 
-        while (currentDay <= endDate) {
-            const dateStr = currentDay.toISOString().split('T')[0];
+        // Create a new date object for iteration to avoid mutation
+        const iterationDate = new Date(startDay);
+
+        while (iterationDate <= endDate) {
+            const dateStr = iterationDate.toISOString().split('T')[0];
 
             const checkin = localCheckInDataSet.find(entry =>
                 new Date(entry.date).toISOString().split('T')[0] === dateStr
             );
 
             if (checkin) {
-                total += cigsPerDay - checkin?.cigs;
+                total += cigsPerDay - (checkin?.cigs || 0);
             }
             if (readinessValue === 'relapse-support') {
-                total += cigsPerDay
+                total += cigsPerDay;
             }
 
-            currentDay.setDate(currentDay.getUTCDate() + 1);
+            // Create new date instead of mutating existing one
+            iterationDate.setUTCDate(iterationDate.getUTCDate() + 1);
         }
 
-        return total;
-    }, [localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay]);
+        return Math.max(0, total); // Ensure non-negative result
+    }, [localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
 
-
-    const moneySaved = Math.round(cigsQuit * pricePerCig);
+    const moneySaved = useMemo(() => {
+        return Math.round(cigsQuit * pricePerCig);
+    }, [cigsQuit, pricePerCig]);
 
     useEffect(() => {
-        if (typeof setMoneySaved === 'function' && moneySaved !== undefined) {
+        if (typeof setMoneySaved === 'function' && typeof moneySaved === 'number') {
             setMoneySaved(moneySaved);
         }
     }, [moneySaved, setMoneySaved]);
 
     const mergedDataSet = useMemo(() => {
-        if (isDatasetPending) return
+        if (isDatasetPending) return [];
         if (!planLog || !localCheckInDataSet) return [];
         return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod));
-    }, [planLog, localCheckInDataSet, quittingMethod]);
+    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending]);
 
     const getReferenceArea = useCallback(() => {
+        if (!mergedDataSet || mergedDataSet.length === 0) return null;
+
         const arrayOfArrays = [];
         const size = 7;
 
@@ -219,12 +236,13 @@ const ProgressBoard = ({
                 );
             }
         }
-    }, [cigsPerDay, currentDate, mergedDataSet, localCheckInDataSet]);
+        return null;
+    }, [cigsPerDay, currentDate, mergedDataSet]);
 
-    const handleCheckIn = () => {
+    const handleCheckIn = useCallback(() => {
         setCurrentStepDashboard('check-in');
-        handleStepThree()
-    }
+        handleStepThree();
+    }, [setCurrentStepDashboard, handleStepThree]);
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
@@ -232,7 +250,7 @@ const ProgressBoard = ({
                 {isPending ? (
                     <Skeleton.Button active/>
                 ) : (
-                    <CustomButton onClick={() => handleCheckIn()}>Check-in hàng ngày →</CustomButton>
+                    <CustomButton onClick={handleCheckIn}>Check-in hàng ngày →</CustomButton>
                 )}
                 {isPending ? (
                     <Skeleton.Input style={{width: 180}} active size="small"/>
@@ -252,11 +270,11 @@ const ProgressBoard = ({
                         <Skeleton.Input style={{width: 250}} active/>
                     ) : (
                         <>
-                            <span className="text-4xl font-bold text-primary-800">{difference.days}</span>
+                            <span className="text-4xl font-bold text-primary-800">{timeDifference.days}</span>
                             <span className="text-sm text-gray-500">ngày</span>
-                            <span className="text-4xl font-bold text-primary-800">{difference.hours}</span>
+                            <span className="text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
                             <span className="text-sm text-gray-500">giờ</span>
-                            <span className="text-4xl font-bold text-primary-800">{difference.minutes}</span>
+                            <span className="text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
                             <span className="text-sm text-gray-500">phút</span>
                         </>
                     )}
@@ -298,11 +316,15 @@ const ProgressBoard = ({
                 <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
                 <div className="text-sm text-gray-600">
                     {isPending ?
-                        <Skeleton.Input style={{width: 160}}
-                                        active/> : readinessValue === 'ready' ? `${localStartDate.toLocaleDateString('vi-VN')} - ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}` : stoppedDate}
+                        <Skeleton.Input style={{width: 160}} active/> :
+                        readinessValue === 'ready' ?
+                            `${new Date(startDate).toLocaleDateString('vi-VN')} - ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}` :
+                            stoppedDate
+                    }
                 </div>
             </div>
-            {readinessValue === 'ready' &&
+
+            {readinessValue === 'ready' && (
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
                     <div className="absolute right-3 top-3">
                         {!isPending && (
@@ -320,12 +342,11 @@ const ProgressBoard = ({
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : mergedDataSet?.length > 0 ? (
                         <ResponsiveContainer width="100%" height={350}>
-                            {localCheckInDataSet.length > 0 ?
+                            {localCheckInDataSet.length > 0 ? (
                                 <LineChart
                                     data={mergedDataSet}
                                     margin={{top: 20, right: 30, left: 20, bottom: 25}}
                                 >
-                                    {/* Smoked line (actual check-ins) */}
                                     <Line
                                         type="monotone"
                                         dataKey="actual"
@@ -333,8 +354,6 @@ const ProgressBoard = ({
                                         dot={{r: 3}}
                                         name="Đã hút"
                                     />
-
-                                    {/* Planned line (target plan) */}
                                     <Line
                                         type="monotone"
                                         dataKey="plan"
@@ -344,7 +363,6 @@ const ProgressBoard = ({
                                         name="Kế hoạch"
                                         connectNulls={true}
                                     />
-
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     {quittingMethod === 'gradual-weekly' && getReferenceArea()}
                                     <ReferenceLine
@@ -356,13 +374,13 @@ const ProgressBoard = ({
                                         stroke="#115e59"
                                         label={'Hôm nay'}
                                     />
-
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
                                            interval={quittingMethod === 'gradual-weekly' ? 5 : 1}/>
                                     <YAxis/>
                                     <Tooltip/>
                                     <Legend verticalAlign="top"/>
-                                </LineChart> :
+                                </LineChart>
+                            ) : (
                                 <LineChart data={planLogCloneDDMMYY}
                                            margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                     <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
@@ -379,12 +397,12 @@ const ProgressBoard = ({
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                     <YAxis/>
                                     <Tooltip/>
-                                </LineChart>}
+                                </LineChart>
+                            )}
                         </ResponsiveContainer>
-
                     ) : null}
                 </div>
-            }
+            )}
 
             <div className="text-center">
                 {isPending ? (
@@ -396,7 +414,6 @@ const ProgressBoard = ({
                 )}
             </div>
         </div>
-
     );
 };
 

@@ -149,7 +149,6 @@ function Dashboard() {
             case 'dashboard':
                 return userProfile.data ? (
                     <ProgressBoard
-
                         startDate={startDate}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}
@@ -190,7 +189,6 @@ function Dashboard() {
                 return <MessageBox/>
             case 'post-blog':
                 return <PostBlog user_id={userProfile.data.user_id[0]}/>
-
             default:
                 return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
         }
