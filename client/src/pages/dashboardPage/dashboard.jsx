@@ -14,7 +14,6 @@ import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
 import { useQuery } from '@tanstack/react-query'
 import { useCheckInDataStore } from "../../stores/checkInStore.js";
-import { Typography } from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CoachSideBar from "../../components/layout/dashboard/coachsidebar.jsx"
