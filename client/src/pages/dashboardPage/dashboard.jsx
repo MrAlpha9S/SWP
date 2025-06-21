@@ -8,6 +8,7 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
+import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
@@ -53,8 +54,25 @@ function Dashboard() {
     const [heroTitle, setHeroTitle] = useState("");
     const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
 
-
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+
+    const {
+        data: userIn4,
+        isPending: isUserIn4Pending,
+    } = useQuery({
+        queryKey: ['userIn4'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getUser(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if(isUserIn4Pending === false) {
+            console.log(userIn4)
+        }
+    }, [isUserIn4Pending]);
 
     const {
         isPending: isUserProfilePending,
@@ -80,12 +98,6 @@ function Dashboard() {
         }
         syncStores();
     }, [userProfile, isUserProfilePending])
-
-    // useEffect(() => {
-    //     if (!isDatasetPending) {
-    //         setCheckInDataSet(checkInDataset?.data)
-    //     }
-    // }, [checkInDataset, isDatasetPending])
 
     useEffect(() => {
         const handleScroll = () => {
