@@ -44,7 +44,7 @@ export default function Messenger() {
   const [contacts, setContacts] = useState();
   useEffect(() => {
     if (!isUserConversationsPending && userConversations) {
-      setSelectedContactId(userConversations.data[0].conversation_id);
+      setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
     }
   }, [isUserConversationsPending, userConversations]);
