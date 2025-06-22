@@ -31,3 +31,41 @@ export async function getUserCreationDate(user, getAccessTokenSilently, isAuthen
     return res.json();
 }
 
+export async function getUserInfo(user, getAccessTokenSilently, isAuthenticated) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/info?userAuth0Id=${user.sub}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return await res.json();
+}
+
+export async function updateUserInfo(user, getAccessTokenSilently, { username, email, avatar }) {
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/info", {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userAuth0Id: user.sub,
+            username,
+            email,
+            avatar
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}

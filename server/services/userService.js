@@ -69,4 +69,39 @@ const getUserCreationDateFromAuth0Id = async (auth0_id) => {
     }
 }
 
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id};
+async function getUserByAuth0Id(auth0Id) {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('auth0_id', auth0Id)
+            .query('SELECT * FROM users WHERE auth0_id = @auth0_id');
+
+        return result.recordset[0];
+    } catch (err) {
+        console.error('getUserByAuth0Id error:', err);
+        return null;
+    }
+}
+
+async function updateUserByAuth0Id(auth0Id, { username, email, avatar }) {
+    try {
+        const pool = await poolPromise;
+        await pool.request()
+            .input('auth0_id', auth0Id)
+            .input('username', username)
+            .input('email', email)
+            .input('avatar', avatar)
+            .query(`
+                UPDATE users
+                SET username = @username, email = @email, avatar = @avatar
+                WHERE auth0_id = @auth0_id
+            `);
+
+        return getUserByAuth0Id(auth0Id);
+    } catch (err) {
+        console.error('updateUserByAuth0Id error:', err);
+        return null;
+    }
+}
+
+module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUserByAuth0Id, updateUserByAuth0Id};

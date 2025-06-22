@@ -25,6 +25,7 @@ import PostPage from "./components/layout/forum/postPage.jsx";
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
+import Profile from "./pages/profilePage/profile.jsx";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                 <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/profile" element={<Profile/>}></Route>
                 <Route path="/forum" element={<ForumPage />}></Route>
 
                 <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>

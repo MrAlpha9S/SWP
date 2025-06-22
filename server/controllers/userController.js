@@ -1,6 +1,6 @@
 const { getAllUsers } = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id, getUserByAuth0Id, updateUserByAuth0Id} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 
 const handlePostSignup = async (req, res) => {
@@ -51,4 +51,31 @@ const getUserCreationDate = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate };
+const getUserInfo = async (req, res) => {
+    try {
+        // Lấy userAuth0Id từ query hoặc từ token (tùy bạn)
+        const userAuth0Id = req.query.userAuth0Id || req.body.userAuth0Id;
+        if (!userAuth0Id) return res.status(400).json({ success: false, message: "Missing userAuth0Id" });
+
+        const user = await getUserByAuth0Id(userAuth0Id);
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        res.json({ success: true, data: user });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const updateUserInfo = async (req, res) => {
+    try {
+        const { userAuth0Id, username, email, avatar } = req.body;
+        if (!userAuth0Id) return res.status(400).json({ success: false, message: "Missing userAuth0Id" });
+
+        const updated = await updateUserByAuth0Id(userAuth0Id, { username, email, avatar });
+        res.json({ success: true, data: updated });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserInfo, updateUserInfo };
