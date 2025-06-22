@@ -46,7 +46,7 @@ export default function MessageBox({ messages, conversation_id }) {
     <div className="flex-1 flex flex-col justify-between p-4">
       <div className="overflow-y-auto space-y-2 pr-4">
         {messages.map((msg, idx) => (
-          <ChatMessage key={idx} message={msg} conversation_id={conversation_id} auth0_id={user.sub} />
+          <ChatMessage key={idx} user={user} message={msg} conversation_id={conversation_id}/>
         ))}
       </div>
       <div className="mt-4 flex items-center gap-2">

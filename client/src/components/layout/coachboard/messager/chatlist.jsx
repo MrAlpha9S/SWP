@@ -1,5 +1,4 @@
 import React from 'react';
-import { Avatar } from 'antd';
 
 export default function ChatList({ user, contacts, selectedContactId, onSelect }) {
   return (
@@ -14,7 +13,6 @@ export default function ChatList({ user, contacts, selectedContactId, onSelect }
               c.conversation_id === selectedContactId ? 'bg-gray-700' : 'hover:bg-gray-800'
             }`}
           >
-            {/* <Avatar>{c.img}</Avatar> */}
             <div>
               <div className="font-semibold">{c.conversation_name}</div>
               <div className="text-xs text-gray-400">Active recently</div>
