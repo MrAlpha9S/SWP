@@ -12,7 +12,7 @@ import { postBlog } from '../../utils/blogUtils'
 import { useAuth0 } from "@auth0/auth0-react";
 
 
-export default function PostBlog({ user_id }) {
+export default function PostBlog() {
     const [currentTopic, setCurrentTopic] = useState('')
     const [currentTitle, setCurrentTitle] = useState('')
     const [currentDescription, setCurrentDescription] = useState('')
@@ -81,9 +81,6 @@ export default function PostBlog({ user_id }) {
         console.log('Submit:', post)
         postBlogMutation.mutate({user, getAccessTokenSilently, isAuthenticated, ...post})
 
-
-
-        // Gửi lên API hoặc lưu Firestore ở đây nếu cần
     }
 
 

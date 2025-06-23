@@ -2,10 +2,31 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router-dom";
+import {useQuery} from "@tanstack/react-query";
+import {getUser} from "../utils/userUtils.js";
+import {useEffect, useState} from "react";
 
 const Profile = () => {
-    const { user, isAuthenticated, isLoading } = useAuth0();
-    const navigate = useNavigate(); // fix here: remove destructuring
+    const { user, isAuthenticated, getAccessTokenSilently, isLoading } = useAuth0();
+    const [userInfo, setUserInfo] = useState();
+    const navigate = useNavigate();
+
+    const {
+        data: userIn4,
+        isPending: isUserIn4Pending,
+    } = useQuery({
+        queryKey: ['userIn4'],
+        queryFn: async () => {
+            return await getUser(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isUserIn4Pending) {
+            setUserInfo(userIn4[0])
+        }
+    }, [isUserIn4Pending, userIn4]);
 
     if (isLoading) {
         return <div>Loading ...</div>;
@@ -61,7 +82,7 @@ const Profile = () => {
                         <div className="flex justify-center items-center">
                             <img
                                 className="rounded-full size-14"
-                                src={user.picture}
+                                src={userInfo?.avatar}
                                 alt="avatar"
                             />
                         </div>

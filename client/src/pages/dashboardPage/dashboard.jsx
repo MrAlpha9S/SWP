@@ -8,16 +8,17 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
+import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
 import { useQuery } from '@tanstack/react-query'
 import { useCheckInDataStore } from "../../stores/checkInStore.js";
-import { Typography } from "antd";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
+import CoachSideBar from "../../components/layout/dashboard/coachsidebar.jsx"
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
-import {queryClient} from "../../main.jsx";
+import { queryClient } from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
@@ -27,14 +28,14 @@ import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 
 function Dashboard() {
-    const { readinessValue } = useQuitReadinessStore();
-    const { addError, removeError } = useErrorStore();
-    const { reasonList } = useReasonStore();
-    const { pricePerPack } = usePricePerPackStore();
-    const { cigsPerPack } = useCigsPerPackStore();
-    const { timeAfterWaking } = useTimeAfterWakingStore();
-    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
-    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
+    const {readinessValue} = useQuitReadinessStore();
+    const {addError, removeError} = useErrorStore();
+    const {reasonList} = useReasonStore();
+    const {pricePerPack} = usePricePerPackStore();
+    const {cigsPerPack} = useCigsPerPackStore();
+    const {timeAfterWaking} = useTimeAfterWakingStore();
+    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
+    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -47,14 +48,25 @@ function Dashboard() {
     } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
-    const { isProfileExist } = useProfileExists();
-    const { setCheckInDataSet } = useCheckInDataStore()
+    const {isProfileExist} = useProfileExists();
+    const {setCheckInDataSet} = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
+    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
 
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {
+        data: userIn4,
+        isPending: isUserIn4Pending,
+    } = useQuery({
+        queryKey: ['userIn4'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return;
+            return await getUser(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user,
+    })
 
     const {
         isPending: isUserProfilePending,
@@ -69,7 +81,7 @@ function Dashboard() {
     })
 
     useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
+        queryClient.invalidateQueries({queryKey: ['checkin-status']});
     }, []);
 
     useEffect(() => {
@@ -80,12 +92,6 @@ function Dashboard() {
         }
         syncStores();
     }, [userProfile, isUserProfilePending])
-
-    // useEffect(() => {
-    //     if (!isDatasetPending) {
-    //         setCheckInDataSet(checkInDataset?.data)
-    //     }
-    // }, [checkInDataset, isDatasetPending])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -141,7 +147,7 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending) {
+        if (!isAuthenticated || isUserProfilePending || isUserIn4Pending) {
             return <ProgressBoard isPending={true}/>;
         }
 
@@ -189,32 +195,64 @@ function Dashboard() {
             case 'messager':
                 return <MessageBox/>
             case 'post-blog':
-                return <PostBlog user_id={userProfile.data.user_id[0]}/>
+                return <PostBlog/>
 
             default:
                 return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
         }
     };
 
+    const renderSidebar = (SidebarComponent, currentStepDashboard, setCurrentStepDashboard) => {
+        const commonProps = {
+            currentStepDashboard,
+            setCurrentStepDashboard
+        };
+
+        return (
+            <>
+                {/* Desktop Sidebar */}
+                <div className='sticky top-[155px] self-start h-fit hidden md:block'>
+                    <SidebarComponent
+                        {...commonProps}
+                        mode="inline"
+                    />
+                </div>
+
+                {/* Mobile Sidebar */}
+                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'>
+                    <SidebarComponent
+                        {...commonProps}
+                        collapse={true}
+                        mode="horizontal"
+                    />
+                </div>
+            </>
+        );
+    };
+
+    const userRole = userIn4?.[0]?.role;
+
+    const dashboardHandle = (role) => {
+        if (role === 'Member') {
+            return renderSidebar(Sidebar, currentStepDashboard, setCurrentStepDashboard);
+        } else if (role === 'Coach') {
+            return renderSidebar(CoachSideBar, currentStepDashboard, setCurrentStepDashboard);
+        }
+        return null;
+    }
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col">
-            <Hero title={heroTitle} heroHeight={heroHeight}/>
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userIn4?.[0]?.username}/>
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit hidden md:block'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    mode="inline"/></div>
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'><Sidebar
-                    currentStepDashboard={currentStepDashboard} setCurrentStepDashboard={setCurrentStepDashboard}
-                    collapse={true} mode="horizontal"/></div>
+                {dashboardHandle(userRole)}
 
                 <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
                     {renderBoard()}
                 </div>
-
             </div>
         </div>
-    );
+    )
 
 }
 

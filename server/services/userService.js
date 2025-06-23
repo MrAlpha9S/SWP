@@ -14,7 +14,7 @@ const userExists = async (auth0_id) => {
     }
 };
 
-const createUser = async (auth0_id, username, email, created_at, picture) => {
+const createUser = async (auth0_id, username, email, created_at, picture, isSocial) => {
     try {
         const pool = await poolPromise;
         await pool.request()
@@ -23,7 +23,8 @@ const createUser = async (auth0_id, username, email, created_at, picture) => {
             .input('email', sql.NVarChar, email)
             .input('created_at', sql.DateTime, convertUTCStringToLocalDate(created_at).toISOString())
             .input('avatar', sql.NVarChar(sql.MAX), picture)
-            .query('INSERT INTO users (auth0_id, username, email, created_at, avatar) VALUES (@auth0_id, @username, @email, @created_at, @avatar)');
+            .input('is_social', sql.Bit, isSocial)
+            .query('INSERT INTO users (auth0_id, username, email, created_at, avatar, is_social) VALUES (@auth0_id, @username, @email, @created_at, @avatar, @is_social)');
         return true;
     } catch (error) {
         console.error('error in createUser', error);
@@ -39,6 +40,20 @@ const getAllUsers = async () => {
         return result.recordset;
     } catch (error) {
         console.error('error in getAllUsers', error);
+        return [];
+    }
+}
+
+const getUser = async (auth0_id) => {
+    try {
+        const user_id = await getUserIdFromAuth0Id(auth0_id)
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', user_id)
+            .query('SELECT * FROM users WHERE user_id=@user_id');
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getUser', error);
         return [];
     }
 }
@@ -105,3 +120,50 @@ async function updateUserByAuth0Id(auth0Id, { username, email, avatar }) {
 }
 
 module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUserByAuth0Id, updateUserByAuth0Id};
+const updateUserService = async (auth0_id, username = null, email = null, avatar = null, displayName = null) => {
+    if (!username && !email && !avatar && !password && !displayName) {
+        return false;
+    }
+    try {
+        const updates = [];
+        const inputs = {};
+
+        if (username) {
+            updates.push('username = @username');
+            inputs.username = username;
+        }
+        if (email) {
+            updates.push('email = @email');
+            inputs.email = email;
+        }
+        if (avatar) {
+            updates.push('avatar = @avatar');
+            inputs.avatar = avatar;
+        }
+        if (displayName) {
+            updates.push('display_name = @displayName');
+            inputs.displayName = displayName;
+        }
+
+        const userId = await getUserIdFromAuth0Id(auth0_id);
+        if (!userId) return false;
+
+        const queryStr = `UPDATE users SET ${updates.join(', ')} WHERE user_id = @user_id`;
+
+        const pool = await poolPromise;
+        const request = pool.request().input('user_id', userId);
+
+        for (const [key, value] of Object.entries(inputs)) {
+            request.input(key, value);
+        }
+
+        const result = await request.query(queryStr);
+        return result.rowsAffected?.[0] ?? 0;
+    } catch (error) {
+        console.error('error in updateUserService', error);
+        return null;
+    }
+}
+
+
+module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUser, updateUserService};

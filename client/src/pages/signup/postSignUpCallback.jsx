@@ -14,18 +14,15 @@ export default function PostSignUpCallback() {
             if (!isAuthenticated || !user) return;
 
             try {
-                // Step 1: Send user info to backend
                 const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 if (!data.success) return navigate('/error');
 
-                // Step 2: Get profile from backend
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 const profile = profileRes?.data;
                 if (profile) {
                     await syncProfileToStores(profile);
                 }
 
-                // Step 3: If there's local onboarding override, apply it last
                 const stored = localStorage.getItem('onboarding_profile');
                 if (stored) {
                     try {

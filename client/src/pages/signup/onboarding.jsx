@@ -218,6 +218,7 @@ const Onboarding = () => {
                     const errorMsgCigsReduced = errorMap["cigsReduced"];
                     const errorMsgExpectedQuitDate = errorMap["expectedQuitDate"];
                     const errorMsgStoppedDate = errorMap["stoppedDate"];
+                    const errorMsgCigsReducedLarge = errorMap["cigsReducedLarge"]
 
                     if (readinessValue === 'ready') {
                         if (startDate.length === 0) {
@@ -234,6 +235,11 @@ const Onboarding = () => {
                             addError(errorMsgQuitMethod)
                         } else {
                             removeError(errorMsgQuitMethod)
+                        }
+                        if (cigsReduced > cigsPerDay) {
+                            addError(errorMsgCigsReducedLarge)
+                        } else {
+                            removeError(errorMsgCigsReducedLarge)
                         }
                         if (quittingMethod === 'target-date') {
                             if (expectedQuitDate.length === 0) {
@@ -370,8 +376,14 @@ const Onboarding = () => {
     }, [quittingMethod]);
 
     useEffect(() => {
-        if (cigsReduced > 0) {
+        if (cigsReduced > 0 || cigsReduced < cigsPerDay) {
             removeError(errorMap["cigsReduced"]);
+        }
+    }, [cigsReduced]);
+
+    useEffect(() => {
+        if (cigsReduced < cigsPerDay) {
+            removeError(errorMap["cigsReducedLarge"]);
         }
     }, [cigsReduced]);
 

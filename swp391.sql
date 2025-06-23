@@ -24,7 +24,8 @@ CREATE TABLE [users] (
   [updated_at] datetime,
   [sub_id] int DEFAULT (1),
   [vip_end_date] datetime DEFAULT (null),
-  [isBanned] int DEFAULT (0)
+  [isBanned] int DEFAULT (0),
+  [is_social] bit
 )
 GO
 
@@ -362,29 +363,6 @@ ALTER TABLE [social_comments]
 ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id]);
 
 use SWP391
-SELECT * FROM users
 
-SELECT * FROM user_profiles
-select * from plan_log
-select * from profiles_reasons
-select * from goals
-select * from triggers_profiles
-select * from checkin_log
-select * from qna
-select * from quitting_items
-select * from free_text
-select * from social_category
-select * from social_posts
 
-select sc.category_id, sc.category_name, sc.description , count(sc.category_id) as post_count from social_category sc, social_posts sp where sc.category_id = sp.category_id group by sc.category_id, sc.category_name, sc.description
 
-SELECT 
-  sc.category_id, 
-  sc.category_name, 
-  sc.description,
-  COUNT(scmt.comment_id) AS comment_count
-FROM social_category sc
-JOIN social_posts sp ON sc.category_id = sp.category_id
-JOIN social_comments scmt ON sp.post_id = scmt.post_id
-GROUP BY sc.category_id, sc.category_name, sc.description
-ORDER BY sc.category_id;

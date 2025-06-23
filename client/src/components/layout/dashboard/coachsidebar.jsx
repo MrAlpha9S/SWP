@@ -15,7 +15,7 @@ const items = [
         icon: <WechatOutlined className="mr-4"/>,
     },
 ];
-const Coachsidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
+const CoachSideBar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
     return (
         <Menu
             onClick={(e) => {
@@ -29,4 +29,4 @@ const Coachsidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse =
         />
     );
 };
-export default Coachsidebar;
+export default CoachSideBar;
