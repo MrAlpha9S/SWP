@@ -69,3 +69,29 @@ export async function updateUserInfo(user, getAccessTokenSilently, { username, e
 
     return await res.json();
 }
+
+// ...existing code...
+
+export async function updateUserController(user, getAccessTokenSilently, { username, email, avatar }) {
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/update-user", {
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userAuth0Id: user.sub,
+            username,
+            email,
+            avatar
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}
