@@ -243,7 +243,7 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} />
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userIn4?.[0]?.username}/>
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
                 {dashboardHandle(userRole)}
 

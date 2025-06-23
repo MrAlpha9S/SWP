@@ -24,7 +24,8 @@ CREATE TABLE [users] (
   [updated_at] datetime,
   [sub_id] int DEFAULT (1),
   [vip_end_date] datetime DEFAULT (null),
-  [isBanned] int DEFAULT (0)
+  [isBanned] int DEFAULT (0),
+  [is_social] bit
 )
 GO
 
@@ -362,56 +363,6 @@ ALTER TABLE [social_comments]
 ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id]);
 
 use SWP391
-SELECT * FROM users
 
-
-DELETE FROM users where user_id = 17
-
-SELECT * FROM user_profiles
-select * from plan_log
-select * from profiles_reasons
-select * from goals
-select * from triggers_profiles
-select * from checkin_log
-select * from qna
-select * from quitting_items
-select * from free_text
-select * from social_category
-select * from social_posts
-
-select sc.category_id, sc.category_name, sc.description , count(sc.category_id) as post_count from social_category sc, social_posts sp where sc.category_id = sp.category_id group by sc.category_id, sc.category_name, sc.description
-
-SELECT 
-  sc.category_id, 
-  sc.category_name, 
-  sc.description,
-  COUNT(scmt.comment_id) AS comment_count
-FROM social_category sc
-JOIN social_posts sp ON sc.category_id = sp.category_id
-JOIN social_comments scmt ON sp.post_id = scmt.post_id
-GROUP BY sc.category_id, sc.category_name, sc.description
-ORDER BY sc.category_id;
-
-SELECT 
-  u.user_id,
-  u.username,
-  COALESCE(SUM(cl.cigs_smoked), 0) AS totalCigs
-FROM users u
-LEFT JOIN user_profiles p ON u.user_id = p.user_id
-LEFT JOIN checkin_log cl ON u.user_id = cl.user_id
-GROUP BY u.user_id, u.username
-
-SELECT user_id, username, created_at FROM users
-
-SELECT 
-  u.user_id,
-  u.username,
-  COUNT(cl.log_id) AS days_without_smoke
-FROM users u
-LEFT JOIN checkin_log cl 
-  ON u.user_id = cl.user_id AND cl.cigs_smoked = 0
-GROUP BY u.user_id, u.username;
-
-SELECT cigs_per_day, cigs_per_pack, price_per_pack FROM user_profiles
 
 

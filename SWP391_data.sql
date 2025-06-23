@@ -12,21 +12,22 @@ VALUES
   ('Pro - Yearly', 12, 199.99);
 
 --Sample user info
-INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar])
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null),
-('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null),
-('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null),
-('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c'),
-('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c'),
-('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c'),
-('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c'),
-('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c')
-('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc');
+('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null, 1),
+('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 1),
+('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 1),
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1),
+('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1),
+('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1),
+('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1),
+('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1),
+('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc', 1),
+('auth0|6856601d2fbee67c66bcbf69', 'accracc2@gmail.com', 'accracc2@gmail.com', '2025-06-21 14:32:45.097','	https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0);
 
-INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role])
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role], [is_social])
 VALUES
-('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach');
+('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
 SELECT * FROM users
 --Sample data for onboarding
 INSERT INTO user_profiles (
