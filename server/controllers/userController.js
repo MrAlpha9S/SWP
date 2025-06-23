@@ -27,17 +27,6 @@ const handlePostSignup = async (req, res) => {
     }
 };
 
-const getUserController = async (req, res) => {
-    try {
-        const auth0_id = req.params.auth0_id
-        const user = await getUser(auth0_id);
-        return res.status(200).json(user);
-    } catch (error) {
-        console.error('Error in getUserController:', error);
-        res.status(500).json({ error: 'Failed to fetch user' });
-    }
-};
-
 const getAllUsersController = async (req, res) => {
     try {
         const users = await getAllUsers();
@@ -70,10 +59,9 @@ const updateUserController = async (req, res) => {
         return res.status(400).json({success: false, message: 'credentials to update missing'});
     } else {
         try {
-            const userInAuth0 = await getUserFromAuth0(userAuth0Id)
-            const isSocial = userInAuth0.identities.isSocial;
             const updateResult = await updateUserService(userAuth0Id, username, email, avatar);
-            if (updateResult) {
+            const isSocial = updateResult.is_social;
+            if (isSocial != null) {
                 const auth0UserUpdateResult = await updateUserAuth0(userAuth0Id, username, email, avatar, password, isSocial);
                 if (auth0UserUpdateResult) {
                     return res.status(200).json({success: true, message: 'User updated successfully'});
@@ -99,7 +87,7 @@ const getUserInfo = async (req, res) => {
         const user = await getUserByAuth0Id(userAuth0Id);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        res.json({ success: true, data: user });
+        return res.json({ success: true, data: user });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -111,7 +99,7 @@ const updateUserInfo = async (req, res) => {
         if (!userAuth0Id) return res.status(400).json({ success: false, message: "Missing userAuth0Id" });
 
         const updated = await updateUserByAuth0Id(userAuth0Id, { username, email, avatar });
-        res.json({ success: true, data: updated });
+        return res.json({ success: true, data: updated });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

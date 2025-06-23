@@ -3,7 +3,7 @@ import { DownOutlined } from "@ant-design/icons";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import {useQuery} from "@tanstack/react-query";
-import {getUser} from "../utils/userUtils.js";
+import {getUserInfo} from "../utils/userUtils.js";
 import {useEffect, useState} from "react";
 
 const Profile = () => {
@@ -17,14 +17,14 @@ const Profile = () => {
     } = useQuery({
         queryKey: ['userIn4'],
         queryFn: async () => {
-            return await getUser(user, getAccessTokenSilently, isAuthenticated);
+            return await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
         },
         enabled: isAuthenticated && !!user,
     })
 
     useEffect(() => {
         if (!isUserIn4Pending) {
-            setUserInfo(userIn4[0])
+            setUserInfo(userIn4.data)
         }
     }, [isUserIn4Pending, userIn4]);
 
@@ -40,6 +40,10 @@ const Profile = () => {
         navigate("/dashboard");
     }
 
+    const handleUserInfoClick = () => {
+        navigate("/profile");
+    }
+
     const items = [
         {
             key: "1",
@@ -51,15 +55,7 @@ const Profile = () => {
         },
         {
             key: "3",
-            label: (
-                <a
-                    target="_self"
-                    rel="noopener noreferrer"
-                    href="https://www.luohanacademy.com"
-                >
-                    Thông tin cá nhân
-                </a>
-            ),
+            label: <span onClick={handleUserInfoClick}>Thông tin cá nhân</span>,
         },
         {
             key: "4",

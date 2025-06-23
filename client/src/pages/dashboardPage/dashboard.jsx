@@ -8,7 +8,7 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
 } from "../../stores/store.js";
-import { getUser } from "../../components/utils/userUtils.js";
+import {getUserInfo} from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
@@ -53,6 +53,7 @@ function Dashboard() {
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
     const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
+    const [userInfo, setUserInfo] = useState();
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
@@ -63,10 +64,16 @@ function Dashboard() {
         queryKey: ['userIn4'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getUser(user, getAccessTokenSilently, isAuthenticated);
+            return await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
         },
         enabled: isAuthenticated && !!user,
     })
+
+    useEffect(() => {
+        if (!isUserIn4Pending) {
+            setUserInfo(userIn4.data)
+        }
+    }, [isUserIn4Pending])
 
     const {
         isPending: isUserProfilePending,
@@ -230,8 +237,6 @@ function Dashboard() {
         );
     };
 
-    const userRole = userIn4?.[0]?.role;
-
     const dashboardHandle = (role) => {
         if (role === 'Member') {
             return renderSidebar(Sidebar, currentStepDashboard, setCurrentStepDashboard);
@@ -243,9 +248,9 @@ function Dashboard() {
 
     return (
         <div className="bg-primary-50 min-h-screen flex flex-col">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userIn4?.[0]?.username}/>
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userInfo?.role} username={userInfo?.username}/>
             <div className="flex flex-col md:flex-row gap-4 px-1 py-4 md:px-4">
-                {dashboardHandle(userRole)}
+                {dashboardHandle(userInfo?.role)}
 
                 <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
                     {renderBoard()}

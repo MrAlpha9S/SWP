@@ -98,7 +98,7 @@ async function getUserByAuth0Id(auth0Id) {
     }
 }
 
-async function updateUserByAuth0Id(auth0Id, { username, email, avatar }) {
+async function updateUserByAuth0Id(auth0Id, {username, email, avatar}) {
     try {
         const pool = await poolPromise;
         await pool.request()
@@ -108,7 +108,9 @@ async function updateUserByAuth0Id(auth0Id, { username, email, avatar }) {
             .input('avatar', avatar)
             .query(`
                 UPDATE users
-                SET username = @username, email = @email, avatar = @avatar
+                SET username = @username,
+                    email    = @email,
+                    avatar   = @avatar
                 WHERE auth0_id = @auth0_id
             `);
 
@@ -119,9 +121,8 @@ async function updateUserByAuth0Id(auth0Id, { username, email, avatar }) {
     }
 }
 
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUserByAuth0Id, updateUserByAuth0Id};
-const updateUserService = async (auth0_id, username = null, email = null, avatar = null, displayName = null) => {
-    if (!username && !email && !avatar && !password && !displayName) {
+const updateUserService = async (auth0_id, username = null, email = null, avatar = null) => {
+    if (!username && !email && !avatar) {
         return false;
     }
     try {
@@ -140,15 +141,14 @@ const updateUserService = async (auth0_id, username = null, email = null, avatar
             updates.push('avatar = @avatar');
             inputs.avatar = avatar;
         }
-        if (displayName) {
-            updates.push('display_name = @displayName');
-            inputs.displayName = displayName;
-        }
 
         const userId = await getUserIdFromAuth0Id(auth0_id);
         if (!userId) return false;
 
-        const queryStr = `UPDATE users SET ${updates.join(', ')} WHERE user_id = @user_id`;
+        const queryStr = `UPDATE users
+                          SET ${updates.join(', ')}
+                              OUTPUT INSERTED.is_social
+                          WHERE user_id = @user_id`;
 
         const pool = await poolPromise;
         const request = pool.request().input('user_id', userId);
@@ -158,12 +158,21 @@ const updateUserService = async (auth0_id, username = null, email = null, avatar
         }
 
         const result = await request.query(queryStr);
-        return result.rowsAffected?.[0] ?? 0;
+        return result.recordset[0];
     } catch (error) {
         console.error('error in updateUserService', error);
         return null;
     }
 }
 
-
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUser, updateUserService};
+module.exports = {
+    userExists,
+    createUser,
+    getAllUsers,
+    getUserIdFromAuth0Id,
+    getUserCreationDateFromAuth0Id,
+    getUser,
+    updateUserService,
+    getUserByAuth0Id,
+    updateUserByAuth0Id
+};

@@ -69,20 +69,3 @@ export async function updateUserInfo(user, getAccessTokenSilently, { username, e
 
     return await res.json();
 }
-export async function getUser(user, getAccessTokenSilently, isAuthenticated) {
-    if (!isAuthenticated || !user) return;
-
-    const token = await getAccessTokenSilently();
-
-    const res = await fetch(`http://localhost:3000/users/getUser/${user.sub}`, {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-
-    });
-
-    return res.json();
-}
-

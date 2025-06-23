@@ -19,21 +19,19 @@ const getUserFromAuth0 = async (user_id) => {
 const updateUserAuth0 = async (auth0_id, username = null, email = null, avatar = null, password = null, isSocial) => {
     const token = await getManagementToken();
     const bodyPayload = {}
-    const user_metadata = {}
 
     if (!isSocial) {
         if (password)
             bodyPayload.password = password;
         if (email)
             bodyPayload.email = email;
+        if (username)
+            bodyPayload.name = username;
     }
 
-    if (username) user_metadata.username = username;
-    if (avatar) user_metadata.picture = avatar;
+    console.log(bodyPayload);
 
-    bodyPayload.user_metadata = user_metadata;
-
-    const res = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${auth0_id}`, {
+    const rawRes = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${auth0_id}`, {
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -41,9 +39,15 @@ const updateUserAuth0 = async (auth0_id, username = null, email = null, avatar =
             'Accept': 'application/json'
         },
         body: JSON.stringify(bodyPayload),
-    })
+    });
 
-    return res.json();
+    const resData = await rawRes.json();
+    if (!rawRes.ok) {
+        console.error('Auth0 error:', resData);
+        return false;
+    }
+    return true;
+
 }
 
 module.exports = {getUserFromAuth0, updateUserAuth0};
