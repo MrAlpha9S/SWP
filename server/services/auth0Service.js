@@ -29,8 +29,6 @@ const updateUserAuth0 = async (auth0_id, username = null, email = null, avatar =
             bodyPayload.name = username;
     }
 
-    console.log(bodyPayload);
-
     const rawRes = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${auth0_id}`, {
         method: 'PATCH',
         headers: {

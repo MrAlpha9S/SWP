@@ -40,6 +40,7 @@ function Profile() {
             try {
                 const data = await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 const userData = Array.isArray(data.data) ? data.data[0] : data.data;
+                console.log(userData)
                 const loadedProfile = {
                     username: userData?.username || "",
                     email: userData?.email || "",
