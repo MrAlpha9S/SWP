@@ -55,7 +55,17 @@ const getUserCreationDate = async (req, res) => {
 
 const updateUserController = async (req, res) => {
     const {userAuth0Id, username, email, avatar, password} = req.body;
-    if (!username && !email && !avatar && !password) {
+    const isEmpty = (v) => v === undefined || v === null || v === "";
+
+    if (!userAuth0Id) {
+        return res.status(400).json({success: false, message: 'userAuth0Id missing'});
+    }
+    if (
+        isEmpty(username) &&
+        isEmpty(email) &&
+        isEmpty(avatar) &&
+        isEmpty(password)
+    ) {
         return res.status(400).json({success: false, message: 'credentials to update missing'});
     } else {
         try {
@@ -63,8 +73,14 @@ const updateUserController = async (req, res) => {
             const isSocial = updateResult.is_social;
             if (isSocial != null) {
                 const auth0UserUpdateResult = await updateUserAuth0(userAuth0Id, username, email, avatar, password, isSocial);
-                if (auth0UserUpdateResult) {
-                    return res.status(200).json({success: true, message: 'User updated successfully'});
+                if (auth0UserUpdateResult || isSocial) {
+                    // Nếu là social, chỉ cần database thành công là đủ
+                    return res.status(200).json({
+                        success: true,
+                        message: isSocial
+                            ? 'Đã cập nhật database (tài khoản social không thể cập nhật lên Auth0)'
+                            : 'User updated successfully'
+                    });
                 } else {
                     return res.status(400).json({success: false, message: 'Update user auth0 failed'});
                 }
