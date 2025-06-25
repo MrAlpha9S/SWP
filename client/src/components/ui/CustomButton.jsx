@@ -12,6 +12,10 @@ const CustomButton = ({ type = "primary", onClick, children, disabled = false })
             "border border-primary-500 text-primary-500 hover:text-white hover:bg-primary-500",
         cancel:
             "border border-red-500 text-red-500 hover:text-white hover:bg-red-500",
+        whitePrimary:
+        "bg-white text-primary-500 hover:bg-primary-800 hover:text-white",
+        whiteSecondary:
+            "bg-white text-secondary-500 hover:bg-secondary-800 hover:text-white",
     };
 
     return (

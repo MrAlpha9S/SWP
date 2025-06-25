@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import CustomButton from "../../ui/CustomButton.jsx";
 
 function Hero() {
   const navigate = useNavigate();
@@ -15,9 +16,34 @@ function Hero() {
         {/*<button onClick={() => navigate('/onboarding')} className="btn btn-primary text-base md:text-lg px-6 py-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">*/}
         {/*  Bắt đầu ngay*/}
         {/*</button>*/}
-        <div className="absolute bottom-[-130px] flex w-full h-[50%]">
-          <div className="w-[50%] bg-primary-600 hover:-translate-y-16 transition-transform duration-700 opacity-70"></div>
-          <div className="w-[50%] bg-secondary-600 hover:-translate-y-16 transition-transform duration-700 opacity-30"></div>
+        <div className="absolute bottom-[-130px] flex w-full h-[50%] text-white">
+          <div className="relative w-[50%] hover:-translate-y-16 transition-all duration-700 flex justify-end overflow-hidden group p-4">
+            <div className="absolute inset-0 bg-primary-600 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
+            <div className="relative z-10 w-[75%]">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+                Tôi muốn bắt đầu một mình
+              </h2>
+              <p>
+                Chưa sẵn sàng cho huấn luyện viên? Hãy tự tạo kế hoạch bỏ thuốc, theo dõi tiến trình và chủ động kiểm soát hành trình sống không khói thuốc – hoàn toàn miễn phí.
+              </p>
+              <div className="w-full flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 mt-4">
+                <CustomButton type='whitePrimary' onClick={() => navigate('/onboarding')}>Bắt đầu ngay</CustomButton>
+              </div>
+            </div>
+          </div>
+
+
+          <div className="relative w-[50%] hover:-translate-y-16 transition-all duration-700 flex justify-start overflow-hidden group p-4">
+            <div className="absolute inset-0 bg-secondary-400 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0 "></div>
+            <div className="relative z-10 w-[75%]">
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Tôi muốn tham gia khoá học bài bản</h2>
+              <p>Tham gia khoá học cao cấp với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng bước trong suốt quá trình bỏ thuốc.</p>
+              <div className="w-full flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 mt-4">
+                <CustomButton type='whiteSecondary' >Tìm hiểu thêm</CustomButton>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
