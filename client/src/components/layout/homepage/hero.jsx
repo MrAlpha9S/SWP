@@ -21,10 +21,10 @@ function Hero() {
             <div className="absolute inset-0 bg-primary-600 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
             <div className="relative z-10 w-[75%]">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-                Tôi muốn bắt đầu một mình
+                Tôi muốn tự bắt đầu
               </h2>
               <p>
-                Chưa sẵn sàng cho huấn luyện viên? Hãy tự tạo kế hoạch bỏ thuốc, theo dõi tiến trình và chủ động kiểm soát hành trình sống không khói thuốc – hoàn toàn miễn phí.
+                Bạn muốn chủ động hành trình bỏ thuốc theo cách của riêng mình? Hãy sử dụng công cụ của ứng dụng để tạo kế hoạch, theo dõi tiến trình và xây dựng thói quen sống không khói thuốc – hoàn toàn miễn phí.
               </p>
               <div className="w-full flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 mt-4">
                 <CustomButton type='whitePrimary' onClick={() => navigate('/onboarding')}>Bắt đầu ngay</CustomButton>
@@ -37,7 +37,7 @@ function Hero() {
             <div className="absolute inset-0 bg-secondary-400 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0 "></div>
             <div className="relative z-10 w-[75%]">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Tôi muốn tham gia khoá học bài bản</h2>
-              <p>Tham gia khoá học cao cấp với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng bước trong suốt quá trình bỏ thuốc.</p>
+              <p>Bạn cần một lộ trình rõ ràng và người đồng hành đáng tin cậy? Khoá học với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng giai đoạn sẽ giúp bạn bỏ thuốc dễ dàng hơn và duy trì kết quả bền vững.</p>
               <div className="w-full flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 mt-4">
                 <CustomButton type='whiteSecondary' >Tìm hiểu thêm</CustomButton>
               </div>
