@@ -37,7 +37,7 @@ const MyProfile = () => {
     }, [data, isPending])
 
     return (
-        <div className='min-h-[calc(100vh-80px-409px)] flex items-center'>
+        <div className='min-h-[calc(100vh-80px-409px)] w-[1280px] mx-auto flex items-center'>
             {!fetchStatus &&
                 <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
                     <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>

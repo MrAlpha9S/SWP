@@ -44,7 +44,7 @@ function App() {
     return (
         <>
             <Navbar />
-            <div className="max-w-[1280px] mx-auto bg-[#fff7e5]">
+            <div className="w-full mx-auto bg-[#fff7e5]">
             <Routes>
                 <Route path="/" element={<Homepage />} />
 

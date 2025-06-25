@@ -446,75 +446,80 @@ const Onboarding = () => {
 
     const scrollRef = useRef(null);
     return (
-        <>
-            <Modal
-                title="Kế hoạch đã tồn tại"
-                closable={{'aria-label': 'Custom Close Button'}}
-                open={isModalOpen}
-                onOk={() => setIsModalOpen(false)}
-                onCancel={() => navigate('/')}
-                centered
-                maskClosable
-                closeIcon={null}
-                footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
-                                     onCancel={() => {
-                                         setIsModalOpen(false)
-                                         navigate('/')
-                                     }}/>}
-            >
-                <p>
-                    Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn
-                    tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
-                </p>
-                <p>
-                    Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
-                </p>
+        <div className='w-full bg-white'>
+            <div className='flex flex-col'>
+                <Modal
+                    title="Kế hoạch đã tồn tại"
+                    closable={{'aria-label': 'Custom Close Button'}}
+                    open={isModalOpen}
+                    onOk={() => setIsModalOpen(false)}
+                    onCancel={() => navigate('/')}
+                    centered
+                    maskClosable
+                    closeIcon={null}
+                    footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
+                                         onCancel={() => {
+                                             setIsModalOpen(false)
+                                             navigate('/')
+                                         }}/>}
+                >
+                    <p>
+                        Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn
+                        tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
+                    </p>
+                    <p>
+                        Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
+                    </p>
 
 
-            </Modal>
-            <Hero/>
-            <div className='flex flex-col h-full bg-white gap-14 p-14'>
+                </Modal>
+                <Hero/>
+                <div className='flex flex-col mx-auto max-w-[1280px] bg-white'>
+                    <div className='flex flex-col h-full  gap-14 p-14'>
 
-                {currentStep !== 6 &&
-                    <div className="flex flex-col w-full bg-white">
-                        <Collapse
-                            className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
+                        {currentStep !== 6 &&
+                            <div className="flex flex-col w-full bg-white">
+                                <Collapse
+                                    className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
+                                />
+                            </div>
+                        }
+
+                        <Steps
+                            ref={scrollRef}
+                            className='bg-white'
+                            current={currentStep}
+                            onChange={onChangeSteps}
+                            labelPlacement="vertical"
+                            items={stepsItems}
                         />
+
+                        <div className='flex flex-col gap-14 bg-white'>
+                            {currentStep === 0 && <Readiness/>}
+                            {currentStep === 1 && <Reason/>}
+                            {currentStep === 2 && <CigInfo/>}
+                            {currentStep === 3 && <SmokingRoutine/>}
+                            {currentStep === 4 && <SetPlan/>}
+                            {currentStep === 5 && <SetGoals/>}
+                            {currentStep === 6 && <Summary/>}
+                        </div>
+                        <div className='flex justify-between gap-5 w-full'>
+                            {currentStep !== 0 && (
+                                <CustomButton type="secondary" onClick={() => toPreviousPage()}>
+                                    Trở lại <FaArrowLeft/>
+                                </CustomButton>
+                            )}
+                            <CustomButton type="primary" onClick={() => {
+                                currentStep !== 6 ? toNextPage() : handleSave();
+                            }}>
+                                {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
+                            </CustomButton>
+                        </div>
                     </div>
-                }
-
-                <Steps
-                    ref={scrollRef}
-                    className='bg-white'
-                    current={currentStep}
-                    onChange={onChangeSteps}
-                    labelPlacement="vertical"
-                    items={stepsItems}
-                />
-
-                <div className='flex flex-col gap-14 bg-white'>
-                    {currentStep === 0 && <Readiness/>}
-                    {currentStep === 1 && <Reason/>}
-                    {currentStep === 2 && <CigInfo/>}
-                    {currentStep === 3 && <SmokingRoutine/>}
-                    {currentStep === 4 && <SetPlan/>}
-                    {currentStep === 5 && <SetGoals/>}
-                    {currentStep === 6 && <Summary/>}
-                </div>
-                <div className='flex justify-between gap-5 w-full'>
-                    {currentStep !== 0 && (
-                        <CustomButton type="secondary" onClick={() => toPreviousPage()}>
-                            Trở lại <FaArrowLeft/>
-                        </CustomButton>
-                    )}
-                    <CustomButton type="primary" onClick={() => {
-                        currentStep !== 6 ? toNextPage() : handleSave();
-                    }}>
-                        {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
-                    </CustomButton>
                 </div>
             </div>
-        </>
+        </div>
+
     )
 };
 
