@@ -24,16 +24,28 @@ CREATE TABLE [users] (
   [updated_at] datetime,
   [sub_id] int DEFAULT (1),
   [vip_end_date] datetime DEFAULT (null),
-  [isBanned] int DEFAULT (0)
+  [isBanned] int DEFAULT (0),
+  [is_social] int,
 )
 GO
 
-CREATE TABLE [subcriptions] (
+CREATE TABLE [subscriptions] (
   [sub_id] int PRIMARY KEY IDENTITY(1, 1),
   [sub_type] varchar(50),
+  [sub_name] nvarchar(50),
   [duration] int,
   [price] float
 )
+GO
+
+CREATE TABLE [subs_features] (
+  [feature_id] int PRIMARY KEY IDENTITY(1, 1),
+  [sub_id] int,
+  [feature] nvarchar(100)
+)
+GO
+
+ALTER TABLE [subs_features] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 
 CREATE TABLE [user_profiles] (
@@ -283,7 +295,7 @@ CREATE TABLE [user_conversation] (
 GO
 
 
-ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subcriptions] ([sub_id])
+ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 
 ALTER TABLE [user_achievements] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -378,40 +390,4 @@ select * from quitting_items
 select * from free_text
 select * from social_category
 select * from social_posts
-
-select sc.category_id, sc.category_name, sc.description , count(sc.category_id) as post_count from social_category sc, social_posts sp where sc.category_id = sp.category_id group by sc.category_id, sc.category_name, sc.description
-
-SELECT 
-  sc.category_id, 
-  sc.category_name, 
-  sc.description,
-  COUNT(scmt.comment_id) AS comment_count
-FROM social_category sc
-JOIN social_posts sp ON sc.category_id = sp.category_id
-JOIN social_comments scmt ON sp.post_id = scmt.post_id
-GROUP BY sc.category_id, sc.category_name, sc.description
-ORDER BY sc.category_id;
-
-SELECT 
-  u.user_id,
-  u.username,
-  COALESCE(SUM(cl.cigs_smoked), 0) AS totalCigs
-FROM users u
-LEFT JOIN user_profiles p ON u.user_id = p.user_id
-LEFT JOIN checkin_log cl ON u.user_id = cl.user_id
-GROUP BY u.user_id, u.username
-
-SELECT user_id, username, created_at FROM users
-
-SELECT 
-  u.user_id,
-  u.username,
-  COUNT(cl.log_id) AS days_without_smoke
-FROM users u
-LEFT JOIN checkin_log cl 
-  ON u.user_id = cl.user_id AND cl.cigs_smoked = 0
-GROUP BY u.user_id, u.username;
-
-SELECT cigs_per_day, cigs_per_pack, price_per_pack FROM user_profiles
-
 

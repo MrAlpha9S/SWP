@@ -9,6 +9,7 @@ const topicRouter = require("./routes/topicRoute");
 const checkInRouter = require("./routes/checkInRoute");
 const socialPostRouter = require("./routes/socialPostRoute");
 const messageRouter = require("./routes/messageRoute");
+const subscriptionRouter = require("./routes/subscriptionRoute");
 
 
 app.use(cors());
@@ -20,6 +21,7 @@ app.use('/topics', topicRouter);
 app.use('/check-in', checkInRouter)
 app.use('/social-posts', socialPostRouter)
 app.use('/messager', messageRouter)
+app.use('/subscription', subscriptionRouter)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
