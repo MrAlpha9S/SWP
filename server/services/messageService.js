@@ -9,9 +9,7 @@ const CreateConversation = async (auth0_id, conversation_name, created_at, user_
             .input('conversation_name', conversation_name)
             .input('created_at', mssql.DateTime, created_at)
             .query(`INSERT INTO [conversations] ([conversation_name], [created_at]) VALUES
-(@conversation_name, @created_at); 
-                    INSERT INTO [user_conversation] ([conversation_id], [user_id]) VALUES
-(1, 1), (1, 2);`);
+(@conversation_name, @created_at);`);
         const conversationId = result.recordset[0].conversation_id;
 
         const pool1 = await poolPromise;

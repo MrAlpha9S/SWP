@@ -7,9 +7,6 @@ import { SendMessage } from '../../../utils/messagerUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils'
 
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-
 
 const { TextArea } = Input;
 

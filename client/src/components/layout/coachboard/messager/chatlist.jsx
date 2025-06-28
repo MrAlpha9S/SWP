@@ -19,7 +19,14 @@ export default function ChatList({ user, contacts, selectedContactId, onSelect }
             </div>
           </div>
         ))}
+        <div
+            className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer hover:bg-gray-800`}
+          >
+          <div>
+            <div className="font-semibold">New Conversation</div>
+            <div className="text-xs text-gray-400">Start a new chat</div>
+          </div>
       </div>
-    </div>
+    </div></div>
   );
 }

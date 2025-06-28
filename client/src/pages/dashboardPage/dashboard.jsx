@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
+import { SocketProvider } from '../../contexts/SocketContext.jsx';
 import {
     useCigsPerPackStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
@@ -26,7 +27,7 @@ import DistractionTools from "../../components/layout/dashboard/distractionTools
 import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 
 import PostBlog from '../../components/layout/coachboard/postblog.jsx'
-import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
+import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 
 function Dashboard() {
     const { readinessValue } = useQuitReadinessStore();
@@ -194,7 +195,7 @@ function Dashboard() {
             case 'badges':
                 return <BadgesMenu />;
             case 'messager':
-                return <MessageBox />
+                return <SocketProvider><Messager /></SocketProvider>;
             case 'post-blog':
                 return <PostBlog />
 
