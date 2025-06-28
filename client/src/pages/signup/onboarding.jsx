@@ -73,13 +73,15 @@ const Onboarding = () => {
 
     const {from} = useParams();
 
+    console.log(isProfileExist);
+
     useEffect(() => {
         if (isProfileExist) {
             if (from) {
                 if (from === 'savings') {
                     setCurrentStep(2);
                 } else if (from === 'progress-board-startdate' || from === 'progress-board-plan') {
-                    setCurrentStep(4);
+                    setCurrentStep(0);
                 } else {
                     setCurrentStep(6)
                 }
@@ -107,7 +109,9 @@ const Onboarding = () => {
         },
         {
             title: readinessValue === 'ready' ? 'Lên kế hoạch' : 'Kết quả & theo dõi',
-            icon: (userInfo && userInfo.sub_id === 1 || !userInfo) && <div className='relative h-6 w-20'><FaCrown/> <PremiumBadge className='absolute top-[-10px] right-2'/></div>,
+            icon: (userInfo && userInfo.sub_id === 1 || !userInfo) &&
+                <div className='relative h-6 w-20'><FaCrown/> <PremiumBadge className='absolute top-[-10px] right-2'/>
+                </div>,
         },
         {
             title: 'Tổng kết',
@@ -120,16 +124,14 @@ const Onboarding = () => {
 
         if (currentStep > 0) {
             if (isFreeUser) {
-                // Treat as free user
                 if (currentStep === 6) {
-                    setCurrentStep(2);
-                } else if (currentStep > 2 && currentStep <= 5) {
-                    setCurrentStep(2);
+                    setCurrentStep(4);
+                } else if (currentStep > 4 && currentStep <= 6) {
+                    setCurrentStep(5);
                 } else {
                     setCurrentStep(currentStep - 1);
                 }
             } else {
-                // Premium user
                 setCurrentStep(currentStep - 1);
             }
         }
@@ -181,11 +183,7 @@ const Onboarding = () => {
                         removeError(errorMsgCigsPerDay)
                     }
                     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
-                        if (userInfo.sub_id === 1) {
-                            setCurrentStep(6)
-                        } else {
-                            setCurrentStep(currentStep + 1)
-                        }
+                        setCurrentStep(currentStep + 1)
                     }
                     // } else {
                     //     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
@@ -238,7 +236,7 @@ const Onboarding = () => {
                     }
                     break;
                 }
-                case 4: {
+                case 5: {
                     const errorMsgStartDate = errorMap["startDate"];
                     const errorMsgCigsPerDay = errorMap["cigsPerDay"];
                     const errorMsgQuitMethod = errorMap["quitMethod"];
@@ -303,21 +301,32 @@ const Onboarding = () => {
 
                     break;
                 }
-                case 5: {
+                case 4: {
                     const errorMsgGoalAmount = errorMap["goalAmount"];
                     const errorMsgGoalList = errorMap["goalList"];
                     if (createGoalChecked) {
                         if (goalList.length === 0) {
                             addError(errorMsgGoalList);
-                        }
-                        if (goalAmount <= 0) {
-                            addError(errorMsgGoalAmount);
-                        }
-                        if (goalList.length > 0 && goalAmount > 0) {
-                            setCurrentStep(currentStep + 1)
+                            if (goalAmount <= 0) {
+                                addError(errorMsgGoalAmount);
+                            }
+                            if (goalList.length > 0 && goalAmount > 0) {
+                                if (userInfo?.sub_id === 1 || !userInfo) {
+                                    setCurrentStep(6)
+                                } else
+                                    setCurrentStep(currentStep + 1)
+                            }
+                        } else {
+                            if (userInfo?.sub_id === 1 || !userInfo) {
+                                setCurrentStep(6)
+                            } else
+                                setCurrentStep(currentStep + 1)
                         }
                     } else {
-                        setCurrentStep(currentStep + 1)
+                        if (userInfo?.sub_id === 1 || !userInfo) {
+                            setCurrentStep(6)
+                        } else
+                            setCurrentStep(currentStep + 1)
                     }
 
                     break;
@@ -521,13 +530,13 @@ const Onboarding = () => {
                             items={stepsItems}
                         />
 
-                        <div className='flex flex-col gap-14 bg-white'>
+                        <div className='flex flex-col gap-8 bg-white'>
                             {currentStep === 0 && <Readiness/>}
                             {currentStep === 1 && <Reason/>}
                             {currentStep === 2 && <CigInfo/>}
                             {currentStep === 3 && <SmokingRoutine/>}
-                            {currentStep === 4 && <SetPlan/>}
-                            {currentStep === 5 && <SetGoals/>}
+                            {currentStep === 4 && <SetGoals/>}
+                            {currentStep === 5 && <SetPlan/>}
                             {currentStep === 6 && <Summary/>}
                         </div>
                         <div className='flex justify-between gap-5 w-full'>

@@ -43,6 +43,7 @@ const ProgressBoard = ({
                            planLogCloneDDMMYY,
                            setCurrentStepDashboard,
                            setMoneySaved,
+                    userInfo
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -114,7 +115,6 @@ const ProgressBoard = ({
     }, []);
 
     const timeDifference = useMemo(() => {
-        const localStartDate = new Date(startDate);
         let differenceInMs;
 
         if (readinessValue === 'ready') {
@@ -152,7 +152,7 @@ const ProgressBoard = ({
         } else if (currentDate < new Date(expectedQuitDate)) {
             return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
         }
-        return '';
+        return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
     }, [readinessValue, currentDate, expectedQuitDate, startDate]);
 
     // FIX: Prevent date mutation that caused infinite loops
@@ -199,7 +199,7 @@ const ProgressBoard = ({
 
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
-        if (!planLog || !localCheckInDataSet) return [];
+        if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
         return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod));
     }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending]);
 
@@ -318,13 +318,13 @@ const ProgressBoard = ({
                     {isPending ?
                         <Skeleton.Input style={{width: 160}} active/> :
                         readinessValue === 'ready' ?
-                            `${new Date(startDate).toLocaleDateString('vi-VN')} - ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}` :
+                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
                             stoppedDate
                     }
                 </div>
             </div>
 
-            {readinessValue === 'ready' && (
+            {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
                     <div className="absolute right-3 top-3">
                         {!isPending && (
@@ -340,7 +340,7 @@ const ProgressBoard = ({
 
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
-                    ) : mergedDataSet?.length > 0 ? (
+                    ) : (mergedDataSet?.length > 0) ? (
                         <ResponsiveContainer width="100%" height={350}>
                             {localCheckInDataSet.length > 0 ? (
                                 <LineChart

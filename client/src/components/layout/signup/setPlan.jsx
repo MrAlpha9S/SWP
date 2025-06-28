@@ -41,7 +41,6 @@ const SetPlan = () => {
 
     const {readinessValue} = useQuitReadinessStore();
     const {errors} = useErrorStore();
-    const today = new Date().toISOString().split('T')[0];
     const scrollRef = useRef(null);
     const frequencyLabel = quittingMethod === "gradual-weekly" ? "tuần" : "ngày";
     const {pricePerPack} = usePricePerPackStore();
@@ -78,7 +77,7 @@ const SetPlan = () => {
     return (
         <>
             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                5. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}
+                6. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}
             </h2>
 
             {readinessValue === "ready" &&
@@ -98,23 +97,23 @@ const SetPlan = () => {
 
                     <form className="w-[60%] flex flex-col gap-3">
 
-                        <label htmlFor="startDate" className="block text-sm md:text-base text-gray-700">
-                            Hãy chọn ngày mà bạn quyết định bắt đầu hành trình cai thuốc:
-                        </label>
+                        {/*<label htmlFor="startDate" className="block text-sm md:text-base text-gray-700">*/}
+                        {/*    Hãy chọn ngày mà bạn quyết định bắt đầu hành trình cai thuốc:*/}
+                        {/*</label>*/}
 
-                        <div className='my-[-30]'>
-                            {errors.map((error, index) => {
-                                if (error.location === "startDate") {
-                                    return (
-                                        <ErrorText key={index}>{error.message}</ErrorText>
-                                    )
-                                }
-                            })}
-                        </div>
+                        {/*<div className='my-[-30]'>*/}
+                        {/*    {errors.map((error, index) => {*/}
+                        {/*        if (error.location === "startDate") {*/}
+                        {/*            return (*/}
+                        {/*                <ErrorText key={index}>{error.message}</ErrorText>*/}
+                        {/*            )*/}
+                        {/*        }*/}
+                        {/*    })}*/}
+                        {/*</div>*/}
 
-                        <DatePicker className='h-[42px]' onChange={(date, dateString) => {
-                            setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
-                        }} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>
+                        {/*<DatePicker className='h-[42px]' onChange={(date, dateString) => {*/}
+                        {/*    setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);*/}
+                        {/*}} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>*/}
 
                         <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
                         <div className=''>
@@ -187,56 +186,56 @@ const SetPlan = () => {
                 </>}
 
 
-            {readinessValue === "relapse-support" &&
-                <>
-                    <div className="text-left text-sm md:text-base">
-                        <p>
-                            Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng
-                            thẳng,
-                            mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp
-                            bạn theo
-                            dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào
-                            ngày
-                            bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông
-                            tin đó
-                            cho bạn theo dõi để có động lực duy trì tình trạng ngừng hút hơn.
-                        </p>
-                    </div>
-                    <form className="w-[60%] flex flex-col gap-3">
-                        <div className='text-left font-bold text-base md:text-lg'>
-                            <h3>Hãy chọn ngày mà bạn đã ngừng hút</h3>
-                        </div>
+            {/*{readinessValue === "relapse-support" &&*/}
+            {/*    <>*/}
+            {/*        <div className="text-left text-sm md:text-base">*/}
+            {/*            <p>*/}
+            {/*                Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng*/}
+            {/*                thẳng,*/}
+            {/*                mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp*/}
+            {/*                bạn theo*/}
+            {/*                dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào*/}
+            {/*                ngày*/}
+            {/*                bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông*/}
+            {/*                tin đó*/}
+            {/*                cho bạn theo dõi để có động lực duy trì tình trạng ngừng hút hơn.*/}
+            {/*            </p>*/}
+            {/*        </div>*/}
+            {/*        <form className="w-[60%] flex flex-col gap-3">*/}
+            {/*            <div className='text-left font-bold text-base md:text-lg'>*/}
+            {/*                <h3>Hãy chọn ngày mà bạn đã ngừng hút</h3>*/}
+            {/*            </div>*/}
 
-                        <div className='my-[-30]'>
-                            {errors.map((error, index) => {
-                                if (error.location === "stoppedDate") {
-                                    return (
-                                        <ErrorText key={index}>{error.message}</ErrorText>
-                                    )
-                                }
-                            })}
-                        </div>
-                        <DatePicker className='h-[42px]' onChange={(date, dateString) => {
-                            setStoppedDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
-                        }} format={'DD-MM-YYYY'} value={stoppedDate ? dayjs(stoppedDate) : ''} allowClear={false}/>
-                        <p className='text-left font-bold text-base md:text-lg'>
-                            Thống kê kết quả
-                        </p>
-                        <p className='text-sm md:text-base'>
-                            Kể từ khi bạn bỏ thuốc từ ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn đã: <br/>
-                            Bỏ thuốc
-                            được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
-                            Bỏ được <strong>
-                            {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
-                        </strong> điếu thuốc <br/>
-                            Tiết kiệm
-                            được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
-                            <br/>
-                            <em>Hãy giữ vững tinh thần nhé!</em>
+            {/*            <div className='my-[-30]'>*/}
+            {/*                {errors.map((error, index) => {*/}
+            {/*                    if (error.location === "stoppedDate") {*/}
+            {/*                        return (*/}
+            {/*                            <ErrorText key={index}>{error.message}</ErrorText>*/}
+            {/*                        )*/}
+            {/*                    }*/}
+            {/*                })}*/}
+            {/*            </div>*/}
+            {/*            <DatePicker className='h-[42px]' onChange={(date, dateString) => {*/}
+            {/*                setStoppedDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);*/}
+            {/*            }} format={'DD-MM-YYYY'} value={stoppedDate ? dayjs(stoppedDate) : ''} allowClear={false}/>*/}
+            {/*            <p className='text-left font-bold text-base md:text-lg'>*/}
+            {/*                Thống kê kết quả*/}
+            {/*            </p>*/}
+            {/*            <p className='text-sm md:text-base'>*/}
+            {/*                Kể từ khi bạn bỏ thuốc từ ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn đã: <br/>*/}
+            {/*                Bỏ thuốc*/}
+            {/*                được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>*/}
+            {/*                Bỏ được <strong>*/}
+            {/*                {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}*/}
+            {/*            </strong> điếu thuốc <br/>*/}
+            {/*                Tiết kiệm*/}
+            {/*                được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>*/}
+            {/*                <br/>*/}
+            {/*                <em>Hãy giữ vững tinh thần nhé!</em>*/}
 
-                        </p>
-                    </form>
-                </>}
+            {/*            </p>*/}
+            {/*        </form>*/}
+            {/*    </>}*/}
             {readinessValue === 'ready' && (
                 <>
                     <CustomButton type="primary" onClick={createPlan}>Tạo kế hoạch</CustomButton>

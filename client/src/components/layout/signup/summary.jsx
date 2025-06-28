@@ -6,7 +6,7 @@ import {
     useCigsPerPackStore, useCurrentStepStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../../stores/store.js";
 import {
     quittingMethodOptions,
@@ -42,6 +42,7 @@ const Summary = () => {
     } = usePlanStore();
     const {createGoalChecked, goalList} = useGoalsStore()
     const {currentStep, setCurrentStep} = useCurrentStepStore()
+    const {userInfo} = useUserInfoStore()
 
     const calculatePrice = (type, numberOfYears = 1) => {
         const pricePerCigs = pricePerPack / cigsPerPack
@@ -77,6 +78,18 @@ const Summary = () => {
         return moneySaved.toLocaleString('vi-VN')
     }
 
+    let step4Title = ''
+    if (userInfo?.sub_id !== 1) {
+        if (readinessValue === 'ready') {
+            step4Title = 'Thông tin kế hoạch'
+        } else {
+            step4Title = 'Tình hình hiện tại'
+        }
+    } else {
+        step4Title = 'Thông tin thuốc'
+    }
+
+
     const calculateDateGoal = (amount) => {
         const pricePerCigs = pricePerPack / cigsPerPack;
         let daysUntilGoal = 0;
@@ -94,12 +107,12 @@ const Summary = () => {
     const readiness = readinessRadioOptions.find(option => option.value === readinessValue);
 
     return (
-        <>
-            <h2 className='text-left md:text-4xl lg:text-5xl font-bold'>
+        <div className='min-w-[1280px] flex flex-col'>
+            <h2 className='text-left md:text-4xl lg:text-5xl font-bold mb-4'>
                 7. Tổng kết thông tin của bạn
             </h2>
 
-            <div className='w-full lg:w-[80%] flex flex-col gap-5'>
+            <div className='w-full flex flex-col gap-5'>
                 {!user &&
                     <div
                         className="w-full bg-[#fff7e5] p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
@@ -124,11 +137,6 @@ const Summary = () => {
                                     triggers: useTriggersStore.getState().triggers,
                                     custom_trigger: useTriggersStore.getState().customTrigger,
                                     customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
-                                    start_date: usePlanStore.getState().startDate,
-                                    cigs_per_day: usePlanStore.getState().cigsPerDay,
-                                    quitting_method: usePlanStore.getState().quittingMethod,
-                                    cigs_reduced: usePlanStore.getState().cigsReduced,
-                                    expected_quit_date: usePlanStore.getState().expectedQuitDate,
                                     quit_date: usePlanStore.getState().stoppedDate,
                                     planLog: usePlanStore.getState().planLog,
                                     planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
@@ -136,6 +144,14 @@ const Summary = () => {
                                     goalList: useGoalsStore.getState().goalList,
                                     currentStep: currentStep
                                 };
+
+                                if (userInfo?.sub_id !== 1) {
+                                    state.start_date = usePlanStore.getState().startDate,
+                                        state.cigs_per_day = usePlanStore.getState().cigsPerDay,
+                                        state.quitting_method = usePlanStore.getState().quittingMethod,
+                                        state.cigs_reduced = usePlanStore.getState().cigsReduced,
+                                        state.expected_quit_date = usePlanStore.getState().expectedQuitDate
+                                }
 
                                 localStorage.setItem('onboarding_profile', JSON.stringify(state));
 
@@ -216,11 +232,11 @@ const Summary = () => {
                 <div
                     className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
-                        4.{readinessValue === 'ready' ? ' Thông tin kế hoạch' : ' Tình hình hiện tại'}
+                        4. {step4Title}
                     </p>
-                    <p className='md:text-lg lg:text-xl font-bold'>
+                    {userInfo?.sub_id !== 1 && <p className='md:text-lg lg:text-xl font-bold'>
                         Thông tin thuốc
-                    </p>
+                    </p>}
 
                     <p className='text-sm md:text-base'>
                         Số điếu trong một gói: {cigsPerPack} <br/>
@@ -254,7 +270,7 @@ const Summary = () => {
                         </>
                     )}
 
-                    {readinessValue === 'ready' &&
+                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 &&
                         <>
                             <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
@@ -334,7 +350,7 @@ const Summary = () => {
                             <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                                 5. Những mục tiêu ngắn hạn
                             </p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col gap-2">
                                 {goalList?.map((item, index) => (
                                     <div key={index}>
                                         <strong>{index + 1}.</strong> <br/>
@@ -350,7 +366,7 @@ const Summary = () => {
                         </div>
                     </>}
             </div>
-        </>
+        </div>
     );
 };
 

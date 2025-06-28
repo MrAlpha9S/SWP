@@ -35,6 +35,7 @@ function App() {
             if (!isAuthenticated || !user) return;
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
             if (result?.data) {
+                console.log(result.data.userInfo)
                 await syncProfileToStores(result.data);
             }
         };

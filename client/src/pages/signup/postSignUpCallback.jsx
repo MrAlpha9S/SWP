@@ -20,9 +20,8 @@ export default function PostSignUpCallback() {
 
                 // Step 2: Get profile from backend
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-                const profile = profileRes?.data;
-                if (profile.success !== false) {
-                    await syncProfileToStores(profile);
+                if (profileRes.success) {
+                        await syncProfileToStores(profileRes.data);
                 }
 
                 // Step 3: If there's local onboarding override, apply it last

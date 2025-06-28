@@ -6,7 +6,7 @@ import {
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore, useProfileExists,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
 import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
@@ -53,20 +53,21 @@ function Dashboard() {
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
     const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
+    const {userInfo} = useUserInfoStore()
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    const {
-        data: userIn4,
-        isPending: isUserIn4Pending,
-    } = useQuery({
-        queryKey: ['userIn4'],
-        queryFn: async () => {
-            if (!isAuthenticated || !user) return;
-            return await getUser(user, getAccessTokenSilently, isAuthenticated);
-        },
-        enabled: isAuthenticated && !!user,
-    })
+    // const {
+    //     data: userIn4,
+    //     isPending: isUserIn4Pending,
+    // } = useQuery({
+    //     queryKey: ['userIn4'],
+    //     queryFn: async () => {
+    //         if (!isAuthenticated || !user) return;
+    //         return await getUser(user, getAccessTokenSilently, isAuthenticated);
+    //     },
+    //     enabled: isAuthenticated && !!user,
+    // })
 
     const {
         isPending: isUserProfilePending,
@@ -147,15 +148,14 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending || isUserIn4Pending) {
+        if (!isAuthenticated || isUserProfilePending) {
             return <ProgressBoard isPending={true}/>;
         }
 
         switch (currentStepDashboard) {
             case 'dashboard':
-                return userProfile.data ? (
+                return userProfile.data.userProfile ? (
                     <ProgressBoard
-
                         startDate={startDate}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}
@@ -169,7 +169,7 @@ function Dashboard() {
                         readinessValue={readinessValue}
                         planLogCloneDDMMYY={planLogCloneDDMMYY}
                         setCurrentStepDashboard={setCurrentStepDashboard}
-                        user={user}
+                        userInfo={userInfo}
                         isAuthenticated={isAuthenticated}
                         getAccessTokenSilently={getAccessTokenSilently}
                         setMoneySaved={setMoneySaved}
@@ -230,7 +230,7 @@ function Dashboard() {
         );
     };
 
-    const userRole = userIn4?.[0]?.role;
+    const userRole = userInfo?.role;
 
     const dashboardHandle = (role) => {
         if (role === 'Member') {

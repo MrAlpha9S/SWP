@@ -6,7 +6,7 @@ import {
     useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists, useUserInfoStore
 } from "../../stores/store.js";
 
 const PostOnboardingCallback = () => {
@@ -25,6 +25,7 @@ const PostOnboardingCallback = () => {
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
     const {goalList, createGoalChecked} = useGoalsStore()
     const {setIsProfileExist} = useProfileExists()
+    const {userInfo} = useUserInfoStore()
 
     useEffect(() => {
         const postUserProfile = async () => {
