@@ -151,7 +151,7 @@ const Onboarding = () => {
                     } else {
                         removeError(errorMsgCigsPerPack)
                     }
-                    if (readinessValue === 'relapse-support') {
+                    //if (readinessValue === 'relapse-support') {
                         if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
                             addError(errorMsgCigsPerDay)
                         } else {
@@ -160,11 +160,11 @@ const Onboarding = () => {
                         if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
                             setCurrentStep(currentStep + 1)
                         }
-                    } else {
-                        if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
-                            setCurrentStep(currentStep + 1)
-                        }
-                    }
+                    // } else {
+                    //     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
+                    //         setCurrentStep(currentStep + 1)
+                    //     }
+                    // }
                     break;
                 }
                 case 3: {
@@ -509,7 +509,7 @@ const Onboarding = () => {
                                     Trở lại <FaArrowLeft/>
                                 </CustomButton>
                             )}
-                            <CustomButton type="primary" onClick={() => {
+                            <CustomButton className='next-btn' type="primary" onClick={() => {
                                 currentStep !== 6 ? toNextPage() : handleSave();
                             }}>
                                 {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}

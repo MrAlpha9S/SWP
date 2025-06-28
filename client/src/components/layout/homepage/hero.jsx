@@ -39,7 +39,7 @@ function Hero() {
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Tôi muốn tham gia khoá học bài bản</h2>
               <p>Bạn cần một lộ trình rõ ràng và người đồng hành đáng tin cậy? Khoá học với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng giai đoạn sẽ giúp bạn bỏ thuốc dễ dàng hơn và duy trì kết quả bền vững.</p>
               <div className="w-full flex justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-700 mt-4">
-                <CustomButton type='whiteSecondary' >Tìm hiểu thêm</CustomButton>
+                <CustomButton onClick={() => navigate('/subscription')} type='whiteSecondary' >Tìm hiểu thêm</CustomButton>
               </div>
             </div>
           </div>

@@ -1,9 +1,9 @@
 import React from "react";
 import clsx from "clsx"; // Optional: install clsx for cleaner conditional classNames
 
-const CustomButton = ({ type = "primary", onClick, children, disabled = false }) => {
+const CustomButton = ({ type = "primary", onClick, children, disabled = false, className = '' }) => {
     const baseClasses =
-        " flex items-center justify-center gap-2 h-[42px] min-w-[120px] px-2 py-2 rounded-md transition font-medium";
+        `${className.length > 0 ? className : ''} flex items-center justify-center gap-2 h-[42px] min-w-[120px] px-2 py-2 rounded-md transition font-medium`;
 
     const typeStyles = {
         primary:
@@ -19,7 +19,7 @@ const CustomButton = ({ type = "primary", onClick, children, disabled = false })
     };
 
     return (
-        <button disabled={disabled} onClick={onClick} className={clsx(baseClasses, typeStyles[type])}>
+        <button  disabled={disabled} onClick={onClick} className={clsx(baseClasses, typeStyles[type])}>
             {children}
         </button>
     );

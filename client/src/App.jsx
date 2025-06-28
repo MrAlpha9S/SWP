@@ -25,6 +25,7 @@ import PostPage from "./components/layout/forum/postPage.jsx";
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
+import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -73,6 +74,7 @@ function App() {
                 <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
                 <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
+                <Route path="/subscription" element={<SubscriptionPage/>}></Route>
             </Routes>
             </div>
             <Footer />

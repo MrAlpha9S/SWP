@@ -29,12 +29,13 @@ const Readiness = () => {
                 {errors.map((error, index) => {
                     if (error.atPage === 'readiness') {
                         return (
-                            <ErrorText key={index}>{error.message}</ErrorText>
+                            <ErrorText data-testid='readiness-error' key={index}>{error.message}</ErrorText>
                         )
                     }
                 })}
             </div>
             <Radio.Group
+                className='ready-radio'
                 onChange={onChangeCheckbox}
                 value={readinessValue}
                 options={readinessRadioOptions}

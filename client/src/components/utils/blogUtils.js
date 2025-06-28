@@ -4,6 +4,7 @@ export async function postBlog(user, getAccessTokenSilently, isAuthenticated, to
 
     const token = await getAccessTokenSilently();
 
+
     const res = await fetch('http://localhost:3000/topics/post_blog', {
         method: 'POST',
         headers: {

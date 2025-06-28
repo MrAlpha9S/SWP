@@ -48,7 +48,7 @@ export const timeOfDayOptions = [
     { value: "after_dinner", label: "Sau bữa tối" },
     { value: "evening", label: "Buổi tối" },
     { value: "before_bed", label: "Trước khi đi ngủ" },
-    { value: "other", label: "Khác" },
+    { value: "other", label: "Thời điểm khác" },
 ];
 
 export const smokingTriggerOptions = [
@@ -65,22 +65,22 @@ export const smokingTriggerOptions = [
     { value: "using_phone_computer", label: "Khi sử dụng điện thoại hoặc máy tính" },
     { value: "partying", label: "Tiệc tùng" },
     { value: "any_opportunity", label: "Tôi hút bất cứ khi nào có cơ hội" },
-    { value: "other", label: "Khác" },
+    { value: "other", label: "Yếu tố khác" },
 ];
 
 export const onboardingErrorMsg = [
     {atPage: "readiness", location: "readinessRadio", message: "Vui lòng chọn 1"},
     {atPage: "reason", location: "reasonCheckbox", message: "Vui lòng chọn ít nhất 3 lý do"},
     {atPage: "cigInfo", location: "pricePerPack", message: "Giá tiền không hợp lệ"},
-    {atPage: "cigInfo", location: "cigsPerPack", message: "Số điếu không hợp lệ"},
-    {atPage: "cigInfo", location: "cigsPerDay", message: "Số điếu không hợp lệ"},
-    {atPage: "smokingRoutine", location: "timeAfterWaking", message: "Vui lòng chọn 1"},
-    {atPage: "smokingRoutine", location: "timeOfDay", message: "Vui lòng chọn ít nhất 1"},
-    {atPage: "smokingRoutine", location: "triggers", message: "Vui lòng chọn ít nhất 1"},
+    {atPage: "cigInfo", location: "cigsPerPack", message: "Số điếu mỗi gói không hợp lệ"},
+    {atPage: "cigInfo", location: "cigsPerDay", message: "Số điếu mỗi ngày không hợp lệ"},
+    {atPage: "smokingRoutine", location: "timeAfterWaking", message: "Vui lòng chọn ít nhất 1"},
+    {atPage: "smokingRoutine", location: "timeOfDay", message: "Vui lòng chọn ít nhất 1 thời điểm"},
+    {atPage: "smokingRoutine", location: "triggers", message: "Vui lòng chọn ít nhất 1 yếu tố"},
     {atPage: "smokingRoutine", location: "customTimeOfDay", message: "Không để trống mục này"},
-    {atPage: "smokingRoutine", location: "customTrigger", message: "Không để trống mục này"},
+    {atPage: "smokingRoutine", location: "customTrigger", message: "Vui lòng không để trống mục này"},
     {atPage: "createPlan", location: "startDate", message: "Vui lòng chọn ngày"},
-    {atPage: "createPlan", location: "cigsPerDay", message: "Số điếu không hợp lệ"},
+    // {atPage: "createPlan", location: "cigsPerDay", message: "Số điếu không hợp lệ"},
     {atPage: "createPlan", location: "quitMethod", message: "Vui lòng chọn 1"},
     {atPage: "createPlan", location: "cigsReduced", message: "Số điếu không hợp lệ"},
     {atPage: "createPlan", location: "expectedQuitDate", message: "Vui lòng chọn ngày"},

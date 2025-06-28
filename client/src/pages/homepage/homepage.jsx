@@ -10,8 +10,8 @@ function Homepage() {
         <div className="flex flex-col min-h-screen">
             <main>
                 <Hero />
-                <LeaderBoard/>
                 <Stats />
+                <LeaderBoard/>
                 <SupportMethods />
                 <Membership />
                 <Testimonials />
