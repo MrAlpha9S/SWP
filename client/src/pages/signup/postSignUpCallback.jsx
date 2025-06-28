@@ -21,7 +21,7 @@ export default function PostSignUpCallback() {
                 // Step 2: Get profile from backend
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 const profile = profileRes?.data;
-                if (profile) {
+                if (profile.success !== false) {
                     await syncProfileToStores(profile);
                 }
 

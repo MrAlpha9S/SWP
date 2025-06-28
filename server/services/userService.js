@@ -57,6 +57,21 @@ const getUser = async (auth0_id) => {
     }
 }
 
+const getUserWithSubscription = async (auth0_id) => {
+    try {
+        const user_id = await getUserIdFromAuth0Id(auth0_id)
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', user_id)
+            .query('SELECT u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
+        console.log(result)
+        return result.recordset[0];
+    } catch (error) {
+        console.error('error in getUser', error);
+        return null;
+    }
+}
+
 const getUserIdFromAuth0Id = async (auth0_id) => {
     try {
         const pool = await poolPromise;
@@ -83,4 +98,12 @@ const getUserCreationDateFromAuth0Id = async (auth0_id) => {
     }
 }
 
-module.exports = {userExists, createUser, getAllUsers, getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id, getUser};
+module.exports = {
+    userExists,
+    createUser,
+    getAllUsers,
+    getUserIdFromAuth0Id,
+    getUserCreationDateFromAuth0Id,
+    getUser,
+    getUserWithSubscription
+};

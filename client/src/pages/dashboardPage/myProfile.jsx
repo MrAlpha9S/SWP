@@ -38,7 +38,7 @@ const MyProfile = () => {
 
     return (
         <div className='min-h-[calc(100vh-80px-409px)] w-[1280px] mx-auto flex items-center'>
-            {!fetchStatus &&
+            {!fetchStatus ?
                 <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
                     <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
                         <h2 className='md:text-4xl lg:text-5xl font-bold'>
@@ -61,8 +61,8 @@ const MyProfile = () => {
                         }
                         className="!p-0"
                     />
-                </div>}
-            <div className='flex flex-col h-full w-full bg-white gap-14 p-14'><Summary/></div>
+                </div> :
+            <div className='flex flex-col h-full w-full bg-white gap-14 p-14'><Summary/></div>}
         </div>
     );
 };

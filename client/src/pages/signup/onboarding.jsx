@@ -1,7 +1,7 @@
 import React, {useRef, useEffect, useState} from 'react';
 import Hero from "../../components/layout/signup/hero.jsx";
 import {Collapse, Steps, Modal} from "antd";
-import {FaArrowLeft, FaArrowRight} from "react-icons/fa";
+import {FaArrowLeft, FaArrowRight, FaCrown} from "react-icons/fa";
 import CustomButton from "../../components/ui/CustomButton.jsx";
 import {FaCircleCheck} from "react-icons/fa6";
 import Readiness from "../../components/layout/signup/readiness.jsx";
@@ -14,7 +14,7 @@ import {
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists, useUserInfoStore
 } from "../../stores/store.js";
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
@@ -22,6 +22,7 @@ import Summary from "../../components/layout/signup/summary.jsx";
 import {useNavigate, useParams} from "react-router-dom";
 import ModalFooter from "../../components/ui/modalFooter.jsx";
 import {useAuth0} from "@auth0/auth0-react";
+import PremiumBadge from "../../components/ui/premiumBadge.jsx";
 
 const planTipsCollapseItems = [
     {
@@ -68,6 +69,7 @@ const Onboarding = () => {
     const {isProfileExist} = useProfileExists();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {user, isAuthenticated} = useAuth0();
+    const {userInfo} = useUserInfoStore();
 
     const {from} = useParams();
 
@@ -90,17 +92,23 @@ const Onboarding = () => {
         if (from === 'newUser') {
             setCurrentStep(6);
         }
+        console.log(userInfo)
     }, [])
 
     const stepsItems = React.useMemo(() => [
         {title: 'Bắt đầu'},
         {title: 'Động lực'},
         {title: 'Thông tin thuốc'},
-        {title: 'Thói quen'},
+        {
+            title: 'Thói quen',
+        },
+        {
+            title: 'Mục tiêu',
+        },
         {
             title: readinessValue === 'ready' ? 'Lên kế hoạch' : 'Kết quả & theo dõi',
+            icon: (userInfo && userInfo.sub_id === 1 || !userInfo) && <div className='relative h-6 w-20'><FaCrown/> <PremiumBadge className='absolute top-[-10px] right-2'/></div>,
         },
-        {title: 'Mục tiêu'},
         {
             title: 'Tổng kết',
             icon: <FaCircleCheck className="size-8"/>,
@@ -108,10 +116,25 @@ const Onboarding = () => {
     ], [readinessValue]);
 
     const toPreviousPage = () => {
+        const isFreeUser = !userInfo || userInfo.sub_id === 1;
+
         if (currentStep > 0) {
-            setCurrentStep(currentStep - 1);
+            if (isFreeUser) {
+                // Treat as free user
+                if (currentStep === 6) {
+                    setCurrentStep(2);
+                } else if (currentStep > 2 && currentStep <= 5) {
+                    setCurrentStep(2);
+                } else {
+                    setCurrentStep(currentStep - 1);
+                }
+            } else {
+                // Premium user
+                setCurrentStep(currentStep - 1);
+            }
         }
-    }
+    };
+
 
     const toNextPage = () => {
         if (currentStep <= 8) {
@@ -152,14 +175,18 @@ const Onboarding = () => {
                         removeError(errorMsgCigsPerPack)
                     }
                     //if (readinessValue === 'relapse-support') {
-                        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
-                            addError(errorMsgCigsPerDay)
+                    if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
+                        addError(errorMsgCigsPerDay)
+                    } else {
+                        removeError(errorMsgCigsPerDay)
+                    }
+                    if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
+                        if (userInfo.sub_id === 1) {
+                            setCurrentStep(6)
                         } else {
-                            removeError(errorMsgCigsPerDay)
-                        }
-                        if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
                             setCurrentStep(currentStep + 1)
                         }
+                    }
                     // } else {
                     //     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
                     //         setCurrentStep(currentStep + 1)

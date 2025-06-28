@@ -189,9 +189,9 @@ export const useCurrentStepDashboard = create((set) => ({
     setCurrentStepDashboard: (value) => set({currentStepDashboard: value}),
 }))
 
-export const alreadyCheckedIn = create((set) => ({
-    alreadyCheckedIn: false,
-    setAlreadyCheckedIn: (value) => set({alreadyCheckedIn: value}),
+export const useUserInfoStore = create((set) => ({
+    userInfo: null,
+    setUserInfo: (value) => set({userInfo: value}),
 }))
 
 

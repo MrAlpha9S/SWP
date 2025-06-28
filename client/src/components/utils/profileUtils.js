@@ -8,7 +8,7 @@ import {
     useTimeOfDayStore,
     useTriggersStore,
     usePlanStore,
-    useGoalsStore,
+    useGoalsStore, useUserInfoStore,
 } from '../../stores/store.js';
 
 export async function getUserProfile(user, getAccessTokenSilently, isAuthenticated) {
@@ -94,52 +94,58 @@ export const deleteGoal = async (goalId, user, getAccessTokenSilently, isAuthent
 export async function syncProfileToStores(profile) {
     if (!profile) return;
 
-    useProfileExists.getState().setIsProfileExist(true);
-    useQuitReadinessStore.getState().setReadinessValue(profile.readiness_value);
+    const userProfile = profile.userProfile;
+    const userInfo = profile.userInfo;
 
-    usePlanStore.getState().setStartDate(profile.start_date?.split('T')[0] ?? '');
-    usePlanStore.getState().setStoppedDate(profile.quit_date?.split('T')[0] ?? '');
-    usePlanStore.getState().setExpectedQuitDate(profile.expected_quit_date?.split('T')[0] ?? '');
-    usePlanStore.getState().setCigsPerDay(profile.cigs_per_day);
-    useCigsPerPackStore.getState().setCigsPerPack(profile.cigs_per_pack);
-    usePricePerPackStore.getState().setPricePerPack(profile.price_per_pack);
-    useTimeAfterWakingStore.getState().setTimeAfterWaking(profile.time_after_waking);
-    usePlanStore.getState().setQuittingMethod(profile.quitting_method ?? '');
-    usePlanStore.getState().setCigsReduced(profile.cigs_reduced ?? 0);
+    useProfileExists.getState().setIsProfileExist(true);
+    useQuitReadinessStore.getState().setReadinessValue(userProfile.readiness_value);
+
+    usePlanStore.getState().setStartDate(userProfile.start_date?.split('T')[0] ?? '');
+    usePlanStore.getState().setStoppedDate(userProfile.quit_date?.split('T')[0] ?? '');
+    usePlanStore.getState().setExpectedQuitDate(userProfile.expected_quit_date?.split('T')[0] ?? '');
+    usePlanStore.getState().setCigsPerDay(userProfile.cigs_per_day);
+    useCigsPerPackStore.getState().setCigsPerPack(userProfile.cigs_per_pack);
+    usePricePerPackStore.getState().setPricePerPack(userProfile.price_per_pack);
+    useTimeAfterWakingStore.getState().setTimeAfterWaking(userProfile.time_after_waking);
+    usePlanStore.getState().setQuittingMethod(userProfile.quitting_method ?? '');
+    usePlanStore.getState().setCigsReduced(userProfile.cigs_reduced ?? 0);
 
     usePlanStore.getState().setPlanLog(
-        (profile.planLog ?? []).map(entry => ({
+        (userProfile.planLog ?? []).map(entry => ({
             date: entry.date.split('T')[0],
             cigs: entry.cigs,
         }))
     );
 
     usePlanStore.getState().setPlanLogCloneDDMMYY(
-        (profile.planLog ?? [])
+        (userProfile.planLog ?? [])
     );
 
-    if (profile.goalList) {
+    if (userProfile.goalList) {
         useGoalsStore.getState().setCreateGoalChecked(true);
-        useGoalsStore.getState().setGoalList(profile.goalList);
+        useGoalsStore.getState().setGoalList(userProfile.goalList);
     }
 
     const reasonStore = useReasonStore.getState();
     reasonStore.resetReasons();
-    profile.reasonList?.forEach(reason => reasonStore.addReason(reason));
+    userProfile.reasonList?.forEach(reason => reasonStore.addReason(reason));
 
     const triggerStore = useTriggersStore.getState();
     triggerStore.resetTriggers();
-    profile.triggers?.forEach(trigger => triggerStore.addTrigger(trigger));
-    if (profile.custom_trigger) {
+    userProfile.triggers?.forEach(trigger => triggerStore.addTrigger(trigger));
+    if (userProfile.custom_trigger) {
         triggerStore.setCustomTriggerChecked(true);
-        triggerStore.setCustomTrigger(profile.custom_trigger);
+        triggerStore.setCustomTrigger(userProfile.custom_trigger);
     }
 
     const timeOfDayStore = useTimeOfDayStore.getState();
     timeOfDayStore.resetTimeOfDay();
-    profile.timeOfDayList?.forEach(time => timeOfDayStore.addTimeOfDay(time));
-    if (profile.custom_time_of_day) {
+    userProfile.timeOfDayList?.forEach(time => timeOfDayStore.addTimeOfDay(time));
+    if (userProfile.custom_time_of_day) {
         timeOfDayStore.setCustomTimeOfDayChecked(true);
-        timeOfDayStore.setCustomTimeOfDay(profile.custom_time_of_day);
+        timeOfDayStore.setCustomTimeOfDay(userProfile.custom_time_of_day);
     }
+
+    const userInfoStore = useUserInfoStore.getState();
+    userInfoStore.setUserInfo(userInfo);
 }

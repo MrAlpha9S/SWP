@@ -1,4 +1,5 @@
 const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal} = require("../services/profileService");
+const {getUserWithSubscription} = require("../services/userService");
 
 
 const handlePostOnboarding = async (req, res) => {
@@ -83,10 +84,11 @@ const handleGetProfile = async (req, res) => {
 
     try {
         const userProfile = await getUserProfile(userAuth0Id);
-        if (userProfile === null) {
+        const userInfo = await getUserWithSubscription(userAuth0Id);
+        if (userProfile === null || userInfo === null) {
             return res.status(404).json({success: false, message: 'User profile not found', data: null});
         } else {
-            return res.status(200).json({success: true, message: 'User profile fetched', data: userProfile});
+            return res.status(200).json({success: true, message: 'User profile fetched', data: {userProfile : userProfile, userInfo : userInfo}});
         }
     } catch (err) {
         console.error('handleGetProfile error:', err);
