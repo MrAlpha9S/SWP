@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
-import { SocketProvider } from '../../contexts/SocketContext.jsx';
 import {
     useCigsPerPackStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
@@ -195,7 +194,7 @@ function Dashboard() {
             case 'badges':
                 return <BadgesMenu />;
             case 'messager':
-                return <SocketProvider><Messager /></SocketProvider>;
+                return <Messager />
             case 'post-blog':
                 return <PostBlog />
 
