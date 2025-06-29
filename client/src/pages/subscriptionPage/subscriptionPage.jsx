@@ -205,10 +205,10 @@ function SubscriptionPage() {
                             disabled={subscriptionMutation.isLoading}
                             onClick={() => handlePaymentButton()}
                             className={`w-full mt-auto bg-primary-500 text-white py-4 px-6 rounded-xl font-semibold shadow-lg ${
-                                subscriptionMutation.isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'
+                                subscriptionMutation.isLoading || userInfo?.sub_id !== 1 ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'
                             }`}
                         >
-                            {subscriptionMutation.isLoading ? 'Đang xử lý...' : 'Thanh toán'}
+                            {subscriptionMutation.isLoading ? 'Đang xử lý...' : `${userInfo?.sub_id !== 1 ? 'Bạn đã trở thành thành viên Premium' : 'Thanh toán'}`}
                         </button>
 
 
