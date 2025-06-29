@@ -1,5 +1,6 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
-const {convertUTCStringToLocalDate} = require("../utils/dateUtils");
+const {convertUTCStringToLocalDate, getCurrentUTCDateTime} = require("../utils/dateUtils");
+const {getSubscriptionService} = require("./subscriptionService");
 
 const userExists = async (auth0_id) => {
     try {
@@ -98,6 +99,23 @@ const getUserCreationDateFromAuth0Id = async (auth0_id) => {
     }
 }
 
+const updateUserSubscriptionService = async (user_id, subscription_id, today, duration) => {
+    try {
+        const pool = await poolPromise;
+        const todayObj = new Date(today)
+        todayObj.setMonth(todayObj.getUTCMonth() + duration)
+        const result = await pool.request()
+            .input('sub_id', sql.Int, subscription_id)
+            .input('user_id', sql.Int, user_id)
+            .input('vip_end_date', sql.DateTime, todayObj.toISOString())
+            .query('UPDATE users SET sub_id = @sub_id, vip_end_date = @vip_end_date WHERE user_id = @user_id');
+        return result.rowsAffected > 0
+    } catch (error) {
+        console.error('error in updateSubscriptionService', error);
+        return false;
+    }
+}
+
 module.exports = {
     userExists,
     createUser,
@@ -105,5 +123,6 @@ module.exports = {
     getUserIdFromAuth0Id,
     getUserCreationDateFromAuth0Id,
     getUser,
-    getUserWithSubscription
+    getUserWithSubscription,
+    updateUserSubscriptionService
 };

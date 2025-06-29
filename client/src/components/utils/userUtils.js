@@ -48,3 +48,18 @@ export async function getUser(user, getAccessTokenSilently, isAuthenticated) {
     return res.json();
 }
 
+export async function updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId) {
+    if (!isAuthenticated || !user) return;
+    const token = await getAccessTokenSilently();
+    const res = await fetch('http://localhost:3000/users/updateSubscription', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userAuth0Id: user.sub, subscriptionId: subscriptionId})
+    })
+
+    return await res.json();
+}
+

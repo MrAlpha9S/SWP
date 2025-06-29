@@ -1,7 +1,9 @@
-const { getAllUsers } = require('../services/userService');
+const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id} = require('../services/userService');
 
 const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
+const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
 
 const handlePostSignup = async (req, res) => {
     const {userAuth0Id} = req.body;
@@ -60,4 +62,24 @@ const getUserCreationDate = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController };
+const updateUserSubscription = async (req, res) => {
+    const {userAuth0Id, subscriptionId} = req.body;
+
+    if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
+    try {
+        const user_id = await getUserIdFromAuth0Id(userAuth0Id);
+        const today = getCurrentUTCDateTime().toISOString();
+        const subsInfo = await getSubscriptionService(subscriptionId);
+        const price = subsInfo.price
+        const duration = subsInfo.duration
+        const updateResult = await updateUserSubscriptionService(user_id, subscriptionId, today, duration);
+        const addSubsLogResult = await addSubscriptionPurchaseLog(user_id, subscriptionId, today);
+        if (updateResult && addSubsLogResult) res.status(200).json({success: true, message: 'Update subscription successfully'})
+        else res.status(500).json({success: false, message: 'Update subscription failed'});
+    } catch (err) {
+        console.error('Error in updateUserSubscription:', err);
+        res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+    }
+}
+
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription };
