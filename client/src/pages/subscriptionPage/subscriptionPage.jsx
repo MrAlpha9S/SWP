@@ -1,15 +1,15 @@
 import React, {useState} from 'react';
-import {Check, Crown, Zap, Shield, Users, BarChart3, Headphones, Sparkles, Star} from 'lucide-react';
+import {Check, Crown, Zap, Users, BarChart3} from 'lucide-react';
 import {useAuth0} from "@auth0/auth0-react";
 import {
-    useCigsPerPackStore, useGoalsStore, usePlanStore,
-    usePricePerPackStore,
-    useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore,
     useUserInfoStore
 } from "../../stores/store.js";
-import {useNavigate} from "react-router-dom";
 import {saveProfileToLocalStorage} from "../../components/utils/profileUtils.js";
+import {useMutation} from "@tanstack/react-query";
+import {updateUserSubscription} from "../../components/utils/userUtils.js";
+import {Modal} from "antd";
+import {useNavigate} from "react-router-dom";
+import CongratulationPage from "./CongratulationPage.jsx";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -18,8 +18,10 @@ function SubscriptionPage() {
     const premiumYearlyPrice = 2400000; // 2 months free
     const yearlyDiscount = Math.round(((premiumMonthlyPrice * 12 - premiumYearlyPrice) / (premiumMonthlyPrice * 12)) * 100);
     const {userInfo} = useUserInfoStore()
-    const {loginWithRedirect} = useAuth0();
+    const {loginWithRedirect, user, isAuthenticated, getAccessTokenSilently} = useAuth0();
+    const [subscriptionData, setSubscriptionData] = useState();
     const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const freeFeatures = [
         'Bài viết và blog giáo dục về Thuốc lá',
@@ -34,12 +36,40 @@ function SubscriptionPage() {
         'Trao đổi 24/24 trực tiếp với Huấn luyện viên',
     ];
 
+    const subscriptionMutation = useMutation({
+        mutationFn: async (subscriptionId) => {
+            return await updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId);
+        },
+        onSuccess: (data) => {
+            console.log("Mutation success:", data);
+            setSubscriptionData(data.data);
+            setIsModalOpen(true);
+        },
+        onError: (error) => {
+            console.error("Mutation failed:", error);
+        }
+    });
+
     const handleSignUpButton = () => {
         const state = saveProfileToLocalStorage({currentStep : 6, referrer : 'subscriptionPage', userInfo : userInfo})
         localStorage.setItem('onboarding_profile', JSON.stringify(state));
 
         loginWithRedirect({authorizationParams: {screen_hint: 'signup'}})
     }
+
+    const handlePaymentButton = () => {
+        const id = isYearly ? 3 : 2;
+        console.log("Clicked. Subscription ID:", id);
+        console.log("Is authenticated?", isAuthenticated);
+
+        if (!isAuthenticated) {
+            loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
+            localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscriptionPagePayment'}));
+        } else {
+            subscriptionMutation.mutate(id);
+        }
+    };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary-50  to-primary-100">
@@ -172,9 +202,15 @@ function SubscriptionPage() {
                         </ul>
 
                         <button
-                            className="w-full mt-auto bg-primary-500 text-white py-4 px-6 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                            Thanh toán
+                            disabled={subscriptionMutation.isLoading}
+                            onClick={() => handlePaymentButton()}
+                            className={`w-full mt-auto bg-primary-500 text-white py-4 px-6 rounded-xl font-semibold shadow-lg ${
+                                subscriptionMutation.isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'
+                            }`}
+                        >
+                            {subscriptionMutation.isLoading ? 'Đang xử lý...' : 'Thanh toán'}
                         </button>
+
 
                         {/*<p className="text-center text-sm text-gray-500 mt-4">*/}
                         {/*    14-day free trial • No credit card required*/}
@@ -233,6 +269,18 @@ function SubscriptionPage() {
                 </div>
 
             </div>
+
+            <Modal
+                width={700}
+                open={isModalOpen}
+                onCancel={() => navigate('/')}
+                centered
+                closable={false}
+                footer={null}
+                maskClosable={false}
+            >
+                {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} />}
+            </Modal>
 
         </div>
     );

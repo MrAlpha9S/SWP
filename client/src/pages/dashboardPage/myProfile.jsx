@@ -14,7 +14,6 @@ const MyProfile = () => {
     const { Title, Paragraph } = Typography;
 
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
-    const [fetchStatus, setFetchStatus] = useState(null);
     const navigate = useNavigate();
     const [msg, setMsg] = useState('');
 
@@ -32,13 +31,13 @@ const MyProfile = () => {
         const syncStores = async () => {
             await syncProfileToStores();
         }
+        console.log(data)
         syncStores();
-        setFetchStatus(true);
     }, [data, isPending])
 
     return (
         <div className='min-h-[calc(100vh-80px-409px)] w-[1280px] mx-auto flex items-center'>
-            {!fetchStatus ?
+            {isFetching || !data?.data?.userProfile ?
                 <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
                     <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
                         <h2 className='md:text-4xl lg:text-5xl font-bold'>

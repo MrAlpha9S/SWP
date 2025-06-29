@@ -8,7 +8,6 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
-import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
@@ -154,7 +153,7 @@ function Dashboard() {
 
         switch (currentStepDashboard) {
             case 'dashboard':
-                return userProfile.data.userProfile ? (
+                return userProfile?.data?.userProfile ? (
                     <ProgressBoard
                         startDate={startDate}
                         pricePerPack={pricePerPack}

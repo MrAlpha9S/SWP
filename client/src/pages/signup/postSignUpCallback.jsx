@@ -24,9 +24,22 @@ export default function PostSignUpCallback() {
                         await syncProfileToStores(profileRes.data);
                 }
 
+                const referrerPayment = localStorage.getItem("referrerPayment");
+                if (referrerPayment) {
+                    try {
+                        const localReferrer = JSON.parse(referrerPayment);
+                        if (localReferrer.referrer === 'subscriptionPagePayment') {
+                            localStorage.removeItem('referrerPayment');
+                            return navigate('/subscription');
+                        }
+                    } catch (e) {
+                        console.error('Failed to redirect on payment referrer:', e);
+                        return navigate('/');
+                    }
+                }
+
                 const stored = localStorage.getItem('onboarding_profile');
                 if (stored) {
-                    console.log(stored);
                     try {
                         const localProfile = JSON.parse(stored);
                         await syncProfileToStores(localProfile);

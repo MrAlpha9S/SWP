@@ -69,12 +69,17 @@ const updateUserSubscription = async (req, res) => {
     try {
         const user_id = await getUserIdFromAuth0Id(userAuth0Id);
         const today = getCurrentUTCDateTime().toISOString();
+        const vip_end_date = new Date(today);
         const subsInfo = await getSubscriptionService(subscriptionId);
         const price = subsInfo.price
         const duration = subsInfo.duration
-        const updateResult = await updateUserSubscriptionService(user_id, subscriptionId, today, duration);
+        vip_end_date.setMonth(vip_end_date.getUTCMonth() + duration);
+        const updateResult = await updateUserSubscriptionService(user_id, subscriptionId, vip_end_date.toISOString());
         const addSubsLogResult = await addSubscriptionPurchaseLog(user_id, subscriptionId, today);
-        if (updateResult && addSubsLogResult) res.status(200).json({success: true, message: 'Update subscription successfully'})
+        if (updateResult && addSubsLogResult) {
+            const data = {...subsInfo, vip_end_date};
+            res.status(200).json({success: true, message: 'Update subscription successfully', data: data});
+        }
         else res.status(500).json({success: false, message: 'Update subscription failed'});
     } catch (err) {
         console.error('Error in updateUserSubscription:', err);

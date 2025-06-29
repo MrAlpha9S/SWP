@@ -1,6 +1,5 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
-const {convertUTCStringToLocalDate, getCurrentUTCDateTime} = require("../utils/dateUtils");
-const {getSubscriptionService} = require("./subscriptionService");
+const {convertUTCStringToLocalDate} = require("../utils/dateUtils");
 
 const userExists = async (auth0_id) => {
     try {
@@ -65,7 +64,6 @@ const getUserWithSubscription = async (auth0_id) => {
         const result = await pool.request()
             .input('user_id', user_id)
             .query('SELECT u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
-        console.log(result)
         return result.recordset[0];
     } catch (error) {
         console.error('error in getUser', error);
@@ -99,15 +97,13 @@ const getUserCreationDateFromAuth0Id = async (auth0_id) => {
     }
 }
 
-const updateUserSubscriptionService = async (user_id, subscription_id, today, duration) => {
+const updateUserSubscriptionService = async (user_id, subscription_id, vip_end_date) => {
     try {
         const pool = await poolPromise;
-        const todayObj = new Date(today)
-        todayObj.setMonth(todayObj.getUTCMonth() + duration)
         const result = await pool.request()
             .input('sub_id', sql.Int, subscription_id)
             .input('user_id', sql.Int, user_id)
-            .input('vip_end_date', sql.DateTime, todayObj.toISOString())
+            .input('vip_end_date', sql.DateTime, vip_end_date)
             .query('UPDATE users SET sub_id = @sub_id, vip_end_date = @vip_end_date WHERE user_id = @user_id');
         return result.rowsAffected > 0
     } catch (error) {

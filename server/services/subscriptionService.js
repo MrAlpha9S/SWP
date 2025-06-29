@@ -1,5 +1,4 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
-const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 
 const getSubscriptions = async () => {
@@ -41,7 +40,7 @@ const getSubscriptionService = async (subscription_id) => {
         const pool = await poolPromise;
         const subsInfo = await pool.request()
             .input('subscription_id', subscription_id)
-            .query('SELECT duration, price FROM subscriptions WHERE sub_id = @subscription_id');
+            .query('SELECT * FROM subscriptions WHERE sub_id = @subscription_id');
 
         return subsInfo.recordset[0];
     } catch (error) {

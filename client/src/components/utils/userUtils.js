@@ -51,7 +51,7 @@ export async function getUser(user, getAccessTokenSilently, isAuthenticated) {
 export async function updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId) {
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
-    const res = await fetch('http://localhost:3000/users/updateSubscription', {
+    const res = await fetch('http://localhost:3000/users/update-subscription', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -59,6 +59,8 @@ export async function updateUserSubscription(user, getAccessTokenSilently, isAut
         },
         body: JSON.stringify({userAuth0Id: user.sub, subscriptionId: subscriptionId})
     })
+
+    if (!res.ok) throw new Error('Subscription update failed');
 
     return await res.json();
 }
