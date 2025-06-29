@@ -121,11 +121,6 @@ export const usePlanStore = create((set) => ({
     }),
 }))
 
-export const useQuittingMethodStore = create((set) => ({
-    quittingMethod: '',
-    setQuittingMethod: (value) => set({quittingMethod: value}),
-}))
-
 export const useErrorStore = create((set) => ({
     errors: [],
     addError: (error) =>

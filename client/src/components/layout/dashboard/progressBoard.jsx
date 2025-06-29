@@ -319,7 +319,7 @@ const ProgressBoard = ({
                         <Skeleton.Input style={{width: 160}} active/> :
                         readinessValue === 'ready' ?
                             `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
-                            stoppedDate
+                            new Date(stoppedDate).toLocaleDateString('vi-VN')
                     }
                 </div>
             </div>

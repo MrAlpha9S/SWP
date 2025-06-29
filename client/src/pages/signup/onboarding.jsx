@@ -73,8 +73,6 @@ const Onboarding = () => {
 
     const {from} = useParams();
 
-    console.log(isProfileExist);
-
     useEffect(() => {
         if (isProfileExist) {
             if (from) {
@@ -94,7 +92,6 @@ const Onboarding = () => {
         if (from === 'newUser') {
             setCurrentStep(6);
         }
-        console.log(userInfo)
     }, [])
 
     const stepsItems = React.useMemo(() => [
@@ -120,20 +117,8 @@ const Onboarding = () => {
     ], [readinessValue]);
 
     const toPreviousPage = () => {
-        const isFreeUser = !userInfo || userInfo.sub_id === 1;
-
         if (currentStep > 0) {
-            if (isFreeUser) {
-                if (currentStep === 6) {
-                    setCurrentStep(4);
-                } else if (currentStep > 4 && currentStep <= 6) {
-                    setCurrentStep(5);
-                } else {
-                    setCurrentStep(currentStep - 1);
-                }
-            } else {
-                setCurrentStep(currentStep - 1);
-            }
+            setCurrentStep(currentStep - 1);
         }
     };
 
@@ -311,25 +296,15 @@ const Onboarding = () => {
                                 addError(errorMsgGoalAmount);
                             }
                             if (goalList.length > 0 && goalAmount > 0) {
-                                if (userInfo?.sub_id === 1 || !userInfo) {
-                                    setCurrentStep(6)
-                                } else
-                                    setCurrentStep(currentStep + 1)
+                                setCurrentStep(currentStep + 1)
+                            } else {
+                                setCurrentStep(currentStep + 1)
                             }
                         } else {
-                            if (userInfo?.sub_id === 1 || !userInfo) {
-                                setCurrentStep(6)
-                            } else
-                                setCurrentStep(currentStep + 1)
-                        }
-                    } else {
-                        if (userInfo?.sub_id === 1 || !userInfo) {
-                            setCurrentStep(6)
-                        } else
                             setCurrentStep(currentStep + 1)
+                        }
+                        break;
                     }
-
-                    break;
                 }
             }
         }
@@ -493,14 +468,16 @@ const Onboarding = () => {
                     centered
                     maskClosable
                     closeIcon={null}
-                    footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
+                    footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu'
+                                         onOk={() => setIsModalOpen(false)}
                                          onCancel={() => {
                                              setIsModalOpen(false)
                                              navigate('/')
                                          }}/>}
                 >
                     <p>
-                        Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn
+                        Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và
+                        nhấn <strong>'Hoàn
                         tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
                     </p>
                     <p>

@@ -93,16 +93,37 @@ const Summary = () => {
     const calculateDateGoal = (amount) => {
         const pricePerCigs = pricePerPack / cigsPerPack;
         let daysUntilGoal = 0;
-        if (quittingMethod !== "target-date") {
+        if (quittingMethod !== "target-date" && quittingMethod.length > 0) {
             daysUntilGoal = Math.round(amount / (cigsReduced * pricePerCigs))
-        } else {
+        } else if (quittingMethod === "target-date") {
             const startCigs = planLog[0].cigs
             const endCigs = planLog[6].cigs
             const avgCigsQuitPerDay = (startCigs - endCigs) / 7
             daysUntilGoal = Math.round(amount / (avgCigsQuitPerDay * pricePerCigs))
+        } else if (!quittingMethod || quittingMethod.length === 0) {
+            daysUntilGoal = Math.round(amount / (cigsPerDay * pricePerCigs))
         }
         return daysUntilGoal.toLocaleString('vi-VN')
     }
+
+    console.log('Summary Data:', {
+        readiness: readinessValue,
+        reasonList,
+        pricePerPack,
+        cigsPerPack,
+        cigsPerDay,
+        timeAfterWaking,
+        timeOfDayList,
+        triggers,
+        customTimeOfDay,
+        customTrigger,
+        quitDate: stoppedDate,
+        planLog,
+        createGoalChecked,
+        goalList,
+        quittingMethod
+    });
+
 
     const readiness = readinessRadioOptions.find(option => option.value === readinessValue);
 
@@ -362,7 +383,7 @@ const Summary = () => {
                                     </div>
                                 ))}
                             </div>
-                            <CustomButton type='primary' onClick={() => setCurrentStep(5)}>Thay đổi</CustomButton>
+                            <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay đổi</CustomButton>
                         </div>
                     </>}
             </div>
