@@ -89,7 +89,7 @@ const Onboarding = () => {
                 setIsModalOpen(true);
             }
         }
-        if (from === 'newUser') {
+        if (from === 'newUser' || from === 'newSubscriptionPage') {
             setCurrentStep(6);
         }
     }, [])
@@ -230,56 +230,60 @@ const Onboarding = () => {
                     const errorMsgStoppedDate = errorMap["stoppedDate"];
                     const errorMsgCigsReducedLarge = errorMap["cigsReducedLarge"]
 
-                    if (readinessValue === 'ready') {
-                        if (startDate.length === 0) {
-                            addError(errorMsgStartDate)
-                        } else {
-                            removeError(errorMsgStartDate)
-                        }
-                        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
-                            addError(errorMsgCigsPerDay)
-                        } else {
-                            removeError(errorMsgCigsPerDay)
-                        }
-                        if (quittingMethod.length === 0) {
-                            addError(errorMsgQuitMethod)
-                        } else {
-                            removeError(errorMsgQuitMethod)
-                        }
-                        if (cigsReduced > cigsPerDay) {
-                            addError(errorMsgCigsReducedLarge)
-                        } else {
-                            removeError(errorMsgCigsReducedLarge)
-                        }
-                        if (quittingMethod === 'target-date') {
-                            if (expectedQuitDate.length === 0) {
-                                addError(errorMsgExpectedQuitDate);
+                    if (!userInfo || userInfo.sub_id === 1) {
+                        setCurrentStep(currentStep + 1);
+                    } else {
+                        if (readinessValue === 'ready') {
+                            if (startDate.length === 0) {
+                                addError(errorMsgStartDate)
                             } else {
+                                removeError(errorMsgStartDate)
+                            }
+                            if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
+                                addError(errorMsgCigsPerDay)
+                            } else {
+                                removeError(errorMsgCigsPerDay)
+                            }
+                            if (quittingMethod.length === 0) {
+                                addError(errorMsgQuitMethod)
+                            } else {
+                                removeError(errorMsgQuitMethod)
+                            }
+                            if (cigsReduced > cigsPerDay) {
+                                addError(errorMsgCigsReducedLarge)
+                            } else {
+                                removeError(errorMsgCigsReducedLarge)
+                            }
+                            if (quittingMethod === 'target-date') {
+                                if (expectedQuitDate.length === 0) {
+                                    addError(errorMsgExpectedQuitDate);
+                                } else {
+                                    removeError(errorMsgExpectedQuitDate);
+                                }
+                                removeError(errorMsgCigsReduced);
+                            } else {
+                                if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                                    addError(errorMsgCigsReduced);
+                                } else {
+                                    removeError(errorMsgCigsReduced);
+                                }
                                 removeError(errorMsgExpectedQuitDate);
                             }
-                            removeError(errorMsgCigsReduced);
-                        } else {
-                            if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
-                                addError(errorMsgCigsReduced);
-                            } else {
-                                removeError(errorMsgCigsReduced);
+                            if (startDate.length > 0 &&
+                                cigsPerDay > 0 &&
+                                quittingMethod.length > 0 &&
+                                ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
+                                setCurrentStep(currentStep + 1)
                             }
-                            removeError(errorMsgExpectedQuitDate);
-                        }
-                        if (startDate.length > 0 &&
-                            cigsPerDay > 0 &&
-                            quittingMethod.length > 0 &&
-                            ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
-                            setCurrentStep(currentStep + 1)
-                        }
-                    } else {
-                        if (stoppedDate.length === 0) {
-                            addError(errorMsgStoppedDate)
                         } else {
-                            removeError(errorMsgStoppedDate)
-                        }
-                        if (stoppedDate.length > 0) {
-                            setCurrentStep(currentStep + 1)
+                            if (stoppedDate.length === 0) {
+                                addError(errorMsgStoppedDate)
+                            } else {
+                                removeError(errorMsgStoppedDate)
+                            }
+                            if (stoppedDate.length > 0) {
+                                setCurrentStep(currentStep + 1)
+                            }
                         }
                     }
 
@@ -304,6 +308,8 @@ const Onboarding = () => {
                             setCurrentStep(currentStep + 1)
                         }
                         break;
+                    } else {
+                        setCurrentStep(currentStep + 1)
                     }
                 }
             }

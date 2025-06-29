@@ -153,3 +153,38 @@ export async function syncProfileToStores(profile) {
         userInfoStore.setUserInfo(userInfo);
     }
 }
+
+export const saveProfileToLocalStorage = ({currentStep, referrer = '', userInfo}) => {
+    const state = {
+        userProfile : {
+            readiness_value: useQuitReadinessStore.getState().readinessValue,
+            reasonList: useReasonStore.getState().reasonList,
+            price_per_pack: usePricePerPackStore.getState().pricePerPack,
+            cigs_per_pack: useCigsPerPackStore.getState().cigsPerPack,
+            time_after_waking: useTimeAfterWakingStore.getState().timeAfterWaking,
+            timeOfDayList: useTimeOfDayStore.getState().timeOfDayList,
+            custom_time_of_day: useTimeOfDayStore.getState().customTimeOfDay,
+            customTimeOfDayChecked: useTimeOfDayStore.getState().customTimeOfDayChecked,
+            triggers: useTriggersStore.getState().triggers,
+            custom_trigger: useTriggersStore.getState().customTrigger,
+            customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
+            quit_date: usePlanStore.getState().stoppedDate,
+            planLog: usePlanStore.getState().planLog,
+            planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
+            createGoalChecked: useGoalsStore.getState().createGoalChecked,
+            goalList: useGoalsStore.getState().goalList,
+            currentStep: currentStep
+        },
+        referrer: referrer
+    };
+
+    if (userInfo?.sub_id !== 1) {
+        state.userProfile.start_date = usePlanStore.getState().startDate,
+            state.userProfile.cigs_per_day = usePlanStore.getState().cigsPerDay,
+            state.userProfile.quitting_method = usePlanStore.getState().quittingMethod,
+            state.userProfile.cigs_reduced = usePlanStore.getState().cigsReduced,
+            state.userProfile.expected_quit_date = usePlanStore.getState().expectedQuitDate
+    }
+
+    return state
+}

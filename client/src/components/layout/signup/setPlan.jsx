@@ -80,7 +80,7 @@ const SetPlan = () => {
 
     return (
         <>
-            {userInfo?.sub_id !== 1 ? <><h2 className="text-left md:text-4xl lg:text-5xl font-bold">
+            { userInfo && userInfo.sub_id !== 1 ? <><h2 className="text-left md:text-4xl lg:text-5xl font-bold">
                 6. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}
             </h2>
 

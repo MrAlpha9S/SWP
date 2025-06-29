@@ -24,16 +24,18 @@ export default function PostSignUpCallback() {
                         await syncProfileToStores(profileRes.data);
                 }
 
-                // Step 3: If there's local onboarding override, apply it last
                 const stored = localStorage.getItem('onboarding_profile');
                 if (stored) {
+                    console.log(stored);
                     try {
                         const localProfile = JSON.parse(stored);
-                        syncProfileToStores(localProfile);
+                        await syncProfileToStores(localProfile);
                         localStorage.removeItem('onboarding_profile');
                         useCurrentStepStore.getState().setCurrentStep(6);
                         useProfileExists.getState().setIsProfileExist(false);
-                        return navigate('/onboarding/newUser');
+                        if (localProfile.referrer.length > 0) {
+                            return navigate(`/onboarding/${localProfile.referrer}`);
+                        }
                     } catch (e) {
                         console.error('Failed to restore onboarding profile:', e);
                         return navigate('/');

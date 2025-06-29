@@ -17,6 +17,7 @@ import {
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
+import {saveProfileToLocalStorage} from "../../utils/profileUtils.js";
 
 
 const Summary = () => {
@@ -43,6 +44,7 @@ const Summary = () => {
     const {createGoalChecked, goalList} = useGoalsStore()
     const {currentStep, setCurrentStep} = useCurrentStepStore()
     const {userInfo} = useUserInfoStore()
+    const isFreeUser = !userInfo || userInfo.sub_id === 1;
 
     const calculatePrice = (type, numberOfYears = 1) => {
         const pricePerCigs = pricePerPack / cigsPerPack
@@ -78,16 +80,9 @@ const Summary = () => {
         return moneySaved.toLocaleString('vi-VN')
     }
 
-    let step4Title = ''
-    if (userInfo?.sub_id !== 1) {
-        if (readinessValue === 'ready') {
-            step4Title = 'Thông tin kế hoạch'
-        } else {
-            step4Title = 'Tình hình hiện tại'
-        }
-    } else {
-        step4Title = 'Thông tin thuốc'
-    }
+    const step4Title = isFreeUser
+        ? 'Thông tin thuốc'
+        : (readinessValue === 'ready' ? 'Thông tin kế hoạch' : 'Tình hình hiện tại');
 
 
     const calculateDateGoal = (amount) => {
@@ -146,33 +141,7 @@ const Summary = () => {
                         </p>
                         <CustomButton
                             onClick={() => {
-                                const state = {
-                                    readiness_value: useQuitReadinessStore.getState().readinessValue,
-                                    reasonList: useReasonStore.getState().reasonList,
-                                    price_per_pack: usePricePerPackStore.getState().pricePerPack,
-                                    cigs_per_pack: useCigsPerPackStore.getState().cigsPerPack,
-                                    time_after_waking: useTimeAfterWakingStore.getState().timeAfterWaking,
-                                    timeOfDayList: useTimeOfDayStore.getState().timeOfDayList,
-                                    custom_time_of_day: useTimeOfDayStore.getState().customTimeOfDay,
-                                    customTimeOfDayChecked: useTimeOfDayStore.getState().customTimeOfDayChecked,
-                                    triggers: useTriggersStore.getState().triggers,
-                                    custom_trigger: useTriggersStore.getState().customTrigger,
-                                    customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
-                                    quit_date: usePlanStore.getState().stoppedDate,
-                                    planLog: usePlanStore.getState().planLog,
-                                    planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
-                                    createGoalChecked: useGoalsStore.getState().createGoalChecked,
-                                    goalList: useGoalsStore.getState().goalList,
-                                    currentStep: currentStep
-                                };
-
-                                if (userInfo?.sub_id !== 1) {
-                                    state.start_date = usePlanStore.getState().startDate,
-                                        state.cigs_per_day = usePlanStore.getState().cigsPerDay,
-                                        state.quitting_method = usePlanStore.getState().quittingMethod,
-                                        state.cigs_reduced = usePlanStore.getState().cigsReduced,
-                                        state.expected_quit_date = usePlanStore.getState().expectedQuitDate
-                                }
+                                const state = saveProfileToLocalStorage({currentStep : currentStep, referrer : 'summary', userInfo : userInfo})
 
                                 localStorage.setItem('onboarding_profile', JSON.stringify(state));
 
@@ -255,7 +224,7 @@ const Summary = () => {
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                         4. {step4Title}
                     </p>
-                    {userInfo?.sub_id !== 1 && <p className='md:text-lg lg:text-xl font-bold'>
+                    {!isFreeUser && <p className='md:text-lg lg:text-xl font-bold'>
                         Thông tin thuốc
                     </p>}
 
@@ -291,7 +260,7 @@ const Summary = () => {
                         </>
                     )}
 
-                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 &&
+                    {readinessValue === 'ready' && !isFreeUser &&
                         <>
                             <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
