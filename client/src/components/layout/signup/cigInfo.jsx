@@ -4,11 +4,12 @@ import {
     usePricePerPackStore, useQuitReadinessStore,
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
+import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
 
 const CigInfo = () => {
     const {pricePerPack, setPricePerPack} = usePricePerPackStore();
     const {cigsPerPack, setCigsPerPack} = useCigsPerPackStore();
-    const {cigsPerDay, setCigsPerDay} = usePlanStore()
+    const {cigsPerDay, setCigsPerDay, stoppedDate} = usePlanStore()
     const {readinessValue} = useQuitReadinessStore()
     const {errors} = useErrorStore();
 
@@ -32,6 +33,15 @@ const CigInfo = () => {
                     <label htmlFor="pricePerPack" className="block text-sm md:text-base mb-1">
                         Một gói thuốc bạn thường hút có giá bao nhiêu?
                     </label>
+                    <div className=''>
+                        {errors.map((error, index) => {
+                            if (error.location === "pricePerPack") {
+                                return (
+                                    <ErrorText key={index}>{error.message}</ErrorText>
+                                )
+                            }
+                        })}
+                    </div>
                     <input
                         onChange={(e) => setPricePerPack(Number(e.target.value))}
                         id="pricePerPack"
@@ -40,21 +50,22 @@ const CigInfo = () => {
                         value={pricePerPack}
                     />
                 </div>
-                <div className=''>
-                    {errors.map((error, index) => {
-                        if (error.location === "pricePerPack") {
-                            return (
-                                <ErrorText key={index}>{error.message}</ErrorText>
-                            )
-                        }
-                    })}
-                </div>
+
 
                 <div>
                     <label htmlFor="cigsPerPack"
                            className="block text-sm md:text-base text-gray-700 mb-1">
                         Có bao nhiêu điếu trong một gói thuốc bạn thường hút?
                     </label>
+                    <div className=''>
+                        {errors.map((error, index) => {
+                            if (error.location === "cigsPerPack") {
+                                return (
+                                    <ErrorText key={index}>{error.message}</ErrorText>
+                                )
+                            }
+                        })}
+                    </div>
                     <input
                         onChange={(e) => setCigsPerPack(Number(e.target.value))}
                         id="cigsPerPack"
@@ -63,15 +74,7 @@ const CigInfo = () => {
                         value={cigsPerPack}
                     />
                 </div>
-                <div className=''>
-                    {errors.map((error, index) => {
-                        if (error.location === "cigsPerPack") {
-                            return (
-                                <ErrorText key={index}>{error.message}</ErrorText>
-                            )
-                        }
-                    })}
-                </div>
+
                 <div>
                     <label htmlFor="cigsPerInterval" className="block text-sm md:text-base text-gray-700 mb-1">
                         Bạn {readinessValue === 'relapse-support' ? 'đã' : ''} thường hút bao nhiêu điếu một ngày?
@@ -90,12 +93,33 @@ const CigInfo = () => {
                             onChange={(e) => setCigsPerDay(Number(e.target.value))}
                             id="cigsPerInterval"
                             type="number"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="cigsPerDay w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={cigsPerDay}
                         />
                     </div>
 
                 </div>
+
+                {(readinessValue === 'relapse-support' && pricePerPack !== 0 && cigsPerPack !== 0 && cigsPerDay !== 0) && <>
+                    <p
+                    className='text-left font-bold text-base md:text-lg'>
+                    Thống kê kết quả
+                    </p>
+                    <p className='text-sm md:text-base'>
+                        Kể từ khi bạn bỏ thuốc từ
+                        ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn
+                        đã: <br/>
+                        Bỏ thuốc
+                        được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>
+                        Bỏ được <strong>
+                        {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}
+                    </strong> điếu thuốc <br/>
+                        Tiết kiệm
+                        được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>
+                        <br/>
+                        <em>Hãy giữ vững tinh thần nhé!</em>
+
+                    </p></>}
 
             </form>
         </>

@@ -1,0 +1,12 @@
+{
+  "proxyBypass": ["localhost", "127.0.0.1", "::1"],
+  "selectorTimeout": 10000,
+  "assertionTimeout": 5000,
+  "pageLoadTimeout": 8000,
+  "speed": 0.8,
+  "stopOnFirstFail": true,
+  "skipJsErrors": false,
+  "quarantineMode": true,
+  "skipUncaughtErrors": false,
+  "concurrency": 1
+}

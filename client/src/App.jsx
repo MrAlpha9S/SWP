@@ -25,6 +25,10 @@ import PostPage from "./components/layout/forum/postPage.jsx";
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
+import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
+import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx";
+import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
+import {AnimatePresence} from "framer-motion";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -44,7 +48,8 @@ function App() {
     return (
         <>
             <Navbar />
-            <div className="max-w-[1280px] mx-auto bg-[#fff7e5]">
+            <div className="w-full mx-auto bg-[#fff7e5]">
+                <AnimatePresence mode="wait">
             <Routes>
                 <Route path="/" element={<Homepage />} />
 
@@ -73,7 +78,11 @@ function App() {
                 <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
                 <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
+                <Route path="/subscription" element={<SubscriptionPage/>}></Route>
+                <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
+                <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
             </Routes>
+                </AnimatePresence>
             </div>
             <Footer />
         </>

@@ -1,4 +1,5 @@
 const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal} = require("../services/profileService");
+const {getUserWithSubscription} = require("../services/userService");
 
 
 const handlePostOnboarding = async (req, res) => {
@@ -22,6 +23,8 @@ const handlePostOnboarding = async (req, res) => {
         planLog,
         goalList
     } = req.body;
+
+    console.log(req.body)
 
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userId required'});
     let result = false
@@ -83,11 +86,26 @@ const handleGetProfile = async (req, res) => {
 
     try {
         const userProfile = await getUserProfile(userAuth0Id);
-        if (userProfile === null) {
-            return res.status(404).json({success: false, message: 'User profile not found', data: null});
-        } else {
-            return res.status(200).json({success: true, message: 'User profile fetched', data: userProfile});
+        const userInfo = await getUserWithSubscription(userAuth0Id);
+
+        if (!userProfile && !userInfo) {
+            return res.status(404).json({
+                success: false,
+                message: 'User profile and subscription info not found',
+                data: null
+            });
         }
+
+        return res.status(200).json({
+            success: true,
+            message: !userProfile
+                ? 'Subscription info fetched, but user profile not found'
+                : !userInfo
+                    ? 'User profile fetched, but subscription info not found'
+                    : 'User profile and subscription info fetched',
+            data: { userProfile, userInfo }
+        });
+
     } catch (err) {
         console.error('handleGetProfile error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});

@@ -40,14 +40,14 @@ const SetGoals = () => {
         setGoalAmount,
         setGoalName,
         addGoal,
-        removeGoal
+        removeGoalWithName
     } = useGoalsStore();
     const {errors} = useErrorStore();
 
     return (
         <>
             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                6. Đề ra mục tiêu
+                5. Đề ra mục tiêu
             </h2>
 
             <div className="text-left text-sm md:text-base">
@@ -159,7 +159,7 @@ const SetGoals = () => {
                                             {item.goalAmount.toLocaleString('vi-VN')}
                                         </p>
                                     </div>
-                                    <CustomButton type='primary' onClick={() => removeGoal(item)}>Xóa</CustomButton>
+                                    <CustomButton type='primary' onClick={() => removeGoalWithName(item.goalName)}>Xóa</CustomButton>
                                 </div>
                             ))}
                         </div>

@@ -22,13 +22,7 @@ const handleGetBlog = async (req, res) => {
 }
 
 const handlePostBlog = async (req, res) => {
-    const auth0_id  = req.body.auth0_id;
-    const topic = req.body.topic;
-    const title = req.body.title;
-    const description = req.body.description;
-    const content = req.body.content;
-    const created_at = req.body.created_at;
-
+    const {auth0_id, topic, title, description, content, created_at}  = req.body;
     console.log(req.body)
 
     if (!auth0_id || !topic || !title || !description || !content || !created_at) {

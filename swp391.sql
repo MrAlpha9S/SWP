@@ -24,16 +24,80 @@ CREATE TABLE [users] (
   [updated_at] datetime,
   [sub_id] int DEFAULT (1),
   [vip_end_date] datetime DEFAULT (null),
-  [isBanned] int DEFAULT (0)
+  [isBanned] int DEFAULT (0),
+  [is_social] int,
 )
 GO
 
-CREATE TABLE [subcriptions] (
+CREATE TABLE [subscriptions] (
   [sub_id] int PRIMARY KEY IDENTITY(1, 1),
   [sub_type] varchar(50),
+  [sub_name] nvarchar(50),
   [duration] int,
   [price] float
 )
+GO
+
+CREATE TABLE [users_subscriptions] (
+  [user_id] int,
+  [sub_id] int,
+  [purchased_date] DATETIME,
+  PRIMARY KEY ([user_id], [sub_id])
+)
+ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
+GO
+
+
+CREATE TABLE [subs_features] (
+  [feature_id] int PRIMARY KEY IDENTITY(1, 1),
+  [sub_id] int,
+  [feature] nvarchar(100)
+)
+GO
+
+ALTER TABLE [subs_features] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
+GO
+
+CREATE TABLE [coach_info] (
+  [coach_id] int PRIMARY KEY,
+  [years_of_exp] int,
+  [bio] nvarchar(200),
+  [detailed_bio] nvarchar(max),
+  [motto] nvarchar(100),
+)
+ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [coach_specialties_achievements] (
+  [id] int PRIMARY KEY IDENTITY(1, 1),
+  [content] nvarchar(50),
+  [is_specialties] BIT,
+  [coach_id] int
+)
+ALTER TABLE [coach_specialties_achievements] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+
+CREATE TABLE [coach_reviews] (
+  [review_id] int PRIMARY KEY IDENTITY(1, 1),
+  [review_content] nvarchar(200),
+  [stars] int,
+  [user_id] int,
+  [coach_id] int,
+  [created_date] DATETIME,
+)
+ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+
+CREATE TABLE [coach_user] (
+  [pair_id] int PRIMARY KEY IDENTITY(1, 1),
+  [coach_id] int,
+  [user_id] int,
+  [started_date] DATETIME
+)
+ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 GO
 
 CREATE TABLE [user_profiles] (
@@ -283,7 +347,7 @@ CREATE TABLE [user_conversation] (
 GO
 
 
-ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subcriptions] ([sub_id])
+ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 
 ALTER TABLE [user_achievements] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -378,40 +442,4 @@ select * from quitting_items
 select * from free_text
 select * from social_category
 select * from social_posts
-
-select sc.category_id, sc.category_name, sc.description , count(sc.category_id) as post_count from social_category sc, social_posts sp where sc.category_id = sp.category_id group by sc.category_id, sc.category_name, sc.description
-
-SELECT 
-  sc.category_id, 
-  sc.category_name, 
-  sc.description,
-  COUNT(scmt.comment_id) AS comment_count
-FROM social_category sc
-JOIN social_posts sp ON sc.category_id = sp.category_id
-JOIN social_comments scmt ON sp.post_id = scmt.post_id
-GROUP BY sc.category_id, sc.category_name, sc.description
-ORDER BY sc.category_id;
-
-SELECT 
-  u.user_id,
-  u.username,
-  COALESCE(SUM(cl.cigs_smoked), 0) AS totalCigs
-FROM users u
-LEFT JOIN user_profiles p ON u.user_id = p.user_id
-LEFT JOIN checkin_log cl ON u.user_id = cl.user_id
-GROUP BY u.user_id, u.username
-
-SELECT user_id, username, created_at FROM users
-
-SELECT 
-  u.user_id,
-  u.username,
-  COUNT(cl.log_id) AS days_without_smoke
-FROM users u
-LEFT JOIN checkin_log cl 
-  ON u.user_id = cl.user_id AND cl.cigs_smoked = 0
-GROUP BY u.user_id, u.username;
-
-SELECT cigs_per_day, cigs_per_pack, price_per_pack FROM user_profiles
-
 

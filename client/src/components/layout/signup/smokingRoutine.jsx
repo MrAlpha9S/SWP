@@ -52,8 +52,8 @@ const SmokingRoutine = () => {
     }
 
     return (
-        <>
-            <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
+        <div className='space-y-6'>
+            <h2 className="text-left md:text-4xl lg:text-5xl font-bold ">
                 4. Thói quen hút thuốc của bạn
             </h2>
 
@@ -87,10 +87,6 @@ const SmokingRoutine = () => {
                     style={checkboxStyle}
                 />
             </div>
-            <div className="mt-4 text-sm text-gray-600">
-                <strong>Đã chọn:</strong>{" "}
-                {timeAfterWaking}
-            </div>
 
             <div className="mt-8 text-left font-bold text-base md:text-lg">
                 <h3>Bạn thường hút thuốc vào thời điểm nào trong ngày?
@@ -106,7 +102,7 @@ const SmokingRoutine = () => {
                     }
                 })}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mb-[-56px]">
                 {timeOfDayOptions.map((option) => (
                     <Checkbox
                         key={option.value}
@@ -133,12 +129,6 @@ const SmokingRoutine = () => {
                             value={customTimeOfDay}
                         />
                     </>}
-                <div className="mt-4 text-sm text-gray-600">
-                    <strong>Đã chọn:</strong>{" "}
-                    {timeOfDayList.length === 0
-                        ? "Chưa chọn"
-                        : timeOfDayList.join(", ")}
-                </div>
             </div>
 
             <div className="mt-8 text-left font-bold text-base md:text-lg">
@@ -182,14 +172,8 @@ const SmokingRoutine = () => {
                             value={customTrigger}
                         />
                     </>}
-                <div className="mt-4 text-sm text-gray-600">
-                    <strong>Đã chọn:</strong>{" "}
-                    {triggers.length === 0
-                        ? "Chưa chọn"
-                        : triggers.join(", ")}
-                </div>
             </div>
-        </>
+        </div>
     );
 };
 

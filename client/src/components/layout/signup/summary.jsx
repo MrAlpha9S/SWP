@@ -6,7 +6,7 @@ import {
     useCigsPerPackStore, useCurrentStepStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore
+    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../../stores/store.js";
 import {
     quittingMethodOptions,
@@ -17,6 +17,7 @@ import {
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
+import {saveProfileToLocalStorage} from "../../utils/profileUtils.js";
 
 
 const Summary = () => {
@@ -42,6 +43,8 @@ const Summary = () => {
     } = usePlanStore();
     const {createGoalChecked, goalList} = useGoalsStore()
     const {currentStep, setCurrentStep} = useCurrentStepStore()
+    const {userInfo} = useUserInfoStore()
+    const isFreeUser = !userInfo || userInfo.sub_id === 1;
 
     const calculatePrice = (type, numberOfYears = 1) => {
         const pricePerCigs = pricePerPack / cigsPerPack
@@ -77,29 +80,55 @@ const Summary = () => {
         return moneySaved.toLocaleString('vi-VN')
     }
 
+    const step4Title = isFreeUser
+        ? 'Thông tin thuốc'
+        : (readinessValue === 'ready' ? 'Thông tin kế hoạch' : 'Tình hình hiện tại');
+
+
     const calculateDateGoal = (amount) => {
         const pricePerCigs = pricePerPack / cigsPerPack;
         let daysUntilGoal = 0;
-        if (quittingMethod !== "target-date") {
+        if (quittingMethod !== "target-date" && quittingMethod.length > 0) {
             daysUntilGoal = Math.round(amount / (cigsReduced * pricePerCigs))
-        } else {
+        } else if (quittingMethod === "target-date") {
             const startCigs = planLog[0].cigs
             const endCigs = planLog[6].cigs
             const avgCigsQuitPerDay = (startCigs - endCigs) / 7
             daysUntilGoal = Math.round(amount / (avgCigsQuitPerDay * pricePerCigs))
+        } else if (!quittingMethod || quittingMethod.length === 0) {
+            daysUntilGoal = Math.round(amount / (cigsPerDay * pricePerCigs))
         }
         return daysUntilGoal.toLocaleString('vi-VN')
     }
 
+    console.log('Summary Data:', {
+        readiness: readinessValue,
+        reasonList,
+        pricePerPack,
+        cigsPerPack,
+        cigsPerDay,
+        timeAfterWaking,
+        timeOfDayList,
+        triggers,
+        customTimeOfDay,
+        customTrigger,
+        quitDate: stoppedDate,
+        planLog,
+        createGoalChecked,
+        goalList,
+        quittingMethod
+    });
+
+
     const readiness = readinessRadioOptions.find(option => option.value === readinessValue);
 
     return (
-        <>
-            <h2 className='text-left md:text-4xl lg:text-5xl font-bold'>
+        <div className='min-w-[1280px] flex flex-col'>
+            <h2 className='text-left md:text-4xl lg:text-5xl font-bold mb-4'>
                 7. Tổng kết thông tin của bạn
             </h2>
 
-            <div className='w-full lg:w-[80%] flex flex-col gap-5'>
+            <div className='w-full flex flex-col gap-5'>
                 {!user &&
                     <div
                         className="w-full bg-[#fff7e5] p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
@@ -112,30 +141,7 @@ const Summary = () => {
                         </p>
                         <CustomButton
                             onClick={() => {
-                                const state = {
-                                    readiness_value: useQuitReadinessStore.getState().readinessValue,
-                                    reasonList: useReasonStore.getState().reasonList,
-                                    price_per_pack: usePricePerPackStore.getState().pricePerPack,
-                                    cigs_per_pack: useCigsPerPackStore.getState().cigsPerPack,
-                                    time_after_waking: useTimeAfterWakingStore.getState().timeAfterWaking,
-                                    timeOfDayList: useTimeOfDayStore.getState().timeOfDayList,
-                                    custom_time_of_day: useTimeOfDayStore.getState().customTimeOfDay,
-                                    customTimeOfDayChecked: useTimeOfDayStore.getState().customTimeOfDayChecked,
-                                    triggers: useTriggersStore.getState().triggers,
-                                    custom_trigger: useTriggersStore.getState().customTrigger,
-                                    customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
-                                    start_date: usePlanStore.getState().startDate,
-                                    cigs_per_day: usePlanStore.getState().cigsPerDay,
-                                    quitting_method: usePlanStore.getState().quittingMethod,
-                                    cigs_reduced: usePlanStore.getState().cigsReduced,
-                                    expected_quit_date: usePlanStore.getState().expectedQuitDate,
-                                    quit_date: usePlanStore.getState().stoppedDate,
-                                    planLog: usePlanStore.getState().planLog,
-                                    planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
-                                    createGoalChecked: useGoalsStore.getState().createGoalChecked,
-                                    goalList: useGoalsStore.getState().goalList,
-                                    currentStep: currentStep
-                                };
+                                const state = saveProfileToLocalStorage({currentStep : currentStep, referrer : 'summary', userInfo : userInfo})
 
                                 localStorage.setItem('onboarding_profile', JSON.stringify(state));
 
@@ -216,11 +222,11 @@ const Summary = () => {
                 <div
                     className="w-full p-5 flex flex-col gap-5 max-h-[1500px] border border-primary-600 rounded-[8px]">
                     <p className='text-left md:text-3xl lg:text-4xl font-bold'>
-                        4.{readinessValue === 'ready' ? ' Thông tin kế hoạch' : ' Tình hình hiện tại'}
+                        4. {step4Title}
                     </p>
-                    <p className='md:text-lg lg:text-xl font-bold'>
+                    {!isFreeUser && <p className='md:text-lg lg:text-xl font-bold'>
                         Thông tin thuốc
-                    </p>
+                    </p>}
 
                     <p className='text-sm md:text-base'>
                         Số điếu trong một gói: {cigsPerPack} <br/>
@@ -254,7 +260,7 @@ const Summary = () => {
                         </>
                     )}
 
-                    {readinessValue === 'ready' &&
+                    {readinessValue === 'ready' && !isFreeUser &&
                         <>
                             <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
@@ -334,7 +340,7 @@ const Summary = () => {
                             <p className='text-left md:text-3xl lg:text-4xl font-bold'>
                                 5. Những mục tiêu ngắn hạn
                             </p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col gap-2">
                                 {goalList?.map((item, index) => (
                                     <div key={index}>
                                         <strong>{index + 1}.</strong> <br/>
@@ -346,11 +352,11 @@ const Summary = () => {
                                     </div>
                                 ))}
                             </div>
-                            <CustomButton type='primary' onClick={() => setCurrentStep(5)}>Thay đổi</CustomButton>
+                            <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay đổi</CustomButton>
                         </div>
                     </>}
             </div>
-        </>
+        </div>
     );
 };
 

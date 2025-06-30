@@ -1,4 +1,4 @@
-const {poolPromise} = require("../configs/sqlConfig");
+const {poolPromise, sql} = require("../configs/sqlConfig");
 const {getUserIdFromAuth0Id} = require('./userService')
 
 const Blog = async (topic_id, blog_id) => {
@@ -16,15 +16,17 @@ const Blog = async (topic_id, blog_id) => {
 };
 
 const PostBlog = async (auth0_id, topic, title, description, content, created_at) => {
+    console.log(auth0_id, topic, title, description, created_at);
     try {
         const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
         const result = await pool.request()
-            .input('user_id', await getUserIdFromAuth0Id(auth0_id))
-            .input('topic_id', topic)
-            .input('title', title)
-            .input('description', description)
-            .input('content', content)
-            .input('created_at', created_at)
+            .input('user_id', sql.Int, user_id)
+            .input('topic_id', sql.VarChar(100), topic)
+            .input('title', sql.NVarChar(255), title)
+            .input('description', sql.NVarChar(255), description)
+            .input('content', sql.NVarChar(sql.MAX), content)
+            .input('created_at', sql.DateTime, created_at)
             .query(`INSERT INTO [blog_posts] ([title], [description], [content], [user_id], [topic_id], [created_at]) 
                 VALUES (@title, @description, @content, @user_id, @topic_id, @created_at);`);
         if(result.rowsAffected[0] === 0) {
