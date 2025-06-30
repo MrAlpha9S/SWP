@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const checkJwt = require('../middlewares/jwtChecker');
-const {getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription,
+const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserSubscription,
     getCoachesController, getCoachByIdController
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");

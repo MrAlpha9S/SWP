@@ -245,21 +245,6 @@ const getCoachDetailsById = async (coachId) => {
     }
 };
 
-
-
-
-module.exports = {
-    userExists,
-    createUser,
-    getAllUsers,
-    getUserIdFromAuth0Id,
-    getUserCreationDateFromAuth0Id,
-    getUser,
-    getUserWithSubscription,
-    updateUserSubscriptionService,
-    getCoaches,
-    getCoachDetailsById
-};
 async function getUserByAuth0Id(auth0Id) {
     try {
         const pool = await poolPromise;
@@ -350,5 +335,9 @@ module.exports = {
     getUser,
     updateUserService,
     getUserByAuth0Id,
-    updateUserByAuth0Id
+    updateUserByAuth0Id,
+    getUserWithSubscription,
+    updateUserSubscriptionService,
+    getCoaches,
+    getCoachDetailsById
 };

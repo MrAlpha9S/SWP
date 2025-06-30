@@ -1,8 +1,14 @@
-const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id, getCoaches, getCoachDetailsById} = require('../services/userService');
-const { updateUserService} = require('../services/userService');
+const {
+    getAllUsers,
+    updateUserSubscriptionService,
+    getUserIdFromAuth0Id,
+    getCoaches,
+    getCoachDetailsById
+} = require('../services/userService');
+const {updateUserService} = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
-const  {updateUserAuth0} = require("../services/auth0Service");
+const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
+const {updateUserAuth0} = require("../services/auth0Service");
 const {getUserByAuth0Id, updateUserByAuth0Id} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
@@ -34,7 +40,7 @@ const getAllUsersController = async (req, res) => {
         return res.status(200).json(users);
     } catch (error) {
         console.error('Error in getAllUsersController:', error);
-        res.status(500).json({ error: 'Failed to fetch users' });
+        res.status(500).json({error: 'Failed to fetch users'});
     }
 };
 
@@ -70,8 +76,7 @@ const updateUserSubscription = async (req, res) => {
         if (updateResult && addSubsLogResult) {
             const data = {...subsInfo, vip_end_date};
             res.status(200).json({success: true, message: 'Update subscription successfully', data: data});
-        }
-        else res.status(500).json({success: false, message: 'Update subscription failed'});
+        } else res.status(500).json({success: false, message: 'Update subscription failed'});
     } catch (err) {
         console.error('Error in updateUserSubscription:', err);
         res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
@@ -81,7 +86,11 @@ const updateUserSubscription = async (req, res) => {
 const getCoachesController = async (req, res) => {
     try {
         const result = await getCoaches();
-        if (result.length > 0) return res.status(200).json({success: true, message: 'Fetch coaches successfully', data: result});
+        if (result.length > 0) return res.status(200).json({
+            success: true,
+            message: 'Fetch coaches successfully',
+            data: result
+        });
     } catch (err) {
         console.error('Error in getCoachesController:', err);
         res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
@@ -117,8 +126,6 @@ const getCoachByIdController = async (req, res) => {
     }
 };
 
-
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription, getCoachesController, getCoachByIdController };
 const updateUserController = async (req, res) => {
     const {userAuth0Id, username, email, avatar, password} = req.body;
     if (!username && !email && !avatar && !password) {
@@ -148,27 +155,37 @@ const getUserInfo = async (req, res) => {
     try {
         // Lấy userAuth0Id từ query hoặc từ token (tùy bạn)
         const userAuth0Id = req.query.userAuth0Id || req.body.userAuth0Id;
-        if (!userAuth0Id) return res.status(400).json({ success: false, message: "Missing userAuth0Id" });
+        if (!userAuth0Id) return res.status(400).json({success: false, message: "Missing userAuth0Id"});
 
         const user = await getUserByAuth0Id(userAuth0Id);
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        if (!user) return res.status(404).json({success: false, message: "User not found"});
 
-        return res.json({ success: true, data: user });
+        return res.json({success: true, data: user});
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+        res.status(500).json({success: false, message: err.message});
     }
 };
 
 const updateUserInfo = async (req, res) => {
     try {
-        const { userAuth0Id, username, email, avatar } = req.body;
-        if (!userAuth0Id) return res.status(400).json({ success: false, message: "Missing userAuth0Id" });
+        const {userAuth0Id, username, email, avatar} = req.body;
+        if (!userAuth0Id) return res.status(400).json({success: false, message: "Missing userAuth0Id"});
 
-        const updated = await updateUserByAuth0Id(userAuth0Id, { username, email, avatar });
-        return res.json({ success: true, data: updated });
+        const updated = await updateUserByAuth0Id(userAuth0Id, {username, email, avatar});
+        return res.json({success: true, data: updated});
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+        res.status(500).json({success: false, message: err.message});
     }
 };
 
-module.exports = { getAllUsersController, handlePostSignup, updateUserController, getUserCreationDate, getUserInfo, updateUserInfo };
+module.exports = {
+    getAllUsersController,
+    handlePostSignup,
+    getUserCreationDate,
+    updateUserSubscription,
+    getCoachesController,
+    getCoachByIdController,
+    updateUserController,
+    getUserInfo,
+    updateUserInfo
+};
