@@ -14,11 +14,9 @@ export default function PostSignUpCallback() {
             if (!isAuthenticated || !user) return;
 
             try {
-                // Step 1: Send user info to backend
                 const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 if (!data.success) return navigate('/error');
 
-                // Step 2: Get profile from backend
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 if (profileRes.success) {
                         await syncProfileToStores(profileRes.data);
