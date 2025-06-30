@@ -38,6 +38,17 @@ CREATE TABLE [subscriptions] (
 )
 GO
 
+CREATE TABLE [users_subscriptions] (
+  [user_id] int,
+  [sub_id] int,
+  [purchased_date] DATETIME,
+  PRIMARY KEY ([user_id], [sub_id])
+)
+ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
+GO
+
+
 CREATE TABLE [subs_features] (
   [feature_id] int PRIMARY KEY IDENTITY(1, 1),
   [sub_id] int,
@@ -46,6 +57,36 @@ CREATE TABLE [subs_features] (
 GO
 
 ALTER TABLE [subs_features] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
+GO
+
+CREATE TABLE [coach_info] (
+  [coach_id] int PRIMARY KEY,
+  [years_of_exp] int,
+  [bio] nvarchar(200)
+)
+ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [coach_reviews] (
+  [review_id] int PRIMARY KEY IDENTITY(1, 1),
+  [review_content] nvarchar(200),
+  [stars] int,
+  [user_id] int,
+  [coach_id] int,
+)
+ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+
+CREATE TABLE [coach_user] (
+  [pair_id] int PRIMARY KEY IDENTITY(1, 1),
+  [coach_id] int,
+  [user_id] int,
+  [started_date] DATETIME
+)
+ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 GO
 
 CREATE TABLE [user_profiles] (

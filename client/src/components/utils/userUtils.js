@@ -65,3 +65,16 @@ export async function updateUserSubscription(user, getAccessTokenSilently, isAut
     return await res.json();
 }
 
+export async function getCoaches() {
+    const res = await fetch('http://localhost:3000/users/get-coaches', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+
+    if (!res.ok) throw new Error('Fetching coaches failed');
+
+    return await res.json();
+}
+

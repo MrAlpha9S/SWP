@@ -1,4 +1,4 @@
-const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id} = require('../services/userService');
+const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id, getCoaches} = require('../services/userService');
 
 const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
@@ -87,4 +87,14 @@ const updateUserSubscription = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription };
+const getCoachesController = async (req, res) => {
+    try {
+        const result = await getCoaches();
+        if (result.length > 0) return res.status(200).json({success: true, message: 'Fetch coaches successfully', data: result});
+    } catch (err) {
+        console.error('Error in getCoachesController:', err);
+        res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+    }
+}
+
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription, getCoachesController };

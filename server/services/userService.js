@@ -112,6 +112,25 @@ const updateUserSubscriptionService = async (user_id, subscription_id, vip_end_d
     }
 }
 
+const getCoaches = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`
+                SELECT u.*, cf.years_of_exp, cf.bio
+                FROM users u
+                INNER JOIN coach_info cf ON cf.coach_id = u.user_id
+                WHERE u.role = 'Coach'
+            `);
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in getCoaches:', error);
+        return [];
+    }
+}
+
+
+
 module.exports = {
     userExists,
     createUser,
@@ -120,5 +139,6 @@ module.exports = {
     getUserCreationDateFromAuth0Id,
     getUser,
     getUserWithSubscription,
-    updateUserSubscriptionService
+    updateUserSubscriptionService,
+    getCoaches
 };

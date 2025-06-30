@@ -4,7 +4,10 @@ use SWP391
 INSERT INTO [subscriptions] ([sub_type], [sub_name], [duration], [price])
 VALUES 
   ('free', N'Gói cơ bản', 0, 0.0),
-  ('premium-3-months', N'Gói 3 tháng', 3, 400000);
+  ('premium-1-months', N'Gói 1 tháng', 1, 300000),
+  ('premium-12-months', N'Gói 12 tháng', 12, 2400000);
+
+
 
 INSERT INTO [subs_features] ([sub_id], [feature])
 VALUES 
@@ -17,23 +20,68 @@ VALUES
   (2, N'Tạo kế hoạch cá nhân hóa với Huấn luyện viên');
 
 --Sample user info
-INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social])
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social], [sub_id], [vip_end_date], [role])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null, 1),
-('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 1),
-('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 1),
-('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1),
-('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1),
-('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1),
-('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1),
-('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1),
-('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc', 1);
---('auth0|6856601d2fbee67c66bcbf69', 'accracc2@gmail.com', 'accracc2@gmail.com', '2025-06-21 14:32:45.097','	https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0);
-
+('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null, 0, 2, '2025-07-29 00:00:00.000', 'Member'),
+('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 0, 1, null, 'Member'),
+('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 0, 1, null, 'Member'),
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1, 2, '2025-07-29T00:00:00Z', 'Member'),
+('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1, 1, null, 'Member'),
+('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1, 1, null, 'Coach'),
+('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1, 1, null, 'Coach'),
+('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1, 1, null, 'Coach'),
+('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc', 1, 1, null, 'Coach'),
+('auth0|68618755eebebacadc1644fe', N'Nguyễn Văn A', 'accracc1@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/3ccd19e78b2402bd6b6cd079b3ef3be9?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|68618779647c625e169651b2', N'Nguyễn Trần C', 'accracc3@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|6861878cd9893cf2eb2a9d36', N'Trần Thị D', 'accracc4@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|686187a33b40354d7c81e3a7', N'Trần Văn E', 'accracc5@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member');
 INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role], [is_social])
 VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
-SELECT * FROM users
+
+
+INSERT INTO [coach_info] ([coach_id], [years_of_exp], [bio]) 
+VALUES
+(6, 5, N'Đã đồng hành cùng hàng trăm người bỏ thuốc trong 5 năm qua.'),
+(7, 3, N'Chuyên gia sức khỏe cộng đồng với kinh nghiệm tư vấn cai thuốc lá.'),
+(8, 7, N'Có kinh nghiệm 7 năm trong việc hỗ trợ bệnh nhân qua các phương pháp khoa học.'),
+(9, 2, N'Tận tâm, kiên nhẫn và luôn sẵn sàng hỗ trợ người dùng vượt qua thử thách.'),
+(14, 10, N'Người tiên phong trong việc áp dụng công nghệ vào việc hỗ trợ bỏ thuốc.');
+
+
+
+select * from users
+INSERT INTO [coach_user] ([coach_id], [user_id], [started_date]) VALUES
+(6, 1, '2025-06-30T00:00:00Z'),
+(6, 4, '2025-06-30T00:00:00Z'),
+(7, 10, '2025-06-30T00:00:00Z'),
+(9, 11, '2025-06-30T00:00:00Z'),
+(14, 12, '2025-06-30T00:00:00Z'),
+(14, 13, '2025-06-30T00:00:00Z')
+
+INSERT INTO [users_subscriptions] ([user_id], [sub_id], [purchased_date])
+VALUES
+(1, 2, '2025-06-29T00:00:00Z'),
+(4, 2, '2025-06-29T00:00:00Z'),
+(10, 2, '2025-06-29T00:00:00Z'),
+(11, 2, '2025-06-29T00:00:00Z'),
+(12, 2, '2025-06-29T00:00:00Z'),
+(13, 2, '2025-06-29T00:00:00Z')
+
+INSERT INTO [coach_reviews] ([review_content], [stars], [user_id], [coach_id])
+VALUES
+(N'Rất tận tâm và hiểu tâm lý người bỏ thuốc.', 5, 1, 6),
+(N'Hướng dẫn chi tiết, dễ hiểu. Cảm ơn coach!', 4, 4, 7),
+(N'Cảm thấy được động viên rất nhiều.', 5, 10, 9),
+(N'Thái độ tốt, phản hồi hơi chậm.', 3, 11, 10),
+(N'Cung cấp lộ trình rõ ràng, dễ áp dụng.', 4, 12, 14),
+(N'Coach nhiệt tình nhưng chưa sâu sát.', 3, 13, 6),
+(N'Giúp tôi bỏ thuốc thành công sau 2 tháng.', 5, 4, 9),
+(N'Tôi rất hài lòng với sự hỗ trợ nhận được.', 5, 12, 7),
+(N'Trả lời nhanh và hữu ích.', 4, 1, 10),
+(N'Phương pháp logic, dễ áp dụng mỗi ngày.', 4, 11, 14);
+
+
 --Sample data for onboarding
 INSERT INTO user_profiles (
     user_id, readiness_value, start_date, quit_date, expected_quit_date,
