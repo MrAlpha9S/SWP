@@ -14,6 +14,7 @@ import {useQuery} from "@tanstack/react-query";
 import {getForumCategoryMetadata} from "../../components/utils/forumUtils.js";
 import {useNavigate} from "react-router-dom";
 import SideBar from "../../components/layout/forum/sideBar.jsx";
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 const SidebarLinks = [
     {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
@@ -72,49 +73,52 @@ export default function ForumPage() {
     }, []);
 
     return (
-        <div className="w-full h-full">
-            <Hero title='Cộng đồng' img='/community.png' heroHeight={heroHeight}>
-                Cộng đồng EzQuit luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
-                thuốc. Hãy khám phá những câu chuyện của người khác để tìm cảm hứng, sự động viên và động lực cho
-                riêng mình.
-                <br/>
-                Bạn cũng có thể chia sẻ trải nghiệm của bản thân, xin lời khuyên hoặc tiếp thêm sức mạnh cho người
-                khác. Đừng quên xem qua nội quy cộng đồng để giữ cho nơi đây luôn tích cực và an toàn cho tất cả mọi
-                người nhé!
-            </Hero>
-            <div className="max-w-7xl bg-primary-50 mx-auto px-14 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
-                {/* Left Section */}
-                <div className="md:col-span-3 space-y-6">
-                    {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
-                        <Card key={idx} hoverable className="bg-primary-100 border-0"
-                              onClick={() => navigate(`/forum/${section.category_tag}`)}>
-                            <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">
-                                <img src={section.img_path} alt={section.category_name}
-                                     className="size-56 object-contain"/>
-                                <div className="flex-1 space-y-4">
-                                    <h3 className="text-lg font-bold text-primary-900">{section.category_name}</h3>
-                                    <p className="text-gray-700">{section.description}</p>
-                                    <Divider orientation="horizontal"/>
-                                    <div className="flex gap-10 text-sm text-purple-900 font-semibold">
-                                        <div>
-                                            Thảo luận:
-                                            <p>{section.post_count.toLocaleString()}</p>
-                                        </div>
+        <PageFadeWrapper>
+            <div className="w-full h-full">
+                <Hero title='Cộng đồng' img='/community.png' heroHeight={heroHeight}>
+                    Cộng đồng EzQuit luôn chào đón tất cả mọi người, dù bạn đang ở giai đoạn nào trên hành trình cai
+                    thuốc. Hãy khám phá những câu chuyện của người khác để tìm cảm hứng, sự động viên và động lực cho
+                    riêng mình.
+                    <br/>
+                    Bạn cũng có thể chia sẻ trải nghiệm của bản thân, xin lời khuyên hoặc tiếp thêm sức mạnh cho người
+                    khác. Đừng quên xem qua nội quy cộng đồng để giữ cho nơi đây luôn tích cực và an toàn cho tất cả mọi
+                    người nhé!
+                </Hero>
+                <div className="max-w-7xl bg-primary-50 mx-auto px-14 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+                    {/* Left Section */}
+                    <div className="md:col-span-3 space-y-6">
+                        {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
+                            <Card key={idx} hoverable className="bg-primary-100 border-0"
+                                  onClick={() => navigate(`/forum/${section.category_tag}`)}>
+                                <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">
+                                    <img src={section.img_path} alt={section.category_name}
+                                         className="size-56 object-contain"/>
+                                    <div className="flex-1 space-y-4">
+                                        <h3 className="text-lg font-bold text-primary-900">{section.category_name}</h3>
+                                        <p className="text-gray-700">{section.description}</p>
+                                        <Divider orientation="horizontal"/>
+                                        <div className="flex gap-10 text-sm text-purple-900 font-semibold">
+                                            <div>
+                                                Thảo luận:
+                                                <p>{section.post_count.toLocaleString()}</p>
+                                            </div>
 
-                                        <div>
-                                            Bình luận:
-                                            <p>{section.comment_count.toLocaleString()}</p>
-                                        </div>
+                                            <div>
+                                                Bình luận:
+                                                <p>{section.comment_count.toLocaleString()}</p>
+                                            </div>
 
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Card>
-                    ))}
+                            </Card>
+                        ))}
+                    </div>
+                    <SideBar isInPost={true}/>
                 </div>
-                <SideBar isInPost={true}/>
             </div>
-        </div>
+        </PageFadeWrapper>
+
 
     );
 }

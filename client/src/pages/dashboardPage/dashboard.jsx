@@ -25,6 +25,7 @@ import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 
 import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -241,8 +242,9 @@ function Dashboard() {
     }
 
     return (
+
         <div className="w-full bg-primary-50 flex flex-col items-center">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} />
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole}/>
             <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
                 {dashboardHandle(userRole)}
 
@@ -251,6 +253,7 @@ function Dashboard() {
                 </div>
             </div>
         </div>
+
     )
 
 }

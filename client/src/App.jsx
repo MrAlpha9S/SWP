@@ -28,6 +28,7 @@ import BlogPost from "./pages/topicsPage/blogPost.jsx";
 import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
 import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx";
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
+import {AnimatePresence} from "framer-motion";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -48,6 +49,7 @@ function App() {
         <>
             <Navbar />
             <div className="w-full mx-auto bg-[#fff7e5]">
+                <AnimatePresence mode="wait">
             <Routes>
                 <Route path="/" element={<Homepage />} />
 
@@ -80,6 +82,7 @@ function App() {
                 <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
                 <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
             </Routes>
+                </AnimatePresence>
             </div>
             <Footer />
         </>
