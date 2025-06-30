@@ -244,7 +244,7 @@ function Dashboard() {
     return (
 
         <div className="w-full bg-primary-50 flex flex-col items-center">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole}/>
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username}/>
             <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
                 {dashboardHandle(userRole)}
 
