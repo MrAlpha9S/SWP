@@ -142,25 +142,32 @@ const getCheckInDataService = async (userAuth0Id, date = null, action = null) =>
 
 const fillMissingCheckInData = async (userAuth0Id, checkInResult) => {
     const userCreationDate = await getUserCreationDateFromAuth0Id(userAuth0Id);
-    const today = getCurrentUTCDateTime()
-    const currentDate = new Date(userCreationDate)
-    const daysFromCreationToToday = Math.floor(
-        (today - new Date(userCreationDate)) / (1000 * 60 * 60 * 24)
+    const today = getCurrentUTCDateTime();
+
+    const result = [...checkInResult]; // clone
+
+    const loggedDates = new Set(
+        result.map(r => new Date(r.logged_at).toISOString().split('T')[0])
     );
 
-    while (currentDate < today) {
-        if (!checkInResult.find(result => {
-            return new Date(result.logged_at).toISOString().split('T')[0] === currentDate.toISOString().split('T')[0]
-        })) {
-            checkInResult.push({
-                logged_at: currentDate.toISOString(),
+    let current = new Date(userCreationDate);
+    const end = new Date(today);
+    let count = 0;
+
+    while (current <= end && count < 366) {
+        const dateISO = current.toISOString().split('T')[0];
+        if (!loggedDates.has(dateISO)) {
+            result.push({
+                logged_at: new Date(current),
                 isMissed: true
-            })
+            });
         }
-        currentDate.setDate(currentDate.getUTCDate() + 1);
+        current.setUTCDate(current.getUTCDate() + 1);
+        count++;
     }
 
-    return checkInResult.sort((a, b) =>new Date(b.logged_at) - new Date(a.logged_at));
+    return result.sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
 }
+
 
 module.exports = {postCheckIn, getCheckInLogDataset, getCheckInDataService, fillMissingCheckInData};
