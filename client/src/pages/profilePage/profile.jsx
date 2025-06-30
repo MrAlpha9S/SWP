@@ -1,284 +1,321 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getUserInfo, updateUserInfo, updateUserController } from "../../components/utils/userUtils.js";
-import Hero from "../../components/layout/profilepage/hero.jsx";
-import UsernameField from "../../components/layout/profilepage/UsernameField.jsx";
-import EmailField from "../../components/layout/profilepage/EmailField.jsx";
-import RoleField from "../../components/layout/profilepage/RoleField.jsx";
-import CreatedAtField from "../../components/layout/profilepage/CreatedAtField.jsx";
-import { FaUser, FaEnvelope, FaUserTag, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCamera, FaTrash, FaEye } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getUserInfo, updateUserController } from "../../components/utils/userUtils.js";
+import { Form, Input, Button, Avatar, Modal, message, Spin, Typography } from "antd";
+import { UserOutlined, MailOutlined, UserSwitchOutlined, CalendarOutlined, CameraOutlined, EditOutlined, LockOutlined } from "@ant-design/icons";
 
-function Profile() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-    const [profile, setProfile] = useState({
-        username: "",
-        email: "",
-        avatar: "",
-        role: "",
-        created_at: ""
+// Notify component
+const Notify = {
+    success: (msg) => message.success(msg),
+    error: (msg) => message.error(msg),
+    info: (msg) => message.info(msg),
+};
+
+const { Title, Text } = Typography;
+
+const Profile = () => {
+    const { user, isAuthenticated, getAccessTokenSilently, isLoading: authLoading } = useAuth0();
+    const queryClient = useQueryClient();
+
+    const [avatarModal, setAvatarModal] = useState(false);
+    const [avatarInput, setAvatarInput] = useState("");
+    const [avatarPreview, setAvatarPreview] = useState("");
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordForm] = Form.useForm();
+    const [form] = Form.useForm();
+
+    // Fetch user info
+    const {
+        data,
+        isPending,
+        isError,
+    } = useQuery({
+        queryKey: ["profileInfo"],
+        queryFn: async () => {
+            const res = await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
+            return Array.isArray(res.data) ? res.data[0] : res.data;
+        },
+        enabled: isAuthenticated && !!user,
     });
-    const [originalProfile, setOriginalProfile] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [currentStepDashboard, setCurrentStepDashboard] = useState("profile");
-    const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-    const [showAvatarModal, setShowAvatarModal] = useState(false);
-    const navigate = useNavigate();
 
+    // Update user info
+    const mutation = useMutation({
+        mutationFn: async (values) => {
+            await updateUserController(user, getAccessTokenSilently, values);
+        },
+        onSuccess: () => {
+            Notify.success("Cập nhật thành công!");
+            queryClient.invalidateQueries(["profileInfo"]);
+        },
+        onError: () => {
+            Notify.error("Cập nhật thất bại!");
+        },
+    });
+
+    // Set form values when data loaded
     useEffect(() => {
-        if (currentStepDashboard !== "profile") {
-            // Điều hướng sang trang tương ứng nếu không phải profile
-            navigate(`/${currentStepDashboard}`);
+        if (data) {
+            form.setFieldsValue({
+                username: data.username,
+                email: data.email,
+            });
+            setAvatarPreview(data.avatar || "");
         }
-    }, [currentStepDashboard, navigate]);
+    }, [data, form]);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if (!isAuthenticated || !user) return;
-            setIsLoading(true);
-            try {
-                const data = await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
-                const userData = Array.isArray(data.data) ? data.data[0] : data.data;
-                console.log(userData)
-                const loadedProfile = {
-                    username: userData?.username || "",
-                    email: userData?.email || "",
-                    avatar: userData?.avatar || "",
-                    role: userData?.role || "",
-                    created_at: userData?.created_at || "",
-                    is_social: userData?.is_social || false // Thêm dòng này
-                };
-                setProfile(loadedProfile);
-                setOriginalProfile(loadedProfile);
-            } catch (err) {
-                setError("Không thể tải thông tin người dùng.");
-            }
-            setIsLoading(false);
-        };
-        fetchProfile();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+    if (authLoading || isPending) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <Spin size="large" />
+            </div>
+        );
+    }
 
-    const handleChange = (e) => {
-        setProfile({ ...profile, [e.target.name]: e.target.value });
+    if (isError) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <Text type="danger">Không thể tải thông tin người dùng.</Text>
+            </div>
+        );
+    }
+
+    const isSocial = data?.is_social;
+
+    // Handle avatar update
+    const handleAvatarOk = () => {
+        if (!/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(avatarInput.trim())) {
+            Notify.error("Link ảnh không hợp lệ! (phải là http(s)://...jpg/png/jpeg/gif)");
+            return;
+        }
+        mutation.mutate({
+            username: data.username,
+            email: data.email,
+            avatar: avatarInput.trim(),
+        });
+        setAvatarPreview(avatarInput.trim());
+        setAvatarModal(false);
+        setAvatarInput("");
     };
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        setError("");
-        setSuccess("");
-        try {
-            let payload;
-            if (profile.is_social) {
-                // Gửi đầy đủ thông tin hiện tại lên database, chỉ avatar là có thể thay đổi
-                payload = {
-                    username: profile.username,
-                    email: profile.email,
-                    avatar: profile.avatar
-                };
-            } else {
-                // Cho phép cập nhật tất cả
-                payload = {
-                    username: profile.username,
-                    email: profile.email,
-                    avatar: profile.avatar
-                };
-            }
-
-            // 1. Cập nhật database (luôn gửi đủ trường)
-            await updateUserInfo(user, getAccessTokenSilently, payload);
-
-            // 2. Cập nhật Auth0 (chỉ avatar nếu là social, còn lại thì gửi đủ)
-            let auth0Payload = profile.is_social
-                ? { avatar: profile.avatar }
-                : { username: profile.username, email: profile.email, avatar: profile.avatar };
-
-            await updateUserController(user, getAccessTokenSilently, auth0Payload);
-
-            setSuccess("Cập nhật thành công! Đăng xuất và đăng nhập lại để thấy thông tin mới ở Hero.");
-            setOriginalProfile(profile);
-        } catch (err) {
-            setError("Cập nhật thất bại!");
-        }
-    };
-
-    // Hàm cập nhật avatar (chọn file hoặc nhập link)
-    const handleAvatarChange = async (e) => {
-        let avatarUrl = "";
-        if (e.target.files && e.target.files[0]) {
-            // Upload lên server hoặc cloud, ở đây demo lấy URL local
-            avatarUrl = URL.createObjectURL(e.target.files[0]);
-        }
-        setProfile({ ...profile, avatar: avatarUrl });
-        setShowAvatarMenu(false);
-    };
-
-    // Hàm nhập link avatar
-    const handleAvatarLink = () => {
-        const url = prompt("Nhập link ảnh avatar:");
-        if (url) {
-            setProfile({ ...profile, avatar: url });
-        }
-        setShowAvatarMenu(false);
-    };
-
-    // Hàm xóa avatar
+    // Handle avatar remove
     const handleAvatarRemove = () => {
-        setProfile({ ...profile, avatar: "" });
-        setShowAvatarMenu(false);
+        mutation.mutate({
+            username: data.username,
+            email: data.email,
+            avatar: "",
+        });
+        setAvatarPreview("");
+    };
+
+    // Handle form submit
+    const onFinish = (values) => {
+        mutation.mutate({
+            username: values.username,
+            email: values.email,
+            avatar: avatarPreview,
+        });
+    };
+
+    const handlePasswordChange = async (values) => {
+        if (values.newPassword !== values.confirmPassword) {
+            Notify.error("Mật khẩu mới không khớp!");
+            return;
+        }
+        if (values.newPassword.length < 6) {
+            Notify.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
+            return;
+        }
+        try {
+            await updateUserController(user, getAccessTokenSilently, {
+                username: data.username,
+                email: data.email,
+                avatar: avatarPreview,
+                password: values.newPassword,
+            });
+            Notify.success("Đổi mật khẩu thành công!");
+            setShowPasswordModal(false);
+            passwordForm.resetFields();
+        } catch (err) {
+            Notify.error("Đổi mật khẩu thất bại!");
+        }
     };
 
     return (
-        <div className="bg-[#e0f7fa] min-h-screen flex flex-col">
-            <Hero
-                title="Hồ sơ cá nhân"
-                heroHeight={120}
-                username={user?.name || user?.nickname || ""}
-                role={profile.role}
-            />
-            <div className="flex flex-1 justify-center items-start py-8">
-                <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mt-2">
-                    <div className="flex flex-col items-center mb-6">
-                        <div className="relative">
-                            {profile.avatar ? (
-                                <img src={profile.avatar} alt="avatar" className="w-28 h-28 rounded-full border-4 border-primary-400 shadow object-cover" />
-                            ) : (
-                                <div className="w-28 h-28 rounded-full bg-gray-300 flex items-center justify-center text-5xl text-white shadow">
-                                    <FaUser />
-                                </div>
-                            )}
-                            {/* Nút mở menu avatar */}
-                            <button
-                                type="button"
-                                className="absolute bottom-2 right-2 bg-primary-500 text-white rounded-full p-2 shadow hover:bg-primary-600 transition"
-                                onClick={() => setShowAvatarMenu((v) => !v)}
-                                title="Tùy chọn avatar"
-                            >
-                                <FaCamera />
-                            </button>
-                            {/* Menu avatar */}
-                            {showAvatarMenu && (
-                                <div className="absolute z-10 right-0 mt-2 w-40 bg-white border rounded shadow-lg flex flex-col">
-                                    <label className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                        <FaCamera /> 
-                                        <span>Cập nhật từ file</span>
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                                    </label>
-                                    <button
-                                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-                                        onClick={handleAvatarLink}
-                                        type="button"
-                                    >
-                                        <FaCamera /> Cập nhật từ link
-                                    </button>
-                                    <button
-                                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-red-500"
-                                        onClick={handleAvatarRemove}
-                                        type="button"
-                                        disabled={!profile.avatar}
-                                    >
-                                        <FaTrash /> Xóa avatar
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+        <div className="flex flex-col items-center bg-[#e0f7fa] min-h-screen py-8">
+            <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                <Title level={2} className="text-center mb-6 text-primary-700">Hồ sơ cá nhân</Title>
+                <div className="flex flex-col items-center mb-6">
+                    <div className="relative">
+                        <Avatar
+                            size={112}
+                            src={avatarPreview || undefined}
+                            icon={<UserOutlined />}
+                            className="border-4 border-primary-400 shadow"
+                        />
+                        <Button
+                            shape="circle"
+                            icon={<CameraOutlined />}
+                            className="absolute bottom-2 right-2 bg-primary-500 text-white border-none shadow hover:bg-primary-600"
+                            onClick={() => setAvatarModal(true)}
+                        />
                     </div>
-                    {/* Modal xem avatar */}
-                    {showAvatarModal && profile.avatar && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-4 shadow-lg flex flex-col items-center">
-                                <img src={profile.avatar} alt="avatar" className="w-64 h-64 object-cover rounded-full mb-4" />
-                                <button
-                                    className="mt-2 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-                                    onClick={() => setShowAvatarModal(false)}
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    {error && (
-                        <div className="flex items-center text-red-600 mb-2 gap-2 justify-center">
-                            <FaTimesCircle /> {error}
-                        </div>
-                    )}
-                    {success && (
-                        <div className="flex items-center text-green-600 mb-2 gap-2 justify-center">
-                            <FaCheckCircle /> {success}
-                        </div>
-                    )}
-                    {isLoading ? (
-                        <div className="text-center text-primary-500 font-semibold">Đang tải...</div>
-                    ) : (
-                        <form onSubmit={handleUpdate} className="space-y-4">
-                            {/* Nếu là social chỉ cho đổi avatar, disable các trường khác */}
-                            <div>
-                                <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
-                                    <FaUser className="text-primary-400" /> Tên người dùng
-                                </label>
-                                <UsernameField
-                                    value={profile.username}
-                                    onChange={handleChange}
-                                    readOnly={profile.is_social} // Thêm dòng này
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
-                                    <FaEnvelope className="text-primary-400" /> Email
-                                </label>
-                                <EmailField
-                                    value={profile.email}
-                                    onChange={handleChange}
-                                    readOnly={profile.is_social} // Thêm dòng này
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
-                                    <FaUserTag className="text-primary-400" /> Vai trò
-                                </label>
-                                <RoleField value={profile.role} />
-                            </div>
-                            <div>
-                                <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
-                                    <FaCalendarAlt className="text-primary-400" /> Ngày tạo
-                                </label>
-                                <CreatedAtField value={profile.created_at} />
-                            </div>
-                            <button
-                                type="submit"
-                                className={`w-full mt-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2
-                                    ${(
-                                        (!profile.is_social && (
-                                            profile.username !== originalProfile.username ||
-                                            profile.email !== originalProfile.email ||
-                                            profile.avatar !== originalProfile.avatar
-                                        )) ||
-                                        (profile.is_social && profile.avatar !== originalProfile.avatar)
-                                    )
-                                        ? "bg-primary-500 hover:bg-primary-600 text-white shadow"
-                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    }`}
+                    <Button
+                        type="link"
+                        danger
+                        className="mt-2"
+                        onClick={handleAvatarRemove}
+                        disabled={!avatarPreview}
+                    >
+                        Xóa avatar
+                    </Button>
+                </div>
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={onFinish}
+                    initialValues={{
+                        username: data.username,
+                        email: data.email,
+                    }}
+                >
+                    <Form.Item
+                        label={<span className="flex items-center gap-2"><UserOutlined className="text-primary-400" /> Tên người dùng</span>}
+                        name="username"
+                        rules={[{ required: true, message: "Vui lòng nhập tên người dùng!" }]}
+                    >
+                        <Input
+                            disabled={false}
+                            placeholder="Tên người dùng"
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label={<span className="flex items-center gap-2"><MailOutlined className="text-primary-400" /> Email</span>}
+                        name="email"
+                        rules={[
+                            { required: true, message: "Vui lòng nhập email!" },
+                            { type: "email", message: "Email không hợp lệ!" },
+                        ]}
+                    >
+                        <Input
+                            disabled={isSocial}
+                            placeholder="Email"
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        label={<span className="flex items-center gap-2"><UserSwitchOutlined className="text-primary-400" /> Vai trò</span>}
+                    >
+                        <Input value={data.role} disabled />
+                    </Form.Item>
+                    <Form.Item
+                        label={<span className="flex items-center gap-2"><CalendarOutlined className="text-primary-400" /> Ngày tạo</span>}
+                    >
+                        <Input value={data.created_at} disabled />
+                    </Form.Item>
+                    <Form.Item shouldUpdate>
+                        {() => (
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white shadow"
+                                icon={<EditOutlined />}
                                 disabled={
-                                    !(
-                                        (!profile.is_social && (
-                                            profile.username !== originalProfile.username ||
-                                            profile.email !== originalProfile.email ||
-                                            profile.avatar !== originalProfile.avatar
-                                        )) ||
-                                        (profile.is_social && profile.avatar !== originalProfile.avatar)
+                                    mutation.isPending ||
+                                    (
+                                        form.getFieldValue("username") === data.username &&
+                                        form.getFieldValue("email") === data.email &&
+                                        avatarPreview === (data.avatar || "")
                                     )
                                 }
+                                loading={mutation.isPending}
                             >
-                                <FaCheckCircle />
                                 Cập nhật
-                            </button>
-                        </form>
-                    )}
-                </div>
+                            </Button>
+                        )}
+                    </Form.Item>
+                </Form>
+                <Button
+                    type="primary"
+                    icon={<LockOutlined />}
+                    className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick={() => setShowPasswordModal(true)}
+                >
+                    Đổi mật khẩu
+                </Button>
             </div>
+            {/* Modal cập nhật avatar */}
+            <Modal
+                title="Cập nhật avatar từ link"
+                open={avatarModal}
+                onOk={handleAvatarOk}
+                onCancel={() => setAvatarModal(false)}
+                okText="Cập nhật"
+                cancelText="Hủy"
+            >
+                <Input
+                    placeholder="Dán link ảnh (http...)"
+                    value={avatarInput}
+                    onChange={e => setAvatarInput(e.target.value)}
+                    suffix={<CameraOutlined />}
+                />
+            </Modal>
+            {/* Modal đổi mật khẩu */}
+            <Modal
+                title="Đổi mật khẩu"
+                open={showPasswordModal}
+                onCancel={() => setShowPasswordModal(false)}
+                footer={null}
+            >
+                <Form
+                    form={passwordForm}
+                    layout="vertical"
+                    onFinish={handlePasswordChange}
+                >
+                    <Form.Item
+                        label="Mật khẩu cũ"
+                        name="oldPassword"
+                        rules={[{ required: true, message: "Vui lòng nhập mật khẩu cũ!" }]}
+                    >
+                        <Input.Password placeholder="Mật khẩu cũ" />
+                    </Form.Item>
+                    <Form.Item
+                        label="Mật khẩu mới"
+                        name="newPassword"
+                        rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
+                    >
+                        <Input.Password placeholder="Mật khẩu mới" />
+                    </Form.Item>
+                    <Form.Item
+                        label="Xác nhận mật khẩu mới"
+                        name="confirmPassword"
+                        dependencies={["newPassword"]}
+                        rules={[
+                            { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue("newPassword") === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error("Mật khẩu xác nhận không khớp!"));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password placeholder="Xác nhận mật khẩu mới" />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                            Đổi mật khẩu
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
-}
+};
 
 export default Profile;

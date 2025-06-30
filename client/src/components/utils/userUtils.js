@@ -70,9 +70,7 @@ export async function updateUserInfo(user, getAccessTokenSilently, { username, e
     return await res.json();
 }
 
-// ...existing code...
-
-export async function updateUserController(user, getAccessTokenSilently, { username, email, avatar }) {
+export async function updateUserController(user, getAccessTokenSilently, { username, email, avatar, password }) {
     const token = await getAccessTokenSilently();
 
     const res = await fetch("http://localhost:3000/users/update-user", {
@@ -85,7 +83,8 @@ export async function updateUserController(user, getAccessTokenSilently, { usern
             userAuth0Id: user.sub,
             username,
             email,
-            avatar
+            avatar,
+            password
         })
     });
 

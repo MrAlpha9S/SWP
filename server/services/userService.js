@@ -129,15 +129,15 @@ const updateUserService = async (auth0_id, username = null, email = null, avatar
         const updates = [];
         const inputs = {};
 
-        if (username) {
+        if (username !== undefined && username !== null) {
             updates.push('username = @username');
             inputs.username = username;
         }
-        if (email) {
+        if (email !== undefined && email !== null) {
             updates.push('email = @email');
             inputs.email = email;
         }
-        if (avatar) {
+        if (avatar !== undefined && avatar !== null) {
             updates.push('avatar = @avatar');
             inputs.avatar = avatar;
         }
