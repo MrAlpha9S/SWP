@@ -26,8 +26,10 @@ import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
 import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
-import PaymentPage from './pages/paymentPage/paymentpage.jsx';
-import PaymentSuccess from './pages/paymentPage/PaymentSuccess';
+import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx";
+import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
+import {AnimatePresence} from "framer-motion";
+import Profile from "./pages/profilePage/profile.jsx";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -48,6 +50,7 @@ function App() {
         <>
             <Navbar />
             <div className="w-full mx-auto bg-[#fff7e5]">
+                <AnimatePresence mode="wait">
             <Routes>
                 <Route path="/" element={<Homepage />} />
 
@@ -67,6 +70,7 @@ function App() {
                 <Route path="/error" element={<ErrorPage />} />
                 <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
                 <Route path="/my-profile" element={<MyProfile/>}></Route>
+                <Route path="/profile" element={<Profile/>}></Route>
                 <Route path="/forum" element={<ForumPage />}></Route>
 
                 <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
@@ -77,9 +81,10 @@ function App() {
                 <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
                 <Route path="/subscription" element={<SubscriptionPage/>}></Route>
-                <Route path="/payment" element={<PaymentPage />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
+                <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
             </Routes>
+                </AnimatePresence>
             </div>
             <Footer />
         </>

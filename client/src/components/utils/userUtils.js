@@ -31,20 +31,110 @@ export async function getUserCreationDate(user, getAccessTokenSilently, isAuthen
     return res.json();
 }
 
-export async function getUser(user, getAccessTokenSilently, isAuthenticated) {
+export async function getUserInfo(user, getAccessTokenSilently, isAuthenticated) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/getUser/${user.sub}`, {
+    const res = await fetch(`http://localhost:3000/users/info?userAuth0Id=${user.sub}`, {
         method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return await res.json();
+}
+
+export async function updateUserInfo(user, getAccessTokenSilently, { username, email, avatar }) {
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/info", {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userAuth0Id: user.sub,
+            username,
+            email,
+            avatar
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}
+
+export async function updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId) {
+    if (!isAuthenticated || !user) return;
+    const token = await getAccessTokenSilently();
+    const res = await fetch('http://localhost:3000/users/update-subscription', {
+        method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        
-    });
+        body: JSON.stringify({userAuth0Id: user.sub, subscriptionId: subscriptionId})
+    })
 
-    return res.json();
+    if (!res.ok) throw new Error('Subscription update failed');
+
+    return await res.json();
 }
 
+export async function getCoaches() {
+    const res = await fetch('http://localhost:3000/users/get-coaches', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+
+    if (!res.ok) throw new Error('Fetching coaches failed');
+
+    return await res.json();
+}
+
+export async function getCoachById(coachId) {
+    const res = await fetch('http://localhost:3000/users/coaches/' + coachId, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+
+    if (!res.ok) throw new Error('Fetching coaches failed');
+
+    return await res.json();
+}
+
+// ...existing code...
+
+export async function updateUserController(user, getAccessTokenSilently, { username, email, avatar }) {
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/update-user", {
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userAuth0Id: user.sub,
+            username,
+            email,
+            avatar
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}

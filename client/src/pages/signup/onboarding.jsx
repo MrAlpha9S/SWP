@@ -23,6 +23,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import ModalFooter from "../../components/ui/modalFooter.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import PremiumBadge from "../../components/ui/premiumBadge.jsx";
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 const planTipsCollapseItems = [
     {
@@ -79,7 +80,7 @@ const Onboarding = () => {
                 if (from === 'savings') {
                     setCurrentStep(2);
                 } else if (from === 'progress-board-startdate' || from === 'progress-board-plan') {
-                    setCurrentStep(4);
+                    setCurrentStep(0);
                 } else {
                     setCurrentStep(6)
                 }
@@ -89,10 +90,9 @@ const Onboarding = () => {
                 setIsModalOpen(true);
             }
         }
-        if (from === 'newUser') {
+        if (from === 'newUser' || from === 'newSubscriptionPage') {
             setCurrentStep(6);
         }
-        console.log(userInfo)
     }, [])
 
     const stepsItems = React.useMemo(() => [
@@ -107,7 +107,9 @@ const Onboarding = () => {
         },
         {
             title: readinessValue === 'ready' ? 'Lên kế hoạch' : 'Kết quả & theo dõi',
-            icon: (userInfo && userInfo.sub_id === 1 || !userInfo) && <div className='relative h-6 w-20'><FaCrown/> <PremiumBadge className='absolute top-[-10px] right-2'/></div>,
+            icon: (userInfo && userInfo.sub_id === 1 || !userInfo) &&
+                <div className='relative h-6 w-20'><FaCrown/> <PremiumBadge className='absolute top-[-10px] right-2'/>
+                </div>,
         },
         {
             title: 'Tổng kết',
@@ -116,22 +118,8 @@ const Onboarding = () => {
     ], [readinessValue]);
 
     const toPreviousPage = () => {
-        const isFreeUser = !userInfo || userInfo.sub_id === 1;
-
         if (currentStep > 0) {
-            if (isFreeUser) {
-                // Treat as free user
-                if (currentStep === 6) {
-                    setCurrentStep(2);
-                } else if (currentStep > 2 && currentStep <= 5) {
-                    setCurrentStep(2);
-                } else {
-                    setCurrentStep(currentStep - 1);
-                }
-            } else {
-                // Premium user
-                setCurrentStep(currentStep - 1);
-            }
+            setCurrentStep(currentStep - 1);
         }
     };
 
@@ -181,11 +169,7 @@ const Onboarding = () => {
                         removeError(errorMsgCigsPerDay)
                     }
                     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack) && cigsPerDay > 0 && Number.isInteger(cigsPerDay)) {
-                        if (userInfo.sub_id === 1) {
-                            setCurrentStep(6)
-                        } else {
-                            setCurrentStep(currentStep + 1)
-                        }
+                        setCurrentStep(currentStep + 1)
                     }
                     // } else {
                     //     if (pricePerPack > 0 && cigsPerPack > 0 && Number.isInteger(cigsPerPack)) {
@@ -238,7 +222,7 @@ const Onboarding = () => {
                     }
                     break;
                 }
-                case 4: {
+                case 5: {
                     const errorMsgStartDate = errorMap["startDate"];
                     const errorMsgCigsPerDay = errorMap["cigsPerDay"];
                     const errorMsgQuitMethod = errorMap["quitMethod"];
@@ -247,80 +231,87 @@ const Onboarding = () => {
                     const errorMsgStoppedDate = errorMap["stoppedDate"];
                     const errorMsgCigsReducedLarge = errorMap["cigsReducedLarge"]
 
-                    if (readinessValue === 'ready') {
-                        if (startDate.length === 0) {
-                            addError(errorMsgStartDate)
-                        } else {
-                            removeError(errorMsgStartDate)
-                        }
-                        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
-                            addError(errorMsgCigsPerDay)
-                        } else {
-                            removeError(errorMsgCigsPerDay)
-                        }
-                        if (quittingMethod.length === 0) {
-                            addError(errorMsgQuitMethod)
-                        } else {
-                            removeError(errorMsgQuitMethod)
-                        }
-                        if (cigsReduced > cigsPerDay) {
-                            addError(errorMsgCigsReducedLarge)
-                        } else {
-                            removeError(errorMsgCigsReducedLarge)
-                        }
-                        if (quittingMethod === 'target-date') {
-                            if (expectedQuitDate.length === 0) {
-                                addError(errorMsgExpectedQuitDate);
+                    if (!userInfo || userInfo.sub_id === 1) {
+                        setCurrentStep(currentStep + 1);
+                    } else {
+                        if (readinessValue === 'ready') {
+                            if (startDate.length === 0) {
+                                addError(errorMsgStartDate)
                             } else {
+                                removeError(errorMsgStartDate)
+                            }
+                            if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
+                                addError(errorMsgCigsPerDay)
+                            } else {
+                                removeError(errorMsgCigsPerDay)
+                            }
+                            if (quittingMethod.length === 0) {
+                                addError(errorMsgQuitMethod)
+                            } else {
+                                removeError(errorMsgQuitMethod)
+                            }
+                            if (cigsReduced > cigsPerDay) {
+                                addError(errorMsgCigsReducedLarge)
+                            } else {
+                                removeError(errorMsgCigsReducedLarge)
+                            }
+                            if (quittingMethod === 'target-date') {
+                                if (expectedQuitDate.length === 0) {
+                                    addError(errorMsgExpectedQuitDate);
+                                } else {
+                                    removeError(errorMsgExpectedQuitDate);
+                                }
+                                removeError(errorMsgCigsReduced);
+                            } else {
+                                if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                                    addError(errorMsgCigsReduced);
+                                } else {
+                                    removeError(errorMsgCigsReduced);
+                                }
                                 removeError(errorMsgExpectedQuitDate);
                             }
-                            removeError(errorMsgCigsReduced);
-                        } else {
-                            if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
-                                addError(errorMsgCigsReduced);
-                            } else {
-                                removeError(errorMsgCigsReduced);
+                            if (startDate.length > 0 &&
+                                cigsPerDay > 0 &&
+                                quittingMethod.length > 0 &&
+                                ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
+                                setCurrentStep(currentStep + 1)
                             }
-                            removeError(errorMsgExpectedQuitDate);
-                        }
-                        if (startDate.length > 0 &&
-                            cigsPerDay > 0 &&
-                            quittingMethod.length > 0 &&
-                            ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
-                            setCurrentStep(currentStep + 1)
-                        }
-                    } else {
-                        if (stoppedDate.length === 0) {
-                            addError(errorMsgStoppedDate)
                         } else {
-                            removeError(errorMsgStoppedDate)
-                        }
-                        if (stoppedDate.length > 0) {
-                            setCurrentStep(currentStep + 1)
+                            if (stoppedDate.length === 0) {
+                                addError(errorMsgStoppedDate)
+                            } else {
+                                removeError(errorMsgStoppedDate)
+                            }
+                            if (stoppedDate.length > 0) {
+                                setCurrentStep(currentStep + 1)
+                            }
                         }
                     }
 
 
                     break;
                 }
-                case 5: {
+                case 4: {
                     const errorMsgGoalAmount = errorMap["goalAmount"];
                     const errorMsgGoalList = errorMap["goalList"];
                     if (createGoalChecked) {
                         if (goalList.length === 0) {
                             addError(errorMsgGoalList);
-                        }
-                        if (goalAmount <= 0) {
-                            addError(errorMsgGoalAmount);
-                        }
-                        if (goalList.length > 0 && goalAmount > 0) {
+                            if (goalAmount <= 0) {
+                                addError(errorMsgGoalAmount);
+                            }
+                            if (goalList.length > 0 && goalAmount > 0) {
+                                setCurrentStep(currentStep + 1)
+                            } else {
+                                setCurrentStep(currentStep + 1)
+                            }
+                        } else {
                             setCurrentStep(currentStep + 1)
                         }
+                        break;
                     } else {
                         setCurrentStep(currentStep + 1)
                     }
-
-                    break;
                 }
             }
         }
@@ -473,79 +464,84 @@ const Onboarding = () => {
 
     const scrollRef = useRef(null);
     return (
-        <div className='w-full bg-white'>
-            <div className='flex flex-col'>
-                <Modal
-                    title="Kế hoạch đã tồn tại"
-                    closable={{'aria-label': 'Custom Close Button'}}
-                    open={isModalOpen}
-                    onOk={() => setIsModalOpen(false)}
-                    onCancel={() => navigate('/')}
-                    centered
-                    maskClosable
-                    closeIcon={null}
-                    footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu' onOk={() => setIsModalOpen(false)}
-                                         onCancel={() => {
-                                             setIsModalOpen(false)
-                                             navigate('/')
-                                         }}/>}
-                >
-                    <p>
-                        Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và nhấn <strong>'Hoàn
-                        tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
-                    </p>
-                    <p>
-                        Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
-                    </p>
+        <PageFadeWrapper>
+            <div className='w-full bg-white'>
+                <div className='flex flex-col'>
+                    <Modal
+                        title="Kế hoạch đã tồn tại"
+                        closable={{'aria-label': 'Custom Close Button'}}
+                        open={isModalOpen}
+                        onOk={() => setIsModalOpen(false)}
+                        onCancel={() => navigate('/')}
+                        centered
+                        maskClosable
+                        closeIcon={null}
+                        footer={<ModalFooter cancelText='Trở lại' okText='Tôi đã hiểu'
+                                             onOk={() => setIsModalOpen(false)}
+                                             onCancel={() => {
+                                                 setIsModalOpen(false)
+                                                 navigate('/')
+                                             }}/>}
+                    >
+                        <p>
+                            Bạn đã có một kế hoạch trước đó. Nếu bạn <strong>thực hiện thay đổi</strong> và
+                            nhấn <strong>'Hoàn
+                            tất'</strong>, kế hoạch mới <strong>sẽ thay thế</strong> kế hoạch cũ.
+                        </p>
+                        <p>
+                            Nếu bạn muốn giữ lại kế hoạch cũ, hãy nhấn <strong>'Trở lại'</strong> để quay về trang chủ.
+                        </p>
 
 
-                </Modal>
-                <Hero/>
-                <div className='flex flex-col mx-auto max-w-[1280px] bg-white'>
-                    <div className='flex flex-col h-full  gap-14 p-14'>
+                    </Modal>
+                    <Hero/>
+                    <div className='flex flex-col mx-auto max-w-[1280px] bg-white'>
+                        <div className='flex flex-col h-full  gap-14 p-14'>
 
-                        {currentStep !== 6 &&
-                            <div className="flex flex-col w-full bg-white">
-                                <Collapse
-                                    className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
-                                />
+                            {currentStep !== 6 &&
+                                <div className="flex flex-col w-full bg-white">
+                                    <Collapse
+                                        className='w-[70%]' items={planTipsCollapseItems} defaultActiveKey={['1']}
+                                    />
+                                </div>
+                            }
+
+                            <Steps
+                                ref={scrollRef}
+                                className='bg-white'
+                                current={currentStep}
+                                onChange={onChangeSteps}
+                                labelPlacement="vertical"
+                                items={stepsItems}
+                            />
+
+                            <div className='flex flex-col gap-8 bg-white'>
+                                {currentStep === 0 && <Readiness/>}
+                                {currentStep === 1 && <Reason/>}
+                                {currentStep === 2 && <CigInfo/>}
+                                {currentStep === 3 && <SmokingRoutine/>}
+                                {currentStep === 4 && <SetGoals/>}
+                                {currentStep === 5 && <SetPlan/>}
+                                {currentStep === 6 && <Summary/>}
                             </div>
-                        }
-
-                        <Steps
-                            ref={scrollRef}
-                            className='bg-white'
-                            current={currentStep}
-                            onChange={onChangeSteps}
-                            labelPlacement="vertical"
-                            items={stepsItems}
-                        />
-
-                        <div className='flex flex-col gap-14 bg-white'>
-                            {currentStep === 0 && <Readiness/>}
-                            {currentStep === 1 && <Reason/>}
-                            {currentStep === 2 && <CigInfo/>}
-                            {currentStep === 3 && <SmokingRoutine/>}
-                            {currentStep === 4 && <SetPlan/>}
-                            {currentStep === 5 && <SetGoals/>}
-                            {currentStep === 6 && <Summary/>}
-                        </div>
-                        <div className='flex justify-between gap-5 w-full'>
-                            {currentStep !== 0 && (
-                                <CustomButton type="secondary" onClick={() => toPreviousPage()}>
-                                    Trở lại <FaArrowLeft/>
+                            <div className='flex justify-between gap-5 w-full'>
+                                {currentStep !== 0 && (
+                                    <CustomButton type="secondary" onClick={() => toPreviousPage()}>
+                                        Trở lại <FaArrowLeft/>
+                                    </CustomButton>
+                                )}
+                                <CustomButton className='next-btn' type="primary" onClick={() => {
+                                    currentStep !== 6 ? toNextPage() : handleSave();
+                                }}>
+                                    {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
                                 </CustomButton>
-                            )}
-                            <CustomButton className='next-btn' type="primary" onClick={() => {
-                                currentStep !== 6 ? toNextPage() : handleSave();
-                            }}>
-                                {currentStep !== 6 ? <>Tiếp tục <FaArrowRight/></> : 'Hoàn tất'}
-                            </CustomButton>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </PageFadeWrapper>
+
 
     )
 };

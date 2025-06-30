@@ -21,10 +21,10 @@ function Hero() {
             <div className="absolute inset-0 bg-primary-600 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
             <div className="relative z-10 w-[75%]">
               <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-                Tôi muốn tự bắt đầu
+                Tôi chỉ cần công cụ theo dõi cơ bản
               </h2>
               <p>
-                Bạn muốn chủ động trong hành trình bỏ thuốc? Hãy sử dụng công cụ của ứng dụng để tạo kế hoạch, theo dõi tiến trình và xây dựng thói quen sống không khói thuốc – hoàn toàn miễn phí.
+                Bạn muốn chủ động trong hành trình bỏ thuốc? Ứng dụng cung cấp các công cụ theo dõi cơ bản và các hoạt động hỗ trợ cai thuốc - hoàn toàn miễn phí.
               </p>
               <div className="w-full flex justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-700 mt-4">
                 <CustomButton type='whitePrimary' onClick={() => navigate('/onboarding')}>Bắt đầu ngay</CustomButton>
@@ -36,8 +36,8 @@ function Hero() {
           <div className="relative w-[50%] hover:-translate-y-16 transition-all duration-700 flex justify-start overflow-hidden group p-4">
             <div className="absolute inset-0 bg-secondary-400 opacity-70 group-hover:opacity-100 transition-opacity duration-700 z-0 "></div>
             <div className="relative z-10 w-[75%]">
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Tôi muốn tham gia khoá học bài bản</h2>
-              <p>Bạn cần một lộ trình rõ ràng và người đồng hành đáng tin cậy? Khoá học với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng giai đoạn sẽ giúp bạn bỏ thuốc dễ dàng hơn và duy trì kết quả bền vững.</p>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Tôi cần một kế hoạch</h2>
+              <p>Bạn cần một lộ trình rõ ràng và người đồng hành đáng tin cậy? Kế hoạch với lộ trình rõ ràng, có huấn luyện viên hướng dẫn từng giai đoạn sẽ giúp bạn bỏ thuốc dễ dàng hơn và duy trì kết quả bền vững.</p>
               <div className="w-full flex justify-start opacity-0 group-hover:opacity-100 transition-opacity duration-700 mt-4">
                 <CustomButton onClick={() => navigate('/subscription')} type='whiteSecondary' >Tìm hiểu thêm</CustomButton>
               </div>

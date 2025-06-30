@@ -43,14 +43,18 @@ const postUserProfile = async (userAuth0Id,
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
 
+        console.log('ex', expectedQuitDate)
+        console.log('startDate', startDate)
+        console.log('stoppedDate', stoppedDate)
+
         if (actionType !== 'update') {
 
             const result = await pool.request()
                 .input('userId', sql.Int, userId)
                 .input('readiness', sql.VarChar(20), readiness)
-                .input('startDate', sql.DateTime, startDate ?? null)
-                .input('quitDate', sql.DateTime, stoppedDate ?? null)
-                .input('expectedQuitDate', sql.DateTime, expectedQuitDate)
+                .input('startDate', sql.DateTime, startDate && startDate.length >0 ? startDate : null)
+                .input('quitDate', sql.DateTime, stoppedDate && stoppedDate.length > 0 ? stoppedDate : null)
+                .input('expectedQuitDate', sql.DateTime, expectedQuitDate && expectedQuitDate.length > 0 ? expectedQuitDate : null)
                 .input('cigsPerDay', sql.Int, cigsPerDay)
                 .input('cigsPerPack', sql.Int, cigsPerPack)
                 .input('pricePerPack', sql.Decimal(10, 2), pricePerPack)

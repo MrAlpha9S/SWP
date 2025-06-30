@@ -121,11 +121,6 @@ export const usePlanStore = create((set) => ({
     }),
 }))
 
-export const useQuittingMethodStore = create((set) => ({
-    quittingMethod: '',
-    setQuittingMethod: (value) => set({quittingMethod: value}),
-}))
-
 export const useErrorStore = create((set) => ({
     errors: [],
     addError: (error) =>
@@ -152,6 +147,10 @@ export const useGoalsStore = create((set) => ({
     removeGoal: (goalId) =>
         set((state) => ({
             goalList: state.goalList.filter((g) => g.goalId !== goalId)
+        })),
+    removeGoalWithName: (goalName) =>
+        set((state) => ({
+            goalList: state.goalList.filter((g) => g.goalName !== goalName)
         })),
     addGoal: (goal) =>
         set((state) =>

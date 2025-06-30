@@ -4,7 +4,10 @@ use SWP391
 INSERT INTO [subscriptions] ([sub_type], [sub_name], [duration], [price])
 VALUES 
   ('free', N'Gói cơ bản', 0, 0.0),
-  ('premium-3-months', N'Gói 3 tháng', 3, 400000);
+  ('premium-1-months', N'Gói 1 tháng', 1, 300000),
+  ('premium-12-months', N'Gói 12 tháng', 12, 2400000);
+
+
 
 INSERT INTO [subs_features] ([sub_id], [feature])
 VALUES 
@@ -17,23 +20,121 @@ VALUES
   (2, N'Tạo kế hoạch cá nhân hóa với Huấn luyện viên');
 
 --Sample user info
-INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social])
+INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social], [sub_id], [vip_end_date], [role])
 VALUES 
-('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null, 1),
-('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 1),
-('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 1),
-('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1),
-('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1),
-('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1),
-('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1),
-('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1),
-('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc', 1);
---('auth0|6856601d2fbee67c66bcbf69', 'accracc2@gmail.com', 'accracc2@gmail.com', '2025-06-21 14:32:45.097','	https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0);
-
+('auth0|abc123', 'john_doe', 'john@example.com', '2025-05-15 00:00:00', null, 0, 2, '2025-07-29 00:00:00.000', 'Member'),
+('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 0, 1, null, 'Member'),
+('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 0, 1, null, 'Member'),
+('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1, 2, '2025-07-29T00:00:00Z', 'Member'),
+('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1, 1, null, 'Member'),
+('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1, 1, null, 'Coach'),
+('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1, 1, null, 'Coach'),
+('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1, 1, null, 'Coach'),
+('facebook|1285613699562777', N'Lươn Thế Bụt', '', '2025-06-19 10:37:50.413', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1285613699562777&height=50&width=50&ext=1752896270&hash=AT8_ElB83fsHopCIE12tvARc', 1, 1, null, 'Coach'),
+('auth0|68618755eebebacadc1644fe', N'Nguyễn Văn A', 'accracc1@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/3ccd19e78b2402bd6b6cd079b3ef3be9?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|68618779647c625e169651b2', N'Nguyễn Trần C', 'accracc3@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|6861878cd9893cf2eb2a9d36', N'Trần Thị D', 'accracc4@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member'),
+('auth0|686187a33b40354d7c81e3a7', N'Trần Văn E', 'accracc5@gmail.com', '2025-06-19 10:37:50.413', 'https://s.gravatar.com/avatar/9087d22c25140893d3a57bb3fc52b552?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fac.png', 0, 2, '2025-07-29T00:00:00Z', 'Member');
 INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role], [is_social])
 VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
-SELECT * FROM users
+
+
+INSERT INTO coach_info (coach_id, years_of_exp, bio, detailed_bio, motto)
+VALUES 
+(6, 5, N'Tư vấn viên tâm lý với kinh nghiệm hỗ trợ cai thuốc lá.',
+N'Tôi là một tư vấn viên tâm lý đã đồng hành cùng hàng trăm học viên trên hành trình từ bỏ thuốc lá. Bằng cách kết hợp giữa phương pháp khoa học, lắng nghe sâu sắc và hỗ trợ cá nhân hóa, tôi giúp học viên hiểu rõ nguyên nhân sâu xa khiến họ hút thuốc và tìm ra chiến lược phù hợp để vượt qua. Với tôi, mỗi hành trình là duy nhất và cần được thiết kế riêng cho từng người.',
+N'Cai thuốc là một hành trình chứ không phải điểm đến.'),
+
+(7, 8, N'Chuyên gia sức khỏe cộng đồng từng công tác tại các bệnh viện lớn.',
+N'Tôi đã có hơn 8 năm làm việc trong lĩnh vực sức khỏe cộng đồng, đặc biệt là hỗ trợ người dân từ bỏ thói quen hút thuốc lá. Kinh nghiệm làm việc tại các bệnh viện tuyến đầu giúp tôi hiểu rõ ảnh hưởng của thuốc lá đến sức khỏe con người. Tôi tin rằng với sự hỗ trợ đúng đắn và lòng kiên trì, bất cứ ai cũng có thể từ bỏ thuốc và sống một cuộc sống khỏe mạnh, trọn vẹn hơn.',
+N'Hãy chọn một lý do đủ lớn để bắt đầu.'),
+
+(8, 3, N'Chuyên gia hỗ trợ thanh thiếu niên và người trẻ tuổi trong việc cai thuốc.',
+N'Với hơn 3 năm kinh nghiệm làm việc với các bạn trẻ, tôi nhận ra rằng việc cai thuốc không chỉ là từ bỏ một thói quen, mà còn là hành trình xây dựng lại niềm tin vào bản thân. Tôi sử dụng các phương pháp thực hành tư duy tích cực, thiết lập mục tiêu và thay đổi hành vi để hỗ trợ học viên tìm lại sự kiểm soát trong cuộc sống và xây dựng một lối sống lành mạnh hơn.',
+N'Thói quen mới sẽ thay thế thói quen cũ.'),
+
+(9, 10, N'Chuyên gia hành vi nhận thức (CBT) với hơn 10 năm kinh nghiệm.',
+N'Tôi chuyên sử dụng liệu pháp hành vi nhận thức (CBT) để giúp người nghiện thuốc lá nhận diện và điều chỉnh các suy nghĩ tiêu cực và hành vi tự hủy hoại bản thân. Trong hơn một thập kỷ, tôi đã hỗ trợ nhiều học viên không chỉ từ bỏ thuốc lá, mà còn xây dựng lại sự tự tin, cải thiện sức khỏe tinh thần và duy trì cuộc sống không khói thuốc một cách bền vững.',
+N'Cai thuốc là bắt đầu của một phiên bản tốt hơn của chính bạn.'),
+
+(14, 6, N'Chuyên gia tư vấn sức khỏe tâm thần và cai thuốc trong cộng đồng.',
+N'Là một chuyên gia tư vấn tâm lý chuyên làm việc với các tổ chức cộng đồng, tôi tập trung vào việc xây dựng chương trình cai thuốc toàn diện, từ động lực nội tại đến hỗ trợ xã hội. Tôi hiểu rằng mỗi người đều có hoàn cảnh riêng, vì vậy tôi luôn bắt đầu bằng việc lắng nghe và cùng học viên tạo ra một kế hoạch phù hợp, thực tế và hiệu quả.',
+N'Bạn không cần làm điều này một mình.');
+
+select * from users
+INSERT INTO [coach_user] ([coach_id], [user_id], [started_date]) VALUES
+(6, 1, '2025-06-30T00:00:00Z'),
+(6, 4, '2025-06-30T00:00:00Z'),
+(7, 10, '2025-06-30T00:00:00Z'),
+(9, 11, '2025-06-30T00:00:00Z'),
+(14, 12, '2025-06-30T00:00:00Z'),
+(14, 13, '2025-06-30T00:00:00Z')
+
+INSERT INTO [users_subscriptions] ([user_id], [sub_id], [purchased_date])
+VALUES
+(1, 2, '2025-06-29T00:00:00Z'),
+(4, 2, '2025-06-29T00:00:00Z'),
+(10, 2, '2025-06-29T00:00:00Z'),
+(11, 2, '2025-06-29T00:00:00Z'),
+(12, 2, '2025-06-29T00:00:00Z'),
+(13, 2, '2025-06-29T00:00:00Z')
+
+INSERT INTO [coach_reviews] ([review_content], [stars], [user_id], [coach_id], [created_date])
+VALUES
+(N'Rất tận tâm và hiểu tâm lý người bỏ thuốc.', 5, 1, 6, '2025-06-18T00:00:00Z'),
+(N'Hướng dẫn chi tiết, dễ hiểu. Cảm ơn coach!', 4, 4, 7, '2025-06-15T00:00:00Z'),
+(N'Cảm thấy được động viên rất nhiều.', 5, 10, 9, '2025-06-25T00:00:00Z'),
+(N'Thái độ tốt, phản hồi hơi chậm.', 3, 11, 10, '2025-06-12T00:00:00Z'),
+(N'Cung cấp lộ trình rõ ràng, dễ áp dụng.', 4, 12, 14, '2025-06-23T00:00:00Z'),
+(N'Coach nhiệt tình nhưng chưa sâu sát.', 3, 13, 6, '2025-06-22T00:00:00Z'),
+(N'Giúp tôi bỏ thuốc thành công sau 2 tháng.', 5, 4, 9, '2025-06-18T00:00:00Z'),
+(N'Tôi rất hài lòng với sự hỗ trợ nhận được.', 5, 12, 7, '2025-06-21T00:00:00Z'),
+(N'Trả lời nhanh và hữu ích.', 4, 1, 10, '2025-06-29T00:00:00Z'),
+(N'Phương pháp logic, dễ áp dụng mỗi ngày.', 4, 11, 14, '2025-06-30T00:00:00Z');
+
+-- Coach 6
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Hỗ trợ tâm lý khi cai thuốc', 1, 6),
+(N'Tư vấn theo liệu pháp hành vi', 1, 6),
+(N'Hơn 100 học viên thành công', 0, 6),
+(N'Trình độ Thạc sĩ Tâm lý học lâm sàng', 0, 6);
+
+-- Coach 7
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Cai thuốc cho người mắc bệnh nền', 1, 7),
+(N'Tư vấn nhóm và cá nhân', 1, 7),
+(N'Từng công tác tại bệnh viện Chợ Rẫy', 0, 7),
+(N'Được trao giải Sáng kiến sức khỏe cộng đồng', 0, 7);
+
+-- Coach 8
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Hỗ trợ thanh thiếu niên & người trẻ tuổi', 1, 8),
+(N'Xây dựng thói quen mới sau khi cai thuốc', 1, 8),
+(N'Từng cộng tác với các trường THPT lớn', 0, 8),
+(N'Khách mời chương trình radio “Sức khỏe tuổi teen”', 0, 8);
+
+-- Coach 9
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Liệu pháp hành vi nhận thức (CBT)', 1, 9),
+(N'Cai thuốc kết hợp hỗ trợ tâm lý', 1, 9),
+(N'Hơn 300 ca thành công lâu dài', 0, 9),
+(N'Tác giả sách “Vượt qua thuốc lá bằng CBT”', 0, 9);
+
+-- Coach 14
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Cai thuốc trong môi trường cộng đồng', 1, 14),
+(N'Tư vấn trực tiếp và trực tuyến', 1, 14),
+(N'Từng phối hợp với Sở Y tế địa phương', 0, 14),
+(N'Chứng nhận Quốc tế về Tư vấn Cai thuốc (CTC)', 0, 14);
+
+
+
 --Sample data for onboarding
 INSERT INTO user_profiles (
     user_id, readiness_value, start_date, quit_date, expected_quit_date,

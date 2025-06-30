@@ -1,12 +1,22 @@
 import React from 'react';
-import {Radio} from "antd";
-import {useErrorStore, useQuitReadinessStore} from "../../../stores/store.js";
+import {DatePicker, Radio} from "antd";
+import {useErrorStore, usePlanStore, useQuitReadinessStore} from "../../../stores/store.js";
 import {checkboxStyle, readinessRadioOptions} from "../../../constants/constants.js";
 import ErrorText from "../../ui/errorText.jsx";
+import {
+    convertDDMMYYYYStrToYYYYMMDDStr,
+} from "../../utils/dateUtils.js";
+import dayjs from "dayjs";
 
 const Readiness = () => {
     const {readinessValue, setReadinessValue} = useQuitReadinessStore();
     const {errors} = useErrorStore();
+    const {
+        startDate,
+        setStartDate,
+        stoppedDate,
+        setStoppedDate,
+    } = usePlanStore();
 
     const onChangeCheckbox = (event) => {
         setReadinessValue(event.target.value);
@@ -25,7 +35,7 @@ const Readiness = () => {
                     hiện tại của bạn để chúng tôi có thể hỗ trợ bạn đúng cách, đúng lúc.
                 </p>
             </div>
-            <div className='my-[-30px]'>
+            <div className='my-[-20px]'>
                 {errors.map((error, index) => {
                     if (error.atPage === 'readiness') {
                         return (
@@ -42,9 +52,61 @@ const Readiness = () => {
                 size="large"
                 style={checkboxStyle}
             />
-            <div>
-                Đã chọn: {readinessValue}
-            </div>
+            {readinessValue === 'ready' && <>
+                <label htmlFor="startDate" className="text-left font-bold text-base md:text-lg mb-[-56px]">
+                    Hãy chọn ngày mà bạn quyết định bắt đầu hành trình cai thuốc:
+                </label>
+
+                <div className='my-[-30]'>
+                    {errors.map((error, index) => {
+                        if (error.location === "startDate") {
+                            return (
+                                <ErrorText key={index}>{error.message}</ErrorText>
+                            )
+                        }
+                    })}
+                </div>
+
+                <DatePicker className='h-[42px]' onChange={(date, dateString) => {
+                    setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
+                }} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>
+            </>}
+
+            {readinessValue === "relapse-support" &&
+                <>
+                    <div className="text-left text-sm md:text-base">
+                        <p>
+                            Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng
+                            thẳng,
+                            mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp
+                            bạn theo
+                            dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào
+                            ngày
+                            bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông
+                            tin đó
+                            cho bạn theo dõi để có động lực duy trì tình trạng ngừng hút hơn.
+                        </p>
+                    </div>
+                    <form className="w-[60%] flex flex-col gap-3">
+                        <div className='text-left font-bold text-base md:text-lg'>
+                            <h3>Hãy chọn ngày mà bạn đã ngừng hút</h3>
+                        </div>
+
+                        <div className='my-[-30]'>
+                            {errors.map((error, index) => {
+                                if (error.location === "stoppedDate") {
+                                    return (
+                                        <ErrorText key={index}>{error.message}</ErrorText>
+                                    )
+                                }
+                            })}
+                        </div>
+                        <DatePicker className='h-[42px]' onChange={(date, dateString) => {
+                            setStoppedDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
+                        }} format={'DD-MM-YYYY'} value={stoppedDate ? dayjs(stoppedDate) : ''} allowClear={false}/>
+
+                    </form>
+                </>}
         </>
     );
 };

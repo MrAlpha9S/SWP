@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import {  useAuth0, withAuthenticationRequired} from '@auth0/auth0-react';
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 const topics = [
   {
@@ -57,49 +58,52 @@ const topics = [
 const TopicsPage = () => {
     const navigate = useNavigate();
   return (
-    <div className="bg-primary-50 min-h-screen w-full mx-auto flex flex-col items-center px-4 md:px-12 py-12">
-      <div className="flex flex-col max-w-[1280px]">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl font-bold text-primary-800 mb-4">Bài viết</h1>
-            <p className="text-gray-700 text-lg">
-              Bỏ thuốc lá là một hành trình, và việc có thông tin đúng vào đúng thời điểm sẽ rất hữu ích. Cho dù bạn
-              chỉ đang nghĩ đến việc bỏ thuốc hay đã thực hiện bước đầu tiên, các chủ đề của chúng tôi ở đây để hướng dẫn và hỗ trợ
-              bạn.
-            </p>
-          </div>
-          {/* Right image placeholder (replace with actual image if needed) */}
-          <div className="w-[300px] h-[220px] bg-primary-100 rounded-lg flex items-center justify-center">
-            {/* placeholder */}
-            <span className="text-primary-400">[Image]</span>
+      <PageFadeWrapper>
+        <div className="bg-primary-50 min-h-screen w-full mx-auto flex flex-col items-center px-4 md:px-12 py-12">
+          <div className="flex flex-col max-w-[1280px]">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="max-w-2xl">
+                <h1 className="text-4xl font-bold text-primary-800 mb-4">Bài viết</h1>
+                <p className="text-gray-700 text-lg">
+                  Bỏ thuốc lá là một hành trình, và việc có thông tin đúng vào đúng thời điểm sẽ rất hữu ích. Cho dù bạn
+                  chỉ đang nghĩ đến việc bỏ thuốc hay đã thực hiện bước đầu tiên, các chủ đề của chúng tôi ở đây để hướng dẫn và hỗ trợ
+                  bạn.
+                </p>
+              </div>
+              {/* Right image placeholder (replace with actual image if needed) */}
+              <div className="w-[300px] h-[220px] bg-primary-100 rounded-lg flex items-center justify-center">
+                {/* placeholder */}
+                <span className="text-primary-400">[Image]</span>
+              </div>
+            </div>
+
+            {/* Cards */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {topics.map((topic, index) => (
+                  <button
+                      onClick={() => navigate('/topics' + topic.navigator)}
+                      key={index}
+                      className="bg-white hover:bg-primary-50 transition p-6 rounded-xl shadow-md border border-gray-100"
+                  >
+                    {/* Top image placeholder */}
+                    <div className="w-full h-[120px] bg-primary-100 mb-4 rounded-md flex items-center justify-center">
+                      <span className="text-primary-400">[Image]</span>
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-primary-800">{topic.title}</h3>
+                    <p className="text-gray-600 mt-2 text-sm">{topic.description}</p>
+
+                    <div className="mt-4 text-primary-700 flex items-center gap-1 text-sm font-medium cursor-pointer hover:underline">
+                      <ArrowRightOutlined />
+                    </div>
+                  </button>
+              ))}
+            </div>
           </div>
         </div>
+      </PageFadeWrapper>
 
-        {/* Cards */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {topics.map((topic, index) => (
-              <button
-                  onClick={() => navigate('/topics' + topic.navigator)}
-                  key={index}
-                  className="bg-white hover:bg-primary-50 transition p-6 rounded-xl shadow-md border border-gray-100"
-              >
-                {/* Top image placeholder */}
-                <div className="w-full h-[120px] bg-primary-100 mb-4 rounded-md flex items-center justify-center">
-                  <span className="text-primary-400">[Image]</span>
-                </div>
-
-                <h3 className="text-lg font-semibold text-primary-800">{topic.title}</h3>
-                <p className="text-gray-600 mt-2 text-sm">{topic.description}</p>
-
-                <div className="mt-4 text-primary-700 flex items-center gap-1 text-sm font-medium cursor-pointer hover:underline">
-                  <ArrowRightOutlined />
-                </div>
-              </button>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 };
 

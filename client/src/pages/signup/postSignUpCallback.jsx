@@ -14,27 +14,39 @@ export default function PostSignUpCallback() {
             if (!isAuthenticated || !user) return;
 
             try {
-                // Step 1: Send user info to backend
                 const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 if (!data.success) return navigate('/error');
 
-                // Step 2: Get profile from backend
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-                const profile = profileRes?.data;
-                if (profile.success !== false) {
-                    await syncProfileToStores(profile);
+                if (profileRes.success) {
+                        await syncProfileToStores(profileRes.data);
                 }
 
-                // Step 3: If there's local onboarding override, apply it last
+                const referrerPayment = localStorage.getItem("referrerPayment");
+                if (referrerPayment) {
+                    try {
+                        const localReferrer = JSON.parse(referrerPayment);
+                        if (localReferrer.referrer === 'subscriptionPagePayment') {
+                            localStorage.removeItem('referrerPayment');
+                            return navigate('/subscription');
+                        }
+                    } catch (e) {
+                        console.error('Failed to redirect on payment referrer:', e);
+                        return navigate('/');
+                    }
+                }
+
                 const stored = localStorage.getItem('onboarding_profile');
                 if (stored) {
                     try {
                         const localProfile = JSON.parse(stored);
-                        syncProfileToStores(localProfile);
+                        await syncProfileToStores(localProfile);
                         localStorage.removeItem('onboarding_profile');
                         useCurrentStepStore.getState().setCurrentStep(6);
                         useProfileExists.getState().setIsProfileExist(false);
-                        return navigate('/onboarding/newUser');
+                        if (localProfile.referrer.length > 0) {
+                            return navigate(`/onboarding/${localProfile.referrer}`);
+                        }
                     } catch (e) {
                         console.error('Failed to restore onboarding profile:', e);
                         return navigate('/');
