@@ -1,7 +1,18 @@
 const { getAllUsers } = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser, allMember} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
+
+const handleAllMember = async (req, res) => {
+    try {
+        
+        const members = await allMember();
+        return res.status(200).json({ data: members });
+    } catch (error) {
+        console.error('Error in handleAllMember:', error);
+        return res.status(500).json({ error: 'Failed to handleAllMember' });
+    }
+};
 
 const handlePostSignup = async (req, res) => {
     const {userAuth0Id} = req.body;
@@ -62,4 +73,4 @@ const getUserCreationDate = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController };
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, handleAllMember };

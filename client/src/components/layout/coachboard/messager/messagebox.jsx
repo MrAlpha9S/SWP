@@ -6,12 +6,10 @@ import { SendOutlined } from '@ant-design/icons';
 import { SendMessage } from '../../../utils/messagerUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils'
-import io from 'socket.io-client';
 
 const { TextArea } = Input;
 
-export default function MessageBox({ messages, conversation_id }) {
-  const socketRef = useRef(null);
+export default function MessageBox({ messages, conversation_id, onEmitMessage }) {
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
@@ -19,51 +17,15 @@ export default function MessageBox({ messages, conversation_id }) {
 
   const conversationId = conversation_id;
 
-  // Initialize socket connection
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io("http://localhost:3001", {
-        withCredentials: true,
-        transports: ['websocket', 'polling']
-      });
-
-      socketRef.current.on('connect', () => {
-        console.log('Connected to socket server');
-        socketRef.current.emit('join_conversation', conversationId);
-      });
-
-      socketRef.current.on('disconnect', () => {
-        console.log('Disconnected from socket server');
-      });
-
-      socketRef.current.on('new_message', (message) => {
-        console.log('New message received:', message);
-        queryClient.invalidateQueries({ queryKey: ['messageConversations'] });
-      });
-
-      socketRef.current.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
-      });
-    }
-
-    // Cleanup function
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [conversationId, queryClient]);
-
   const sendMessageMutation = useMutation({
     mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at }) => {
       return await SendMessage(user, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
     },
     onSuccess: (data) => {
       console.log('Message sent successfully');
-      // Emit message to socket for real-time updates
-      if (socketRef.current) {
-        socketRef.current.emit('send_message', {
+      // Emit message to socket for real-time updates through parent component
+      if (onEmitMessage) {
+        onEmitMessage({
           conversationId,
           message: data
         });

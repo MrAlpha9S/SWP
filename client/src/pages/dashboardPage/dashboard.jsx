@@ -194,7 +194,7 @@ function Dashboard() {
             case 'badges':
                 return <BadgesMenu />;
             case 'messager':
-                return <Messager />
+                return <Messager role={userIn4[0].role} />
             case 'post-blog':
                 return <PostBlog />
 

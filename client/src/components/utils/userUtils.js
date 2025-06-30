@@ -48,3 +48,21 @@ export async function getUser(user, getAccessTokenSilently, isAuthenticated) {
     return res.json();
 }
 
+export async function GetAllMembers(user, getAccessTokenSilently, isAuthenticated) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/getAllMembers`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+
+    });
+
+    return await res.json();
+}
+
+
