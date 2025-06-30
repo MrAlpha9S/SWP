@@ -117,10 +117,34 @@ const getCoaches = async () => {
         const pool = await poolPromise;
         const result = await pool.request()
             .query(`
-                SELECT u.*, cf.years_of_exp, cf.bio
+                SELECT
+                    u.user_id,
+                    u.auth0_id,
+                    u.avatar,
+                    u.username,
+                    u.email,
+                    u.role,
+                    u.created_at,
+                    u.updated_at,
+                    u.sub_id,
+                    u.vip_end_date,
+                    u.isBanned,
+                    u.is_social,
+                    ci.coach_id,
+                    ci.years_of_exp,
+                    ci.bio,
+                    COUNT(DISTINCT cu.user_id) AS total_users,
+                    AVG(cr.stars * 1.0) AS avg_star,
+                    COUNT(DISTINCT cr.user_id) AS num_reviewers
                 FROM users u
-                INNER JOIN coach_info cf ON cf.coach_id = u.user_id
+                         LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
+                         LEFT JOIN coach_user cu ON ci.coach_id = cu.coach_id
+                         LEFT JOIN coach_reviews cr ON u.user_id = cr.coach_id
                 WHERE u.role = 'Coach'
+                GROUP BY
+                    u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role,
+                    u.created_at, u.updated_at, u.sub_id, u.vip_end_date, u.isBanned, u.is_social,
+                    ci.coach_id, ci.years_of_exp, ci.bio
             `);
         return result.recordset;
     } catch (error) {

@@ -68,18 +68,18 @@ VALUES
 (12, 2, '2025-06-29T00:00:00Z'),
 (13, 2, '2025-06-29T00:00:00Z')
 
-INSERT INTO [coach_reviews] ([review_content], [stars], [user_id], [coach_id])
+INSERT INTO [coach_reviews] ([review_content], [stars], [user_id], [coach_id], [created_date])
 VALUES
-(N'Rất tận tâm và hiểu tâm lý người bỏ thuốc.', 5, 1, 6),
-(N'Hướng dẫn chi tiết, dễ hiểu. Cảm ơn coach!', 4, 4, 7),
-(N'Cảm thấy được động viên rất nhiều.', 5, 10, 9),
-(N'Thái độ tốt, phản hồi hơi chậm.', 3, 11, 10),
-(N'Cung cấp lộ trình rõ ràng, dễ áp dụng.', 4, 12, 14),
-(N'Coach nhiệt tình nhưng chưa sâu sát.', 3, 13, 6),
-(N'Giúp tôi bỏ thuốc thành công sau 2 tháng.', 5, 4, 9),
-(N'Tôi rất hài lòng với sự hỗ trợ nhận được.', 5, 12, 7),
-(N'Trả lời nhanh và hữu ích.', 4, 1, 10),
-(N'Phương pháp logic, dễ áp dụng mỗi ngày.', 4, 11, 14);
+(N'Rất tận tâm và hiểu tâm lý người bỏ thuốc.', 5, 1, 6, '2025-06-18T00:00:00Z'),
+(N'Hướng dẫn chi tiết, dễ hiểu. Cảm ơn coach!', 4, 4, 7, '2025-06-15T00:00:00Z'),
+(N'Cảm thấy được động viên rất nhiều.', 5, 10, 9, '2025-06-25T00:00:00Z'),
+(N'Thái độ tốt, phản hồi hơi chậm.', 3, 11, 10, '2025-06-12T00:00:00Z'),
+(N'Cung cấp lộ trình rõ ràng, dễ áp dụng.', 4, 12, 14, '2025-06-23T00:00:00Z'),
+(N'Coach nhiệt tình nhưng chưa sâu sát.', 3, 13, 6, '2025-06-22T00:00:00Z'),
+(N'Giúp tôi bỏ thuốc thành công sau 2 tháng.', 5, 4, 9, '2025-06-18T00:00:00Z'),
+(N'Tôi rất hài lòng với sự hỗ trợ nhận được.', 5, 12, 7, '2025-06-21T00:00:00Z'),
+(N'Trả lời nhanh và hữu ích.', 4, 1, 10, '2025-06-29T00:00:00Z'),
+(N'Phương pháp logic, dễ áp dụng mỗi ngày.', 4, 11, 14, '2025-06-30T00:00:00Z');
 
 
 --Sample data for onboarding

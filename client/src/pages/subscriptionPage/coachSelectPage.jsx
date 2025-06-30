@@ -4,113 +4,6 @@ import CoachCard from '../../components/layout/coachboard/CoachCard';
 import {getCoaches} from "../../components/utils/userUtils.js";
 import {useQuery} from "@tanstack/react-query";
 
-// const coaches = [
-//     {
-//         id: 1,
-//         name: "Sarah Johnson",
-//         title: "Certified Life Coach & Wellness Expert",
-//         specialty: "Life Coaching",
-//         image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.9,
-//         reviews: 127,
-//         experience: 8,
-//         hourlyRate: 85,
-//         description: "Passionate about helping individuals discover their true potential and create meaningful change in their lives. Specializing in personal development, goal setting, and work-life balance.",
-//         tags: ["Personal Development", "Goal Setting", "Work-Life Balance", "Mindfulness", "Stress Management"]
-//     },
-//     {
-//         id: 2,
-//         name: "Michael Chen",
-//         title: "Executive Business Coach",
-//         specialty: "Business Coaching",
-//         image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.8,
-//         reviews: 89,
-//         experience: 12,
-//         hourlyRate: 150,
-//         description: "Former Fortune 500 executive turned coach. I help leaders and entrepreneurs scale their businesses while maintaining their core values and vision.",
-//         tags: ["Leadership", "Strategy", "Team Building", "Entrepreneurship", "Scaling"]
-//     },
-//     {
-//         id: 3,
-//         name: "Emily Rodriguez",
-//         title: "Career Transition Specialist",
-//         specialty: "Career Coaching",
-//         image: "https://images.pexels.com/photos/1181391/pexels-photo-1181391.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.7,
-//         reviews: 156,
-//         experience: 6,
-//         hourlyRate: 95,
-//         description: "Dedicated to helping professionals navigate career transitions, negotiate salaries, and build fulfilling careers aligned with their values and aspirations.",
-//         tags: ["Career Change", "Resume Building", "Interview Prep", "Salary Negotiation", "Professional Growth"]
-//     },
-//     {
-//         id: 4,
-//         name: "Dr. James Wilson",
-//         title: "Health & Wellness Coach",
-//         specialty: "Health & Wellness",
-//         image: "https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.9,
-//         reviews: 203,
-//         experience: 15,
-//         hourlyRate: 120,
-//         description: "Medical doctor turned wellness coach. I combine medical expertise with holistic approaches to help clients achieve optimal health and vitality.",
-//         tags: ["Nutrition", "Fitness", "Mental Health", "Preventive Care", "Lifestyle Medicine"]
-//     },
-//     {
-//         id: 5,
-//         name: "Amanda Foster",
-//         title: "Executive Leadership Coach",
-//         specialty: "Executive Coaching",
-//         image: "https://images.pexels.com/photos/1181424/pexels-photo-1181424.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.8,
-//         reviews: 94,
-//         experience: 10,
-//         hourlyRate: 180,
-//         description: "Empowering C-suite executives and senior leaders to excel in their roles while fostering high-performing, inclusive teams and sustainable business growth.",
-//         tags: ["C-Suite Coaching", "Team Performance", "Change Management", "Strategic Planning", "Executive Presence"]
-//     },
-//     {
-//         id: 6,
-//         name: "David Kim",
-//         title: "Relationship & Communication Coach",
-//         specialty: "Relationship Coaching",
-//         image: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.6,
-//         reviews: 78,
-//         experience: 7,
-//         hourlyRate: 100,
-//         description: "Helping individuals and couples build stronger, more authentic relationships through improved communication, emotional intelligence, and conflict resolution skills.",
-//         tags: ["Communication", "Conflict Resolution", "Emotional Intelligence", "Couples Therapy", "Family Dynamics"]
-//     },
-//     {
-//         id: 7,
-//         name: "Lisa Thompson",
-//         title: "Performance & Productivity Coach",
-//         specialty: "Life Coaching",
-//         image: "https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.7,
-//         reviews: 112,
-//         experience: 9,
-//         hourlyRate: 110,
-//         description: "Specialist in helping high achievers optimize their performance, overcome procrastination, and create systems for sustained success and fulfillment.",
-//         tags: ["Performance Optimization", "Time Management", "Productivity Systems", "Habit Formation", "Peak Performance"]
-//     },
-//     {
-//         id: 8,
-//         name: "Robert Martinez",
-//         title: "Small Business Growth Coach",
-//         specialty: "Business Coaching",
-//         image: "https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400",
-//         rating: 4.8,
-//         reviews: 67,
-//         experience: 14,
-//         hourlyRate: 125,
-//         description: "Passionate about helping small business owners and startups build profitable, sustainable businesses through strategic planning, marketing, and operational excellence.",
-//         tags: ["Small Business", "Marketing Strategy", "Operations", "Financial Planning", "Growth Hacking"]
-//     }
-// ];
-
 function CoachSelectPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [coaches, setCoaches] = useState([]);
@@ -137,11 +30,15 @@ function CoachSelectPage() {
 
             return matchesSearch ;
         });
-    }, [searchTerm]);
+    }, [searchTerm, coaches]);
 
     const handleSearch = (term) => {
         setSearchTerm(term);
     };
+
+    useEffect(() => {
+        console.log(filteredCoaches)
+    }, [filteredCoaches, searchTerm])
 
     return (
         <div className="min-h-screen bg-gray-50">

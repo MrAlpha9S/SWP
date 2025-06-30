@@ -73,6 +73,7 @@ CREATE TABLE [coach_reviews] (
   [stars] int,
   [user_id] int,
   [coach_id] int,
+  [created_date] DATETIME,
 )
 ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])

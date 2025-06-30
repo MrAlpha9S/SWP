@@ -50,23 +50,23 @@ const SearchFilter = ({ onSearch, onFilterSpecialty }) => {
                     </div>
                 </div>
 
-                <div className="lg:w-64">
-                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-2">
-                        Filter by Specialty
-                    </label>
-                    <select
-                        id="specialty"
-                        value={selectedSpecialty}
-                        onChange={handleSpecialtyChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white"
-                    >
-                        {specialties.map((specialty) => (
-                            <option key={specialty} value={specialty}>
-                                {specialty}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                {/*<div className="lg:w-64">*/}
+                {/*    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-2">*/}
+                {/*        Filter by Specialty*/}
+                {/*    </label>*/}
+                {/*    <select*/}
+                {/*        id="specialty"*/}
+                {/*        value={selectedSpecialty}*/}
+                {/*        onChange={handleSpecialtyChange}*/}
+                {/*        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white"*/}
+                {/*    >*/}
+                {/*        {specialties.map((specialty) => (*/}
+                {/*            <option key={specialty} value={specialty}>*/}
+                {/*                {specialty}*/}
+                {/*            </option>*/}
+                {/*        ))}*/}
+                {/*    </select>*/}
+                {/*</div>*/}
             </div>
         </div>
     );

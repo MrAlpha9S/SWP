@@ -1,4 +1,10 @@
+
+import {Modal} from "antd";
+import React, {useState} from "react";
+
 const CoachCard = ({coach}) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     return (
         <div
             className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-primary-200 transition-all duration-300 group flex flex-col">
@@ -27,7 +33,7 @@ const CoachCard = ({coach}) => {
                                 <svg
                                     key={i}
                                     className={`w-4 h-4 ${
-                                        i < Math.floor(coach.rating) ? 'text-yellow-400' : 'text-gray-200'
+                                        i < Math.floor(coach.avg_star) ? 'text-yellow-400' : 'text-gray-200'
                                     }`}
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
@@ -37,7 +43,7 @@ const CoachCard = ({coach}) => {
                                 </svg>
                             ))}
                         </div>
-                        <span className="ml-2 text-sm text-gray-600">({5})</span>
+                        <span className="ml-2 text-sm text-gray-600">({coach.num_reviewers})</span>
                     </div>
                 </div>
 
@@ -46,6 +52,11 @@ const CoachCard = ({coach}) => {
                 <div className="flex items-center justify-between mb-4">
                     <div className="text-sm text-gray-500">
                         <span className="font-medium text-gray-900">{coach.years_of_exp}</span> năm kinh nghiệm
+                    </div>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-500">
+                        <span className="font-medium text-gray-900">{coach.total_users}</span> người đã chọn
                     </div>
                 </div>
 
@@ -74,10 +85,19 @@ const CoachCard = ({coach}) => {
                     Chọn
                 </button>
                 <button
+                    onClick={() => setIsModalOpen(true)}
                     className="px-4 py-2.5 border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-700 font-medium rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                     Xem chi tiết
                 </button>
             </div>
+            <Modal
+                width={700}
+                open={isModalOpen}
+                centered
+                onCancel={() => setIsModalOpen(false)}
+            >
+               Thông tin thêm
+            </Modal>
         </div>
     );
 };
