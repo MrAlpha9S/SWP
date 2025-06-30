@@ -26,6 +26,8 @@ import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
 import BlogPost from "./pages/topicsPage/blogPost.jsx";
 import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
+import PaymentPage from './pages/paymentPage/paymentpage.jsx';
+import PaymentSuccess from './pages/paymentPage/PaymentSuccess';
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -75,6 +77,8 @@ function App() {
                 <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
                 <Route path="/subscription" element={<SubscriptionPage/>}></Route>
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
             </Routes>
             </div>
             <Footer />
