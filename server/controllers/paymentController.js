@@ -1,36 +1,45 @@
-const axios = require('axios');
+const PayOS = require("@payos/node");
 const crypto = require('crypto');
 
+const payos = new PayOS(process.env.PAYOS_CLIENT_ID, process.env.PAYOS_API_KEY, process.env.PAYOS_CHEKSUM_KEY);
+
 const createOrder = async (req, res) => {
-    const { amount, returnUrl, description } = req.body;
+    const { amount, description, returnUrl } = req.body;
     try {
         const orderCode = Date.now();
         const cancelUrl = returnUrl;
 
-        // Tạo signature đúng chuẩn
-        const rawData = `amount=${amount}&cancelUrl=${cancelUrl}&description=${description}&orderCode=${orderCode}&returnUrl=${returnUrl}`;
-        const signature = crypto.createHmac('sha256', process.env.PAYOS_CHEKSUM_KEY)
-            .update(rawData)
-            .digest('hex');
+        const order = {
+            amount: amount,
+            description: description,
+            orderCode: orderCode,
+            items: [
+                {
+                    name: description,
+                    quantity: 1,
+                    price: amount
+                }
+            ],
+            returnUrl: returnUrl,
+            cancelUrl: cancelUrl,
+        };
 
-        const response = await axios.post('https://api-merchant.payos.vn/v2/payment-requests', {
-            orderCode,
-            amount,
-            description,
-            cancelUrl,
-            returnUrl,
-            signature
-        }, {
-            headers: {
-                'x-client-id': process.env.PAYOS_CLIENT_ID,
-                'x-api-key': process.env.PAYOS_API_KEY,
-            }
-        });
+        const paymentLink = await payos.createPaymentLink(order);
+        res.json({ payUrl: paymentLink.checkoutUrl });
 
-        res.json({ payUrl: response.data.data.checkoutUrl });
     } catch (err) {
-        console.error('PayOS error:', err.response?.data || err.message);
-        res.status(500).json({ error: 'Tạo order thất bại', detail: err.response?.data || err.message });
+        console.error('PayOS error:', err);
+        if (err.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            res.status(500).json({ error: 'Tạo order thất bại', detail: err.response.data });
+        } else if (err.request) {
+            // The request was made but no response was received
+            res.status(500).json({ error: 'Tạo order thất bại', detail: 'No response from PayOS server' });
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            res.status(500).json({ error: 'Tạo order thất bại', detail: err.message });
+        }
     }
 };
 
