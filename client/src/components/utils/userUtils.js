@@ -78,3 +78,16 @@ export async function getCoaches() {
     return await res.json();
 }
 
+export async function getCoachById(coachId) {
+    const res = await fetch('http://localhost:3000/users/coaches/' + coachId, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+
+    if (!res.ok) throw new Error('Fetching coaches failed');
+
+    return await res.json();
+}
+

@@ -1,4 +1,4 @@
-const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id, getCoaches} = require('../services/userService');
+const { getAllUsers, updateUserSubscriptionService, getUserIdFromAuth0Id, getCoaches, getCoachDetailsById} = require('../services/userService');
 
 const {userExists, createUser, getUserCreationDateFromAuth0Id, getUser} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
@@ -71,7 +71,6 @@ const updateUserSubscription = async (req, res) => {
         const today = getCurrentUTCDateTime().toISOString();
         const vip_end_date = new Date(today);
         const subsInfo = await getSubscriptionService(subscriptionId);
-        const price = subsInfo.price
         const duration = subsInfo.duration
         vip_end_date.setMonth(vip_end_date.getUTCMonth() + duration);
         const updateResult = await updateUserSubscriptionService(user_id, subscriptionId, vip_end_date.toISOString());
@@ -97,4 +96,34 @@ const getCoachesController = async (req, res) => {
     }
 }
 
-module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription, getCoachesController };
+const getCoachByIdController = async (req, res) => {
+    const coachId = Number(req.params.coachId);
+
+    try {
+        const result = await getCoachDetailsById(coachId);
+
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: 'Coach not found',
+                data: null
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Fetched coach successfully',
+            data: result
+        });
+    } catch (err) {
+        console.error('Error in getCoachByIdController:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error: ' + err.message,
+            data: null
+        });
+    }
+};
+
+
+module.exports = { getAllUsersController, handlePostSignup, getUserCreationDate, getUserController, updateUserSubscription, getCoachesController, getCoachByIdController };

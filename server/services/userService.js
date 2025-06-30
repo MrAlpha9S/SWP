@@ -153,6 +153,98 @@ const getCoaches = async () => {
     }
 }
 
+const getCoachDetailsById = async (coachId) => {
+    try {
+        const pool = await poolPromise;
+
+        // Fetch coach profile
+        const coachResult = await pool.request()
+            .input('coach_id', coachId)
+            .query(`
+                SELECT 
+                    u.user_id,
+                    u.avatar,
+                    u.username,
+                    u.email,
+                    u.role,
+                    ci.years_of_exp,
+                    ci.bio,
+                    ci.detailed_bio,
+                    ci.motto,
+                    (
+                        SELECT COUNT(*) 
+                        FROM coach_user cu 
+                        WHERE cu.coach_id = u.user_id
+                    ) AS total_students,
+                    (
+                        SELECT AVG(CAST(stars AS FLOAT)) 
+                        FROM coach_reviews cr 
+                        WHERE cr.coach_id = u.user_id
+                    ) AS avg_star,
+                    (
+                        SELECT COUNT(DISTINCT cr.user_id) 
+                        FROM coach_reviews cr 
+                        WHERE cr.coach_id = u.user_id
+                    ) AS num_reviews
+                FROM users u
+                LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
+                WHERE u.user_id = @coach_id AND u.role = 'Coach'
+            `);
+
+        if (coachResult.recordset.length === 0) {
+            return null; // No coach found
+        }
+
+        const coach = coachResult.recordset[0];
+
+        // Fetch specialties
+        const specialtiesResult = await pool.request()
+            .input('coach_id', coachId)
+            .query(`
+                SELECT content 
+                FROM coach_specialties_achievements 
+                WHERE coach_id = @coach_id AND is_specialties = 1
+            `);
+
+        // Fetch achievements
+        const achievementsResult = await pool.request()
+            .input('coach_id', coachId)
+            .query(`
+                SELECT content 
+                FROM coach_specialties_achievements 
+                WHERE coach_id = @coach_id AND is_specialties = 0
+            `);
+
+        // Fetch latest 3 reviews
+        const reviewsResult = await pool.request()
+            .input('coach_id', coachId)
+            .query(`
+                SELECT 
+                    cr.review_content,
+                    cr.stars,
+                    cr.created_date,
+                    u.username AS reviewer_name
+                FROM coach_reviews cr
+                JOIN users u ON cr.user_id = u.user_id
+                WHERE cr.coach_id = @coach_id
+                ORDER BY cr.created_date DESC
+                OFFSET 0 ROWS FETCH NEXT 3 ROWS ONLY
+            `);
+
+        return {
+            coach,
+            specialties: specialtiesResult.recordset.map(r => r.content),
+            achievements: achievementsResult.recordset.map(r => r.content),
+            reviews: reviewsResult.recordset
+        };
+
+    } catch (error) {
+        console.error('Error in getCoachDetailsById:', error);
+        return null;
+    }
+};
+
+
 
 
 module.exports = {
@@ -164,5 +256,6 @@ module.exports = {
     getUser,
     getUserWithSubscription,
     updateUserSubscriptionService,
-    getCoaches
+    getCoaches,
+    getCoachDetailsById
 };

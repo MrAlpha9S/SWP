@@ -1,6 +1,7 @@
 
 import {Modal} from "antd";
 import React, {useState} from "react";
+import CoachDetailsPage from "../../../pages/subscriptionPage/coachDetailsPage.jsx";
 
 const CoachCard = ({coach}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -95,8 +96,9 @@ const CoachCard = ({coach}) => {
                 open={isModalOpen}
                 centered
                 onCancel={() => setIsModalOpen(false)}
+                footer={null}
             >
-               Thông tin thêm
+               <CoachDetailsPage coachId={coach.user_id} />
             </Modal>
         </div>
     );
