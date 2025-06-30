@@ -62,10 +62,20 @@ GO
 CREATE TABLE [coach_info] (
   [coach_id] int PRIMARY KEY,
   [years_of_exp] int,
-  [bio] nvarchar(200)
+  [bio] nvarchar(200),
+  [detailed_bio] nvarchar(max),
+  [motto] nvarchar(100),
 )
 ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 GO
+
+CREATE TABLE [coach_specialties_achievements] (
+  [id] int PRIMARY KEY IDENTITY(1, 1),
+  [content] nvarchar(50),
+  [is_specialties] BIT,
+  [coach_id] int
+)
+ALTER TABLE [coach_specialties_achievements] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 
 CREATE TABLE [coach_reviews] (
   [review_id] int PRIMARY KEY IDENTITY(1, 1),

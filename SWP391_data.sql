@@ -40,15 +40,27 @@ VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
 
 
-INSERT INTO [coach_info] ([coach_id], [years_of_exp], [bio]) 
-VALUES
-(6, 5, N'Đã đồng hành cùng hàng trăm người bỏ thuốc trong 5 năm qua.'),
-(7, 3, N'Chuyên gia sức khỏe cộng đồng với kinh nghiệm tư vấn cai thuốc lá.'),
-(8, 7, N'Có kinh nghiệm 7 năm trong việc hỗ trợ bệnh nhân qua các phương pháp khoa học.'),
-(9, 2, N'Tận tâm, kiên nhẫn và luôn sẵn sàng hỗ trợ người dùng vượt qua thử thách.'),
-(14, 10, N'Người tiên phong trong việc áp dụng công nghệ vào việc hỗ trợ bỏ thuốc.');
+INSERT INTO coach_info (coach_id, years_of_exp, bio, detailed_bio, motto)
+VALUES 
+(6, 5, N'Tư vấn viên tâm lý với kinh nghiệm hỗ trợ cai thuốc lá.',
+N'Tôi là một tư vấn viên tâm lý đã đồng hành cùng hàng trăm học viên trên hành trình từ bỏ thuốc lá. Bằng cách kết hợp giữa phương pháp khoa học, lắng nghe sâu sắc và hỗ trợ cá nhân hóa, tôi giúp học viên hiểu rõ nguyên nhân sâu xa khiến họ hút thuốc và tìm ra chiến lược phù hợp để vượt qua. Với tôi, mỗi hành trình là duy nhất và cần được thiết kế riêng cho từng người.',
+N'Cai thuốc là một hành trình chứ không phải điểm đến.'),
 
+(7, 8, N'Chuyên gia sức khỏe cộng đồng từng công tác tại các bệnh viện lớn.',
+N'Tôi đã có hơn 8 năm làm việc trong lĩnh vực sức khỏe cộng đồng, đặc biệt là hỗ trợ người dân từ bỏ thói quen hút thuốc lá. Kinh nghiệm làm việc tại các bệnh viện tuyến đầu giúp tôi hiểu rõ ảnh hưởng của thuốc lá đến sức khỏe con người. Tôi tin rằng với sự hỗ trợ đúng đắn và lòng kiên trì, bất cứ ai cũng có thể từ bỏ thuốc và sống một cuộc sống khỏe mạnh, trọn vẹn hơn.',
+N'Hãy chọn một lý do đủ lớn để bắt đầu.'),
 
+(8, 3, N'Chuyên gia hỗ trợ thanh thiếu niên và người trẻ tuổi trong việc cai thuốc.',
+N'Với hơn 3 năm kinh nghiệm làm việc với các bạn trẻ, tôi nhận ra rằng việc cai thuốc không chỉ là từ bỏ một thói quen, mà còn là hành trình xây dựng lại niềm tin vào bản thân. Tôi sử dụng các phương pháp thực hành tư duy tích cực, thiết lập mục tiêu và thay đổi hành vi để hỗ trợ học viên tìm lại sự kiểm soát trong cuộc sống và xây dựng một lối sống lành mạnh hơn.',
+N'Thói quen mới sẽ thay thế thói quen cũ.'),
+
+(9, 10, N'Chuyên gia hành vi nhận thức (CBT) với hơn 10 năm kinh nghiệm.',
+N'Tôi chuyên sử dụng liệu pháp hành vi nhận thức (CBT) để giúp người nghiện thuốc lá nhận diện và điều chỉnh các suy nghĩ tiêu cực và hành vi tự hủy hoại bản thân. Trong hơn một thập kỷ, tôi đã hỗ trợ nhiều học viên không chỉ từ bỏ thuốc lá, mà còn xây dựng lại sự tự tin, cải thiện sức khỏe tinh thần và duy trì cuộc sống không khói thuốc một cách bền vững.',
+N'Cai thuốc là bắt đầu của một phiên bản tốt hơn của chính bạn.'),
+
+(14, 6, N'Chuyên gia tư vấn sức khỏe tâm thần và cai thuốc trong cộng đồng.',
+N'Là một chuyên gia tư vấn tâm lý chuyên làm việc với các tổ chức cộng đồng, tôi tập trung vào việc xây dựng chương trình cai thuốc toàn diện, từ động lực nội tại đến hỗ trợ xã hội. Tôi hiểu rằng mỗi người đều có hoàn cảnh riêng, vì vậy tôi luôn bắt đầu bằng việc lắng nghe và cùng học viên tạo ra một kế hoạch phù hợp, thực tế và hiệu quả.',
+N'Bạn không cần làm điều này một mình.');
 
 select * from users
 INSERT INTO [coach_user] ([coach_id], [user_id], [started_date]) VALUES
@@ -80,6 +92,47 @@ VALUES
 (N'Tôi rất hài lòng với sự hỗ trợ nhận được.', 5, 12, 7, '2025-06-21T00:00:00Z'),
 (N'Trả lời nhanh và hữu ích.', 4, 1, 10, '2025-06-29T00:00:00Z'),
 (N'Phương pháp logic, dễ áp dụng mỗi ngày.', 4, 11, 14, '2025-06-30T00:00:00Z');
+
+-- Coach 6
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Hỗ trợ tâm lý khi cai thuốc', 1, 6),
+(N'Tư vấn theo liệu pháp hành vi', 1, 6),
+(N'Hơn 100 học viên thành công', 0, 6),
+(N'Trình độ Thạc sĩ Tâm lý học lâm sàng', 0, 6);
+
+-- Coach 7
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Cai thuốc cho người mắc bệnh nền', 1, 7),
+(N'Tư vấn nhóm và cá nhân', 1, 7),
+(N'Từng công tác tại bệnh viện Chợ Rẫy', 0, 7),
+(N'Được trao giải Sáng kiến sức khỏe cộng đồng', 0, 7);
+
+-- Coach 8
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Hỗ trợ thanh thiếu niên & người trẻ tuổi', 1, 8),
+(N'Xây dựng thói quen mới sau khi cai thuốc', 1, 8),
+(N'Từng cộng tác với các trường THPT lớn', 0, 8),
+(N'Khách mời chương trình radio “Sức khỏe tuổi teen”', 0, 8);
+
+-- Coach 9
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Liệu pháp hành vi nhận thức (CBT)', 1, 9),
+(N'Cai thuốc kết hợp hỗ trợ tâm lý', 1, 9),
+(N'Hơn 300 ca thành công lâu dài', 0, 9),
+(N'Tác giả sách “Vượt qua thuốc lá bằng CBT”', 0, 9);
+
+-- Coach 14
+INSERT INTO coach_specialties_achievements (content, is_specialties, coach_id)
+VALUES 
+(N'Cai thuốc trong môi trường cộng đồng', 1, 14),
+(N'Tư vấn trực tiếp và trực tuyến', 1, 14),
+(N'Từng phối hợp với Sở Y tế địa phương', 0, 14),
+(N'Chứng nhận Quốc tế về Tư vấn Cai thuốc (CTC)', 0, 14);
+
 
 
 --Sample data for onboarding
