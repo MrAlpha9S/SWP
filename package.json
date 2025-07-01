@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@ant-design/charts": "^2.3.0",
+    "@payos/node": "^1.0.10",
     "concurrently": "^9.1.2",
+    "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "vite": "^6.3.5",

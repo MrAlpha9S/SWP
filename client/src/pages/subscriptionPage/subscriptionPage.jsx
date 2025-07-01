@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Check, Crown, Zap, Users, BarChart3} from 'lucide-react';
 import {useAuth0} from "@auth0/auth0-react";
 import {
@@ -11,6 +11,8 @@ import {Modal} from "antd";
 import {useNavigate} from "react-router-dom";
 import CongratulationPage from "./CongratulationPage.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
+import {usePayOS} from "@payos/payos-checkout";
+import axios from "axios";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -23,6 +25,41 @@ function SubscriptionPage() {
     const [subscriptionData, setSubscriptionData] = useState();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [paymentLink, setPaymentLink] = useState(null);
+    const hasPaidRef = useRef(false);
+
+    const {
+        data: paymentData,
+        open: openPayOS,
+        exit: exitPayOS
+    } = usePayOS({
+        RETURN_URL: `http://localhost:5173/payment-success`,
+        ELEMENT_ID: 'payos-container',
+        CHECKOUT_URL: paymentLink,
+        onExit: () => {
+            setIsPaymentModalOpen(false);
+            setPaymentLink(null);
+        },
+        onSuccess: () => {
+            if (hasPaidRef.current) return;
+            hasPaidRef.current = true;
+
+            setIsPaymentModalOpen(false);
+            const id = isYearly ? 3 : 2;
+            subscriptionMutation.mutate(id);
+        },
+        onError: () => {
+            console.log('Payment failed');
+            setIsPaymentModalOpen(false);
+        }
+    });
+
+    useEffect(() => {
+        if (paymentLink) {
+            openPayOS();
+        }
+    }, [paymentLink, openPayOS]);
 
     const freeFeatures = [
         'Bài viết và blog giáo dục về Thuốc lá',
@@ -36,6 +73,20 @@ function SubscriptionPage() {
         'Lên kế hoạch cai thuốc với lộ trình rõ ràng và dễ theo dõi',
         'Trao đổi 24/24 trực tiếp với Huấn luyện viên',
     ];
+
+    const paymentMutation = useMutation({
+        mutationFn: async (paymentInfo) => {
+            const res = await axios.post('/api/v1/payment/create-order', paymentInfo);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            setPaymentLink(data.payUrl);
+            setIsPaymentModalOpen(true);
+        },
+        onError: (error) => {
+            console.error("Payment failed:", error);
+        }
+    });
 
     const subscriptionMutation = useMutation({
         mutationFn: async (subscriptionId) => {
@@ -59,13 +110,16 @@ function SubscriptionPage() {
     }
 
     const handlePaymentButton = () => {
-        const id = isYearly ? 3 : 2;
+        const amount = isYearly ? premiumYearlyPrice : premiumMonthlyPrice;
+        const description = isYearly ? 'Premium - 1 Nam' : 'Premium - 1 Thang';
+        const returnUrl = `http://localhost:5173/payment-success`;
+        const paymentInfo = { amount, description, returnUrl };
 
         if (!isAuthenticated) {
             loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
-            localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscriptionPagePayment'}));
+            localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscription                                                                                                                                                                                                                                                                                                                                                 PagePayment'}));
         } else {
-            subscriptionMutation.mutate(id);
+            paymentMutation.mutate(paymentInfo);
         }
     };
 
@@ -223,7 +277,6 @@ function SubscriptionPage() {
                             </button>
 
 
-
                             {/*<p className="text-center text-sm text-gray-500 mt-4">*/}
                             {/*    14-day free trial • No credit card required*/}
                             {/*</p>*/}
@@ -283,6 +336,22 @@ function SubscriptionPage() {
                 </div>
 
                 <Modal
+                    title="Thanh toán PayOS"
+                    width={500}
+                    open={isPaymentModalOpen}
+                    onCancel={() => {
+                        exitPayOS();
+                        setIsPaymentModalOpen(false);
+                    }}
+                    centered
+                    footer={null}
+                    maskClosable={false}
+                    bodyStyle={{ height: '550px' }}
+                >
+                    <div id="payos-container" style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}></div>
+                </Modal>
+
+                <Modal
                     width={700}
                     open={isModalOpen}
                     onCancel={() => navigate('/')}
@@ -293,6 +362,30 @@ function SubscriptionPage() {
                 >
                     {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} />}
                 </Modal>
+
+                <button
+                    onClick={() => {
+                        setSubscriptionData({
+                            sub_name: isYearly ? "Gói 12 tháng" : "Gói 1 tháng",
+                            vip_end_date: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000),
+                            price: isYearly ? 2400000 : 300000
+                        });
+                        setIsModalOpen(true);
+                    }}
+                    style={{
+                        position: 'fixed',
+                        bottom: 20,
+                        right: 20,
+                        zIndex: 9999,
+                        background: '#10b981',
+                        color: 'white',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Test modal chúc mừng
+                </button>
 
             </div>
         </PageFadeWrapper>
