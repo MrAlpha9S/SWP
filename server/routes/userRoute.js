@@ -2,7 +2,7 @@ const express = require('express');
 const userRouter = express.Router();
 const checkJwt = require('../middlewares/jwtChecker');
 const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserSubscription,
-    getCoachesController, getCoachByIdController
+    getCoachesController, getCoachByIdController, assignUserToCoachController
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 
@@ -15,5 +15,6 @@ userRouter.put('/info', checkJwt, updateUserInfo);
 userRouter.post('/update-subscription', checkJwt, updateUserSubscription)
 userRouter.get('/get-coaches', getCoachesController)
 userRouter.get('/coaches/:coachId', getCoachByIdController)
+userRouter.post('/assign-coach', checkJwt, assignUserToCoachController)
 
 module.exports = userRouter;

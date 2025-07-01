@@ -13,6 +13,7 @@ import CongratulationPage from "./CongratulationPage.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import {usePayOS} from "@payos/payos-checkout";
 import axios from "axios";
+import {queryClient} from "../../main.jsx";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -93,7 +94,7 @@ function SubscriptionPage() {
             return await updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId);
         },
         onSuccess: (data) => {
-            console.log("Mutation success:", data);
+            queryClient.invalidateQueries(['user-profile'])
             setSubscriptionData(data.data);
             setIsModalOpen(true);
         },

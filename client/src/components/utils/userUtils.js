@@ -138,3 +138,26 @@ export async function updateUserController(user, getAccessTokenSilently, { usern
 
     return await res.json();
 }
+
+export async function assignCoachToUser (coachId, userId, getAccessTokenSilently, isAuthenticated) {
+    if (!isAuthenticated) return
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/assign-coach", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userId: userId,
+            coachId: coachId,
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}

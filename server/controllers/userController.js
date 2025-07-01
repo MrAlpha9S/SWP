@@ -3,7 +3,7 @@ const {
     updateUserSubscriptionService,
     getUserIdFromAuth0Id,
     getCoaches,
-    getCoachDetailsById
+    getCoachDetailsById, assignUserToCoachService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -176,6 +176,23 @@ const updateUserInfo = async (req, res) => {
     }
 };
 
+const assignUserToCoachController = async (req, res) => {
+    const { coachId, userId } = req.body;
+    try {
+        if (!coachId || !userId) {
+            return res.status(400).json({success: false, message: "Missing ids"});
+        }
+        const assignResult = await assignUserToCoachService(coachId, userId);
+        if (assignResult) {
+            return res.status(200).json({success: true, message: "Assign successful"});
+        } else {
+            return res.status(500).json({success: false, message: "Assign failed"});
+        }
+    } catch (err) {
+        res.status(500).json({success: false, message: err.message});
+    }
+}
+
 module.exports = {
     getAllUsersController,
     handlePostSignup,
@@ -185,5 +202,6 @@ module.exports = {
     getCoachByIdController,
     updateUserController,
     getUserInfo,
-    updateUserInfo
+    updateUserInfo,
+    assignUserToCoachController
 };

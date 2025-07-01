@@ -19,7 +19,6 @@ function CoachSelectPage() {
     useEffect(() => {
         if (!isPending) {
             setCoaches(data.data);
-            console.log(data.data)
         }
     }, [isPending]);
 
@@ -36,10 +35,6 @@ function CoachSelectPage() {
     const handleSearch = (term) => {
         setSearchTerm(term);
     };
-
-    useEffect(() => {
-        console.log(filteredCoaches)
-    }, [filteredCoaches, searchTerm])
 
     return (
         <PageFadeWrapper>

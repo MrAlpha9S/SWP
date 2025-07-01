@@ -5,7 +5,7 @@ import {useNavigate} from "react-router-dom";
 import {Card} from "antd";
 import {useQuery} from "@tanstack/react-query";
 import {getCoachById} from "../../utils/userUtils.js";
-import {convertDDMMYYYYStrToYYYYMMDDStr, convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
+import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
 
 const CoachDashboard = () => {
@@ -23,12 +23,17 @@ const CoachDashboard = () => {
     })
 
     useEffect(() => {
-        if (!isPending) {
+        if (!isPending && data?.data) {
             setCoachInfo(data?.data)
         }
     }, [isPending])
 
-    if (userInfo.sub_id === 1) {
+    useEffect(() => {
+        console.log(userInfo)
+        console.log(coachInfo)
+    }, [userInfo, coachInfo])
+
+    if (userInfo && userInfo.sub_id === 1) {
         return (
             <div className='space-y-4'>
                 <p>Chức năng này dành riêng cho người dùng <strong>Premium</strong>. Nâng cấp ngay để truy cập những
@@ -59,7 +64,7 @@ const CoachDashboard = () => {
                 </div>
             </div>
         )
-    } else if (userInfo?.sub_id !== 1 && coachInfo) {
+    } else if (userInfo && userInfo.sub_id !== 1 && coachInfo?.coach) {
         return (
             <div className='w-full h-full'>
 
@@ -95,7 +100,7 @@ const CoachDashboard = () => {
                 </div>
             </div>
         )
-    } else {
+    } else if (userInfo && userInfo.sub_id !== 1 && !coachInfo) {
         return (
             <div className='w-full h-full'>
                 Chưa có coach

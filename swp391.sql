@@ -91,10 +91,10 @@ GO
 
 
 CREATE TABLE [coach_user] (
-  [pair_id] int PRIMARY KEY IDENTITY(1, 1),
   [coach_id] int,
   [user_id] int,
-  [started_date] DATETIME
+  [started_date] DATETIME,
+  PRIMARY KEY ([coach_id], [user_id])
 )
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])

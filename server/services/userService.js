@@ -1,5 +1,5 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
-const {convertUTCStringToLocalDate} = require("../utils/dateUtils");
+const {convertUTCStringToLocalDate, getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const userExists = async (auth0_id) => {
     try {
@@ -156,12 +156,14 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
     try {
         const pool = await poolPromise;
 
-        // If coachId is not provided, try to resolve it from userId (student)
+        let startedDate = null;
+
+        // Resolve coachId from userId
         if (!coachId && userId !== null) {
             const result = await pool.request()
                 .input('user_id', sql.Int, userId)
                 .query(`
-                    SELECT TOP 1 coach_id
+                    SELECT TOP 1 coach_id, started_date
                     FROM coach_user
                     WHERE user_id = @user_id
                 `);
@@ -171,47 +173,47 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
             }
 
             coachId = result.recordset[0].coach_id;
+            startedDate = result.recordset[0].started_date;
         }
 
         // Fetch coach's main profile
-        const coachResultObj = await pool.request()
+        const coachResult = await pool.request()
             .input('coach_id', sql.Int, coachId)
-            .input('user_id', sql.Int, -1);
-
-        const query = `
-            SELECT u.user_id,
-                   u.avatar,
-                   u.username,
-                   u.email,
-                   u.role,
-                   ci.years_of_exp,
-                   ci.bio,
-                   ci.detailed_bio,
-                   ci.motto,
-                   cu.started_date,
-                   (SELECT COUNT(*)
-                    FROM coach_user cu2
-                    WHERE cu2.coach_id = u.user_id) AS total_students,
-                   (SELECT AVG(CAST(stars AS FLOAT))
-                    FROM coach_reviews cr
-                    WHERE cr.coach_id = u.user_id)  AS avg_star,
-                   (SELECT COUNT(DISTINCT cr.user_id)
-                    FROM coach_reviews cr
-                    WHERE cr.coach_id = u.user_id)  AS num_reviews
-            FROM users u
-                     LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
-                     LEFT JOIN coach_user cu ON cu.coach_id = u.user_id
-            WHERE u.role = 'Coach'
-              AND u.user_id = @coach_id
-        `;
-
-        const coachResult = await coachResultObj.query(query);
+            .query(`
+        SELECT u.user_id,
+               u.avatar,
+               u.username,
+               u.email,
+               u.role,
+               ci.years_of_exp,
+               ci.bio,
+               ci.detailed_bio,
+               ci.motto,
+               (SELECT COUNT(*)
+                FROM coach_user cu2
+                WHERE cu2.coach_id = u.user_id) AS total_students,
+               (SELECT AVG(CAST(stars AS FLOAT))
+                FROM coach_reviews cr
+                WHERE cr.coach_id = u.user_id)  AS avg_star,
+               (SELECT COUNT(DISTINCT cr.user_id)
+                FROM coach_reviews cr
+                WHERE cr.coach_id = u.user_id)  AS num_reviews
+        FROM users u
+        LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
+        WHERE u.role = 'Coach'
+          AND u.user_id = @coach_id
+      `);
 
         if (coachResult.recordset.length === 0) {
             return null; // Coach not found
         }
 
         const coach = coachResult.recordset[0];
+
+        // If userId was provided, override started_date manually
+        if (startedDate) {
+            coach.started_date = startedDate;
+        }
 
         // Fetch specialties
         const specialtiesResult = await pool.request()
@@ -260,6 +262,7 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
         return null;
     }
 };
+
 
 
 async function getUserByAuth0Id(auth0Id) {
@@ -343,6 +346,22 @@ const updateUserService = async (auth0_id, username = null, email = null, avatar
     }
 }
 
+const assignUserToCoachService = async (coachId, userId) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('coach_id', coachId)
+            .input('user_id', userId)
+            .input('started_date', getCurrentUTCDateTime().toISOString())
+            .query(`INSERT INTO coach_user (coach_id, user_id, started_date) VALUES (@coach_id, @user_id, @started_date)`)
+        console.log(result)
+        return result.rowsAffected > 0;
+    }catch (error) {
+        console.error('error in assignUserToCoachService', error);
+        return false;
+    }
+}
+
 module.exports = {
     userExists,
     createUser,
@@ -356,5 +375,6 @@ module.exports = {
     getUserWithSubscription,
     updateUserSubscriptionService,
     getCoaches,
-    getCoachDetailsById
+    getCoachDetailsById,
+    assignUserToCoachService
 };

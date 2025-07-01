@@ -10,7 +10,6 @@ import MyProfile from "./pages/dashboardPage/myProfile.jsx";
 import ErrorPage from "./pages/errorPage.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
-import {useEffect} from "react";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
@@ -30,21 +29,33 @@ import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx"
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
 import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
+import {useQuery} from "@tanstack/react-query";
+import {useEffect} from "react";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    useEffect(() => {
-        const syncOnLoad = async () => {
-            if (!isAuthenticated || !user) return;
-            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            if (result?.data) {
-                await syncProfileToStores(result.data);
-            }
-        };
+    const { isPending, error, data } = useQuery({
+        queryKey: ['user-profile'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return null;
 
-        syncOnLoad();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+            return result?.data;
+        },
+        enabled: !!isAuthenticated && !!user,
+    });
+
+    useEffect(() => {
+        const syncStores = async () => {
+            await syncProfileToStores(data);
+        }
+        if (!isPending) {
+            if (data) {
+                syncStores();
+            }
+        }
+    })
 
     return (
         <>
