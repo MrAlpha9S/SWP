@@ -34,9 +34,6 @@ function Navbar() {
                             <a onClick={() => navigate('/forum')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
                                 Cộng đồng
                             </a>
-                            <a onClick={() => navigate('/')} className="cursor-pointer text-white hover:text-primary-500 font-medium transition-colors">
-                                Hỗ trợ
-                            </a>
                             {isAuthenticated === true && (
                                 <a onClick={() => navigate('/topics')} className="text-white hover:text-primary-500 font-medium transition-colors">
                                     <TopicsDropdown />
