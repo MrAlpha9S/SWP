@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Check, Crown, Zap, Users, BarChart3} from 'lucide-react';
 import {useAuth0} from "@auth0/auth0-react";
 import {
@@ -27,6 +27,7 @@ function SubscriptionPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [paymentLink, setPaymentLink] = useState(null);
+    const hasPaidRef = useRef(false);
 
     const {
         data: paymentData,
@@ -41,6 +42,9 @@ function SubscriptionPage() {
             setPaymentLink(null);
         },
         onSuccess: () => {
+            if (hasPaidRef.current) return;
+            hasPaidRef.current = true;
+
             setIsPaymentModalOpen(false);
             const id = isYearly ? 3 : 2;
             subscriptionMutation.mutate(id);

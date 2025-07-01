@@ -1,7 +1,6 @@
 const PayOS = require("@payos/node");
-const crypto = require('crypto');
 
-const payos = new PayOS(process.env.PAYOS_CLIENT_ID, process.env.PAYOS_API_KEY, process.env.PAYOS_CHEKSUM_KEY);
+const payos = new PayOS(process.env.PAYOS_CLIENT_ID, process.env.PAYOS_API_KEY, process.env.PAYOS_CHECKSUM_KEY);
 
 const createOrder = async (req, res) => {
     const { amount, description, returnUrl } = req.body;
