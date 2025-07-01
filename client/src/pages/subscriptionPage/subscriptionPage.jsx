@@ -60,8 +60,6 @@ function SubscriptionPage() {
 
     const handlePaymentButton = () => {
         const id = isYearly ? 3 : 2;
-        console.log("Clicked. Subscription ID:", id);
-        console.log("Is authenticated?", isAuthenticated);
 
         if (!isAuthenticated) {
             loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
@@ -172,7 +170,7 @@ function SubscriptionPage() {
                                     <Crown className="h-6 w-6 text-white"/>
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium</h3>
-                                <p className="text-gray-600 mb-6">Dành cho người dùng cần sự theo dõi và giúp đỡ của các Chuyên gia</p>
+                                <p className="text-gray-600 mb-6">Dành cho người dùng cần một kế hoạch rõ ràng, sự theo dõi và giúp đỡ của các Chuyên gia</p>
 
                                 <div className="mb-8">
                 <span
@@ -204,14 +202,26 @@ function SubscriptionPage() {
                             </ul>
 
                             <button
-                                disabled={subscriptionMutation.isLoading}
+                                disabled={
+                                    subscriptionMutation.isLoading ||
+                                    (userInfo && userInfo.sub_id !== 1)
+                                }
                                 onClick={() => handlePaymentButton()}
                                 className={`w-full mt-auto bg-primary-500 text-white py-4 px-6 rounded-xl font-semibold shadow-lg ${
-                                    subscriptionMutation.isLoading || userInfo?.sub_id !== 1 ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl'
+                                    subscriptionMutation.isLoading || (userInfo && userInfo.sub_id !== 1)
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : 'hover:shadow-xl'
                                 }`}
                             >
-                                {subscriptionMutation.isLoading ? 'Đang xử lý...' : `${userInfo?.sub_id !== 1 ? 'Bạn đã trở thành thành viên Premium' : 'Thanh toán'}`}
+                                {!userInfo
+                                    ? 'Tạo tài khoản'
+                                    : subscriptionMutation.isLoading
+                                        ? 'Đang xử lý...'
+                                        : userInfo.sub_id !== 1
+                                            ? 'Bạn đã trở thành thành viên Premium'
+                                            : 'Thanh toán'}
                             </button>
+
 
 
                             {/*<p className="text-center text-sm text-gray-500 mt-4">*/}

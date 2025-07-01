@@ -1,7 +1,7 @@
 function Hero({title, img, children, heroHeight = 472}) {
     return (
         <section style={{height: heroHeight, transition: 'height 0.2s'}}
-                 className="sticky top-[80px] z-50 px-6 flex justify-center py-10 bg-[#fef1db] w-full">
+                 className="sticky top-[80px] z-10 px-6 flex justify-center py-10 bg-[#fef1db] w-full">
             <div className="flex w-[1280px]">
                 <div
                     className="hidden md:block w-full h-auto bg-no-repeat bg-cover bg-center"

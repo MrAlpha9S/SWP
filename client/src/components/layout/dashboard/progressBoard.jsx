@@ -51,6 +51,7 @@ const ProgressBoard = ({
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
+    const [showWarning, setShowWarning] = useState(false);
 
     const {
         isPending: isDatasetPending,
@@ -90,6 +91,18 @@ const ProgressBoard = ({
             useCheckInDataStore.getState().setCheckInDataSet(checkInDataset.data);
         }
     }, [checkInDataset, isDatasetPending]);
+
+    useEffect(() => {
+        if (localCheckInDataSet && localCheckInDataSet.length > 0 && planLog && planLog.length > 0) {
+            const lastCheckInEntry = localCheckInDataSet[localCheckInDataSet.length - 1];
+            const lastPlanEntry = planLog[planLog.length - 1];
+            const lastDateInPlan = new Date(lastPlanEntry.date);
+
+            if (lastCheckInEntry.cigs > 0 && lastDateInPlan < getCurrentUTCDateTime()) {
+                setShowWarning(true);
+            }
+        }
+    }, [localCheckInDataSet, planLog]);
 
     // FIX: Remove infinite timer loop
     useEffect(() => {
@@ -244,6 +257,10 @@ const ProgressBoard = ({
         handleStepThree();
     }, [setCurrentStepDashboard, handleStepThree]);
 
+    useEffect(() => {
+        console.log(mergedDataSet)
+    }, [mergedDataSet]);
+
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
             <div className="flex items-center justify-between">
@@ -337,7 +354,7 @@ const ProgressBoard = ({
                     <div className="text-2xl flex justify-center"><BsGraphDown
                         className='size-7 text-primary-800 mb-1'/></div>
                     <h3 className="text-lg font-semibold text-primary-800">Số điếu thuốc theo kế hoạch và thực tế</h3>
-
+                    {showWarning && <p>Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!</p>}
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : (mergedDataSet?.length > 0) ? (
@@ -375,7 +392,8 @@ const ProgressBoard = ({
                                         label={'Hôm nay'}
                                     />
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
-                                           interval={quittingMethod === 'gradual-weekly' ? 5 : 1}/>
+                                           // interval={quittingMethod === 'gradual-weekly' ? 5 : 1}
+                                           interval= {1}/>
                                     <YAxis/>
                                     <Tooltip/>
                                     <Legend verticalAlign="top"/>

@@ -85,6 +85,14 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         });
     }
 
+    const getCurrentUTCDateTime = () => {
+        const now = new Date();
+        return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    };
+
+    const currentDate = getCurrentUTCDateTime();
+
+    // Determine first and last date for loop
     const firstDate = new Date(Math.min(
         ...checkinLog.map(e => new Date(e.date)),
         ...planLog.map(e => new Date(e.date))
@@ -92,16 +100,23 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
 
     const lastDate = new Date(Math.max(
         ...checkinLog.map(e => new Date(e.date)),
-        ...planLog.map(e => new Date(e.date)),
-        new Date()
+        ...planLog.map(e => new Date(e.date))
     ));
 
     const current = new Date(firstDate);
+    let lastKnownActual = null;
+
     while (current <= lastDate) {
         const dayStr = current.toISOString().split('T')[0];
-        const actual = checkinMap.get(dayStr) ?? null;
+        let actual = checkinMap.get(dayStr);
 
-        // Default plan is null unless it's the first day of a plan range
+        // Only fill forward if the current day is <= today
+        if (actual == null && lastKnownActual != null && current <= currentDate) {
+            actual = lastKnownActual;
+        } else if (actual != null) {
+            lastKnownActual = actual;
+        }
+
         let plan = null;
         for (const range of planRanges) {
             if (dayStr === range.start.toISOString().split('T')[0]) {
@@ -121,6 +136,7 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
 
 
 

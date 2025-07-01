@@ -8,6 +8,7 @@ import RoleField from "../../components/layout/profilepage/RoleField.jsx";
 import CreatedAtField from "../../components/layout/profilepage/CreatedAtField.jsx";
 import { FaUser, FaEnvelope, FaUserTag, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCamera, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 function Profile() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -41,14 +42,14 @@ function Profile() {
             try {
                 const data = await getUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 const userData = Array.isArray(data.data) ? data.data[0] : data.data;
-                console.log(userData)
                 const loadedProfile = {
                     username: userData?.username || "",
                     email: userData?.email || "",
                     avatar: userData?.avatar || "",
                     role: userData?.role || "",
                     created_at: userData?.created_at || "",
-                    is_social: userData?.is_social || false // Thêm dòng này
+                    is_social: userData?.is_social || false,
+                    sub_id: userData?.sub_id,
                 };
                 setProfile(loadedProfile);
                 setOriginalProfile(loadedProfile);
@@ -130,6 +131,7 @@ function Profile() {
     };
 
     return (
+        <PageFadeWrapper>
         <div className="bg-[#e0f7fa] min-h-screen flex flex-col">
             <Hero
                 title="Hồ sơ cá nhân"
@@ -186,7 +188,7 @@ function Profile() {
                     </div>
                     {/* Modal xem avatar */}
                     {showAvatarModal && profile.avatar && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-10">
                             <div className="bg-white rounded-lg p-4 shadow-lg flex flex-col items-center">
                                 <img src={profile.avatar} alt="avatar" className="w-64 h-64 object-cover rounded-full mb-4" />
                                 <button
@@ -245,6 +247,20 @@ function Profile() {
                                 </label>
                                 <CreatedAtField value={profile.created_at} />
                             </div>
+                            <div>
+                                <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
+                                    <FaCalendarAlt className="text-primary-400" /> Gói đăng ký
+                                </label>
+                                <RoleField
+                                    value={
+                                        originalProfile.sub_id === 1
+                                            ? 'Miễn phí'
+                                            : originalProfile.sub_id === 2
+                                                ? 'Premium 1 tháng'
+                                                : 'Premium 12 tháng'
+                                    }
+                                />
+                            </div>
                             <button
                                 type="submit"
                                 className={`w-full mt-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2
@@ -275,9 +291,11 @@ function Profile() {
                             </button>
                         </form>
                     )}
+
                 </div>
             </div>
         </div>
+            </PageFadeWrapper>
     );
 }
 

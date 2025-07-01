@@ -26,6 +26,7 @@ import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
+import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -141,6 +142,9 @@ function Dashboard() {
             case 'messager':
                 setHeroTitle('Trò Chuyện');
                 break;
+            case 'coach':
+                setHeroTitle('Huấn luyện viên');
+                break;
             default:
                 setHeroTitle('');
                 break;
@@ -197,6 +201,9 @@ function Dashboard() {
             case 'post-blog':
                 return <PostBlog/>
 
+            case 'coach':
+                return <CoachDashboard/>;
+
             default:
                 return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
         }
@@ -242,8 +249,8 @@ function Dashboard() {
     }
 
     return (
-
-        <div className="w-full bg-primary-50 flex flex-col items-center">
+        <PageFadeWrapper>
+        <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
             <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username}/>
             <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
                 {dashboardHandle(userRole)}
@@ -253,6 +260,7 @@ function Dashboard() {
                 </div>
             </div>
         </div>
+        </PageFadeWrapper>
 
     )
 

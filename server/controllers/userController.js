@@ -98,33 +98,31 @@ const getCoachesController = async (req, res) => {
 }
 
 const getCoachByIdController = async (req, res) => {
-    const coachId = Number(req.params.coachId);
+    const { coachId } = req.params;
+    const id = parseInt(coachId);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ message: 'Invalid ID' });
+    }
 
     try {
-        const result = await getCoachDetailsById(coachId);
+        let coachDetails = await getCoachDetailsById(id, null);
 
-        if (!result) {
-            return res.status(404).json({
-                success: false,
-                message: 'Coach not found',
-                data: null
-            });
+        if (!coachDetails) {
+            coachDetails = await getCoachDetailsById(null, id);
         }
 
-        return res.status(200).json({
-            success: true,
-            message: 'Fetched coach successfully',
-            data: result
-        });
-    } catch (err) {
-        console.error('Error in getCoachByIdController:', err);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error: ' + err.message,
-            data: null
-        });
+        if (!coachDetails) {
+            return res.status(404).json({success: true, message: 'Coach not found or student is not assigned a coach.', data: null});
+        }
+
+        return res.status(200).json({success: true, message: 'Coach found.', data: coachDetails});
+    } catch (error) {
+        console.error('Error in getCoachByIdController:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
+
 
 const updateUserController = async (req, res) => {
     const {userAuth0Id, username, email, avatar, password} = req.body;

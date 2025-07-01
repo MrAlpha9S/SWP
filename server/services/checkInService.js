@@ -56,7 +56,7 @@ const postCheckIn = async (userAuth0Id,
 
         return true;
     } catch (error) {
-        console.error('error in userProfileExists', error);
+        console.error('error in postCheckIn', error);
         return false;
     }
 }
@@ -105,11 +105,11 @@ const getCheckInDataService = async (userAuth0Id, date = null, action = null) =>
 
         if (date) {
             const onDate = date.split('T')[0]; // Ensure YYYY-MM-DD format
-            query += ` AND CAST(cl.logged_at AS DATE) = @onDate`;
+            query += ` AND CAST(cl.logged_at AS DATE) = @onDate `;
             request.input('onDate', sql.Date, onDate);
         }
 
-        query += ` ORDER BY cl.logged_at DESC`;
+        query += `ORDER BY cl.logged_at DESC`;
 
         const result = await request.query(query);
 

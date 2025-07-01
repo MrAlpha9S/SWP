@@ -24,8 +24,6 @@ const handlePostOnboarding = async (req, res) => {
         goalList
     } = req.body;
 
-    console.log(req.body)
-
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userId required'});
     let result = false
 

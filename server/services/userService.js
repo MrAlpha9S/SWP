@@ -64,7 +64,7 @@ const getUserWithSubscription = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', user_id)
-            .query('SELECT u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
+            .query('SELECT u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
         return result.recordset[0];
     } catch (error) {
         console.error('error in getUser', error);
@@ -118,34 +118,32 @@ const getCoaches = async () => {
         const pool = await poolPromise;
         const result = await pool.request()
             .query(`
-                SELECT
-                    u.user_id,
-                    u.auth0_id,
-                    u.avatar,
-                    u.username,
-                    u.email,
-                    u.role,
-                    u.created_at,
-                    u.updated_at,
-                    u.sub_id,
-                    u.vip_end_date,
-                    u.isBanned,
-                    u.is_social,
-                    ci.coach_id,
-                    ci.years_of_exp,
-                    ci.bio,
-                    COUNT(DISTINCT cu.user_id) AS total_users,
-                    AVG(cr.stars * 1.0) AS avg_star,
-                    COUNT(DISTINCT cr.user_id) AS num_reviewers
+                SELECT u.user_id,
+                       u.auth0_id,
+                       u.avatar,
+                       u.username,
+                       u.email,
+                       u.role,
+                       u.created_at,
+                       u.updated_at,
+                       u.sub_id,
+                       u.vip_end_date,
+                       u.isBanned,
+                       u.is_social,
+                       ci.coach_id,
+                       ci.years_of_exp,
+                       ci.bio,
+                       COUNT(DISTINCT cu.user_id) AS total_users,
+                       AVG(cr.stars * 1.0)        AS avg_star,
+                       COUNT(DISTINCT cr.user_id) AS num_reviewers
                 FROM users u
                          LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
                          LEFT JOIN coach_user cu ON ci.coach_id = cu.coach_id
                          LEFT JOIN coach_reviews cr ON u.user_id = cr.coach_id
                 WHERE u.role = 'Coach'
-                GROUP BY
-                    u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role,
-                    u.created_at, u.updated_at, u.sub_id, u.vip_end_date, u.isBanned, u.is_social,
-                    ci.coach_id, ci.years_of_exp, ci.bio
+                GROUP BY u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role,
+                         u.created_at, u.updated_at, u.sub_id, u.vip_end_date, u.isBanned, u.is_social,
+                         ci.coach_id, ci.years_of_exp, ci.bio
             `);
         return result.recordset;
     } catch (error) {
@@ -154,46 +152,63 @@ const getCoaches = async () => {
     }
 }
 
-const getCoachDetailsById = async (coachId) => {
+const getCoachDetailsById = async (coachId = null, userId = null) => {
     try {
         const pool = await poolPromise;
 
-        // Fetch coach profile
-        const coachResult = await pool.request()
-            .input('coach_id', coachId)
-            .query(`
-                SELECT 
-                    u.user_id,
-                    u.avatar,
-                    u.username,
-                    u.email,
-                    u.role,
-                    ci.years_of_exp,
-                    ci.bio,
-                    ci.detailed_bio,
-                    ci.motto,
-                    (
-                        SELECT COUNT(*) 
-                        FROM coach_user cu 
-                        WHERE cu.coach_id = u.user_id
-                    ) AS total_students,
-                    (
-                        SELECT AVG(CAST(stars AS FLOAT)) 
-                        FROM coach_reviews cr 
-                        WHERE cr.coach_id = u.user_id
-                    ) AS avg_star,
-                    (
-                        SELECT COUNT(DISTINCT cr.user_id) 
-                        FROM coach_reviews cr 
-                        WHERE cr.coach_id = u.user_id
-                    ) AS num_reviews
-                FROM users u
-                LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
-                WHERE u.user_id = @coach_id AND u.role = 'Coach'
-            `);
+        // If coachId is not provided, try to resolve it from userId (student)
+        if (!coachId && userId !== null) {
+            const result = await pool.request()
+                .input('user_id', sql.Int, userId)
+                .query(`
+                    SELECT TOP 1 coach_id
+                    FROM coach_user
+                    WHERE user_id = @user_id
+                `);
+
+            if (result.recordset.length === 0) {
+                return null; // Unassigned student
+            }
+
+            coachId = result.recordset[0].coach_id;
+        }
+
+        // Fetch coach's main profile
+        const coachResultObj = await pool.request()
+            .input('coach_id', sql.Int, coachId)
+            .input('user_id', sql.Int, -1);
+
+        const query = `
+            SELECT u.user_id,
+                   u.avatar,
+                   u.username,
+                   u.email,
+                   u.role,
+                   ci.years_of_exp,
+                   ci.bio,
+                   ci.detailed_bio,
+                   ci.motto,
+                   cu.started_date,
+                   (SELECT COUNT(*)
+                    FROM coach_user cu2
+                    WHERE cu2.coach_id = u.user_id) AS total_students,
+                   (SELECT AVG(CAST(stars AS FLOAT))
+                    FROM coach_reviews cr
+                    WHERE cr.coach_id = u.user_id)  AS avg_star,
+                   (SELECT COUNT(DISTINCT cr.user_id)
+                    FROM coach_reviews cr
+                    WHERE cr.coach_id = u.user_id)  AS num_reviews
+            FROM users u
+                     LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
+                     LEFT JOIN coach_user cu ON cu.coach_id = u.user_id
+            WHERE u.role = 'Coach'
+              AND u.user_id = @coach_id
+        `;
+
+        const coachResult = await coachResultObj.query(query);
 
         if (coachResult.recordset.length === 0) {
-            return null; // No coach found
+            return null; // Coach not found
         }
 
         const coach = coachResult.recordset[0];
@@ -202,31 +217,32 @@ const getCoachDetailsById = async (coachId) => {
         const specialtiesResult = await pool.request()
             .input('coach_id', coachId)
             .query(`
-                SELECT content 
-                FROM coach_specialties_achievements 
-                WHERE coach_id = @coach_id AND is_specialties = 1
+                SELECT content
+                FROM coach_specialties_achievements
+                WHERE coach_id = @coach_id
+                  AND is_specialties = 1
             `);
 
         // Fetch achievements
         const achievementsResult = await pool.request()
             .input('coach_id', coachId)
             .query(`
-                SELECT content 
-                FROM coach_specialties_achievements 
-                WHERE coach_id = @coach_id AND is_specialties = 0
+                SELECT content
+                FROM coach_specialties_achievements
+                WHERE coach_id = @coach_id
+                  AND is_specialties = 0
             `);
 
         // Fetch latest 3 reviews
         const reviewsResult = await pool.request()
             .input('coach_id', coachId)
             .query(`
-                SELECT 
-                    cr.review_content,
-                    cr.stars,
-                    cr.created_date,
-                    u.username AS reviewer_name
+                SELECT cr.review_content,
+                       cr.stars,
+                       cr.created_date,
+                       u.username AS reviewer_name
                 FROM coach_reviews cr
-                JOIN users u ON cr.user_id = u.user_id
+                         JOIN users u ON cr.user_id = u.user_id
                 WHERE cr.coach_id = @coach_id
                 ORDER BY cr.created_date DESC
                 OFFSET 0 ROWS FETCH NEXT 3 ROWS ONLY
@@ -244,6 +260,7 @@ const getCoachDetailsById = async (coachId) => {
         return null;
     }
 };
+
 
 async function getUserByAuth0Id(auth0Id) {
     try {
