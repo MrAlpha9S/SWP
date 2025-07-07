@@ -98,7 +98,7 @@ export default function ChatList({
       );
     }
     return (
-      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+      <div className="w-full h-full bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center">
         <span className="text-white text-sm font-semibold">
           {contact.conversation_name ? contact.conversation_name.charAt(0).toUpperCase() : '?'}
         </span>
@@ -113,7 +113,7 @@ export default function ChatList({
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-semibold">
               {user ? user.charAt(0).toUpperCase() : 'U'}
             </span>
@@ -134,7 +134,7 @@ export default function ChatList({
             placeholder="Search conversations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-400"
+            className="w-full pl-10 pr-10 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-white placeholder-gray-400"
           />
           {searchTerm && (
             <button
@@ -175,7 +175,7 @@ export default function ChatList({
                   onClick={() => handleSelectConversation(contact.conversation_id)}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                     isSelected 
-                      ? 'bg-blue-600 shadow-lg' 
+                      ? 'bg-primary-600 shadow-lg' 
                       : 'hover:bg-gray-700'
                   }`}
                   role="button"
@@ -217,14 +217,14 @@ export default function ChatList({
                     {contact.other_participant_id && renderOnlineStatus(contact.other_participant_id)}
                     {contact.last_message && (
                       <div className={`text-xs truncate mt-1 ${
-                        isSelected ? 'text-blue-100' : 'text-gray-400'
+                        isSelected ? 'text-primary-100' : 'text-gray-400'
                       }`}>
                         {contact.last_message}
                       </div>
                     )}
                     {contact.last_message_time && (
                       <div className={`text-xs mt-1 flex items-center gap-1 ${
-                        isSelected ? 'text-blue-200' : 'text-gray-500'
+                        isSelected ? 'text-primary-200' : 'text-gray-500'
                       }`}>
                         <Clock className="w-3 h-3" />
                         {formatLastSeen ? formatLastSeen(contact.last_message_time) : contact.last_message_time}

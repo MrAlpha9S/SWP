@@ -140,7 +140,7 @@ export default function AllMembers({
             <div
                 key={member.auth0_id}
                 className={`relative flex flex-col items-center bg-white rounded-lg p-4 shadow-sm border-2 transition-all duration-200 cursor-pointer hover:shadow-md hover:scale-105 ${
-                    isSelected ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-200 hover:border-gray-300'
+                    isSelected ? 'border-primary-500 bg-primary-50 shadow-md' : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onClick={() => handleSelectMember(member.auth0_id, member.username || member.name)}
                 role="button"
@@ -174,7 +174,7 @@ export default function AllMembers({
                     {renderOnlineStatus(member.auth0_id)}
                 </div>
                 {isSelected && (
-                    <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="absolute top-2 right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                         <MessageCircle className="w-3 h-3 text-white" />
                     </div>
                 )}
@@ -190,7 +190,7 @@ export default function AllMembers({
             <div
                 key={member.auth0_id}
                 className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                    isSelected ? 'bg-blue-50 border-2 border-blue-500' : 'bg-white hover:bg-gray-50 border-2 border-gray-200'
+                    isSelected ? 'bg-primary-50 border-2 border-primary-500' : 'bg-white hover:bg-gray-50 border-2 border-gray-200'
                 }`}
                 onClick={() => handleSelectMember(member.auth0_id, member.username || member.name)}
                 role="button"
@@ -224,7 +224,7 @@ export default function AllMembers({
                     {renderOnlineStatus(member.auth0_id)}
                 </div>
                 {isSelected && (
-                    <MessageCircle className="w-5 h-5 text-blue-500" />
+                    <MessageCircle className="w-5 h-5 text-primary-500" />
                 )}
             </div>
         );
@@ -255,7 +255,7 @@ export default function AllMembers({
                     <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2 rounded transition-colors ${
-                            viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                            viewMode === 'grid' ? 'bg-primary-500 text-white' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                         aria-label="Grid view"
                     >
@@ -269,7 +269,7 @@ export default function AllMembers({
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2 rounded transition-colors ${
-                            viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                            viewMode === 'list' ? 'bg-primary-500 text-white' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                         aria-label="List view"
                     >
@@ -292,7 +292,7 @@ export default function AllMembers({
                         placeholder="Search members..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                     />
                     {searchTerm && (
                         <button
@@ -319,14 +319,14 @@ export default function AllMembers({
 
             {/* Selected Member Banner */}
             {selectedMemberId && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <User className="w-5 h-5 text-blue-600" />
-                        <span className="text-blue-900 font-medium">Selected: {selectedName}</span>
+                        <User className="w-5 h-5 text-primary-600" />
+                        <span className="text-primary-900 font-medium">Selected: {selectedName}</span>
                     </div>
                     <button
                         onClick={clearSelection}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        className="text-primary-600 hover:text-primary-800 transition-colors"
                         aria-label="Clear selection"
                     >
                         <X className="w-5 h-5" />
@@ -369,7 +369,7 @@ export default function AllMembers({
                     <button
                         className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
                             selectedMemberId && !isCreatingConversation
-                                ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg'
+                                ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-md hover:shadow-lg'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                         onClick={handleStartConversation}

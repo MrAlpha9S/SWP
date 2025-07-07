@@ -6,9 +6,9 @@ export default function CoachAction({ role, handleNewConversationClick }) {
             <div className="p-4 border-t border-gray-700 space-y-2">
                 <button
                     onClick={handleNewConversationClick}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
                 >
-                    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
                         <Plus className="w-5 h-5" />
                     </div>
                     <div className="text-left">
