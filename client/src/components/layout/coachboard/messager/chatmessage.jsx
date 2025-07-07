@@ -7,12 +7,15 @@ export default function ChatMessage({ user, message, conversation_id }) {
 
   return (
     <div className={`flex ${message.auth0_id === auth0_id ? 'justify-end' : 'justify-start'}`}>
+      <div>
+        <div>{message.username}</div>
 
-      <div
-        className={`max-w-xs p-2 rounded-xl ${message.auth0_id === auth0_id ? 'bg-primary-500 text-white' : 'bg-gray-700 text-white'
-          } whitespace-pre-line`}
-      >
-        {message.content}
+        <div
+          className={`max-w-xs p-2 rounded-xl ${message.auth0_id === auth0_id ? 'bg-primary-500 text-white' : 'bg-gray-700 text-white'
+            } whitespace-pre-line`}
+        >
+          {message.content}
+        </div>
       </div>
     </div>
   );

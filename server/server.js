@@ -27,8 +27,77 @@ const io = Server(server, {
   }
 });
 
+// Store online users with their socket IDs and user info
+const onlineUsers = new Map();
+
+// Helper function to get online status for multiple users
+const getOnlineStatus = (userIds) => {
+    const statusMap = {};
+    userIds.forEach(userId => {
+        statusMap[userId] = {
+            isOnline: onlineUsers.has(userId),
+            lastSeen: onlineUsers.get(userId)?.lastSeen || null
+        };
+    });
+    return statusMap;
+};
+
+// Helper function to broadcast online status update
+const broadcastUserStatus = (userId, status) => {
+    io.emit('user_status_update', {
+        userId,
+        status,
+        timestamp: new Date().toISOString()
+    });
+};
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+    
+    // Handle user authentication and online status
+    socket.on('user_authenticate', (userData) => {
+        const { userId, username, avatar } = userData;
+        
+        // Store user info with socket
+        socket.userId = userId;
+        socket.username = username;
+        
+        // Add to online users map
+        onlineUsers.set(userId, {
+            socketId: socket.id,
+            username,
+            avatar,
+            lastSeen: new Date().toISOString(),
+            isOnline: true
+        });
+        
+        console.log(`User ${username} (${userId}) is now online`);
+        
+        // Broadcast user coming online
+        broadcastUserStatus(userId, {
+            isOnline: true,
+            username,
+            avatar,
+            lastSeen: new Date().toISOString()
+        });
+        
+        // Send current online users to the newly connected user
+        const onlineUsersList = Array.from(onlineUsers.entries()).map(([id, info]) => ({
+            userId: id,
+            username: info.username,
+            avatar: info.avatar,
+            isOnline: info.isOnline,
+            lastSeen: info.lastSeen
+        }));
+        
+        socket.emit('online_users_list', onlineUsersList);
+    });
+    
+    // Handle request for specific users' online status
+    socket.on('get_users_status', (userIds) => {
+        const statusMap = getOnlineStatus(userIds);
+        socket.emit('users_status_response', statusMap);
+    });
     
     // Handle joining conversation rooms
     socket.on('join_conversation', (conversationId) => {
@@ -138,6 +207,35 @@ io.on('connection', (socket) => {
     // Handle user disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
+        
+        // Handle user going offline
+        if (socket.userId) {
+            const userData = onlineUsers.get(socket.userId);
+            if (userData) {
+                // Update user status to offline
+                onlineUsers.set(socket.userId, {
+                    ...userData,
+                    isOnline: false,
+                    lastSeen: new Date().toISOString()
+                });
+                
+                // Broadcast user going offline
+                broadcastUserStatus(socket.userId, {
+                    isOnline: false,
+                    username: userData.username,
+                    avatar: userData.avatar,
+                    lastSeen: new Date().toISOString()
+                });
+                
+                // Remove from online users after a delay (to handle quick reconnections)
+                setTimeout(() => {
+                    const currentUser = onlineUsers.get(socket.userId);
+                    if (currentUser && !currentUser.isOnline) {
+                        onlineUsers.delete(socket.userId);
+                    }
+                }, 30000); // 30 seconds delay
+            }
+        }
     });
 });
 

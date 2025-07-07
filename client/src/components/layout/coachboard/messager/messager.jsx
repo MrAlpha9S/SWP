@@ -1,9 +1,10 @@
+// This is the updated Messenger.jsx with typing indicator support
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
 import ChatList from './chatlist';
 import MessageBox from './messagebox';
 import AllMembers from './allmembers';
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { GetUserConversations, GetMessageConversations, CreateConversation } from '../../../utils/messagerUtils';
 import { GetAllMembers } from '../../../utils/userUtils';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils';
@@ -14,89 +15,57 @@ export default function Messenger({ role }) {
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const [messagesBoxSwitch, setMessagesBoxSwitch] = useState(1);
   const socketRef = useRef(null);
+  const [onlineUsers, setOnlineUsers] = useState(new Map());
+  const [userStatuses, setUserStatuses] = useState({});
+  const [typingUsers, setTypingUsers] = useState(new Map());
 
-  // All Members
-  const {
-    isPending: isAllMembersPending,
-    data: allMembers,
-  } = useQuery({
+  const { data: allMembers } = useQuery({
     queryKey: ['allMembers'],
-    queryFn: async () => {
-      if (!isAuthenticated || !user) return;
-      return await GetAllMembers(user, getAccessTokenSilently, isAuthenticated);
-    },
+    queryFn: async () => await GetAllMembers(user, getAccessTokenSilently, isAuthenticated),
     enabled: isAuthenticated && !!user,
-  })
+  });
 
   const [members, setMembers] = useState([]);
   const [filteredMembers, setFilteredMembers] = useState([]);
-
   useEffect(() => {
-    if (!isAllMembersPending && allMembers) {
-      console.log(allMembers.data);
-      setMembers(allMembers.data)
-    }
-  }, [isAllMembersPending, allMembers]);
-  // User Conversations
-  const {
-    isPending: isUserConversationsPending,
-    data: userConversations,
-  } = useQuery({
-    queryKey: ['userConversations'],
-    queryFn: async () => {
-      if (!isAuthenticated || !user) return;
-      return await GetUserConversations(user, getAccessTokenSilently, isAuthenticated);
-    },
-    enabled: isAuthenticated && !!user,
-  })
+    if (allMembers) setMembers(allMembers.data);
+  }, [allMembers]);
 
-  const [selectedContactId, setSelectedContactId] = useState(undefined);
+  const { data: userConversations } = useQuery({
+    queryKey: ['userConversations'],
+    queryFn: async () => await GetUserConversations(user, getAccessTokenSilently, isAuthenticated),
+    enabled: isAuthenticated && !!user,
+  });
+
+  const [selectedContactId, setSelectedContactId] = useState();
   const [contacts, setContacts] = useState();
   useEffect(() => {
-    if (!isUserConversationsPending && userConversations) {
+    if (userConversations) {
       setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
     }
-  }, [isUserConversationsPending, userConversations]);
+  }, [userConversations]);
 
-  // Filter out members who already have conversations
   useEffect(() => {
-    if (members.length > 0 && contacts) {
-      const existingConversationMemberIds = contacts.map(contact => {
-        return contact.other_participant_id; 
-      }).filter(Boolean);
-      const availableMembers = members.filter(member =>
-        !existingConversationMemberIds.includes(member.auth0_id)
-      );
-
-      setFilteredMembers(availableMembers);
+    if (members.length && contacts) {
+      const existingIds = contacts.map(c => c.other_participant_id);
+      setFilteredMembers(members.filter(m => !existingIds.includes(m.auth0_id)));
     } else {
       setFilteredMembers(members);
     }
   }, [members, contacts]);
 
-  // Message Conversation
-  const {
-    isPending: isMessageConversationsPending,
-    data: messageConversations,
-  } = useQuery({
+  const { data: messageConversations } = useQuery({
     queryKey: ['messageConversations'],
-    queryFn: async () => {
-      if (!isAuthenticated || !user) return;
-      return await GetMessageConversations(user, getAccessTokenSilently, isAuthenticated);
-    },
+    queryFn: async () => await GetMessageConversations(user, getAccessTokenSilently, isAuthenticated),
     enabled: isAuthenticated && !!user,
-  })
+  });
 
   const [allMessages, setAllMessages] = useState();
   useEffect(() => {
-    if (!isMessageConversationsPending && messageConversations) {
-      setAllMessages(messageConversations.data)
-    }
-  }, [isMessageConversationsPending, messageConversations]);
+    if (messageConversations) setAllMessages(messageConversations.data);
+  }, [messageConversations]);
 
-
-  // Socket initialization and management
   useEffect(() => {
     if (!socketRef.current && isAuthenticated && user) {
       socketRef.current = io("http://localhost:3001", {
@@ -105,43 +74,45 @@ export default function Messenger({ role }) {
       });
 
       socketRef.current.on('connect', () => {
-        console.log('Connected to socket server');
+        socketRef.current.emit('user_authenticate', {
+          userId: user.sub,
+          username: user.name,
+          avatar: user.picture
+        });
       });
 
-      socketRef.current.on('disconnect', () => {
-        console.log('Disconnected from socket server');
+      socketRef.current.on('online_users_list', (users) => {
+        const usersMap = new Map(users.map(u => [u.userId, u]));
+        setOnlineUsers(usersMap);
       });
 
-      socketRef.current.on('new_message', (message) => {
-        console.log('New message received:', message);
-        queryClient.invalidateQueries({ queryKey: ['messageConversations'] });
+      socketRef.current.on('user_status_update', (data) => {
+        setOnlineUsers(prev => new Map(prev.set(data.userId, data.status)));
       });
 
-      socketRef.current.on('new_conversation', (data) => {
-        console.log('New conversation created:', data);
-        queryClient.invalidateQueries({ queryKey: ['userConversations'] });
+      socketRef.current.on('typing', ({ conversationId, userId, username }) => {
+        setTypingUsers(prev => new Map(prev.set(conversationId, { userId, username })));
       });
 
-      socketRef.current.on('conversation_updated', (data) => {
-        console.log('Conversation updated:', data);
-        queryClient.invalidateQueries({ queryKey: ['userConversations'] });
+      socketRef.current.on('stop_typing', ({ conversationId, userId }) => {
+        setTypingUsers(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(conversationId);
+          return newMap;
+        });
       });
+
+      socketRef.current.on('new_message', () => queryClient.invalidateQueries(['messageConversations']));
+      socketRef.current.on('new_conversation', () => queryClient.invalidateQueries(['userConversations']));
+      socketRef.current.on('conversation_updated', () => queryClient.invalidateQueries(['userConversations']));
 
       socketRef.current.on('member_interaction', (data) => {
-        console.log('Member interaction:', data);
-        // Handle different types of member interactions
-        if (data.type === 'conversation_created_successfully' || data.type === 'new_conversation_available') {
-          queryClient.invalidateQueries({ queryKey: ['userConversations'] });
-          queryClient.invalidateQueries({ queryKey: ['allMembers'] });
+        if (["conversation_created_successfully", "new_conversation_available"].includes(data.type)) {
+          queryClient.invalidateQueries(['userConversations']);
+          queryClient.invalidateQueries(['allMembers']);
         }
       });
-
-      socketRef.current.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
-      });
     }
-
-    // Cleanup function
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -150,17 +121,13 @@ export default function Messenger({ role }) {
     };
   }, [isAuthenticated, user, queryClient]);
 
-  // Join conversation room when selectedContactId changes
   useEffect(() => {
     if (socketRef.current && selectedContactId) {
       socketRef.current.emit('join_conversation', selectedContactId);
     }
   }, [selectedContactId]);
 
-  const onButtonClick = () => {
-    setMessagesBoxSwitch(2);
-  }
-
+  const onButtonClick = () => setMessagesBoxSwitch(2);
   const handleSelectConversation = (id) => {
     setMessagesBoxSwitch(1);
     setSelectedContactId(id);
@@ -171,7 +138,6 @@ export default function Messenger({ role }) {
     const created_at = getCurrentUTCDateTime();
     const newConversation = await CreateConversation(user, getAccessTokenSilently, isAuthenticated, conversation_name, created_at, id);
 
-    // Emit new conversation event via socket
     if (socketRef.current && newConversation) {
       socketRef.current.emit('new_conversation', {
         conversation: newConversation,
@@ -179,36 +145,18 @@ export default function Messenger({ role }) {
       });
     }
 
-    // Refresh both user conversations and all members to update the filtered list
-    queryClient.invalidateQueries({ queryKey: ['userConversations'] });
-    queryClient.invalidateQueries({ queryKey: ['allMembers'] });
-
-    // Switch back to message view
+    queryClient.invalidateQueries(['userConversations']);
+    queryClient.invalidateQueries(['allMembers']);
     setMessagesBoxSwitch(1);
-  }
-
-  // Socket helper functions to pass to components
-  const emitMessage = (data) => {
-    if (socketRef.current) {
-      socketRef.current.emit('send_message', data);
-    }
   };
 
-  const emitConversationUpdate = (data) => {
-    if (socketRef.current) {
-      socketRef.current.emit('conversation_updated', data);
-    }
-  };
+  const emitMessage = (data) => socketRef.current?.emit('send_message', data);
+  const emitConversationUpdate = (data) => socketRef.current?.emit('conversation_updated', data);
+  const emitMemberInteraction = (data) => socketRef.current?.emit('member_interaction', data);
 
-  const emitMemberInteraction = (data) => {
-    if (socketRef.current) {
-      socketRef.current.emit('member_interaction', data);
-    }
-  };
+  const typingUser = typingUsers.get(selectedContactId);
 
-  if (isMessageConversationsPending || isUserConversationsPending || !contacts) {
-    return <div>Loading...</div>;
-  }
+  if (!contacts || !allMessages) return <div>Loading...</div>;
 
   return (
     <div className="w-full flex h-screen bg-primary-700 rounded-lg text-white">
@@ -220,18 +168,37 @@ export default function Messenger({ role }) {
         onSelect={handleSelectConversation}
         onButtonClick={onButtonClick}
         onEmitConversationUpdate={emitConversationUpdate}
+        onlineUsers={onlineUsers}
+        getUserOnlineStatus={(id) => onlineUsers.get(id)?.isOnline || false}
+        getUserLastSeen={(id) => onlineUsers.get(id)?.lastSeen || null}
+        formatLastSeen={(lastSeen) => {
+          if (!lastSeen) return 'Never';
+          const now = new Date();
+          const diff = Math.floor((now - new Date(lastSeen)) / 60000);
+          if (diff < 1) return 'Just now';
+          if (diff < 60) return `${diff} min ago`;
+          if (diff < 1440) return `${Math.floor(diff / 60)} hr ago`;
+          return `${Math.floor(diff / 1440)} day(s) ago`;
+        }}
       />
       {messagesBoxSwitch === 2 ? (
         <AllMembers
           members={filteredMembers}
           onSelectMember={onSelectMember}
           onEmitMemberInteraction={emitMemberInteraction}
+          onlineUsers={onlineUsers}
+          getUserOnlineStatus={(id) => onlineUsers.get(id)?.isOnline || false}
+          getUserLastSeen={(id) => onlineUsers.get(id)?.lastSeen || null}
+          formatLastSeen={(lastSeen) => lastSeen}
         />
       ) : (
         <MessageBox
           messages={allMessages}
           conversation_id={selectedContactId}
           onEmitMessage={emitMessage}
+          socket={socketRef.current}
+          currentUser={user}
+          typingUser={typingUser}
         />
       )}
     </div>

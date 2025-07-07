@@ -5,11 +5,11 @@ import ChatMessage from './ChatMessage';
 import { SendOutlined } from '@ant-design/icons';
 import { SendMessage } from '../../../utils/messagerUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCurrentUTCDateTime } from '../../../utils/dateUtils'
+import { getCurrentUTCDateTime } from '../../../utils/dateUtils';
 
 const { TextArea } = Input;
 
-export default function MessageBox({ messages, conversation_id, onEmitMessage }) {
+export default function MessageBox({ messages, conversation_id, onEmitMessage, socket, currentUser, typingUser }) {
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
@@ -23,7 +23,6 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
     },
     onSuccess: (data) => {
       console.log('Message sent successfully');
-      // Emit message to socket for real-time updates through parent component
       if (onEmitMessage) {
         onEmitMessage({
           conversationId,
@@ -31,7 +30,6 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
         });
       }
       queryClient.invalidateQueries({ queryKey: ['messageConversations'] });
-      // Clear input after successful send
       setInput('');
     },
     onError: (error) => {
@@ -41,14 +39,13 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
 
   const handleOnSend = () => {
     if (!input || input.trim() === '') return;
-    
+
     const message = {
       conversationId: conversationId,
       content: input.trim(),
       created_at: getCurrentUTCDateTime()
     };
-    
-    console.log('Sending message:', message);
+
     sendMessageMutation.mutate({ user, getAccessTokenSilently, isAuthenticated, ...message });
   };
 
@@ -59,8 +56,29 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
     }
   };
 
+  // Typing handler with debounce
+  const typingTimeoutRef = useRef();
+  const handleTyping = () => {
+    if (socket && currentUser && conversationId) {
+      socket.emit('typing', {
+        conversationId,
+        userId: currentUser.sub,
+        username: currentUser.name
+      });
+
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('stop_typing', {
+          conversationId,
+          userId: currentUser.sub
+        });
+      }, 3000);
+    }
+  };
+
   const handleInputChange = (e) => {
     setInput(e.target.value);
+    handleTyping();
   };
 
   return (
@@ -68,11 +86,11 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
       <div className="flex-1 overflow-y-auto space-y-2 pr-4 mb-4">
         {messages && messages.length > 0 ? (
           messages.map((msg, idx) => (
-            <ChatMessage 
-              key={msg.id || idx} 
-              user={user} 
-              message={msg} 
-              conversation_id={conversation_id} 
+            <ChatMessage
+              key={msg.id || idx}
+              user={user}
+              message={msg}
+              conversation_id={conversation_id}
             />
           ))
         ) : (
@@ -82,7 +100,13 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
         )}
         <div ref={messagesEndRef} />
       </div>
-      
+
+      {typingUser && (
+        <div className="text-sm text-gray-400 mb-2">
+          {typingUser.username} is typing...
+        </div>
+      )}
+
       <div className="border-t pt-4">
         <div className="flex items-end gap-2">
           <TextArea
@@ -107,7 +131,7 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage })
             <SendOutlined className="text-xl" />
           </button>
         </div>
-        
+
         {sendMessageMutation.isPending && (
           <div className="text-sm text-gray-500 mt-2">
             Sending message...
