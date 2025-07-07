@@ -5,29 +5,35 @@ const mssql = require('mssql')
 const CreateConversation = async (auth0_id, conversation_name, created_at, user_id) => {
     try {
         const pool = await poolPromise;
+        
+        // Insert conversation and get the ID
         const result = await pool.request()
             .input('conversation_name', conversation_name)
             .input('created_at', mssql.DateTime, created_at)
-            .query(`INSERT INTO [conversations] ([conversation_name], [created_at]) VALUES
-(@conversation_name, @created_at); 
-                    INSERT INTO [user_conversation] ([conversation_id], [user_id]) VALUES
-(1, 1), (1, 2);`);
+            .query(`
+                INSERT INTO [conversations] ([conversation_name], [created_at]) 
+                OUTPUT INSERTED.conversation_id
+                VALUES (@conversation_name, @created_at);
+            `);
         const conversationId = result.recordset[0].conversation_id;
-
-        const pool1 = await poolPromise;
-        const result1 = await pool1.request()
+        
+        // Insert user-conversation relationships
+        const result1 = await pool.request()
             .input('conversation_id', conversationId)
             .input('user_id1', await getUserIdFromAuth0Id(auth0_id))
-            .input('user_id2', user_id)
-            .query(`INSERT INTO [user_conversation] ([conversation_id], [user_id]) VALUES
-(@conversation_id, @user_id1), (@conversation_id, @user_id2);`);
+            .input('user_id2', await getUserIdFromAuth0Id(user_id))
+            .query(`
+                INSERT INTO [user_conversation] ([conversation_id], [user_id]) 
+                VALUES (@conversation_id, @user_id1), (@conversation_id, @user_id2);
+            `);
 
         if(result.rowsAffected[0] === 0 || result1.rowsAffected[0] === 0) {
-            throw new Error('error in insert CreateConversation');
+            throw new Error('Error in insert CreateConversation');
         }
-        return true;
+        
+        return conversationId; // Return the ID instead of just true
     } catch (error) {
-        console.error('error in CreateConversation', error);
+        console.error('Error in CreateConversation:', error);
         return false;
     }
 };
@@ -37,15 +43,22 @@ const GetMessageConversation = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', await getUserIdFromAuth0Id(auth0_id))
-            .query(`SELECT DISTINCT m.conversation_id, u.user_id, u.username, m.created_at, m.content, m.message_id, u.auth0_id
+            .query(`SELECT 
+    m.message_id,
+    m.conversation_id,
+    m.user_id,
+    u.username,
+    u.auth0_id,
+    m.content,
+    m.created_at
 FROM messages m
 JOIN users u ON m.user_id = u.user_id
 WHERE m.conversation_id IN (
-    SELECT DISTINCT conversation_id
-    FROM messages
+    SELECT conversation_id
+    FROM user_conversation
     WHERE user_id = @user_id
 )
-    ORDER BY m.created_at ASC;`);
+ORDER BY m.conversation_id, m.created_at;`);
         // if(result.rowsAffected[0] === 0) {
         //     throw new Error('error in insert GetMessageConversation');
         // }
@@ -61,9 +74,22 @@ const GetUserConversations = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', await getUserIdFromAuth0Id(auth0_id))
-            .query(`Select uc.conversation_id, c.conversation_name, c.created_at, uc.user_id from user_conversation uc
-Join conversations c ON c.conversation_id = uc.conversation_id
-Where uc.user_id = @user_id`);
+            .query(`SELECT 
+  uc2.conversation_id,
+  c.created_at,
+  uc2.user_id,
+  u.username AS conversation_name,
+  u.avatar,
+  u.auth0_id AS other_participant_id
+FROM user_conversation uc
+JOIN user_conversation uc2 
+  ON uc.conversation_id = uc2.conversation_id
+JOIN conversations c 
+  ON c.conversation_id = uc2.conversation_id
+JOIN users u 
+  ON uc2.user_id = u.user_id
+WHERE uc.user_id = @user_id
+  AND uc2.user_id != @user_id;`);
         // if(result.rowsAffected[0] === 0) {
         //     throw new Error('error in insert GetUserConversations');
         // }
@@ -76,6 +102,12 @@ Where uc.user_id = @user_id`);
 
 const SendMessage = async (auth0_id, conversationId, content, created_at) => {
     try {
+        console.log('SendMessage called with:', {
+            auth0_id,
+            conversationId,
+            content,
+            created_at
+        });
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', await getUserIdFromAuth0Id(auth0_id))

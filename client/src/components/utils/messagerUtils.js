@@ -1,5 +1,25 @@
 const API = 'http://localhost:3000/messager'
 
+export async function CreateConversation(user, getAccessTokenSilently, isAuthenticated, conversation_name, created_at, user_id) {
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`${API}/createconversation`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({auth0_id: user.sub, conversation_name: conversation_name, created_at: created_at, user_id: user_id})
+    });
+    
+
+    return await res.json();
+}
+
+
 export async function GetMessageConversations(user, getAccessTokenSilently, isAuthenticated) {
 
     if (!isAuthenticated || !user) return;

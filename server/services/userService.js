@@ -1,6 +1,25 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
 const {convertUTCStringToLocalDate, getCurrentUTCDateTime} = require("../utils/dateUtils");
 
+const allMember = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`
+                SELECT * FROM users u 
+                WHERE u.role = 'Member' 
+                AND u.user_id NOT IN (
+                    SELECT DISTINCT user_id 
+                    FROM user_conversation
+                )
+            `);
+        return result.recordset;
+    } catch (error) {
+        console.error('error in allMember', error);
+        return [];
+    }
+};
+
 const userExists = async (auth0_id) => {
     try {
         const pool = await poolPromise;
@@ -376,5 +395,5 @@ module.exports = {
     updateUserSubscriptionService,
     getCoaches,
     getCoachDetailsById,
-    assignUserToCoachService
+    assignUserToCoachService, allMember
 };

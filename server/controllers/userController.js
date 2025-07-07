@@ -7,12 +7,23 @@ const {
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
 const {updateUserAuth0} = require("../services/auth0Service");
 const {getUserByAuth0Id, updateUserByAuth0Id} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id, allMember} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
+
+const handleAllMember = async (req, res) => {
+    try {
+
+        const members = await allMember();
+        return res.status(200).json({ data: members });
+    } catch (error) {
+        console.error('Error in handleAllMember:', error);
+        return res.status(500).json({ error: 'Failed to handleAllMember' });
+    }
+};
 
 const handlePostSignup = async (req, res) => {
     const {userAuth0Id} = req.body;
@@ -203,5 +214,6 @@ module.exports = {
     updateUserController,
     getUserInfo,
     updateUserInfo,
-    assignUserToCoachController
+    assignUserToCoachController,
+    handleAllMember
 };

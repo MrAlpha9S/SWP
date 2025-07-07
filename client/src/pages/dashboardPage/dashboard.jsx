@@ -8,6 +8,7 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
+import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
@@ -27,6 +28,7 @@ import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
+import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -160,6 +162,7 @@ function Dashboard() {
             case 'dashboard':
                 return userProfile?.data?.userProfile ? (
                     <ProgressBoard
+
                         startDate={startDate}
                         pricePerPack={pricePerPack}
                         cigsPerPack={cigsPerPack}
@@ -197,7 +200,7 @@ function Dashboard() {
             case 'badges':
                 return <BadgesMenu/>;
             case 'messager':
-                return <MessageBox/>
+                return <Messager role={userInfo?.role} />
             case 'post-blog':
                 return <PostBlog/>
 
