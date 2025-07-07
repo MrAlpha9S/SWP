@@ -18,6 +18,7 @@ export default function Messenger({ role }) {
   const [onlineUsers, setOnlineUsers] = useState(new Map());
   const [userStatuses, setUserStatuses] = useState({});
   const [typingUsers, setTypingUsers] = useState(new Map());
+  const [typingUser, setTypingUser] = useState();
 
   const { data: allMembers } = useQuery({
     queryKey: ['allMembers'],
@@ -67,6 +68,7 @@ export default function Messenger({ role }) {
   }, [messageConversations]);
 
   useEffect(() => {
+  
     if (!socketRef.current && isAuthenticated && user) {
       socketRef.current = io("http://localhost:3001", {
         withCredentials: true,
@@ -91,6 +93,7 @@ export default function Messenger({ role }) {
       });
 
       socketRef.current.on('typing', ({ conversationId, userId, username }) => {
+        console.log('typing: ', conversationId, userId, username)
         setTypingUsers(prev => new Map(prev.set(conversationId, { userId, username })));
       });
 
@@ -121,11 +124,17 @@ export default function Messenger({ role }) {
     };
   }, [isAuthenticated, user, queryClient]);
 
+  // Typing User
+  useEffect(() => {
+    console.log(typingUsers)
+    setTypingUser(typingUsers.get(selectedContactId));
+  },[selectedContactId, typingUsers])
+
   useEffect(() => {
     if (socketRef.current && selectedContactId) {
       socketRef.current.emit('join_conversation', selectedContactId);
     }
-  }, [selectedContactId]);
+  }, [selectedContactId, userConversations]);
 
   const onButtonClick = () => setMessagesBoxSwitch(2);
   const handleSelectConversation = (id) => {
@@ -153,8 +162,6 @@ export default function Messenger({ role }) {
   const emitMessage = (data) => socketRef.current?.emit('send_message', data);
   const emitConversationUpdate = (data) => socketRef.current?.emit('conversation_updated', data);
   const emitMemberInteraction = (data) => socketRef.current?.emit('member_interaction', data);
-
-  const typingUser = typingUsers.get(selectedContactId);
 
   if (!contacts || !allMessages) return <div>Loading...</div>;
 

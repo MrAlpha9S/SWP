@@ -1,4 +1,4 @@
-require('dotenv').config({path: `.env`});
+require('dotenv').config({ path: `.env` });
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -20,15 +20,18 @@ const messageRouter = require("./routes/messageRoute");
 const server = http.createServer(app);
 
 const io = Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true
-  }
+    cors: {
+        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 
 // Store online users with their socket IDs and user info
 const onlineUsers = new Map();
+
+// Store typing users by conversation ID
+const typingUsers = new Map();
 
 // Helper function to get online status for multiple users
 const getOnlineStatus = (userIds) => {
@@ -51,17 +54,28 @@ const broadcastUserStatus = (userId, status) => {
     });
 };
 
+// Helper function to clean up typing status
+const cleanupTypingStatus = (conversationId, userId) => {
+    const typingInConversation = typingUsers.get(conversationId);
+    if (typingInConversation && typingInConversation.has(userId)) {
+        typingInConversation.delete(userId);
+        if (typingInConversation.size === 0) {
+            typingUsers.delete(conversationId);
+        }
+    }
+};
+
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
-    
+
     // Handle user authentication and online status
     socket.on('user_authenticate', (userData) => {
         const { userId, username, avatar } = userData;
-        
+
         // Store user info with socket
         socket.userId = userId;
         socket.username = username;
-        
+
         // Add to online users map
         onlineUsers.set(userId, {
             socketId: socket.id,
@@ -70,9 +84,9 @@ io.on('connection', (socket) => {
             lastSeen: new Date().toISOString(),
             isOnline: true
         });
-        
+
         console.log(`User ${username} (${userId}) is now online`);
-        
+
         // Broadcast user coming online
         broadcastUserStatus(userId, {
             isOnline: true,
@@ -80,7 +94,7 @@ io.on('connection', (socket) => {
             avatar,
             lastSeen: new Date().toISOString()
         });
-        
+
         // Send current online users to the newly connected user
         const onlineUsersList = Array.from(onlineUsers.entries()).map(([id, info]) => ({
             userId: id,
@@ -89,16 +103,16 @@ io.on('connection', (socket) => {
             isOnline: info.isOnline,
             lastSeen: info.lastSeen
         }));
-        
+
         socket.emit('online_users_list', onlineUsersList);
     });
-    
+
     // Handle request for specific users' online status
     socket.on('get_users_status', (userIds) => {
         const statusMap = getOnlineStatus(userIds);
         socket.emit('users_status_response', statusMap);
     });
-    
+
     // Handle joining conversation rooms
     socket.on('join_conversation', (conversationId) => {
         socket.join(`conversation_${conversationId}`);
@@ -109,25 +123,78 @@ io.on('connection', (socket) => {
     socket.on('leave_conversation', (conversationId) => {
         socket.leave(`conversation_${conversationId}`);
         console.log(`User ${socket.id} left conversation ${conversationId}`);
+
+        // Clean up typing status when leaving conversation
+        if (socket.userId) {
+            cleanupTypingStatus(conversationId, socket.userId);
+        }
     });
-    
-    // Handle sending messages
+
+    // Handle typing indicator
+    socket.on('typing', (data) => {
+        // console.log(data)
+        const { conversationId, userId, username } = data;
+
+        // Initialize typing users for this conversation if not exists
+        if (!typingUsers.has(conversationId)) {
+            typingUsers.set(conversationId, new Map());
+        }
+
+        // Add user to typing users
+        typingUsers.get(conversationId).set(userId, {
+            username,
+            timestamp: new Date().toISOString()
+        });
+
+        // Broadcast typing indicator to other users in the conversation
+        socket.to(`conversation_${conversationId}`).emit('typing', {
+            conversationId,
+            userId,
+            username
+        });
+        // socket.emit('typing', {
+        //     conversationId,
+        //     userId,
+        //     username
+        // });
+    });
+
+    // Handle stop typing indicator
+    socket.on('stop_typing', (data) => {
+        const { conversationId, userId } = data;
+
+        console.log(`User ${userId} stopped typing in conversation ${conversationId}`);
+
+        // Remove user from typing users
+        cleanupTypingStatus(conversationId, userId);
+
+        // Broadcast stop typing indicator to other users in the conversation
+        socket.emit('stop_typing', {
+            conversationId,
+            userId
+        });
+    });
+
     socket.on('send_message', (data) => {
         console.log('Message received:', data);
-        // Emit to specific conversation room
+
+        if (socket.userId) {
+            cleanupTypingStatus(data.conversationId, socket.userId);
+            socket.to(`conversation_${data.conversationId}`).emit('stop_typing', {
+                conversationId: data.conversationId,
+                userId: socket.userId
+            });
+        }
+
         socket.to(`conversation_${data.conversationId}`).emit('new_message', data);
-        // Also emit to sender for confirmation
         socket.emit('message_sent', data);
     });
 
     // Handle new conversation creation
     socket.on('new_conversation', (data) => {
         console.log('New conversation created:', data);
-        // Emit to all participants
         if (data.participants && data.participants.length > 0) {
             data.participants.forEach(participantId => {
-                // In a real application, you'd need to map user IDs to socket IDs
-                // For now, broadcast to all connected clients
                 io.emit('new_conversation', data);
             });
         }
@@ -148,7 +215,7 @@ io.on('connection', (socket) => {
     // Handle member interactions (selection, conversation creation, etc.)
     socket.on('member_interaction', (data) => {
         console.log('Member interaction:', data);
-        
+
         switch (data.type) {
             case 'member_selected':
                 // Broadcast member selection to other users (for presence/activity indicators)
@@ -160,7 +227,7 @@ io.on('connection', (socket) => {
                     timestamp: data.timestamp
                 });
                 break;
-                
+
             case 'conversation_creation_started':
                 // Notify other users that a conversation is being created
                 socket.broadcast.emit('member_interaction', {
@@ -171,7 +238,7 @@ io.on('connection', (socket) => {
                     timestamp: data.timestamp
                 });
                 break;
-                
+
             case 'conversation_created_successfully':
                 // Broadcast successful conversation creation
                 io.emit('member_interaction', {
@@ -187,7 +254,7 @@ io.on('connection', (socket) => {
                     timestamp: data.timestamp
                 });
                 break;
-                
+
             case 'conversation_creation_failed':
                 // Log error and potentially notify relevant users
                 console.error('Conversation creation failed:', data.error);
@@ -197,7 +264,7 @@ io.on('connection', (socket) => {
                     timestamp: data.timestamp
                 });
                 break;
-                
+
             default:
                 // Handle other member interaction types
                 socket.broadcast.emit('member_interaction', data);
@@ -207,18 +274,32 @@ io.on('connection', (socket) => {
     // Handle user disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        
+
         // Handle user going offline
         if (socket.userId) {
             const userData = onlineUsers.get(socket.userId);
             if (userData) {
+                // Clean up typing status for all conversations this user was typing in
+                typingUsers.forEach((typingInConversation, conversationId) => {
+                    if (typingInConversation.has(socket.userId)) {
+                        // Broadcast stop typing to the conversation
+                        socket.to(`conversation_${conversationId}`).emit('stop_typing', {
+                            conversationId,
+                            userId: socket.userId
+                        });
+
+                        // Remove from typing users
+                        cleanupTypingStatus(conversationId, socket.userId);
+                    }
+                });
+
                 // Update user status to offline
                 onlineUsers.set(socket.userId, {
                     ...userData,
                     isOnline: false,
                     lastSeen: new Date().toISOString()
                 });
-                
+
                 // Broadcast user going offline
                 broadcastUserStatus(socket.userId, {
                     isOnline: false,
@@ -226,7 +307,7 @@ io.on('connection', (socket) => {
                     avatar: userData.avatar,
                     lastSeen: new Date().toISOString()
                 });
-                
+
                 // Remove from online users after a delay (to handle quick reconnections)
                 setTimeout(() => {
                     const currentUser = onlineUsers.get(socket.userId);

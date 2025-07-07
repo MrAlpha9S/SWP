@@ -59,7 +59,9 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
   // Typing handler with debounce
   const typingTimeoutRef = useRef();
   const handleTyping = () => {
-    if (socket && currentUser && conversationId) {
+
+    if (socket && currentUser && currentUser.sub && currentUser.name && conversationId) {
+
       socket.emit('typing', {
         conversationId,
         userId: currentUser.sub,
@@ -72,7 +74,7 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
           conversationId,
           userId: currentUser.sub
         });
-      }, 3000);
+      }, 15000);
     }
   };
 
@@ -80,6 +82,13 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
     setInput(e.target.value);
     handleTyping();
   };
+
+  //scroll down
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [messages]);
 
   return (
     <div className="flex-1 flex flex-col justify-between p-4 h-full">
@@ -101,7 +110,7 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
         <div ref={messagesEndRef} />
       </div>
 
-      {typingUser && (
+      {typingUser && typingUser.userId !== user.sub && (
         <div className="text-sm text-gray-400 mb-2">
           {typingUser.username} is typing...
         </div>
@@ -122,11 +131,10 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
           <button
             onClick={handleOnSend}
             disabled={sendMessageMutation.isPending || !input.trim()}
-            className={`p-2 rounded-full transition-colors ${
-              sendMessageMutation.isPending || !input.trim()
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-primary-600 hover:text-primary-700 cursor-pointer'
-            }`}
+            className={`p-2 rounded-full transition-colors ${sendMessageMutation.isPending || !input.trim()
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-primary-600 hover:text-primary-700 cursor-pointer'
+              }`}
           >
             <SendOutlined className="text-xl" />
           </button>
