@@ -113,11 +113,7 @@ export default function ChatList({
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-semibold">
-              {user ? user.charAt(0).toUpperCase() : 'U'}
-            </span>
-          </div>
+          <img src={user.avatar}/>
           <div>
             <div className="text-xl font-bold text-white">{user}</div>
             <div className="text-sm text-gray-400">
