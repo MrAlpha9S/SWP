@@ -79,8 +79,10 @@ const Onboarding = () => {
             if (from) {
                 if (from === 'savings') {
                     setCurrentStep(2);
-                } else if (from === 'progress-board-startdate' || from === 'progress-board-plan') {
+                } else if (from === 'progress-board-startdate') {
                     setCurrentStep(0);
+                } else if (from === 'progress-board-plan') {
+                    setCurrentStep(5)
                 } else {
                     setCurrentStep(6)
                 }

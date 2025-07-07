@@ -53,6 +53,90 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
+// export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
+//     const map = new Map();
+//
+//     const checkinMap = new Map();
+//     for (let i = 0; i < checkinLog.length; i++) {
+//         const dateStr = new Date(checkinLog[i].date).toISOString().split('T')[0];
+//         checkinMap.set(dateStr, checkinLog[i].cigs);
+//     }
+//
+//     // Define plan ranges
+//     const planRanges = [];
+//     for (let i = 0; i < planLog.length; i++) {
+//         const start = new Date(planLog[i].date);
+//         const end = planLog[i + 1]
+//             ? new Date(planLog[i + 1].date)
+//             : new Date(start);
+//
+//         if (!planLog[i + 1]) {
+//             end.setUTCDate(
+//                 quittingMethod === 'gradual-weekly'
+//                     ? start.getUTCDate() + 6
+//                     : start.getUTCDate() + 1
+//             );
+//         }
+//
+//         planRanges.push({
+//             start,
+//             end,
+//             cigs: planLog[i].cigs
+//         });
+//     }
+//
+//     const getCurrentUTCDateTime = () => {
+//         const now = new Date();
+//         return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+//     };
+//
+//     const currentDate = getCurrentUTCDateTime();
+//
+//     // Determine first and last date for loop
+//     const firstDate = new Date(Math.min(
+//         ...checkinLog.map(e => new Date(e.date)),
+//         ...planLog.map(e => new Date(e.date))
+//     ));
+//
+//     const lastDate = new Date(Math.max(
+//         ...checkinLog.map(e => new Date(e.date)),
+//         ...planLog.map(e => new Date(e.date))
+//     ));
+//
+//     const current = new Date(firstDate);
+//     let lastKnownActual = null;
+//
+//     while (current <= lastDate) {
+//         const dayStr = current.toISOString().split('T')[0];
+//         let actual = checkinMap.get(dayStr);
+//
+//         // Only fill forward if the current day is <= today
+//         if (actual == null && lastKnownActual != null && current <= currentDate) {
+//             actual = lastKnownActual;
+//         } else if (actual != null) {
+//             lastKnownActual = actual;
+//         }
+//
+//         let plan = null;
+//         for (const range of planRanges) {
+//             if (dayStr === range.start.toISOString().split('T')[0]) {
+//                 plan = range.cigs;
+//                 break;
+//             }
+//         }
+//
+//         map.set(dayStr, {
+//             date: dayStr,
+//             actual,
+//             plan
+//         });
+//
+//         current.setUTCDate(current.getUTCDate() + 1);
+//     }
+//
+//     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+// }
+
 export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
     const map = new Map();
 
@@ -81,7 +165,8 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         planRanges.push({
             start,
             end,
-            cigs: planLog[i].cigs
+            cigs: planLog[i].cigs,
+            nextCigs: planLog[i + 1]?.cigs ?? 0
         });
     }
 
@@ -92,7 +177,6 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
 
     const currentDate = getCurrentUTCDateTime();
 
-    // Determine first and last date for loop
     const firstDate = new Date(Math.min(
         ...checkinLog.map(e => new Date(e.date)),
         ...planLog.map(e => new Date(e.date))
@@ -110,7 +194,6 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         const dayStr = current.toISOString().split('T')[0];
         let actual = checkinMap.get(dayStr);
 
-        // Only fill forward if the current day is <= today
         if (actual == null && lastKnownActual != null && current <= currentDate) {
             actual = lastKnownActual;
         } else if (actual != null) {
@@ -118,9 +201,22 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
         }
 
         let plan = null;
+
         for (const range of planRanges) {
-            if (dayStr === range.start.toISOString().split('T')[0]) {
-                plan = range.cigs;
+            const startDate = new Date(range.start);
+            const endDate = new Date(range.end);
+
+            if (current >= startDate && current <= endDate) {
+                const totalDays = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)));
+                const dayIndex = Math.round((current - startDate) / (1000 * 60 * 60 * 24));
+
+                if (quittingMethod === 'gradual-weekly') {
+                    const delta = (range.cigs - range.nextCigs) / totalDays;
+                    const interpolated = range.cigs - delta * dayIndex;
+                    plan = parseFloat(interpolated.toFixed(2));
+                } else {
+                    plan = range.cigs;
+                }
                 break;
             }
         }
@@ -136,6 +232,7 @@ export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
 
 
 

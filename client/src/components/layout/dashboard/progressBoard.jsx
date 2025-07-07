@@ -335,7 +335,7 @@ const ProgressBoard = ({
                     {isPending ?
                         <Skeleton.Input style={{width: 160}} active/> :
                         readinessValue === 'ready' ?
-                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
+                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
                             new Date(stoppedDate).toLocaleDateString('vi-VN')
                     }
                 </div>
@@ -354,6 +354,12 @@ const ProgressBoard = ({
                     <div className="text-2xl flex justify-center"><BsGraphDown
                         className='size-7 text-primary-800 mb-1'/></div>
                     <h3 className="text-lg font-semibold text-primary-800">Số điếu thuốc theo kế hoạch và thực tế</h3>
+                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
+                        <div className='flex flex-col items-center justify-center'>
+                            <p>Bạn chưa tạo kế hoạch</p>
+                            <CustomButton onClick={() => navigate('/onboarding/progress-board-plan')}>Tạo ngay</CustomButton>
+                        </div>
+                    }
                     {showWarning && <p>Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!</p>}
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>

@@ -260,7 +260,7 @@ const Summary = () => {
                         </>
                     )}
 
-                    {readinessValue === 'ready' && !isFreeUser &&
+                    {readinessValue === 'ready' && !isFreeUser && planLog?.length > 0 &&
                         <>
                             <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
