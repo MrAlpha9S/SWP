@@ -8,6 +8,7 @@ import {getCoachById} from "../../utils/userUtils.js";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
 import NotFoundBanner from "../notFoundBanner.jsx";
+import Messager from '../coachboard/messager/messager.jsx'
 
 const CoachDashboard = () => {
     const {userInfo} = useUserInfoStore()
@@ -63,7 +64,7 @@ const CoachDashboard = () => {
         )
     } else if (userInfo && userInfo.sub_id !== 1 && coachInfo?.coach) {
         return (
-            <div className='w-full h-full'>
+                <div className='w-full h-screen'>
 
                 <div className=' rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5'>
                     <p className='text-2xl font-bold'>Huấn luyện viên của bạn</p>
@@ -94,6 +95,7 @@ const CoachDashboard = () => {
                             </div>
                         </div>
                     </div>
+                    <div className='h-[70%] w-[50%]'><Messager role={userInfo?.role}/></div>
                     {!planLog || planLog.length === 0 && <>
                         <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
                     </>}
