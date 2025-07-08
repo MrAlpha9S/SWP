@@ -1,6 +1,6 @@
 
 import {Modal, Popconfirm} from "antd";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import CoachDetailsPage from "../../../pages/subscriptionPage/coachDetailsPage.jsx";
 import {useMutation} from "@tanstack/react-query";
 import {assignCoachToUser} from "../../utils/userUtils.js";
@@ -16,8 +16,8 @@ const CoachCard = ({coach}) => {
     const {isAuthenticated, getAccessTokenSilently} = useAuth0()
 
     const assignMutation = useMutation({
-        mutationFn: async ({coachId, userId}) => {
-            const res = await assignCoachToUser(coachId, userId, getAccessTokenSilently, isAuthenticated);
+        mutationFn: async ({coachId, userId, username, coachAuth0Id}) => {
+            const res = await assignCoachToUser(coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated);
             return res.data;
         },
         onSuccess: () => {
@@ -30,7 +30,7 @@ const CoachCard = ({coach}) => {
     });
 
     const handleOk = () => {
-        assignMutation.mutate({ coachId: coach?.user_id, userId: userInfo?.user_id });
+        assignMutation.mutate({ coachId: coach?.user_id, userId: userInfo?.user_id, username: userInfo?.username, coachAuth0Id: coach?.auth0_id });
     }
 
     return (

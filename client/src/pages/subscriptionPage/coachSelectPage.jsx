@@ -19,6 +19,7 @@ function CoachSelectPage() {
     useEffect(() => {
         if (!isPending) {
             setCoaches(data.data);
+            console.log(data.data)
         }
     }, [isPending]);
 

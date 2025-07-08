@@ -13,6 +13,7 @@ const {userExists, createUser, getUserCreationDateFromAuth0Id, allMember} = requ
 const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
+const socket = require('../utils/socket');
 
 const handleAllMember = async (req, res) => {
     try {
@@ -188,13 +189,20 @@ const updateUserInfo = async (req, res) => {
 };
 
 const assignUserToCoachController = async (req, res) => {
-    const { coachId, userId } = req.body;
+    const { coachId, userId, username, coachAuth0Id } = req.body;
+
     try {
         if (!coachId || !userId) {
             return res.status(400).json({success: false, message: "Missing ids"});
         }
         const assignResult = await assignUserToCoachService(coachId, userId);
         if (assignResult) {
+            const io = socket.getIo()
+            io.to(coachAuth0Id).emit('coach_selected', {
+                userId,
+                username,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
             return res.status(200).json({success: true, message: "Assign successful"});
         } else {
             return res.status(500).json({success: false, message: "Assign failed"});

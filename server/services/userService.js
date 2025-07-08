@@ -125,7 +125,7 @@ const updateUserSubscriptionService = async (user_id, subscription_id, vip_end_d
             .input('user_id', sql.Int, user_id)
             .input('vip_end_date', sql.DateTime, vip_end_date)
             .query('UPDATE users SET sub_id = @sub_id, vip_end_date = @vip_end_date WHERE user_id = @user_id');
-        return result.rowsAffected > 0
+        return result.rowsAffected[0] > 0;
     } catch (error) {
         console.error('error in updateSubscriptionService', error);
         return false;
@@ -374,7 +374,7 @@ const assignUserToCoachService = async (coachId, userId) => {
             .input('started_date', getCurrentUTCDateTime().toISOString())
             .query(`INSERT INTO coach_user (coach_id, user_id, started_date) VALUES (@coach_id, @user_id, @started_date)`)
         console.log(result)
-        return result.rowsAffected > 0;
+        return result.rowsAffected[0] > 0;
     }catch (error) {
         console.error('error in assignUserToCoachService', error);
         return false;

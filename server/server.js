@@ -6,7 +6,7 @@ const Server = require('socket.io');
 const port = 3000;
 const portSocket = 3001; // Port for Socket.IO server
 const cors = require('cors');
-const socketJwtMiddleware = require('./middlewares/socketAuth');
+const socket = require('./utils/socket');
 
 app.use(cors());
 app.use(express.json());
@@ -22,15 +22,7 @@ const paymentRouter = require("./routes/paymentRoute");
 
 const server = http.createServer(app);
 
-const io = Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:3000",
-        methods: ["GET", "POST"],
-        credentials: true
-    }
-});
-
-socketJwtMiddleware(io);
+const io = socket.init(server);
 
 // Store online users with their socket IDs and user info
 const onlineUsers = new Map();
@@ -72,6 +64,9 @@ const cleanupTypingStatus = (conversationId, userId) => {
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    const userAuth0Id = socket.user.sub
+    socket.join(userAuth0Id)
 
     // Handle user authentication and online status
     socket.on('user_authenticate', (userData) => {
@@ -341,3 +336,5 @@ app.listen(port, () => {
 server.listen(portSocket, () => {
     console.log(`Socket.IO server running at http://localhost:${portSocket}`);
 });
+
+module.exports = { io }
