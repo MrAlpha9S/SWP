@@ -31,9 +31,30 @@ import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
 import {useQuery} from "@tanstack/react-query";
 import {useEffect} from "react";
+import useSocketStore from "./stores/useSocketStore.js";
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const initSocket = useSocketStore((state) => state.initSocket);
+
+    useEffect(() => {
+        const connectSocket = async () => {
+            if (!isAuthenticated) return;
+
+            const token = await getAccessTokenSilently();
+            const socket = initSocket(token);
+
+            socket.on('connect', () => {
+                console.log('Socket connected with token');
+            });
+
+            return () => {
+                socket.off('connect');
+            };
+        };
+
+        connectSocket();
+    }, [isAuthenticated, getAccessTokenSilently, initSocket]);
 
     const { isPending, error, data } = useQuery({
         queryKey: ['user-profile'],

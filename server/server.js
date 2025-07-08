@@ -6,6 +6,7 @@ const Server = require('socket.io');
 const port = 3000;
 const portSocket = 3001; // Port for Socket.IO server
 const cors = require('cors');
+const socketJwtMiddleware = require('./middlewares/socketAuth');
 
 app.use(cors());
 app.use(express.json());
@@ -28,6 +29,8 @@ const io = Server(server, {
         credentials: true
     }
 });
+
+socketJwtMiddleware(io);
 
 // Store online users with their socket IDs and user info
 const onlineUsers = new Map();
