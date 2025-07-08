@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useUserInfoStore} from "../../../stores/store.js";
+import {usePlanStore, useUserInfoStore} from "../../../stores/store.js";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {Card} from "antd";
@@ -7,12 +7,14 @@ import {useQuery} from "@tanstack/react-query";
 import {getCoachById} from "../../utils/userUtils.js";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
+import NotFoundBanner from "../notFoundBanner.jsx";
 
 const CoachDashboard = () => {
     const {userInfo} = useUserInfoStore()
     const navigate = useNavigate();
     const [coachInfo, setCoachInfo] = useState();
     const {Meta} = Card
+    const {planLog} = usePlanStore()
 
     const {isPending, data} = useQuery({
         queryFn: async () => {
@@ -27,11 +29,6 @@ const CoachDashboard = () => {
             setCoachInfo(data?.data)
         }
     }, [isPending])
-
-    useEffect(() => {
-        console.log(userInfo)
-        console.log(coachInfo)
-    }, [userInfo, coachInfo])
 
     if (userInfo && userInfo.sub_id === 1) {
         return (
@@ -97,6 +94,9 @@ const CoachDashboard = () => {
                             </div>
                         </div>
                     </div>
+                    {!planLog || planLog.length === 0 && <>
+                        <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                    </>}
                 </div>
             </div>
         )

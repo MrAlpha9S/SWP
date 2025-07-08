@@ -8,7 +8,6 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
-import { getUser } from "../../components/utils/userUtils.js";
 import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
@@ -182,7 +181,7 @@ function Dashboard() {
                         setMoneySaved={setMoneySaved}
                     />
                 ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
                 );
 
             case 'check-in':

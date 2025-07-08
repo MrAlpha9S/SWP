@@ -1,7 +1,8 @@
 import React from 'react';
 import {Result, Typography} from "antd";
+import CustomButton from "../ui/CustomButton.jsx";
 
-const NotFoundBanner = ({title, content}) => {
+const NotFoundBanner = ({title, content, type = null}) => {
     const {Title, Paragraph} = Typography
     return (
         <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
@@ -10,6 +11,12 @@ const NotFoundBanner = ({title, content}) => {
                     {title}
                 </h2>
                 {content}
+                {
+                    type === 'progressNCoach' && <div className='flex justify-center gap-10'>
+                        <CustomButton>Tự lên kế hoạch</CustomButton>
+                        <CustomButton>Chat với huấn luyện viên</CustomButton>
+                    </div>
+                }
             </div>
             <Result
                 status={404}

@@ -257,10 +257,6 @@ const ProgressBoard = ({
         handleStepThree();
     }, [setCurrentStepDashboard, handleStepThree]);
 
-    useEffect(() => {
-        console.log(mergedDataSet)
-    }, [mergedDataSet]);
-
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
             <div className="flex items-center justify-between">
