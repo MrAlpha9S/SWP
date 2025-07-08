@@ -35,12 +35,15 @@ import {useEffect} from "react";
 import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import CustomButton from "./components/ui/CustomButton.jsx";
+import {queryClient} from "./main.jsx";
+import {useCurrentStepDashboard} from "./stores/store.js";
 const Context = createContext({ name: 'Default' });
 
 function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
     const { openNotification } = useNotificationManager();
+
 
     useEffect(() => {
         const connectSocket = async () => {
@@ -64,6 +67,18 @@ function AppContent() {
 
             socket.on('coach_selected', (data) => {
                 openNotification('coach_selected', data);
+            });
+
+            socket.on('new_message', () => {
+                queryClient.invalidateQueries(['messageConversations'])
+            });
+
+            socket.on('new_message_noti', (data) => {
+                const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
+                console.log('currentStepDashboard', currentStepDashboard);
+                if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
+                    openNotification('new_message', data);
+                }
             });
 
             return () => {

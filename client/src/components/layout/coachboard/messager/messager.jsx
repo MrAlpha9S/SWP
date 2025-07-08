@@ -19,6 +19,7 @@ export default function Messenger({ role }) {
   const [userStatuses, setUserStatuses] = useState({});
   const [typingUsers, setTypingUsers] = useState(new Map());
   const [typingUser, setTypingUser] = useState();
+  const [recipientId, setRecipientId] = useState();
 
   const { data: allMembers } = useQuery({
     queryKey: ['allMembers'],
@@ -86,7 +87,7 @@ export default function Messenger({ role }) {
         });
       });
 
-      socket.on('new_message', () => queryClient.invalidateQueries(['messageConversations']));
+
       socket.on('new_conversation', () => queryClient.invalidateQueries(['userConversations']));
       socket.on('conversation_updated', () => queryClient.invalidateQueries(['userConversations']));
 
@@ -106,6 +107,7 @@ export default function Messenger({ role }) {
 
   useEffect(() => {
     if (socket && selectedContactId) {
+      console.log(selectedContactId);
       socket.emit('join_conversation', selectedContactId);
     }
   }, [selectedContactId, userConversations]);
@@ -179,6 +181,7 @@ export default function Messenger({ role }) {
           onEmitMessage={emitMessage}
           socket={socket}
           currentUser={user}
+          contacts={contacts}
           typingUser={typingUser}
         />
       )}

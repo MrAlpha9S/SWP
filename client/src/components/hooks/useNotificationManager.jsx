@@ -21,9 +21,9 @@ export const NotificationProvider = ({ children }) => {
                 break;
             case 'new_message':
                 api.open({
-                    key: `message_${payload.conversationId}`,
+                    key: `message_${payload.conversation_id}`,
                     message: `Tin nhắn mới từ ${payload.senderName}`,
-                    description: payload.message,
+                    description: payload.content,
                     placement: 'topRight',
                     icon: <BiConversation className="size-5"/>
                 });

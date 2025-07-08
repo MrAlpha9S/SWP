@@ -58,7 +58,7 @@ export async function GetUserConversations(user, getAccessTokenSilently, isAuthe
     return await res.json();
 }
 
-export async function SendMessage(user, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at) {
+export async function SendMessage(user,senderName, senderAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at) {
 
     if (!isAuthenticated || !user) return;
 
@@ -70,7 +70,7 @@ export async function SendMessage(user, getAccessTokenSilently, isAuthenticated,
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({auth0_id: user.sub, conversationId: conversationId, content: content, created_at: created_at})
+        body: JSON.stringify({auth0_id: user.sub, senderAuth0Id: senderAuth0Id, senderName: senderName, conversationId: conversationId, content: content, created_at: created_at})
     });
     
 

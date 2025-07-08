@@ -66,6 +66,7 @@ const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = fals
     return (
         <Menu
             onClick={(e) => {
+                console.log(e.key)
                 setCurrentStepDashboard(e.key)
             }}
             defaultSelectedKeys={['dashboard']}

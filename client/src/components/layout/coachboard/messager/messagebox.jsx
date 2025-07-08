@@ -6,20 +6,23 @@ import { SendOutlined } from '@ant-design/icons';
 import { SendMessage } from '../../../utils/messagerUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils';
+import {useUserInfoStore} from "../../../../stores/store.js";
 
 const { TextArea } = Input;
 
-export default function MessageBox({ messages, conversation_id, onEmitMessage, socket, currentUser, typingUser }) {
+export default function MessageBox({ messages, conversation_id, onEmitMessage, socket, currentUser, contacts, typingUser }) {
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  const {userInfo} = useUserInfoStore()
 
   const conversationId = conversation_id;
+  const recipientId = contacts.find((contact) => contact.conversation_id === conversationId).other_participant_id;
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at }) => {
-      return await SendMessage(user, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
+    mutationFn: async ({ user, senderName, senderAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at }) => {
+      return await SendMessage(user, senderName, senderAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
     },
     onSuccess: (data) => {
       console.log('Message sent successfully');
@@ -39,8 +42,10 @@ export default function MessageBox({ messages, conversation_id, onEmitMessage, s
 
   const handleOnSend = () => {
     if (!input || input.trim() === '') return;
-
+    const username = userInfo?.username;
     const message = {
+      senderAuth0Id: recipientId,
+      senderName: username,
       conversationId: conversationId,
       content: input.trim(),
       created_at: getCurrentUTCDateTime()
