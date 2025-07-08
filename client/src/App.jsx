@@ -33,24 +33,14 @@ import Profile from "./pages/profilePage/profile.jsx";
 import {useQuery} from "@tanstack/react-query";
 import {useEffect} from "react";
 import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
-import { notification } from 'antd';
+import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import CustomButton from "./components/ui/CustomButton.jsx";
 const Context = createContext({ name: 'Default' });
 
-function App() {
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+function AppContent() {
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
-
-    const [api, contextHolder] = notification.useNotification();
-    const openNotification = username => {
-        api.info({
-            message: `Người dùng ${username} vừa chọn bạn`,
-            description: <Context.Consumer>{({ name }) => `Hello, ${name}!`}</Context.Consumer>,
-            placement: 'topRight',
-        });
-    };
-    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
-
+    const { openNotification } = useNotificationManager();
 
     useEffect(() => {
         const connectSocket = async () => {
@@ -58,7 +48,6 @@ function App() {
 
             const token = await getAccessTokenSilently();
             const socket = initSocket(token);
-
 
             socket.on('connect', () => {
                 socket.emit('user_authenticate', {
@@ -70,13 +59,12 @@ function App() {
 
             socket.on('online_users_list', (users) => {
                 const usersMap = new Map(users.map(u => [u.userId, u]));
-                console.log('type of usersMap', typeof usersMap);
                 useOnlineUsersStore.getState().setOnlineUsers(usersMap);
             });
 
             socket.on('coach_selected', (data) => {
-                openNotification(data.username)
-            })
+                openNotification('coach_selected', data);
+            });
 
             return () => {
                 socket.disconnect();
@@ -86,11 +74,10 @@ function App() {
         connectSocket();
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user]);
 
-    const { isPending, error, data } = useQuery({
+    const { isPending, data } = useQuery({
         queryKey: ['user-profile'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return null;
-
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
             return result?.data;
         },
@@ -98,63 +85,64 @@ function App() {
     });
 
     useEffect(() => {
-        const syncStores = async () => {
-            await syncProfileToStores(data);
+        if (!isPending && data) {
+            syncProfileToStores(data);
         }
-        if (!isPending) {
-            if (data) {
-                syncStores();
-            }
-        }
-    })
+    }, [data, isPending]);
+
+    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 
     return (
-        <>
-            <Context.Provider value={contextValue}>
-                <Navbar />
-                {contextHolder}
-                <CustomButton onClick={() => openNotification('topRight')}>Test noti</CustomButton>
-                <div className="w-full mx-auto bg-[#fff7e5]">
-                    <AnimatePresence mode="wait">
-                        <Routes>
-                            <Route path="/" element={<Homepage />} />
-
-                            <Route path="/dashboard" element={<DashBoard />} />
-                            <Route path="/dashboard/check-in" element={<CheckIn />} />
-                            <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
-
-                            <Route path="/topics" element={<TopicsPage />} />
-                            <Route path="/topics/:topicId" element={<Topic />} />
-
-                            <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
-
-                            {/* Auth0 Callback Routes */}
-
-                            <Route path="/post-signup" element={<PostSignUpCallback />} />
-                            <Route path="/onboarding/:from?" element={<Onboarding />} />
-                            <Route path="/error" element={<ErrorPage />} />
-                            <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
-                            <Route path="/my-profile" element={<MyProfile/>}></Route>
-                            <Route path="/profile" element={<Profile/>}></Route>
-                            <Route path="/forum" element={<ForumPage />}></Route>
-
-                            <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
-                            <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
-                            <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
-                            <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
-                            <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
-                            <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
-                            <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
-                            <Route path="/subscription" element={<SubscriptionPage/>}></Route>
-                            <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
-                            <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
-                        </Routes>
-                    </AnimatePresence>
-                </div>
-                <Footer />
-            </Context.Provider>
-        </>
-    )
+        <Context.Provider value={contextValue}>
+            <Navbar />
+            <CustomButton onClick={() => openNotification('coach_selected', { username: 'Test' })}>
+                Test noti
+            </CustomButton>
+            <CustomButton onClick={() => openNotification('new_message', { senderName: 'Test' })}>
+                Test mess
+            </CustomButton>
+            <div className="w-full mx-auto bg-[#fff7e5]">
+                <AnimatePresence mode="wait">
+                    <Routes>
+                        <Route path="/" element={<Homepage />} />
+                        <Route path="/dashboard" element={<DashBoard />} />
+                        <Route path="/dashboard/check-in" element={<CheckIn />} />
+                        <Route path="/dashboard/check-in/:date" element={<CheckIn />} />
+                        <Route path="/topics" element={<TopicsPage />} />
+                        <Route path="/topics/:topicId" element={<Topic />} />
+                        <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
+                        <Route path="/post-signup" element={<PostSignUpCallback />} />
+                        <Route path="/onboarding/:from?" element={<Onboarding />} />
+                        <Route path="/error" element={<ErrorPage />} />
+                        <Route path="/post-onboarding" element={<PostOnboardingCallback />} />
+                        <Route path="/my-profile" element={<MyProfile />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/forum" element={<ForumPage />} />
+                        <Route path="/forum/quit-experiences" element={<QuitExperiences />} />
+                        <Route path="/forum/getting-started" element={<GettingStarted />} />
+                        <Route path="/forum/staying-quit" element={<StayingQuit />} />
+                        <Route path="/forum/hints-and-tips" element={<HintsAndTips />} />
+                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit />} />
+                        <Route path="/forum/all-posts" element={<AllPosts />} />
+                        <Route path="/forum/:category/:postId" element={<PostPage />} />
+                        <Route path="/subscription" element={<SubscriptionPage />} />
+                        <Route path="/congratulationPage" element={<CongratulationPage />} />
+                        <Route path="/coach-selection" element={<CoachSelectPage />} />
+                    </Routes>
+                </AnimatePresence>
+            </div>
+            <Footer />
+        </Context.Provider>
+    );
 }
 
-export default App
+function App() {
+    return (
+        <NotificationProvider>
+            <AppContent />
+        </NotificationProvider>
+    );
+}
+
+export default App;
+

@@ -1,0 +1,49 @@
+import { notification } from 'antd';
+import React, { createContext, useContext, useMemo } from 'react';
+import {BsFillPeopleFill} from "react-icons/bs";
+import {BiConversation} from "react-icons/bi";
+
+const NotificationContext = createContext();
+
+export const NotificationProvider = ({ children }) => {
+    const [api, contextHolder] = notification.useNotification();
+
+    const openNotification = (type, payload) => {
+        switch (type) {
+            case 'coach_selected':
+                api.info({
+                    key: 'coach_selection',
+                    message: `Người dùng ${payload.username} vừa chọn bạn`,
+                    description: `Vào thời điểm: ${new Date(payload.timestamp).toLocaleTimeString()}`,
+                    placement: 'topRight',
+                    icon: <BsFillPeopleFill className="size-5"/>
+                });
+                break;
+            case 'new_message':
+                api.open({
+                    key: `message_${payload.conversationId}`,
+                    message: `Tin nhắn mới từ ${payload.senderName}`,
+                    description: payload.message,
+                    placement: 'topRight',
+                    icon: <BiConversation className="size-5"/>
+                });
+                break;
+            default:
+                api.warning({
+                    message: 'Thông báo',
+                    description: 'Không xác định loại thông báo.',
+                });
+        }
+    };
+
+    const value = useMemo(() => ({ openNotification }), []);
+
+    return (
+        <NotificationContext.Provider value={value}>
+            {contextHolder}
+            {children}
+        </NotificationContext.Provider>
+    );
+};
+
+export const useNotificationManager = () => useContext(NotificationContext);
