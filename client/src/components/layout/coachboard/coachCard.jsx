@@ -7,22 +7,62 @@ import {assignCoachToUser} from "../../utils/userUtils.js";
 import {useNavigate} from "react-router-dom";
 import {useCurrentStepDashboard, useUserInfoStore} from "../../../stores/store.js";
 import {useAuth0} from "@auth0/auth0-react";
+import {useSocketStore} from "../../../stores/useSocketStore.js";
+import {getCurrentUTCDateTime} from "../../utils/dateUtils.js";
+import {CreateConversation} from "../../utils/messagerUtils.js";
 
 const CoachCard = ({coach}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
     const {userInfo} = useUserInfoStore()
     const {setCurrentStepDashboard} = useCurrentStepDashboard()
-    const {isAuthenticated, getAccessTokenSilently} = useAuth0()
+    const {isAuthenticated, getAccessTokenSilently, user} = useAuth0()
+    const { socket } = useSocketStore()
+
 
     const assignMutation = useMutation({
         mutationFn: async ({coachId, userId, username, coachAuth0Id}) => {
             const res = await assignCoachToUser(coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated);
             return res.data;
         },
-        onSuccess: () => {
-            setCurrentStepDashboard('coach')
-            navigate('/dashboard')
+        onSuccess: async () => {
+            const conversation_name = `${user.name} - ${name}`;
+            const created_at = getCurrentUTCDateTime();
+            const newConversation = await CreateConversation(user, getAccessTokenSilently, isAuthenticated, conversation_name, created_at, coach?.auth0_id);
+            if (socket && newConversation) {
+                socket.emit('new_conversation', {
+                    conversation: newConversation,
+                    participants: [user.sub, coach?.auth0_id],
+                });
+                try {
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_creation_started',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_created_successfully',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        timestamp: new Date().toISOString()
+                    });
+
+                } catch (error) {
+                    console.error('Error creating conversation:', error);
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_creation_failed',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        error: error.message,
+                        timestamp: new Date().toISOString()
+                    });
+                } finally {
+                    setCurrentStepDashboard('coach')
+                    navigate('/dashboard')
+                }
+            }
         },
         onError: (error) => {
             console.error("Assign failed:", error);
@@ -30,7 +70,12 @@ const CoachCard = ({coach}) => {
     });
 
     const handleOk = () => {
-        assignMutation.mutate({ coachId: coach?.user_id, userId: userInfo?.user_id, username: userInfo?.username, coachAuth0Id: coach?.auth0_id });
+        assignMutation.mutate({
+            coachId: coach?.user_id,
+            userId: userInfo?.user_id,
+            username: userInfo?.username,
+            coachAuth0Id: coach?.auth0_id
+        });
     }
 
     return (

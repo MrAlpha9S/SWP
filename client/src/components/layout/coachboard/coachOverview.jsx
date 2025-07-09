@@ -18,12 +18,12 @@ export default function CoachOverview({ stats }) {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard icon={<UsergroupAddOutlined />} value={stats.subscribedUserCount} label="Người dùng đã đăng ký" />
-                <StatCard icon={<DollarOutlined />} value={`${stats.totalCommission.toLocaleString()} VNĐ`} label="Tổng hoa hồng" />
-                <StatCard icon={<FileTextOutlined />} value={stats.approvedBlogPostCount} label="Bài blog đã đăng" />
-                <StatCard icon={<ClockCircleOutlined />} value={stats.pendingBlogPostCount} label="Bài blog chờ duyệt" />
-                <StatCard icon={<RiUserCommunityLine />} value={stats.pendingSocialPostCount} label="Bài viết cộng đồng chờ duyệt" />
-                <StatCard icon={<MdOutlineReportGmailerrorred />} value={stats.reportCount} label="Báo cáo bài viết cộng đồng chờ duyệt" />
+                <StatCard icon={<UsergroupAddOutlined />} value={stats?.subscribedUserCount} label="Người dùng đã đăng ký" />
+                <StatCard icon={<DollarOutlined />} value={`${stats?.totalCommission?.toLocaleString()} VNĐ`} label="Tổng hoa hồng" />
+                <StatCard icon={<FileTextOutlined />} value={stats?.approvedBlogPostCount} label="Bài blog đã đăng" />
+                <StatCard icon={<ClockCircleOutlined />} value={stats?.pendingBlogPostCount} label="Bài blog chờ duyệt" />
+                <StatCard icon={<RiUserCommunityLine />} value={stats?.pendingSocialPostCount} label="Bài viết cộng đồng chờ duyệt" />
+                <StatCard icon={<MdOutlineReportGmailerrorred />} value={stats?.reportCount} label="Báo cáo bài viết cộng đồng chờ duyệt" />
             </div>
 
             {/* Chart */}

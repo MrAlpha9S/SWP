@@ -1,9 +1,11 @@
 import React from 'react';
 import {Result, Typography} from "antd";
 import CustomButton from "../ui/CustomButton.jsx";
+import {useNavigate} from "react-router-dom";
 
 const NotFoundBanner = ({title, content, type = null}) => {
     const {Title, Paragraph} = Typography
+    const navigate = useNavigate();
     return (
         <div className='flex flex-col md:flex-row items-center justify-center gap-5 w-full p-14'>
             <div className='w-[60%] flex flex-col items-center md:items-start gap-10'>
@@ -15,6 +17,11 @@ const NotFoundBanner = ({title, content, type = null}) => {
                     type === 'progressNCoach' && <div className='flex justify-center gap-10'>
                         <CustomButton>Tự lên kế hoạch</CustomButton>
                         <CustomButton>Chat với huấn luyện viên</CustomButton>
+                    </div>
+                }
+                {
+                    type === 'userWithoutCoach' && <div className='flex justify-center gap-10'>
+                        <CustomButton onClick={() => navigate('/coach-selection')}>Chọn huấn luyện viên</CustomButton>
                     </div>
                 }
             </div>

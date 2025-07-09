@@ -105,7 +105,7 @@ const CoachDashboard = () => {
     } else if (userInfo && userInfo.sub_id !== 1 && !coachInfo) {
         return (
             <div className='w-full h-full'>
-                Chưa có coach
+                <NotFoundBanner title="Bạn chưa chọn huấn luyện viên" type='userWithoutCoach'/>
             </div>
         )
     }
