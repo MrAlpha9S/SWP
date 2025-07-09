@@ -94,9 +94,9 @@ export default function PostBlog({ user_id }) {
 
 
     return (
-        <div>
+        <div className='w-full'>
             {/* Chọn chủ đề */}
-            <div className="bg-white max-w-3xl mx-auto rounded-lg mt-10 p-4">
+            <div className="bg-white max-w-5xl mx-auto rounded-lg mt-10 p-4">
                 <div className="mb-2 font-semibold text-lg">Chủ Đề</div>
                 <Select
                     showSearch
@@ -118,7 +118,7 @@ export default function PostBlog({ user_id }) {
             </div>
 
             {/* Tiêu đề & Miêu tả */}
-            <div className="bg-white max-w-3xl mx-auto rounded-lg mt-10 p-4">
+            <div className="bg-white max-w-5xl mx-auto rounded-lg mt-10 p-4">
                 <div className="mb-4">
                     <label className="block font-medium mb-1">Tiêu Đề</label>
                     <input
@@ -142,7 +142,7 @@ export default function PostBlog({ user_id }) {
             </div>
 
             {/* Editor */}
-            <div className="bg-white max-w-3xl mx-auto rounded-lg mt-10 p-4">
+            <div className="bg-white max-w-5xl mx-auto rounded-lg mt-10 p-4">
                 <div className="mb-2 font-semibold text-lg">Post</div>
 
                 <div className="border rounded-md shadow-sm">

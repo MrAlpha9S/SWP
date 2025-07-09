@@ -30,6 +30,7 @@ import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx
 import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
 import {getStats} from "../../components/utils/coachUtils.js";
+import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -222,7 +223,7 @@ function Dashboard() {
             case 'messager':
                 return <div className='w-full h-screen'><Messager role={userInfo?.role} /></div>
             case 'post-blog':
-                return <PostBlog/>
+                return <ManageBlog/>
 
             case 'overview':
                 return <CoachOverview stats={coachStats}/>
