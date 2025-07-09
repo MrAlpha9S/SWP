@@ -66,7 +66,7 @@ export default function PostPage() {
                     </div>
 
                     <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
-                        <p>{post?.content}</p>
+                        <div dangerouslySetInnerHTML={{ __html: post?.content }} />
                     </div>
 
                     <div className="flex gap-6 text-sm text-gray-500 pt-2 border-t">

@@ -40,7 +40,7 @@ export async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-export async function getPosts({categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = ''}) {
+export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = '' }) {
     try {
 
         const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}`, {
@@ -62,7 +62,7 @@ export async function getPosts({categoryTag = '', keyword = '', page = 1, fromDa
     }
 }
 
-export async function getComments({postId}) {
+export async function getComments({ postId }) {
     try {
 
         const res = await fetch(`http://localhost:3000/social-posts/comments/${postId}`, {
@@ -82,4 +82,24 @@ export async function getComments({postId}) {
         console.error('getComments error', error);
         throw error;
     }
+}
+
+export async function PostSocialPosts(user, getAccessTokenSilently, isAuthenticated, category_id, title, content, created_at) {
+    console.log(category_id, title, content, created_at)
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/post-socialposts`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ category_id: category_id, auth0_id: user.sub, title: title, content: content, created_at: created_at })
+    });
+
+
+    return await res.json();
 }

@@ -1,5 +1,5 @@
-const {poolPromise, sql} = require("../configs/sqlConfig");
-
+const { poolPromise, sql } = require("../configs/sqlConfig");
+const { getUserIdFromAuth0Id } = require('./userService')
 
 const getTotalPostCount = async () => {
     try {
@@ -217,6 +217,29 @@ const getPostComments = async (postId) => {
     }
 }
 
+const PostSocialPosts = async (category_id, auth0_id, title, content, created_at) => {
+    try {
+        const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
+        const result = await pool.request()
+            .input('postId', sql.Int, category_id)
+            .input('user_id', sql.Int, user_id)
+            .input('title', title)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .query(`INSERT INTO [social_posts] ([category_id], [user_id], [title], [content], [created_at])
+VALUES (@postId, @user_id, @title, @content, @created_at);
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments };
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts };

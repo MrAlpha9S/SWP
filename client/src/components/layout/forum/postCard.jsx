@@ -23,7 +23,7 @@ export default function PostCard({post_id, title, username, created_at, content,
                                 </p>
                             </div>
                             <p className="text-sm text-gray-600 mb-2">Đăng bởi <strong>{username}</strong></p>
-                            <p className="text-sm text-gray-700 mb-1">{content}</p>
+                            <div className="text-sm text-gray-700 mb-1" dangerouslySetInnerHTML={{ __html: content }} />
                             <Divider/>
                         </div>
                         {isPinned && <span className="text-xs text-primary-500">📌</span>}
