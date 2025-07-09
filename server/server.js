@@ -19,6 +19,7 @@ const socialPostRouter = require("./routes/socialPostRoute");
 const messageRouter = require("./routes/messageRoute");
 const subscriptionRouter = require("./routes/subscriptionRoute");
 const paymentRouter = require("./routes/paymentRoute");
+const coachRouter = require("./routes/coachRoute");
 
 const server = http.createServer(app);
 
@@ -328,6 +329,7 @@ app.use('/social-posts', socialPostRouter)
 app.use('/messager', messageRouter)
 app.use('/subscription', subscriptionRouter)
 app.use('/payment', paymentRouter)
+app.use('/coaches', coachRouter)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

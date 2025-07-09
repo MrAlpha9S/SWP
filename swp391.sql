@@ -94,7 +94,7 @@ CREATE TABLE [coach_user] (
   [coach_id] int,
   [user_id] int,
   [started_date] DATETIME,
-  PRIMARY KEY ([coach_id], [user_id])
+  PRIMARY KEY ([coach_id], [user_id], [started_date])
 )
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -266,6 +266,7 @@ CREATE TABLE [blog_posts] (
   [user_id] INT,
   [created_at] DATETIME,
   [isPendingForApprovement] INT DEFAULT (1),
+  [is_pending_for_deletion] INT DEFAULT (0),
   [topic_id] VARCHAR(100),
   FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]),
   FOREIGN KEY ([topic_id]) REFERENCES [Topics] ([topic_id])
@@ -289,6 +290,7 @@ CREATE TABLE [social_posts] (
   [created_at] datetime,
   [is_pinned] bit default(0),
   [is_reported] int DEFAULT (0),
+  [is_pending] bit DEFAULT (1),
 )
 GO
 

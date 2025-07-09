@@ -1,4 +1,4 @@
-const { Blog, PostBlog } = require('../services/blogService');
+const { Blog, PostBlog, getAllBlogPostsOfUser} = require('../services/blogService');
 
 
 const handleGetBlog = async (req, res) => {
@@ -42,7 +42,28 @@ const handlePostBlog = async (req, res) => {
 
 }
 
+const handleGetPostsOfUser = async (req, res) => {
+    const { userAuth0Id } = req.params;
+
+    console.log(userAuth0Id)
+    if (!userAuth0Id) {
+        return res.status(400).json({ success: false, message: 'userAuth0Id is required', data: [] });
+    }
+
+    try {
+        const posts = await getAllBlogPostsOfUser(userAuth0Id);
+        if (!posts || posts.length === 0) {
+            return res.status(404).json({ success: false, message: 'No posts found for this user', data: [] });
+        }
+        return res.status(200).json({ success: true, data: posts });
+    } catch (error) {
+        console.error('Error in handleGetPostsFOfUser:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+}
+
 module.exports = {
     handleGetBlog,
-    handlePostBlog
+    handlePostBlog,
+    handleGetPostsOfUser
 };

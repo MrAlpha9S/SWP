@@ -28,6 +28,8 @@ import MessageBox from "../../components/layout/coachboard/messager/messager.jsx
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
 import Messager from "../../components/layout/coachboard/messager/messager.jsx";
+import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
+import {getStats} from "../../components/utils/coachUtils.js";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -56,6 +58,7 @@ function Dashboard() {
     const [heroTitle, setHeroTitle] = useState("");
     const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
     const {userInfo} = useUserInfoStore()
+    const [coachStats, setCoachStats] = useState([]);
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
@@ -82,6 +85,24 @@ function Dashboard() {
         },
         enabled: isAuthenticated && !!user,
     })
+
+    const {
+        isPending: isCoachStatsPending,
+        data: coachStatsFetched,
+    } = useQuery({
+        queryKey: ['coachStats'],
+        queryFn: async () => {
+            return await getStats(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
+    })
+
+    useEffect(() => {
+        if (!isCoachStatsPending && userInfo?.role === 'Coach') {
+            setCoachStats(coachStatsFetched.data);
+            setCurrentStepDashboard('overview')
+        }
+    }, [isCoachStatsPending, userInfo]);
 
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ['checkin-status']});
@@ -153,7 +174,7 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending) {
+        if ((!isAuthenticated || isUserProfilePending) && userInfo?.role === 'Member') {
             return <ProgressBoard isPending={true}/>;
         }
 
@@ -199,9 +220,12 @@ function Dashboard() {
             case 'badges':
                 return <BadgesMenu/>;
             case 'messager':
-                return <Messager role={userInfo?.role} />
+                return <div className='w-full h-screen'><Messager role={userInfo?.role} /></div>
             case 'post-blog':
                 return <PostBlog/>
+
+            case 'overview':
+                return <CoachOverview stats={coachStats}/>
 
             case 'coach':
                 return <CoachDashboard/>;
@@ -253,7 +277,7 @@ function Dashboard() {
     return (
         <PageFadeWrapper>
         <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username}/>
+            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
             <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
                 {dashboardHandle(userRole)}
 

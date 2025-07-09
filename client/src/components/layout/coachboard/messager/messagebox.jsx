@@ -24,9 +24,12 @@ export default function MessageBox({
     const [input, setInput] = useState('');
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {userInfo} = useUserInfoStore()
-
+    let recipientId
     const conversationId = conversation_id;
-    const recipientId = contacts.find((contact) => contact.conversation_id === conversationId).other_participant_id;
+    if (contacts && contacts.length > 0) {
+        recipientId = contacts?.find((contact) => contact.conversation_id === conversationId).other_participant_id;
+    }
+
 
     const sendMessageMutation = useMutation({
         mutationFn: async ({

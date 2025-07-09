@@ -133,7 +133,7 @@ const handleGetPostComments = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('handleGetPosts error:', err);
+        console.error('handleGetPostComments error:', err);
         return res.status(500).json({
             success: false,
             message: 'Internal server error: ' + err.message,
