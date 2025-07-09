@@ -29,14 +29,14 @@ import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
 
 function Dashboard() {
-    const {readinessValue} = useQuitReadinessStore();
-    const {addError, removeError} = useErrorStore();
-    const {reasonList} = useReasonStore();
-    const {pricePerPack} = usePricePerPackStore();
-    const {cigsPerPack} = useCigsPerPackStore();
-    const {timeAfterWaking} = useTimeAfterWakingStore();
-    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
-    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
+    const { readinessValue } = useQuitReadinessStore();
+    const { addError, removeError } = useErrorStore();
+    const { reasonList } = useReasonStore();
+    const { pricePerPack } = usePricePerPackStore();
+    const { cigsPerPack } = useCigsPerPackStore();
+    const { timeAfterWaking } = useTimeAfterWakingStore();
+    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
+    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -47,16 +47,16 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY,
     } = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
+    const { createGoalChecked, goalAmount, goalList, setMoneySaved } = useGoalsStore()
     const navigate = useNavigate();
-    const {isProfileExist} = useProfileExists();
-    const {setCheckInDataSet} = useCheckInDataStore()
+    const { isProfileExist } = useProfileExists();
+    const { setCheckInDataSet } = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
-    const {userInfo} = useUserInfoStore()
+    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
+    const { userInfo } = useUserInfoStore()
 
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     // const {
     //     data: userIn4,
@@ -83,7 +83,7 @@ function Dashboard() {
     })
 
     useEffect(() => {
-        queryClient.invalidateQueries({queryKey: ['checkin-status']});
+        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
     }, []);
 
     useEffect(() => {
@@ -153,7 +153,7 @@ function Dashboard() {
 
     const renderBoard = () => {
         if (!isAuthenticated || isUserProfilePending) {
-            return <ProgressBoard isPending={true}/>;
+            return <ProgressBoard isPending={true} />;
         }
 
         switch (currentStepDashboard) {
@@ -179,33 +179,33 @@ function Dashboard() {
                         setMoneySaved={setMoneySaved}
                     />
                 ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
+                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" />
                 );
 
             case 'check-in':
-                return <CheckinMenu/>;
+                return <CheckinMenu />;
 
             case 'goals':
-                return <GoalsMenu/>;
+                return <GoalsMenu />;
 
             case 'savings':
-                return <SavingsMenu/>
+                return <SavingsMenu />
 
             case 'distraction-tools':
-                return <DistractionTools/>
+                return <DistractionTools />
 
             case 'badges':
-                return <BadgesMenu/>;
+                return <BadgesMenu />;
             case 'messager':
-                return <MessageBox/>
+                return <MessageBox />
             case 'post-blog':
-                return <PostBlog/>
+                return <PostBlog />
 
             case 'coach':
-                return <CoachDashboard/>;
+                return <CoachDashboard />;
 
             default:
-                return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
+                return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
         }
     };
 
@@ -247,22 +247,23 @@ function Dashboard() {
         }
         return null;
     }
+    if (userInfo) {
+        return (
+            <PageFadeWrapper>
+                <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
+                    <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username} />
+                    <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
+                        {dashboardHandle(userRole)}
 
-    return (
-        <PageFadeWrapper>
-        <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username}/>
-            <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
-                {dashboardHandle(userRole)}
-
-                <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
-                    {renderBoard()}
+                        <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                            {renderBoard()}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        </PageFadeWrapper>
+            </PageFadeWrapper>
 
-    )
+        )
+    }
 
 }
 

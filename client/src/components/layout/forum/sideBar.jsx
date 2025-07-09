@@ -7,7 +7,7 @@ import {
     CompassOutlined, EditOutlined,
     FlagOutlined,
     MessageOutlined, ProfileOutlined,
-    SearchOutlined
+    SearchOutlined, HighlightOutlined
 } from "@ant-design/icons";
 import {convertUTCStringToLocalDate} from "../../utils/dateUtils.js";
 import dayjs from "dayjs";
@@ -30,6 +30,7 @@ const SidebarLinks = [
     {icon: <AppstoreOutlined/>, label: 'Mẹo và lời khuyên', dest: '/forum/hints-and-tips'},
     {icon: <ProfileOutlined/>, label: 'Lý do bỏ thuốc', dest: '/forum/reasons-to-quit'},
     {icon: <EditOutlined/>, label: 'Hướng dẫn cộng đồng', dest: '/forum/all-posts'},
+    {icon: <HighlightOutlined/>, label: 'Tạo bài viết', dest: '/forum/all-posts'},
 ];
 
 const SideBar = ({
