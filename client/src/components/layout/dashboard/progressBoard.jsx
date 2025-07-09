@@ -45,22 +45,6 @@ const ProgressBoard = ({
                            setMoneySaved = null,
                            userInfo
                        }) => {
-    // console.log('--- Dashboard State Log ---');
-    // console.log(`startDate:`, startDate);
-    // console.log(`expectedQuitDate:`, expectedQuitDate);
-    // console.log(`stoppedDate:`, stoppedDate);
-    // console.log(`planLog:`, planLog);
-    // console.log(`planLogCloneDDMMYY:`, planLogCloneDDMMYY);
-    // console.log(`cigsPerDay:`, cigsPerDay);
-    // console.log(`pricePerPack:`, pricePerPack);
-    // console.log(`cigsPerPack:`, cigsPerPack);
-    // console.log(`quittingMethod:`, quittingMethod);
-    // console.log(`readinessValue:`, readinessValue);
-    // console.log(`isPending:`, isPending);
-    // console.log(`userInfo:`, userInfo);
-    // console.log(`setCurrentStepDashboard:`, setCurrentStepDashboard ? 'Function provided' : null);
-    // console.log(`setMoneySaved:`, setMoneySaved ? 'Function provided' : null);
-    // console.log('--------------------------');
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -75,38 +59,41 @@ const ProgressBoard = ({
         data: checkInDataset,
         isFetching: isDatasetFetching,
     } = useQuery({
-        queryKey: ['dataset'],
+        queryKey: ['dataset', userInfo?.auth0_id],
         queryFn: async () => {
             return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
-        enabled: isAuthenticated && !!user,
+        enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
     const {
         isPending: isUserCreationDatePending,
         data: userCreationDate,
     } = useQuery({
-        queryKey: ['user-creation-date'],
+        queryKey: ['user-creation-date', userInfo?.auth0_id],
         queryFn: async () => {
-            if (!isAuthenticated || !user) return;
+            if (!isAuthenticated || !user) return null;
             return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
-        enabled: isAuthenticated && !!user,
+        enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
-    // FIX: Add missing dependency and null check
     useEffect(() => {
-        if (!isUserCreationDatePending && userCreationDate?.data) {
+        if (userCreationDate?.data) {
             setLocalUserCreationDate(userCreationDate.data);
         }
-    }, [isUserCreationDatePending, userCreationDate?.data]);
+    }, [userCreationDate?.data]);
 
     useEffect(() => {
-        if (!isDatasetPending && checkInDataset?.data) {
+        if (checkInDataset?.data) {
             setLocalCheckInDataSet(checkInDataset.data);
             useCheckInDataStore.getState().setCheckInDataSet(checkInDataset.data);
         }
-    }, [checkInDataset, isDatasetPending]);
+    }, [checkInDataset?.data]);
 
     useEffect(() => {
         if (localCheckInDataSet && localCheckInDataSet.length > 0 && planLog && planLog.length > 0) {
@@ -120,14 +107,13 @@ const ProgressBoard = ({
         }
     }, [localCheckInDataSet, planLog]);
 
-    // FIX: Remove infinite timer loop
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
 
         return () => clearInterval(interval);
-    }, []); // Empty dependency array prevents infinite loop
+    }, []);
 
     const formatDateDifference = useCallback((ms) => {
         const seconds = Math.abs(Math.floor(ms / 1000));
@@ -184,15 +170,57 @@ const ProgressBoard = ({
         return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
     }, [readinessValue, currentDate, expectedQuitDate, startDate]);
 
-    // FIX: Prevent date mutation that caused infinite loops
-    const cigsQuit = useMemo(() => {
-        if (typeof localUserCreationDate !== 'string') return 0;
+    // Check if all required data is available for calculation
+    const isDataReady = useMemo(() => {
+        console.log('Data ready check:', {
+            localUserCreationDate,
+            currentDate: !!currentDate,
+            localCheckInDataSet: Array.isArray(localCheckInDataSet),
+            cigsPerDay,
+            readinessValue,
+            stoppedDate,
+            isUserCreationDatePending,
+            isDatasetPending,
+            isAuthenticated,
+            userInfo: !!userInfo?.auth0_id
+        });
 
+        return !!(
+            localUserCreationDate &&
+            currentDate &&
+            Array.isArray(localCheckInDataSet) &&
+            cigsPerDay &&
+            (readinessValue !== 'relapse-support' || stoppedDate) &&
+            !isUserCreationDatePending &&
+            !isDatasetPending &&
+            isAuthenticated &&
+            userInfo?.auth0_id
+        );
+    }, [
+        localUserCreationDate,
+        currentDate,
+        localCheckInDataSet,
+        cigsPerDay,
+        readinessValue,
+        stoppedDate,
+        isUserCreationDatePending,
+        isDatasetPending,
+        isAuthenticated,
+        userInfo?.auth0_id
+    ]);
+
+    const cigsQuit = useMemo(() => {
+        // Return null instead of 0 when data isn't ready
+        if (!isDataReady) {
+            console.log('cigsQuit: Data not ready, returning null');
+            return null;
+        }
+
+        console.log('cigsQuit: Calculating with data ready');
         const startDay = new Date(readinessValue === 'relapse-support' ? stoppedDate : localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
 
-        // Create a new date object for iteration to avoid mutation
         const iterationDate = new Date(startDay);
 
         while (iterationDate <= endDate) {
@@ -209,20 +237,28 @@ const ProgressBoard = ({
                 total += cigsPerDay;
             }
 
-            // Create new date instead of mutating existing one
             iterationDate.setUTCDate(iterationDate.getUTCDate() + 1);
         }
 
-        return Math.max(0, total); // Ensure non-negative result
-    }, [localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
+        const result = Math.max(0, total);
+        console.log('cigsQuit calculated:', result);
+        return result;
+    }, [isDataReady, localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
 
     const moneySaved = useMemo(() => {
-        return Math.round(cigsQuit * pricePerCig);
+        // Return null instead of 0 when cigsQuit isn't calculated yet
+        if (cigsQuit === null || !pricePerCig) {
+            console.log('moneySaved: Not ready, returning null');
+            return null;
+        }
+        const result = Math.round(cigsQuit * pricePerCig);
+        console.log('moneySaved calculated:', result);
+        return result;
     }, [cigsQuit, pricePerCig]);
 
     useEffect(() => {
-        console.log('cigsQuitted', cigsQuit)
-        console.log('moneysaved', moneySaved)
+        console.log('cigsQuitted', cigsQuit);
+        console.log('moneysaved', moneySaved);
     }, [cigsQuit, moneySaved]);
 
     useEffect(() => {
@@ -280,6 +316,9 @@ const ProgressBoard = ({
         }
     }, [setCurrentStepDashboard, handleStepThree]);
 
+    // Show loading state for calculations
+    const isCalculating = isPending || isDatasetPending || isUserCreationDatePending || !isDataReady || cigsQuit === null || moneySaved === null;
+
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
             <div className="flex items-center justify-between">
@@ -320,7 +359,7 @@ const ProgressBoard = ({
             <div className="grid grid-cols-3 gap-3 text-center">
                 {[0, 1, 2].map((i) => (
                     <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
-                        {isPending ? (
+                        {isCalculating ? (
                             <Skeleton active paragraph={{rows: 2}}/>
                         ) : (
                             <>
@@ -328,7 +367,12 @@ const ProgressBoard = ({
                                     <IoLogoNoSmoking className='size-10 text-primary-800'/>,
                                     <FaTrophy className='size-9 text-primary-800'/>][i]}</div>
                                 <div className="text-xl font-semibold text-primary-800">
-                                    {i === 0 ? moneySaved + ' VNĐ' : i === 1 ? cigsQuit : 1}
+                                    {i === 0 ?
+                                        (moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...') :
+                                        i === 1 ?
+                                            (cigsQuit !== null ? cigsQuit : 'Đang tính...') :
+                                            1
+                                    }
                                 </div>
                                 <div className="text-sm text-gray-600">
                                     {['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
@@ -417,7 +461,6 @@ const ProgressBoard = ({
                                         label={'Hôm nay'}
                                     />
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
-                                           // interval={quittingMethod === 'gradual-weekly' ? 5 : 1}
                                            interval= {1}/>
                                     <YAxis/>
                                     <Tooltip/>
