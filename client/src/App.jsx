@@ -75,7 +75,7 @@ function AppContent() {
 
             socket.on('new_message_noti', (data) => {
                 const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
-                console.log('currentStepDashboard', currentStepDashboard);
+                console.log('data', data);
                 if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
                     openNotification('new_message', data);
                 }
@@ -110,12 +110,6 @@ function AppContent() {
     return (
         <Context.Provider value={contextValue}>
             <Navbar />
-            <CustomButton onClick={() => openNotification('coach_selected', { username: 'Test' })}>
-                Test noti
-            </CustomButton>
-            <CustomButton onClick={() => openNotification('new_message', { senderName: 'Test' })}>
-                Test mess
-            </CustomButton>
             <div className="w-full mx-auto bg-[#fff7e5]">
                 <AnimatePresence mode="wait">
                     <Routes>

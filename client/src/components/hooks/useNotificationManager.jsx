@@ -21,7 +21,7 @@ export const NotificationProvider = ({ children }) => {
                 break;
             case 'new_message':
                 api.open({
-                    key: `message_${payload.conversation_id}`,
+                    key: `message_${payload.conversation_id}_${payload.created_at}`,
                     message: `Tin nhắn mới từ ${payload.senderName}`,
                     description: payload.content,
                     placement: 'topRight',
