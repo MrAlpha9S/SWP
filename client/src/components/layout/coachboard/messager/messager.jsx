@@ -105,7 +105,6 @@ export default function Messenger({ role }) {
 
   useEffect(() => {
     if (socket && selectedContactId) {
-      console.log(selectedContactId);
       socket.emit('join_conversation', selectedContactId);
     }
   }, [selectedContactId, userConversations]);

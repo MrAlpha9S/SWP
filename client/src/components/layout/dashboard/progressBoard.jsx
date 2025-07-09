@@ -41,10 +41,26 @@ const ProgressBoard = ({
                            cigsPerPack,
                            readinessValue,
                            planLogCloneDDMMYY,
-                           setCurrentStepDashboard,
-                           setMoneySaved,
-                            userInfo
+                           setCurrentStepDashboard = null,
+                           setMoneySaved = null,
+                           userInfo
                        }) => {
+    // console.log('--- Dashboard State Log ---');
+    // console.log(`startDate:`, startDate);
+    // console.log(`expectedQuitDate:`, expectedQuitDate);
+    // console.log(`stoppedDate:`, stoppedDate);
+    // console.log(`planLog:`, planLog);
+    // console.log(`planLogCloneDDMMYY:`, planLogCloneDDMMYY);
+    // console.log(`cigsPerDay:`, cigsPerDay);
+    // console.log(`pricePerPack:`, pricePerPack);
+    // console.log(`cigsPerPack:`, cigsPerPack);
+    // console.log(`quittingMethod:`, quittingMethod);
+    // console.log(`readinessValue:`, readinessValue);
+    // console.log(`isPending:`, isPending);
+    // console.log(`userInfo:`, userInfo);
+    // console.log(`setCurrentStepDashboard:`, setCurrentStepDashboard ? 'Function provided' : null);
+    // console.log(`setMoneySaved:`, setMoneySaved ? 'Function provided' : null);
+    // console.log('--------------------------');
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -52,10 +68,6 @@ const ProgressBoard = ({
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
     const [showWarning, setShowWarning] = useState(false);
-
-    useEffect(() => {
-        console.log(userInfo)
-    }, [userInfo]);
 
     const {
         isPending: isDatasetPending,
@@ -65,7 +77,7 @@ const ProgressBoard = ({
     } = useQuery({
         queryKey: ['dataset'],
         queryFn: async () => {
-            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated);
+            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -77,7 +89,7 @@ const ProgressBoard = ({
         queryKey: ['user-creation-date'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -209,6 +221,11 @@ const ProgressBoard = ({
     }, [cigsQuit, pricePerCig]);
 
     useEffect(() => {
+        console.log('cigsQuitted', cigsQuit)
+        console.log('moneysaved', moneySaved)
+    }, [cigsQuit, moneySaved]);
+
+    useEffect(() => {
         if (typeof setMoneySaved === 'function' && typeof moneySaved === 'number') {
             setMoneySaved(moneySaved);
         }
@@ -257,8 +274,10 @@ const ProgressBoard = ({
     }, [cigsPerDay, currentDate, mergedDataSet]);
 
     const handleCheckIn = useCallback(() => {
-        setCurrentStepDashboard('check-in');
-        handleStepThree();
+        if (setCurrentStepDashboard) {
+            setCurrentStepDashboard('check-in');
+            handleStepThree();
+        }
     }, [setCurrentStepDashboard, handleStepThree]);
 
     return (

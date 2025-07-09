@@ -11,11 +11,19 @@ import {
     useGoalsStore, useUserInfoStore,
 } from '../../stores/store.js';
 
-export async function getUserProfile(user, getAccessTokenSilently, isAuthenticated) {
+export async function getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id = null) {
 
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
+    const bodyPayload = {}
+    if (selectedUserAuth0Id) {
+        bodyPayload.userAuth0Id = selectedUserAuth0Id;
+    } else {
+        bodyPayload.userAuth0Id = user.sub;
+    }
+
+    console.log(bodyPayload);
 
     const res = await fetch('http://localhost:3000/profiles/getProfile', {
         method: 'POST',
@@ -23,7 +31,7 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({userAuth0Id: user.sub})
+        body: JSON.stringify(bodyPayload)
     });
 
     return await res.json();

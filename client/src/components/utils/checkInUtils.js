@@ -38,12 +38,12 @@ export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated,
     return await res.json();
 }
 
-export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated) {
+export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userAuth0Id) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/check-in/get-data-set?userAuth0Id=${user.sub}`, {
+    const res = await fetch(`http://localhost:3000/check-in/get-data-set?userAuth0Id=${userAuth0Id}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,

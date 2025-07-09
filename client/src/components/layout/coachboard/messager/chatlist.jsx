@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Search, MessageCircle, Circle, Users, X, Clock } from 'lucide-react';
 import CoachAction from './coachaction';
+import {useSelectedUserAuth0IdStore} from "../../../../stores/store.js";
 
 export default function ChatList({
   user,
@@ -16,6 +17,7 @@ export default function ChatList({
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore();
 
   // Filter and sort contacts
   const filteredContacts = useMemo(() => {
@@ -39,8 +41,11 @@ export default function ChatList({
     });
   }, [contacts, searchTerm, showOnlineOnly, getUserOnlineStatus]);
 
-  const handleSelectConversation = useCallback((conversationId) => {
+  const handleSelectConversation = useCallback((contact) => {
     // Emit conversation update when selecting a conversation
+    console.log('selected contact auth0 id in chatlist', contact.other_participant_id)
+    setSelectedUserAuth0Id(contact.other_participant_id)
+    const conversationId = contact.conversation_id;
     if (onEmitConversationUpdate) {
       onEmitConversationUpdate({
         type: 'conversation_selected',
@@ -167,7 +172,7 @@ export default function ChatList({
               return (
                 <div
                   key={contact.conversation_id}
-                  onClick={() => handleSelectConversation(contact.conversation_id)}
+                  onClick={() => handleSelectConversation(contact)}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                     isSelected 
                       ? 'bg-primary-600 shadow-lg' 
@@ -178,7 +183,7 @@ export default function ChatList({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleSelectConversation(contact.conversation_id);
+                      handleSelectConversation(contact);
                     }
                   }}
                 >
