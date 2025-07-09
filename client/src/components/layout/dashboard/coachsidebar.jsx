@@ -12,8 +12,8 @@ const items = [
         icon: <GrOverview className="mr-4"/>
     },
     {
-        key: 'messager',
-        label: 'Trò Chuyện',
+        key: 'coach-user',
+        label: 'Người dùng',
         icon: <WechatOutlined className="mr-4"/>,
     },
     {

@@ -43,7 +43,7 @@ const ProgressBoard = ({
                            planLogCloneDDMMYY,
                            setCurrentStepDashboard,
                            setMoneySaved,
-                    userInfo
+                            userInfo
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -52,6 +52,10 @@ const ProgressBoard = ({
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
     const [showWarning, setShowWarning] = useState(false);
+
+    useEffect(() => {
+        console.log(userInfo)
+    }, [userInfo]);
 
     const {
         isPending: isDatasetPending,
