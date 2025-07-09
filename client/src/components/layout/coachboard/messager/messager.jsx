@@ -15,11 +15,9 @@ export default function Messenger({ role }) {
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const [messagesBoxSwitch, setMessagesBoxSwitch] = useState(1);
   const { socket } = useSocketStore()
-  const {onlineUsers, setOnlineUsers, updateOnlineUser} = useOnlineUsersStore()
-  const [userStatuses, setUserStatuses] = useState({});
+  const {onlineUsers, updateOnlineUser} = useOnlineUsersStore()
   const [typingUsers, setTypingUsers] = useState(new Map());
   const [typingUser, setTypingUser] = useState();
-  const [recipientId, setRecipientId] = useState();
 
   const { data: allMembers } = useQuery({
     queryKey: ['allMembers'],
@@ -158,10 +156,10 @@ export default function Messenger({ role }) {
           if (!lastSeen) return 'Never';
           const now = new Date();
           const diff = Math.floor((now - new Date(lastSeen)) / 60000);
-          if (diff < 1) return 'Just now';
-          if (diff < 60) return `${diff} min ago`;
-          if (diff < 1440) return `${Math.floor(diff / 60)} hr ago`;
-          return `${Math.floor(diff / 1440)} day(s) ago`;
+          if (diff < 1) return 'Vừa mới đăng nhập';
+          if (diff < 60) return `${diff}p trước`;
+          if (diff < 1440) return `${Math.floor(diff / 60)}h trước`;
+          return `${Math.floor(diff / 1440)} ngày trước`;
         }}
       />
       {messagesBoxSwitch === 2 ? (

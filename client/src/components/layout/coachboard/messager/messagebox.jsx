@@ -122,7 +122,7 @@ export default function MessageBox({
             return `${weekday[curDate.getUTCDay()]} - ${curDate.getUTCHours().toString().padStart(2, '0')}:${curDate.getUTCMinutes().toString().padStart(2, '0')}`;
         }
 
-        const diff = (curDate - lastDate) / 1000 / 60; // minutes
+        const diff = (curDate - lastDate) / 1000 / 60;
         if (diff > 30) {
             return `${curDate.getUTCHours().toString().padStart(2, '0')}:${curDate.getUTCMinutes().toString().padStart(2, '0')}`;
         }

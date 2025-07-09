@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Search, User, Users, Clock, Circle, MessageCircle, X } from "lucide-react";
+import { Search, User, Users, Circle, MessageCircle, X } from "lucide-react";
 
 export default function AllMembers({
     members,
     onSelectMember,
     onEmitMemberInteraction,
-    onlineUsers,
     getUserOnlineStatus,
     getUserLastSeen,
     formatLastSeen
@@ -289,7 +288,7 @@ export default function AllMembers({
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                         type="text"
-                        placeholder="Search members..."
+                        placeholder="Tìm kiếm tên thành viên..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
@@ -322,7 +321,7 @@ export default function AllMembers({
                 <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <User className="w-5 h-5 text-primary-600" />
-                        <span className="text-primary-900 font-medium">Selected: {selectedName}</span>
+                        <span className="text-primary-900 font-medium">Đã chọn: {selectedName}</span>
                     </div>
                     <button
                         onClick={clearSelection}
@@ -341,12 +340,12 @@ export default function AllMembers({
                         <div className="text-center">
                             <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                             <div className="text-lg mb-2 font-medium">
-                                {searchTerm ? 'No members found' : 'No available members'}
+                                {searchTerm ? 'Không tìm thấy thành viên nào' : 'Không có thành viên nào đang online'}
                             </div>
                             <div className="text-sm">
                                 {searchTerm 
-                                    ? 'Try adjusting your search terms or filters.'
-                                    : 'All members already have active conversations with you.'
+                                    ? 'Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc'
+                                    : 'Tất cả thành viên đã tham gia trò chuyện với bạn'
                                 }
                             </div>
                         </div>
@@ -381,9 +380,9 @@ export default function AllMembers({
                                 Creating conversation...
                             </div>
                         ) : selectedName ? (
-                            `Start conversation with ${selectedName}`
+                            `Bắt đầu trò chuyện với ${selectedName}`
                         ) : (
-                            'Select a member to start conversation'
+                            'Chọn một thành viên để bắt đầu trò chuyện'
                         )}
                     </button>
                 </div>
