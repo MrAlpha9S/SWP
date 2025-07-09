@@ -43,7 +43,8 @@ const ProgressBoard = ({
                            planLogCloneDDMMYY,
                            setCurrentStepDashboard = null,
                            setMoneySaved = null,
-                           userInfo
+                           userInfo,
+                           from = null
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -108,6 +109,10 @@ const ProgressBoard = ({
     }, [localCheckInDataSet, planLog]);
 
     useEffect(() => {
+        console.log(showWarning)
+    }, [showWarning]);
+
+    useEffect(() => {
         const interval = setInterval(() => {
             setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
@@ -148,6 +153,30 @@ const ProgressBoard = ({
     const totalDaysPhrase = useMemo(() => {
         const localStartDate = new Date(startDate);
 
+        if (from === 'coach-user') {
+            if (readinessValue === 'relapse-support') {
+                return (
+                    <>
+                        Người dùng đã cai thuốc thành công <br/>
+                        Tổng thời gian kể từ khi họ cai thuốc
+                    </>
+                );
+            } else if (currentDate > new Date(expectedQuitDate)) {
+                return (
+                    <>
+                        Người dùng đã hoàn thành kế hoạch cai thuốc <br/>
+                        Tổng thời gian kể từ khi bắt đầu hành trình
+                    </>
+                );
+            } else if (localStartDate > currentDate) {
+                return 'Thời gian còn lại đến khi bắt đầu hành trình cai thuốc';
+            } else if (currentDate < new Date(expectedQuitDate)) {
+                return 'Tổng thời gian kể từ khi người dùng bắt đầu hành trình cai thuốc';
+            }
+            return 'Tổng thời gian kể từ khi người dùng bắt đầu hành trình cai thuốc';
+        }
+
+        // Default (user perspective)
         if (readinessValue === 'relapse-support') {
             return (
                 <>
@@ -168,22 +197,23 @@ const ProgressBoard = ({
             return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
         }
         return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
-    }, [readinessValue, currentDate, expectedQuitDate, startDate]);
+    }, [readinessValue, currentDate, expectedQuitDate, startDate, from]);
+
 
     // Check if all required data is available for calculation
     const isDataReady = useMemo(() => {
-        console.log('Data ready check:', {
-            localUserCreationDate,
-            currentDate: !!currentDate,
-            localCheckInDataSet: Array.isArray(localCheckInDataSet),
-            cigsPerDay,
-            readinessValue,
-            stoppedDate,
-            isUserCreationDatePending,
-            isDatasetPending,
-            isAuthenticated,
-            userInfo: !!userInfo?.auth0_id
-        });
+        // console.log('Data ready check:', {
+        //     localUserCreationDate,
+        //     currentDate: !!currentDate,
+        //     localCheckInDataSet: Array.isArray(localCheckInDataSet),
+        //     cigsPerDay,
+        //     readinessValue,
+        //     stoppedDate,
+        //     isUserCreationDatePending,
+        //     isDatasetPending,
+        //     isAuthenticated,
+        //     userInfo: !!userInfo?.auth0_id
+        // });
 
         return !!(
             localUserCreationDate &&
@@ -212,11 +242,11 @@ const ProgressBoard = ({
     const cigsQuit = useMemo(() => {
         // Return null instead of 0 when data isn't ready
         if (!isDataReady) {
-            console.log('cigsQuit: Data not ready, returning null');
+            //console.log('cigsQuit: Data not ready, returning null');
             return null;
         }
 
-        console.log('cigsQuit: Calculating with data ready');
+        //console.log('cigsQuit: Calculating with data ready');
         const startDay = new Date(readinessValue === 'relapse-support' ? stoppedDate : localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
@@ -241,25 +271,20 @@ const ProgressBoard = ({
         }
 
         const result = Math.max(0, total);
-        console.log('cigsQuit calculated:', result);
+        //console.log('cigsQuit calculated:', result);
         return result;
     }, [isDataReady, localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
 
     const moneySaved = useMemo(() => {
         // Return null instead of 0 when cigsQuit isn't calculated yet
         if (cigsQuit === null || !pricePerCig) {
-            console.log('moneySaved: Not ready, returning null');
+            //console.log('moneySaved: Not ready, returning null');
             return null;
         }
         const result = Math.round(cigsQuit * pricePerCig);
-        console.log('moneySaved calculated:', result);
+        //console.log('moneySaved calculated:', result);
         return result;
     }, [cigsQuit, pricePerCig]);
-
-    useEffect(() => {
-        console.log('cigsQuitted', cigsQuit);
-        console.log('moneysaved', moneySaved);
-    }, [cigsQuit, moneySaved]);
 
     useEffect(() => {
         if (typeof setMoneySaved === 'function' && typeof moneySaved === 'number') {
@@ -321,7 +346,7 @@ const ProgressBoard = ({
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
-            <div className="flex items-center justify-between">
+            {!from && <div className="flex items-center justify-between">
                 {isPending ? (
                     <Skeleton.Button active/>
                 ) : (
@@ -334,7 +359,7 @@ const ProgressBoard = ({
                         What's a check-in and why are they important?
                     </a>
                 )}
-            </div>
+            </div>}
 
             <div className="bg-primary-100 rounded-lg p-6 text-center">
                 <h2 className="text-gray-600 text-sm font-medium">
@@ -375,7 +400,9 @@ const ProgressBoard = ({
                                     }
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                    {['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
+                                    {from === 'coach-user'
+                                        ? ['Số tiền người dùng tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]
+                                        : ['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
                                 </div>
                             </>
                         )}
@@ -384,16 +411,22 @@ const ProgressBoard = ({
             </div>
 
             <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
-                <div className="absolute right-3 top-3">
+                {!from && <div className="absolute right-3 top-3">
                     {!isPending && (
-                        <a onClick={() => navigate('/onboarding/progress-board-startdate')} className="text-sm text-primary-700 hover:underline">
+                        <a onClick={() => navigate('/onboarding/progress-board-startdate')}
+                           className="text-sm text-primary-700 hover:underline">
                             Chỉnh sửa?
                         </a>
                     )}
-                </div>
+                </div>}
                 <div className="text-2xl flex justify-center"><FaRegCalendarCheck
                     className='size-9 text-primary-800 mb-1'/></div>
-                <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
+                <h3 className="text-lg font-semibold text-primary-800">
+                    {from === 'coach-user'
+                        ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
+                        : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
+                </h3>
+
                 <div className="text-sm text-gray-600">
                     {isPending ?
                         <Skeleton.Input style={{width: 160}} active/> :
@@ -406,24 +439,44 @@ const ProgressBoard = ({
 
             {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
-                    <div className="absolute right-3 top-3">
+                    {!from && <div className="absolute right-3 top-3">
                         {!isPending && (
                             <a onClick={() => navigate('/onboarding/progress-board-plan')}
                                className="text-sm text-primary-700 hover:underline">
                                 Chỉnh sửa?
                             </a>
                         )}
-                    </div>
+                    </div>}
                     <div className="text-2xl flex justify-center"><BsGraphDown
                         className='size-7 text-primary-800 mb-1'/></div>
-                    <h3 className="text-lg font-semibold text-primary-800">Số điếu thuốc theo kế hoạch và thực tế</h3>
+                    <h3 className="text-lg font-semibold text-primary-800">
+                        {from === 'coach-user'
+                            ? 'Số điếu thuốc theo kế hoạch và thực tế của người dùng'
+                            : 'Số điếu thuốc theo kế hoạch và thực tế'}
+                    </h3>
+
                     {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
                         <div className='flex flex-col items-center justify-center'>
-                            <p>Bạn chưa tạo kế hoạch</p>
-                            <CustomButton onClick={() => navigate('/onboarding/progress-board-plan')}>Tạo ngay</CustomButton>
+                            <p>
+                                {from === 'coach-user'
+                                    ? 'Người dùng chưa tạo kế hoạch cai thuốc.'
+                                    : 'Bạn chưa tạo kế hoạch'}
+                            </p>
+                            {from !== 'coach-user' && (
+                                <CustomButton onClick={() => navigate('/onboarding/progress-board-plan')}>
+                                    Tạo ngay
+                                </CustomButton>
+                            )}
                         </div>
+
                     }
-                    {showWarning && <p>Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!</p>}
+                    {showWarning &&
+                        <p><p>
+                            {from === 'coach-user'
+                                ? 'Người dùng dường như vẫn hút thuốc sau khi kết thúc kế hoạch. Bạn có thể đề xuất họ bắt đầu lại.'
+                                : 'Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!'}
+                        </p>
+                        </p>}
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : (mergedDataSet?.length > 0) ? (
@@ -461,7 +514,7 @@ const ProgressBoard = ({
                                         label={'Hôm nay'}
                                     />
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
-                                           interval= {1}/>
+                                           interval={1}/>
                                     <YAxis/>
                                     <Tooltip/>
                                     <Legend verticalAlign="top"/>
@@ -490,7 +543,7 @@ const ProgressBoard = ({
                 </div>
             )}
 
-            <div className="text-center">
+            {!from && <div className="text-center">
                 {isPending ? (
                     <Skeleton.Input style={{width: 160}} active/>
                 ) : (
@@ -498,7 +551,7 @@ const ProgressBoard = ({
                         🔗 Chia sẻ tiến trình
                     </a>
                 )}
-            </div>
+            </div>}
         </div>
     );
 };
