@@ -142,7 +142,8 @@ export function mergeByDate(
     checkinLog = [],
     quittingMethod,
     cigsPerDay = null,
-    userCreationDate = null
+    userCreationDate = null,
+    range = 'overview' // new param
 ) {
     const map = new Map();
 
@@ -152,7 +153,6 @@ export function mergeByDate(
         checkinMap.set(dateStr, checkinLog[i].cigs);
     }
 
-    // Step 1: Generate plan ranges
     const planRanges = [];
     for (let i = 0; i < planLog.length; i++) {
         const start = new Date(planLog[i].date);
@@ -176,33 +176,39 @@ export function mergeByDate(
         });
     }
 
-    const getCurrentUTCDate = () => {
+    const getCurrentUTCDateTime = () => {
         const now = new Date();
         return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     };
 
-    const currentDate = getCurrentUTCDate();
+    const currentDate = getCurrentUTCDateTime();
 
-    // Step 2: Determine date range
-    const allDates = [
-        ...checkinLog.map(e => new Date(e.date)),
-        ...planLog.map(e => new Date(e.date))
-    ];
-    if (userCreationDate) {
-        allDates.push(new Date(userCreationDate));
+    // Determine full range vs plan-only range
+    let firstDate, lastDate;
+
+    if (range === 'plan' && planLog.length > 0) {
+        firstDate = new Date(planLog[0].date);
+        lastDate = getCurrentUTCDateTime();
+    } else {
+        const allDates = [
+            ...checkinLog.map(e => new Date(e.date)),
+            ...planLog.map(e => new Date(e.date))
+        ];
+        if (userCreationDate) {
+            allDates.push(new Date(userCreationDate));
+        }
+
+        firstDate = new Date(Math.min(...allDates));
+        lastDate = new Date(Math.max(
+            ...checkinLog.map(e => new Date(e.date)),
+            ...planLog.map(e => new Date(e.date)),
+            getCurrentUTCDateTime()
+        ));
     }
-
-    const firstDate = new Date(Math.min(...allDates));
-    const lastDate = new Date(Math.max(
-        ...checkinLog.map(e => new Date(e.date)),
-        ...planLog.map(e => new Date(e.date)),
-        getCurrentUTCDateTime()
-    ));
 
     const current = new Date(firstDate);
     let lastKnownActual = null;
 
-    // Step 3: Loop over all dates
     while (current <= lastDate) {
         const dayStr = current.toISOString().split('T')[0];
         let actual = checkinMap.get(dayStr);
@@ -215,7 +221,6 @@ export function mergeByDate(
 
         let plan = null;
 
-        // Handle plan from planRanges
         for (const range of planRanges) {
             const startDate = new Date(range.start);
             const endDate = new Date(range.end);
@@ -235,7 +240,6 @@ export function mergeByDate(
             }
         }
 
-        // If before plan starts and userCreationDate is given, fill actual from cigsPerDay
         if (actual == null && cigsPerDay != null && userCreationDate) {
             const ucDate = new Date(userCreationDate);
             const firstPlanDate = planLog.length > 0 ? new Date(planLog[0].date) : null;
@@ -256,6 +260,7 @@ export function mergeByDate(
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
 
 export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null) {
     if (!isAuthenticated || !user) return;

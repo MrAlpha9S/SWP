@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
-import {Skeleton} from "antd";
+import {Dropdown, Select, Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
@@ -53,6 +53,7 @@ const ProgressBoard = ({
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
     const [showWarning, setShowWarning] = useState(false);
+    const [range, setRange] = useState('overview');
 
     const {
         isPending: isDatasetPending,
@@ -295,8 +296,8 @@ const ProgressBoard = ({
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
         if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at));
-    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending]);
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at, range));
+    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending, range]);
 
     const getReferenceArea = useCallback(() => {
         if (!mergedDataSet || mergedDataSet.length === 0) return null;
@@ -343,6 +344,10 @@ const ProgressBoard = ({
 
     // Show loading state for calculations
     const isCalculating = isPending || isDatasetPending || isUserCreationDatePending || !isDataReady || cigsQuit === null || moneySaved === null;
+
+    const handleSelectChange = (e) => {
+        setRange(e);
+    }
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
@@ -454,6 +459,16 @@ const ProgressBoard = ({
                             ? 'Số điếu thuốc theo kế hoạch và thực tế của người dùng'
                             : 'Số điếu thuốc theo kế hoạch và thực tế'}
                     </h3>
+                    <Select
+                        defaultValue="overview"
+                        variant="borderless"
+                        style={{ width: 120 }}
+                        onChange={handleSelectChange}
+                        options={[
+                            { value: 'plan', label: 'Kế hoạch' },
+                            { value: 'overview', label: 'Tổng quan' },
+                        ]}
+                    />
 
                     {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
                         <div className='flex flex-col items-center justify-center'>
