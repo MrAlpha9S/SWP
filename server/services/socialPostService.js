@@ -87,13 +87,19 @@ async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null, postId = null }) {
+async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null, postId = null, auth0_id = null }) {
     try {
         const pool = await poolPromise;
         const offset = (page - 1) * pageSize;
 
         const filters = [];
         const request = pool.request();
+
+        if (auth0_id) {
+            const user_id = await getUserIdFromAuth0Id(auth0_id);
+            filters.push(`u.user_id = @user_id`);
+            request.input('user_id', sql.Int, user_id);
+        }
 
         if (categoryTag) {
             filters.push(`sc.category_tag = @categoryTag`);
@@ -139,7 +145,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             SELECT 
               sp.post_id, sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
-              u.user_id, u.username, u.role, u.avatar,
+              u.user_id, u.username, u.role, u.avatar, u.auth0_id,
               COUNT(DISTINCT sl.like_id) AS likes,
               COUNT(DISTINCT scmt.comment_id) AS comments
             FROM social_posts sp
@@ -150,7 +156,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             ${whereClause}
             GROUP BY 
               sp.title, sp.content, sp.created_at, sp.is_pinned,
-              sc.category_tag, sc.category_name,
+              sc.category_tag, sc.category_name, u.auth0_id,
               u.user_id, u.username, u.role, u.avatar, sp.post_id
             ORDER BY sp.created_at DESC
             OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY

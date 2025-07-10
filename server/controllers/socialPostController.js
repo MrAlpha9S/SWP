@@ -81,12 +81,10 @@ const handleGetPostByCategory = async (req, res) => {
 };
 
 const handleGetPosts = async (req, res) => {
-    const { categoryTag, keyword, page, fromDate, toDate, postId } = req.query;
-
-    console.log(categoryTag, keyword, page, fromDate, toDate, postId);
+    const { categoryTag, keyword, page, fromDate, toDate, postId, auth0_id } = req.query;
 
     try {
-        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate, postId});
+        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate, postId, auth0_id});
 
         if (!result || result.length === 0) {
             return res.status(404).json({

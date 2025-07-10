@@ -22,6 +22,7 @@ import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 import AllPosts from "./pages/forumPage/allPosts.jsx";
 import PostPage from "./components/layout/forum/postPage.jsx";
 import ForumEditor from './components/layout/forum/forumeditor.jsx'
+import ForumProfile from './pages/forumPage/forumprofile.jsx'
 
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
                 <Route path="/forum/editor" element={<ForumEditor/>}></Route>
+                <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                 <Route path="/subscription" element={<SubscriptionPage/>}></Route>
                 <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
                 <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>

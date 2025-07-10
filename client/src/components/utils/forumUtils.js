@@ -40,22 +40,41 @@ export async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = '' }) {
+export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = '', auth0_id }) {
     try {
+        if (auth0_id) {
 
-        const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
+            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
 
-        if (!res.ok) {
-            const errorMessage = await res.text();
-            throw new Error(errorMessage || `Request failed with status ${res.status}`);
+            if (!res.ok) {
+                const errorMessage = await res.text();
+                throw new Error(errorMessage || `Request failed with status ${res.status}`);
+            }
+
+            return await res.json();
+        } else {
+            const auth0_null = ''
+            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!res.ok) {
+                const errorMessage = await res.text();
+                throw new Error(errorMessage || `Request failed with status ${res.status}`);
+            }
+
+            return await res.json();
         }
 
-        return await res.json();
+
     } catch (error) {
         console.error('getForumCategoryMetadata error', error);
         throw error;

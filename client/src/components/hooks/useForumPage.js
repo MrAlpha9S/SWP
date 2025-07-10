@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../utils/forumUtils.js';
 
-export default function useForumPage(initialCategoryTag, queryKeyPrefix) {
+export default function useForumPage(initialCategoryTag, queryKeyPrefix, auth0_id) {
     const [currentPage, setCurrentPage] = useState(1);
     const [posts, setPosts] = useState([]);
     const [total, setTotal] = useState(0);
@@ -11,15 +11,17 @@ export default function useForumPage(initialCategoryTag, queryKeyPrefix) {
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
 
+
     const { isPending, data } = useQuery({
-        queryKey: [queryKeyPrefix, currentPage, keyword, selectedCategory, fromDate, toDate],
+        queryKey: [queryKeyPrefix, currentPage, keyword, selectedCategory, fromDate, toDate, auth0_id],
         queryFn: () =>
             getPosts({
                 categoryTag: selectedCategory,
                 keyword,
                 page: currentPage,
                 fromDate,
-                toDate
+                toDate,
+                auth0_id
             }),
     });
 
@@ -47,6 +49,6 @@ export default function useForumPage(initialCategoryTag, queryKeyPrefix) {
         setFromDate,
         toDate,
         setToDate,
-        isPending
+        isPending,
     };
 }
