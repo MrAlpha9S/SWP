@@ -23,8 +23,6 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
         bodyPayload.userAuth0Id = user.sub;
     }
 
-    console.log(bodyPayload);
-
     const res = await fetch('http://localhost:3000/profiles/getProfile', {
         method: 'POST',
         headers: {

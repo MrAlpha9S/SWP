@@ -202,18 +202,18 @@ const ProgressBoard = ({
 
     // Check if all required data is available for calculation
     const isDataReady = useMemo(() => {
-        // console.log('Data ready check:', {
-        //     localUserCreationDate,
-        //     currentDate: !!currentDate,
-        //     localCheckInDataSet: Array.isArray(localCheckInDataSet),
-        //     cigsPerDay,
-        //     readinessValue,
-        //     stoppedDate,
-        //     isUserCreationDatePending,
-        //     isDatasetPending,
-        //     isAuthenticated,
-        //     userInfo: !!userInfo?.auth0_id
-        // });
+        console.log('Data ready check:', {
+            localUserCreationDate,
+            currentDate: !!currentDate,
+            localCheckInDataSet: Array.isArray(localCheckInDataSet),
+            cigsPerDay,
+            readinessValue,
+            stoppedDate,
+            isUserCreationDatePending,
+            isDatasetPending,
+            isAuthenticated,
+            userInfo: !!userInfo?.auth0_id
+        });
 
         return !!(
             localUserCreationDate &&

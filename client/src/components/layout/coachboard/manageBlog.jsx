@@ -25,7 +25,7 @@ const items = [
 const ManageBlog = () => {
     return (
         <div className='w-full h-screen'>
-            <Tabs defaultActiveKey="1" items={items} onChange={onChange}/>
+            <Tabs defaultActiveKey="1" items={items}/>
         </div>
     )
 }
