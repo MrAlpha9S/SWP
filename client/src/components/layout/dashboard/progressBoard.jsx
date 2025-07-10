@@ -295,7 +295,7 @@ const ProgressBoard = ({
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
         if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod));
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at));
     }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending]);
 
     const getReferenceArea = useCallback(() => {

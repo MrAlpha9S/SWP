@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import Messager from "./messager/messager.jsx";
 import {useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 import {useQuery} from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import PostBlog from "./postblog.jsx";
 import {Tabs} from "antd";
 import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
+import userProfile from "../../ui/userProfile.jsx";
 
 const CoachUser = () => {
     const {userInfo} = useUserInfoStore()
@@ -44,6 +45,10 @@ const CoachUser = () => {
         enabled: isAuthenticated && !!user && !!userInfo?.auth0_id && !!selectedUserAuth0Id,
         retry: 1,
     })
+
+    useEffect(() => {
+        if (!isProfilePending) console.log('profile data', profileData)
+    }, [isProfilePending, profileData])
 
     // Memoized computed values
     const planLogCloneDDMMYY = useMemo(() => {

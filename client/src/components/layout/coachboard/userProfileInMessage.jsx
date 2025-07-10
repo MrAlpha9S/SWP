@@ -78,7 +78,7 @@ const UserProfileInMessage = ({
     const [displayWarning, setDisplayWarning] = useState(false);
     const mergedDataSet = useMemo(() => {
         if (!planLog || !checkInDataSet || userInfo?.sub_id === 1 || checkInDataSet.length === 0) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod));
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at));
     }, [planLog, checkInDataSet, userInfo?.sub_id, quittingMethod]);
 
     useEffect(() => {
