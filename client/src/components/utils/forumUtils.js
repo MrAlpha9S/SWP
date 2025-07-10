@@ -122,3 +122,19 @@ export async function PostSocialPosts(user, getAccessTokenSilently, isAuthentica
 
     return await res.json();
 }
+
+export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, parent_comment_id, post_id, content, created_at, is_reported) => {
+    if (!isAuthenticated || !user) return;
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/addcomment`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ parent_comment_id: parent_comment_id, auth0_id: user.sub, post_id: post_id, content: content, created_at: created_at, is_reported: is_reported })
+    });
+
+    return await res.json();
+};

@@ -204,7 +204,7 @@ const getPostComments = async (postId) => {
                                      FROM social_comments scmt
                                               INNER JOIN CommentTree ct ON scmt.parent_comment_id = ct.comment_id)
                 SELECT ct.*,
-                       u.username, u.avatar,
+                       u.username, u.avatar, u.auth0_id,
                        u.role,
                        COALESCE(COUNT(sl.like_id), 0) AS like_count
                 FROM CommentTree ct
@@ -212,11 +212,11 @@ const getPostComments = async (postId) => {
                          LEFT JOIN social_likes sl ON ct.comment_id = sl.comment_id
                 GROUP BY ct.comment_id, ct.parent_comment_id, ct.post_id, ct.user_id,
                          ct.content, ct.created_at, ct.depth, u.username, u.avatar,
-                         u.role
+                         u.role, u.auth0_id
                 ORDER BY ct.created_at;
             `);
 
-        return result.recordset;
+        return result.recordset || null;
     } catch (err) {
         console.error('SQL error', err);
         throw err;
@@ -246,6 +246,30 @@ VALUES (@postId, @user_id, @title, @content, @created_at);
     }
 }
 
+const PostAddComment = async (parent_comment_id, auth0_id, post_id, content, created_at, is_reported) => {
+    try {
+        const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
+        const result = await pool.request()
+            .input('parent_comment_id', sql.Int, null, parent_comment_id)
+            .input('user_id', sql.Int, user_id)
+            .input('post_id', sql.Int, post_id)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .input('is_reported', sql.Int, is_reported)
+            .query(`INSERT INTO [social_comments] ([parent_comment_id], [user_id], [post_id], [content], [created_at], [is_reported])
+VALUES (@parent_comment_id, @user_id, @post_id, @content, @created_at, @is_reported);
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts };
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment };

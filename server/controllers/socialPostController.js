@@ -1,4 +1,4 @@
-const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts} = require("../services/socialPostService");
+const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment} = require("../services/socialPostService");
 
 const getPostAndCommentCount = async (req, res) => {
 
@@ -117,8 +117,8 @@ const handleGetPostComments = async (req, res) => {
         const result = await getPostComments(postId);
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: 'No comments found',
                 data: []
             });
@@ -160,6 +160,26 @@ const handlePostSocialPosts = async (req, res) => {
 
 }
 
+const handleAddComment = async (req, res) => {
+    const {parent_comment_id, auth0_id, post_id, content, created_at, is_reported}  = req.body;
+
+    if (!auth0_id || !post_id || !content || !created_at || is_reported === undefined) {
+        return res.status(400).json({ success: false, message: 'error in handleAddComment: params is required', data: null });
+    }
+
+    try {
+        const add = await PostAddComment(parent_comment_id, auth0_id, post_id, content, created_at, is_reported);
+        if (!add) {
+            return res.status(404).json({ success: false, message: 'Cant handleAddComment', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'handleAddComment successfully', data: add });
+    } catch (error) {
+        console.error('Error in handleAddComment:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+
+}
 
 
-module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts};
+
+module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment};

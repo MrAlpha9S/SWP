@@ -41,6 +41,8 @@ export default function ForumLayout({
         }
     }, []);
 
+    console.log('data:', posts)
+
     return (
         <div className="bg-white ">
             <Hero title={title} img={heroImg} heroHeight={heroHeight}>
