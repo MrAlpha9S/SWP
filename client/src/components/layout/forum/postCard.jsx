@@ -4,6 +4,7 @@ import {Card, Divider} from 'antd';
 import {FaCommentAlt, FaRegClock, FaRegHeart} from "react-icons/fa";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from '../../utils/dateUtils.js';
 import {useNavigate} from "react-router-dom";
+import {AddLike} from "../../utils/forumUtils.js"
 
 export default function PostCard({post_id, title, username, created_at, content, category_name, category_tag, isPinned, comments, likes, avatar}) {
     const navigate = useNavigate();

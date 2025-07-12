@@ -40,11 +40,11 @@ export async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = '', auth0_id }) {
+export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromDate = '', toDate = '', postId = '', auth0_id, currentUserId = null }) {
     try {
         if (auth0_id) {
 
-            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_id}`, {
+            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_id}&currentUserId=${currentUserId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
             return await res.json();
         } else {
             const auth0_null = ''
-            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}`, {
+            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}&currentUserId=${currentUserId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -81,10 +81,10 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
     }
 }
 
-export async function getComments({ postId }) {
+export async function getComments({ postId, currentUserId }) {
     try {
 
-        const res = await fetch(`http://localhost:3000/social-posts/comments/${postId}`, {
+        const res = await fetch(`http://localhost:3000/social-posts/comments/${postId}/${currentUserId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -134,6 +134,23 @@ export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, 
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ parent_comment_id: parent_comment_id, auth0_id: user.sub, post_id: post_id, content: content, created_at: created_at, is_reported: is_reported })
+    });
+
+    return await res.json();
+};
+
+export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at) => {
+    console.log('AddLike: ',user.sub, post_id, comment_id, created_at)
+    if (!isAuthenticated || !user) return;
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/like`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({auth0_id: user.sub, post_id: post_id, comment_id: comment_id, created_at: created_at})
     });
 
     return await res.json();

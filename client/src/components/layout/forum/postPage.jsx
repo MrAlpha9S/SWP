@@ -6,8 +6,9 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getComments, getPosts } from "../../utils/forumUtils.js";
 import React, { useEffect, useState } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
-import { FaCommentAlt, FaRegHeart, FaFlag } from "react-icons/fa";
-import { AddComment } from '../../utils/forumUtils.js'
+import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
+import { AddComment, AddLike } from '../../utils/forumUtils.js'
+
 import { useAuth0 } from "@auth0/auth0-react";
 
 export default function PostPage() {
@@ -26,6 +27,7 @@ export default function PostPage() {
         queryFn: () =>
             getPosts({
                 postId: postId,
+                currentUserId: user.sub,
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -35,6 +37,7 @@ export default function PostPage() {
         queryFn: () =>
             getComments({
                 postId: postId,
+                currentUserId: user.sub
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -43,7 +46,11 @@ export default function PostPage() {
         if (!isPostPending && postData?.data?.records?.[0]) {
             setPost(postData.data.records[0])
         }
-    }, [postData, isPostPending])
+    }, [postData, isPostPending, post])
+
+    useEffect(() => {
+        console.log('isLiked: ', comments)
+    }, [comments])
 
     useEffect(() => {
         if (!isCommentsPending && commentsData?.data) {
@@ -70,23 +77,39 @@ export default function PostPage() {
                 setReplyContent('');
                 queryClient.invalidateQueries(['get-post-comments', postId]);
                 console.log('Success')
-                // Swal.fire({
-                //     icon: 'success',
-                //     title: 'Bình luận thành công',
-                //     text: 'Bình luận của bạn đã được gửi!',
-                // });
             }
         },
         onError: (error) => {
             console.error('Error adding comment:', error);
-            // Swal.fire({
-            //     icon: 'error',
-            //     title: 'Lỗi',
-            //     text: 'Không thể gửi bình luận. Vui lòng thử lại!',
-            // });
         },
         onSettled: () => {
             setIsSubmitting(false);
+        },
+    });
+
+    const addLikeMutation = useMutation({
+        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId }) => {
+            console.log('addLikeMutation: ', user.sub, postId, commentId)
+            const currentDate = new Date().toISOString();
+            return await AddLike(
+                user,
+                getAccessTokenSilently,
+                isAuthenticated,
+                postId,
+                commentId,
+                currentDate,
+            );
+        },
+        onSuccess: (data) => {
+            if (data.success || data.message === 'Like added successfully') {
+                setReplyContent('');
+                queryClient.invalidateQueries(['get-single-post', postId]);
+                queryClient.invalidateQueries(['get-post-comments', postId]);
+                console.log('Success')
+            }
+        },
+        onError: (error) => {
+            console.error('Error adding like:', error);
         },
     });
 
@@ -96,11 +119,6 @@ export default function PostPage() {
 
         if (!isAuthenticated || !user) {
             console.error('User not authenticated');
-            // Swal.fire({
-            //     icon: 'warning',
-            //     title: 'Bạn chưa đăng nhập',
-            //     text: 'Vui lòng đăng nhập để bình luận!',
-            // });
             return;
         }
 
@@ -112,6 +130,23 @@ export default function PostPage() {
             isAuthenticated,
             postId,
             replyContent,
+        });
+    };
+
+    const onLike = (postId = null, commentId = null) => {
+        console.log('id: ', postId, commentId)
+
+        if (!isAuthenticated || !user) {
+            console.error('User not authenticated');
+            return;
+        }
+
+        addLikeMutation.mutate({
+            user,
+            getAccessTokenSilently,
+            isAuthenticated,
+            postId,
+            commentId,
         });
     };
 
@@ -165,7 +200,7 @@ export default function PostPage() {
     }
 
     // No post found
-    if (!post) {
+    if (!post || !user) {
         return (
             <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
                 <div className="space-y-6 w-[92%]">
@@ -217,8 +252,17 @@ export default function PostPage() {
                     </div>
 
                     <div className="flex gap-6 text-sm text-gray-500 pt-2 border-t">
-                        <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
-                            <FaRegHeart className='size-4' /> {post.likes || 0} Likes
+                        <button
+                            className='flex items-center gap-2 hover:text-primary-600 transition-colors'
+                            onClick={() => onLike(post.post_id, null)}
+                            disabled={post.isLiked === 1}
+                        >
+                            {post.isLiked === 1 ? (
+                                <FaHeart className='size-4 text-primary-600' />
+                            ) : (
+                                <FaRegHeart className='size-4' />
+                            )}
+                            {post.likes || 0} Likes
                         </button>
                         <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
                             <FaCommentAlt /> {comments.length} Reply
@@ -265,6 +309,7 @@ export default function PostPage() {
                             {comments.map((comment) =>
                                 <Comment
                                     key={comment.comment_id}
+                                    commentId={comment.comment_id}
                                     date={comment.created_at}
                                     author={comment.username}
                                     content={comment.content}
@@ -272,6 +317,8 @@ export default function PostPage() {
                                     avatar={comment.avatar}
                                     likes={comment.like_count}
                                     auth0_id={comment.auth0_id}
+                                    isLiked={comment.isLiked}
+                                    onLike={onLike}
                                 />
                             )}
                         </div>
@@ -288,7 +335,7 @@ export default function PostPage() {
     );
 }
 
-export function Comment({ author, date, content, role, likes, avatar, auth0_id }) {
+export function Comment({ key, author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike }) {
     const navigate = useNavigate();
 
     return (
@@ -315,8 +362,17 @@ export function Comment({ author, date, content, role, likes, avatar, auth0_id }
             </div>
             <p className="text-sm text-gray-800">{content}</p>
             <div className="flex gap-4 text-xs text-gray-500 pt-2">
-                <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
-                    <FaRegHeart className='size-4' /> {likes || 0} Likes
+                <button
+                    className='flex items-center gap-2 hover:text-primary-600 transition-colors'
+                    onClick={() => onLike(null, commentId)}
+                    disabled={isLiked === 1}
+                >
+                    {isLiked === 1 ? (
+                        <FaHeart className='size-4 text-primary-600' />
+                    ) : (
+                        <FaRegHeart className='size-4' />
+                    )}
+                    {likes || 0} Likes
                 </button>
                 <button className='flex items-center gap-2 hover:text-red-500 transition-colors'>
                     <FaFlag /> Report
