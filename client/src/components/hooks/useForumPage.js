@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../utils/forumUtils.js';
 
+import { useAuth0 } from "@auth0/auth0-react";
+
 export default function useForumPage(initialCategoryTag, queryKeyPrefix, auth0_id) {
+    const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [currentPage, setCurrentPage] = useState(1);
     const [posts, setPosts] = useState([]);
     const [total, setTotal] = useState(0);
@@ -21,7 +24,8 @@ export default function useForumPage(initialCategoryTag, queryKeyPrefix, auth0_i
                 page: currentPage,
                 fromDate,
                 toDate,
-                auth0_id
+                auth0_id,
+                currentUserId: user.sub,
             }),
     });
 
