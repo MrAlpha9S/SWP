@@ -88,7 +88,7 @@ const UserManagement = () => {
   const handleToggleBan = async (user) => {
     try {
       const token = await getAccessTokenSilently();
-      await toggleBanUser(user.user_id, token);
+      await toggleBanUser(user.user_id, !user.isBanned, token);
       message.success(`${user.isBanned ? 'Mở khóa' : 'Khóa'} user thành công`);
       fetchUsers();
     } catch (err) {

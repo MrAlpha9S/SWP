@@ -39,10 +39,11 @@ export async function deleteUser(id, token) {
   return await res.json();
 }
 
-export async function toggleBanUser(id, token) {
+export async function toggleBanUser(id, isBanned, token) {
   const res = await fetch(`http://localhost:3000/admin/users/${id}/ban`, {
     method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isBanned })
   });
   if (!res.ok) throw new Error('Lỗi ban user');
   return await res.json();

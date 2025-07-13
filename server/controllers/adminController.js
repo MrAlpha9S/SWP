@@ -61,7 +61,8 @@ const handleDeleteUser = async (req, res) => {
 };
 const handleToggleBanUser = async (req, res) => {
   const { id } = req.params;
-  const { isBanned } = req.body;
+  // Đảm bảo isBanned luôn là boolean
+  const isBanned = typeof req.body.isBanned === 'boolean' ? req.body.isBanned : !!req.body.isBanned;
   try {
     const updated = await adminService.toggleBanUserById(Number(id), isBanned);
     if (!updated) return res.status(404).json({ success: false, message: 'User not found' });
