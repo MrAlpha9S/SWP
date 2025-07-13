@@ -12,6 +12,7 @@ import {Tabs} from "antd";
 import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
 import userProfile from "../../ui/userProfile.jsx";
+import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
 
 const CoachUser = () => {
     const {userInfo} = useUserInfoStore()
@@ -19,7 +20,7 @@ const CoachUser = () => {
     const {selectedUserAuth0Id} = useSelectedUserAuth0IdStore()
 
     // User profile query
-    const { isPending: isProfilePending, data: profileData } = useQuery({
+    const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user || !selectedUserAuth0Id) return null;
@@ -77,7 +78,7 @@ const CoachUser = () => {
             children: (
                 <div className="w-full flex justify-center">
                     {isLoading ? (
-                        <ProgressBoard isPending={true} />
+                        <ProgressBoard isPending={true}/>
                     ) : hasProfileData ? (
                         <ProgressBoard
                             startDate={profileData.userProfile.start_date ?? ''}
@@ -96,7 +97,7 @@ const CoachUser = () => {
                             from="coach-user"
                         />
                     ) : (
-                        <NotFoundBanner title="Người dùng chưa nhập thông tin" />
+                        <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
                     )}
                 </div>
             )
@@ -107,7 +108,7 @@ const CoachUser = () => {
             children: (
                 <div className="w-full flex ">
                     {isLoading ? (
-                        <UserProfileInMessage isPending={true} />
+                        <UserProfileInMessage isPending={true}/>
                     ) : hasProfileData ? (
                         <UserProfileInMessage
                             startDate={profileData.userProfile.start_date ?? ''}
@@ -132,7 +133,7 @@ const CoachUser = () => {
                             checkInDataSet={localCheckinDataset}
                         />
                     ) : (
-                        <NotFoundBanner title="Người dùng chưa nhập thông tin" />
+                        <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
                     )}
                 </div>
             )
@@ -149,18 +150,18 @@ const CoachUser = () => {
     ];
 
     return (
-        <div className='w-full h-screen flex'>
-            <div className='w-[50%] h-screen'>
-                <Messager role={userInfo?.role} />
-            </div>
+            <div className='w-full h-screen flex'>
+                <div className='w-[50%] h-screen'>
+                    <Messager role={userInfo?.role}/>
+                </div>
 
-            <div className='w-[50%] flex flex-col items-center'>
-                <p className='font-bold text-4xl text-center'>Thông tin người dùng</p>
-                <div className="w-full flex justify-center">
-                    <Tabs centered defaultActiveKey="1" items={items} />
+                <div className='w-[50%] flex flex-col items-center'>
+                    <p className='font-bold text-4xl text-center'>Thông tin người dùng</p>
+                    <div className="w-full flex justify-center">
+                        <Tabs centered defaultActiveKey="1" items={items}/>
+                    </div>
                 </div>
             </div>
-        </div>
     );
 };
 

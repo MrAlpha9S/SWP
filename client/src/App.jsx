@@ -75,7 +75,6 @@ function AppContent() {
 
             socket.on('new_message_noti', (data) => {
                 const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
-                console.log('data', data);
                 if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
                     openNotification('new_message', data);
                 }
@@ -102,6 +101,12 @@ function AppContent() {
     useEffect(() => {
         if (!isPending && data) {
             syncProfileToStores(data);
+
+            if (data?.userInfo?.role === 'Member') {
+               useCurrentStepDashboard.getState().setCurrentStepDashboard('dashboard');
+            } else {
+                useCurrentStepDashboard.getState().setCurrentStepDashboard('overview');
+            }
         }
     }, [data, isPending]);
 

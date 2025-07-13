@@ -69,7 +69,7 @@ const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = fals
                 console.log(e.key)
                 setCurrentStepDashboard(e.key)
             }}
-            defaultSelectedKeys={['dashboard']}
+            defaultSelectedKeys={userInfo?.role === 'Member' ? ['dashboard'] : ['overview']}
             mode= {mode}
             items={items}
             inlineCollapsed={collapse}

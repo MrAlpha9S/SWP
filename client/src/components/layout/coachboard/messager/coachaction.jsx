@@ -12,18 +12,8 @@ export default function CoachAction({ role, handleNewConversationClick }) {
                         <Plus className="w-5 h-5" />
                     </div>
                     <div className="text-left">
-                        <div className="font-semibold">New Conversation</div>
-                        <div className="text-xs text-blue-100">Start a new conversation</div>
-                    </div>
-                </button>
-
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors">
-                    <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-                        <FileText className="w-5 h-5" />
-                    </div>
-                    <div className="text-left">
-                        <div className="font-semibold">Create Plan</div>
-                        <div className="text-xs text-gray-300">Create a plan for users</div>
+                        <div className="font-semibold">Trò chuyện mới</div>
+                        <div className="text-xs text-blue-100">Bắt đầu một trò chuyện mới</div>
                     </div>
                 </button>
             </div>

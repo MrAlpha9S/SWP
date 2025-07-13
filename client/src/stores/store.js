@@ -184,7 +184,7 @@ export const useProfileExists = create((set) => ({
 }))
 
 export const useCurrentStepDashboard = create((set) => ({
-    currentStepDashboard: 'dashboard',
+    currentStepDashboard: '',
     setCurrentStepDashboard: (value) => set({currentStepDashboard: value}),
 }))
 
@@ -198,6 +198,15 @@ export const useSelectedUserAuth0IdStore = create((set) => ({
     setSelectedUserAuth0Id: (value) => set({selectedUserAuth0Id: value}),
 }))
 
+export const useCoachInfoStore = create((set) => ({
+    coachInfo: [],
+    setCoachInfo: (value) => set({coachInfo: value}),
+}))
+
+export const useCoachStatsStore = create((set) => ({
+    coachStats: [],
+    setCoachStats: (value) => set({coachStats: value}),
+}))
 
 
 

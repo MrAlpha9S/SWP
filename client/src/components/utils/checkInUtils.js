@@ -143,7 +143,7 @@ export function mergeByDate(
     quittingMethod,
     cigsPerDay = null,
     userCreationDate = null,
-    range = 'overview' // new param
+    range = 'overview'
 ) {
     const map = new Map();
 
@@ -176,48 +176,49 @@ export function mergeByDate(
         });
     }
 
-    const getCurrentUTCDateTime = () => {
+    const getCurrentUTCDate = () => {
         const now = new Date();
         return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     };
 
-    const currentDate = getCurrentUTCDateTime();
+    const currentDate = getCurrentUTCDate();
 
-    // Determine full range vs plan-only range
-    let firstDate, lastDate;
-
-    if (range === 'plan' && planLog.length > 0) {
-        firstDate = new Date(planLog[0].date);
-        lastDate = getCurrentUTCDateTime();
-    } else {
-        const allDates = [
-            ...checkinLog.map(e => new Date(e.date)),
-            ...planLog.map(e => new Date(e.date))
-        ];
-        if (userCreationDate) {
-            allDates.push(new Date(userCreationDate));
-        }
-
-        firstDate = new Date(Math.min(...allDates));
-        lastDate = new Date(Math.max(
-            ...checkinLog.map(e => new Date(e.date)),
-            ...planLog.map(e => new Date(e.date)),
-            getCurrentUTCDateTime()
-        ));
+    const allDates = [
+        ...checkinLog.map(e => new Date(e.date)),
+        ...planLog.map(e => new Date(e.date))
+    ];
+    if (userCreationDate) {
+        allDates.push(new Date(userCreationDate));
     }
+
+    const firstDate = new Date(Math.min(...allDates));
+    const lastDate = new Date(Math.max(
+        ...checkinLog.map(e => new Date(e.date)),
+        ...planLog.map(e => new Date(e.date)),
+        currentDate
+    ));
 
     const current = new Date(firstDate);
     let lastKnownActual = null;
 
     while (current <= lastDate) {
         const dayStr = current.toISOString().split('T')[0];
+        const currentCopy = new Date(current); // Copy for comparing
+        const ucDate = userCreationDate ? new Date(userCreationDate) : null;
+        const firstPlanDate = planLog.length > 0 ? new Date(planLog[0].date) : null;
+
         let actual = checkinMap.get(dayStr);
+        let substituted = false;
+
+        let checkinMissed = false;
 
         if (actual == null && lastKnownActual != null && current <= currentDate) {
             actual = lastKnownActual;
+            checkinMissed = true;
         } else if (actual != null) {
             lastKnownActual = actual;
         }
+
 
         let plan = null;
 
@@ -240,19 +241,26 @@ export function mergeByDate(
             }
         }
 
-        if (actual == null && cigsPerDay != null && userCreationDate) {
-            const ucDate = new Date(userCreationDate);
-            const firstPlanDate = planLog.length > 0 ? new Date(planLog[0].date) : null;
+        // Fill pre-plan actuals from userCreationDate
+        if (actual == null && cigsPerDay != null && ucDate && current >= ucDate && (!firstPlanDate || current < firstPlanDate)) {
+            actual = cigsPerDay;
+        }
 
-            if (current >= ucDate && (!firstPlanDate || current < firstPlanDate)) {
-                actual = cigsPerDay;
-            }
+        // Apply range filter
+        const isInPlanRange = planLog.length > 0
+            && current >= new Date(planLog[0].date)
+            && current <= new Date(planLog[planLog.length - 1].date);
+
+        if (range === 'plan' && !isInPlanRange) {
+            current.setUTCDate(current.getUTCDate() + 1);
+            continue;
         }
 
         map.set(dayStr, {
             date: dayStr,
             actual,
-            plan
+            plan,
+            checkinMissed
         });
 
         current.setUTCDate(current.getUTCDate() + 1);
@@ -260,6 +268,7 @@ export function mergeByDate(
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
 
 
 export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null) {

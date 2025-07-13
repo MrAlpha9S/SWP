@@ -201,6 +201,7 @@ const assignUserToCoachController = async (req, res) => {
             io.to(coachAuth0Id).emit('coach_selected', {
                 userId,
                 username,
+                assignResult,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
             return res.status(200).json({success: true, message: "Assign successful"});

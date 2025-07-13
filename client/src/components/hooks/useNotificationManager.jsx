@@ -14,7 +14,7 @@ export const NotificationProvider = ({ children }) => {
                 api.info({
                     key: 'coach_selection',
                     message: `Người dùng ${payload.username} vừa chọn bạn`,
-                    description: `Vào thời điểm: ${new Date(payload.timestamp).toLocaleTimeString()}`,
+                    description: `Bạn nhận được ${new Date(payload.timestamp).toLocaleTimeString()}`,
                     placement: 'topRight',
                     icon: <BsFillPeopleFill className="size-5"/>
                 });

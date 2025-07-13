@@ -110,10 +110,6 @@ const ProgressBoard = ({
     }, [localCheckInDataSet, planLog]);
 
     useEffect(() => {
-        console.log(showWarning)
-    }, [showWarning]);
-
-    useEffect(() => {
         const interval = setInterval(() => {
             setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
@@ -203,18 +199,18 @@ const ProgressBoard = ({
 
     // Check if all required data is available for calculation
     const isDataReady = useMemo(() => {
-        console.log('Data ready check:', {
-            localUserCreationDate,
-            currentDate: !!currentDate,
-            localCheckInDataSet: Array.isArray(localCheckInDataSet),
-            cigsPerDay,
-            readinessValue,
-            stoppedDate,
-            isUserCreationDatePending,
-            isDatasetPending,
-            isAuthenticated,
-            userInfo: !!userInfo?.auth0_id
-        });
+        // console.log('Data ready check:', {
+        //     localUserCreationDate,
+        //     currentDate: !!currentDate,
+        //     localCheckInDataSet: Array.isArray(localCheckInDataSet),
+        //     cigsPerDay,
+        //     readinessValue,
+        //     stoppedDate,
+        //     isUserCreationDatePending,
+        //     isDatasetPending,
+        //     isAuthenticated,
+        //     userInfo: !!userInfo?.auth0_id
+        // });
 
         return !!(
             localUserCreationDate &&
@@ -348,6 +344,25 @@ const ProgressBoard = ({
     const handleSelectChange = (e) => {
         setRange(e);
     }
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+
+            return (
+                <div className="bg-white border rounded shadow p-2 text-sm">
+                    <div className="font-semibold">{label}</div>
+                    <div>
+                        <div className={`${data.checkinMissed ? 'text-red-500' : 'text-green-600'}`}>{data.checkinMissed ? 'Chưa check-in (ước lượng)' : 'Đã check-in'}</div>
+                        <div>Đã hút: {data.actual}</div>
+                        {data.plan != null && <div>Kế hoạch: {data.plan}</div>}
+                    </div>
+
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
@@ -531,7 +546,7 @@ const ProgressBoard = ({
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
                                            interval={1}/>
                                     <YAxis/>
-                                    <Tooltip/>
+                                    <Tooltip content={<CustomTooltip />} />
                                     <Legend verticalAlign="top"/>
                                 </LineChart>
                             ) : (
@@ -550,7 +565,7 @@ const ProgressBoard = ({
                                     />
                                     <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                     <YAxis/>
-                                    <Tooltip/>
+                                    <Tooltip content={<CustomTooltip />} />
                                 </LineChart>
                             )}
                         </ResponsiveContainer>

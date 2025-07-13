@@ -208,6 +208,7 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
                ci.bio,
                ci.detailed_bio,
                ci.motto,
+               ci.commission_rate,
                (SELECT COUNT(*)
                 FROM coach_user cu2
                 WHERE cu2.coach_id = u.user_id) AS total_students,
@@ -373,8 +374,11 @@ const assignUserToCoachService = async (coachId, userId) => {
             .input('user_id', userId)
             .input('started_date', getCurrentUTCDateTime().toISOString())
             .query(`INSERT INTO coach_user (coach_id, user_id, started_date) VALUES (@coach_id, @user_id, @started_date)`)
-        console.log(result)
-        return result.rowsAffected[0] > 0;
+        const price = await pool.request()
+            .input('userId', userId)
+            .query(`SELECT price FROM users u, subscription s WHERE u.sub_id = s.sub_id AND u.user_id = @userId`);
+
+        return price.recordset[0];
     }catch (error) {
         console.error('error in assignUserToCoachService', error);
         return false;

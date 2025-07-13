@@ -65,6 +65,7 @@ CREATE TABLE [coach_info] (
   [bio] nvarchar(200),
   [detailed_bio] nvarchar(max),
   [motto] nvarchar(100),
+  [commission_rate] float DEFAULT(0.3)
 )
 ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 GO
