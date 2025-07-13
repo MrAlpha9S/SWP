@@ -66,6 +66,7 @@ function AppContent() {
             });
 
             socket.on('coach_selected', (data) => {
+                console.log(data);
                 openNotification('coach_selected', data);
             });
 
@@ -102,9 +103,10 @@ function AppContent() {
         if (!isPending && data) {
             syncProfileToStores(data);
 
-            if (data?.userInfo?.role === 'Member') {
+            const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
+            if (data?.userInfo?.role === 'Member' && currentStepDashboard?.length === 0) {
                useCurrentStepDashboard.getState().setCurrentStepDashboard('dashboard');
-            } else {
+            } else if (data?.userInfo?.role === 'Coach' && currentStepDashboard?.length === 0) {
                 useCurrentStepDashboard.getState().setCurrentStepDashboard('overview');
             }
         }

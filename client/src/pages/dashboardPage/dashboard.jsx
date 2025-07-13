@@ -115,7 +115,6 @@ function Dashboard() {
     useEffect(() => {
         if (!isCoachStatsPending && userInfo?.role === 'Coach') {
             setCoachStats(coachStatsFetched?.data);
-            setCurrentStepDashboard('overview')
         }
     }, [coachStatsFetched, isCoachStatsPending, setCoachStats, setCurrentStepDashboard, userInfo]);
 
@@ -228,7 +227,7 @@ function Dashboard() {
                             setMoneySaved={setMoneySaved}
                         />
                     ) : (
-                        <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                        currentStepDashboard === 'dashboard' && <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
                     );
 
                 case 'check-in':

@@ -14,7 +14,10 @@ export const NotificationProvider = ({ children }) => {
                 api.info({
                     key: 'coach_selection',
                     message: `Người dùng ${payload.username} vừa chọn bạn`,
-                    description: `Bạn nhận được ${new Date(payload.timestamp).toLocaleTimeString()}`,
+                    description: <div>
+                        {`Bạn nhận được ${payload.assignResult.toLocaleString()} VNĐ`}
+                        <p>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
+                    </div>,
                     placement: 'topRight',
                     icon: <BsFillPeopleFill className="size-5"/>
                 });
@@ -23,7 +26,10 @@ export const NotificationProvider = ({ children }) => {
                 api.open({
                     key: `message_${payload.conversation_id}_${payload.created_at}`,
                     message: `Tin nhắn mới từ ${payload.senderName}`,
-                    description: payload.content,
+                    description: <div>
+                        {payload.content}
+                        <p>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
+                    </div>,
                     placement: 'topRight',
                     icon: <BiConversation className="size-5"/>
                 });

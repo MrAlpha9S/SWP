@@ -185,7 +185,10 @@ export const useProfileExists = create((set) => ({
 
 export const useCurrentStepDashboard = create((set) => ({
     currentStepDashboard: '',
-    setCurrentStepDashboard: (value) => set({currentStepDashboard: value}),
+    setCurrentStepDashboard: (value) => {
+        console.log('changed to:', value)
+        set({currentStepDashboard: value})
+    },
 }))
 
 export const useUserInfoStore = create((set) => ({
@@ -205,7 +208,10 @@ export const useCoachInfoStore = create((set) => ({
 
 export const useCoachStatsStore = create((set) => ({
     coachStats: [],
-    setCoachStats: (value) => set({coachStats: value}),
+    setCoachStats: (value) => {
+
+        set({coachStats: value})
+    },
 }))
 
 

@@ -376,9 +376,9 @@ const assignUserToCoachService = async (coachId, userId) => {
             .query(`INSERT INTO coach_user (coach_id, user_id, started_date) VALUES (@coach_id, @user_id, @started_date)`)
         const price = await pool.request()
             .input('userId', userId)
-            .query(`SELECT price FROM users u, subscription s WHERE u.sub_id = s.sub_id AND u.user_id = @userId`);
+            .query(`SELECT price FROM users u, subscriptions s WHERE u.sub_id = s.sub_id AND u.user_id = @userId`);
 
-        return price.recordset[0];
+        return price.recordset[0].price;
     }catch (error) {
         console.error('error in assignUserToCoachService', error);
         return false;
