@@ -136,7 +136,7 @@ export default function MessageBox({
     let lastShownTime = null;
 
     return (
-        <div className="flex-1 flex flex-col justify-between p-4 h-full">
+        <div className="flex-1 flex flex-col justify-between p-4 h-full w-[50%]">
             <div className="flex-1 overflow-y-auto space-y-2 pr-4 mb-4">
                 {messages && messages.length > 0 ? (
                     messages.map((msg, idx) => {
