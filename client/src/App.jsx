@@ -30,6 +30,7 @@ import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx"
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
 import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
+import AdminDashboard from './pages/adminPage/adminDashboard.jsx';
 
 function App() {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
@@ -83,6 +84,7 @@ function App() {
                 <Route path="/subscription" element={<SubscriptionPage/>}></Route>
                 <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
                 <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
+                <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
                 </AnimatePresence>
             </div>

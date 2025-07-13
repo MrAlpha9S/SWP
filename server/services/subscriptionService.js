@@ -65,4 +65,49 @@ const addSubscriptionPurchaseLog = async (user_id, subscription_id, today) => {
     }
 }
 
-module.exports = {getSubscriptions, getSubscriptionService, addSubscriptionPurchaseLog}
+// Thêm subscription
+const createSubscription = async (sub_name, price) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('sub_name', sql.NVarChar, sub_name)
+            .input('price', sql.Decimal(10,2), price)
+            .query('INSERT INTO subscriptions (sub_name, price) VALUES (@sub_name, @price)');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in createSubscription', error);
+        return false;
+    }
+};
+
+// Sửa subscription
+const updateSubscription = async (sub_id, sub_name, price) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('sub_id', sql.Int, sub_id)
+            .input('sub_name', sql.NVarChar, sub_name)
+            .input('price', sql.Decimal(10,2), price)
+            .query('UPDATE subscriptions SET sub_name = @sub_name, price = @price WHERE sub_id = @sub_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in updateSubscription', error);
+        return false;
+    }
+};
+
+// Xóa subscription
+const deleteSubscription = async (sub_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('sub_id', sql.Int, sub_id)
+            .query('DELETE FROM subscriptions WHERE sub_id = @sub_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deleteSubscription', error);
+        return false;
+    }
+};
+
+module.exports = {getSubscriptions, getSubscriptionService, addSubscriptionPurchaseLog, createSubscription, updateSubscription, deleteSubscription}
