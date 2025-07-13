@@ -46,6 +46,8 @@ const UserManagement = () => {
   // Open edit modal
   const openEditModal = (user) => {
     setEditingUser(user);
+    // Log để debug
+    console.log('User edit:', user);
     form.setFieldsValue({
       username: user.username || '',
       email: user.email || '',
@@ -145,13 +147,53 @@ const UserManagement = () => {
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="username" label="Username" rules={[{ required: true, message: 'Nhập username' }]}> <Input /> </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Nhập email' }]}> <Input /> </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Chọn role' }]}> <Select>
-            <Option value="Member">Member</Option>
-            <Option value="Coach">Coach</Option>
-            <Option value="Admin">Admin</Option>
-          </Select></Form.Item>
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[
+              { required: true, message: 'Nhập username' },
+              { min: 3, message: 'Username tối thiểu 3 ký tự' },
+              { pattern: /^[a-zA-Z0-9_]+$/, message: 'Username chỉ gồm chữ, số, gạch dưới' }
+            ]}
+          >
+            <Input placeholder="Nhập username" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' }
+            ]}
+          >
+            <Input placeholder="Nhập email" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: 'Chọn role' }]}
+          >
+            <Select placeholder="Chọn role">
+              <Option value="Member">Member</Option>
+              <Option value="Coach">Coach</Option>
+              <Option value="Admin">Admin</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="avatar"
+            label="Avatar (URL)"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  if (/^(https?:\/\/)[^\s]+$/.test(value)) return Promise.resolve();
+                  return Promise.reject('URL không hợp lệ');
+                }
+              }
+            ]}
+          >
+            <Input placeholder="Nhập URL ảnh đại diện (tùy chọn)" />
+          </Form.Item>
           <Form.Item name="isBanned" label="Banned" valuePropName="checked">
             <Switch checkedChildren="Banned" unCheckedChildren="Active" />
           </Form.Item>
