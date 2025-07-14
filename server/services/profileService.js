@@ -218,8 +218,8 @@ const getUserProfile = async (userAuth0Id) => {
 };
 
 const updateUserProfile = async (
-    updaterUserAuth0Id,
     userAuth0Id,
+    updaterUserAuth0Id,
     readiness,
     reasonList,
     pricePerPack,
@@ -239,6 +239,11 @@ const updateUserProfile = async (
     goalList
 ) => {
     try {
+        console.log('update service')
+        console.log("▶ updaterUserAuth0Id:", updaterUserAuth0Id);
+        console.log("▶ userAuth0Id:", userAuth0Id);
+
+
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
         const updaterUserId = await getUserIdFromAuth0Id(updaterUserAuth0Id);
@@ -260,7 +265,6 @@ const updateUserProfile = async (
             .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
             .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
             .input('updatedAt', sql.DateTime, updatedAt)
-            .input('lastUpdatedBy', sql.Int, updaterUserId)
             .query(`
                 UPDATE user_profiles
                 SET readiness_value    = @readiness,
@@ -276,7 +280,7 @@ const updateUserProfile = async (
                     custom_time_of_day = @customTimeOfDay,
                     custom_trigger     = @customTrigger,
                     updated_at         = @updatedAt,
-                    last_updated_by    = @lastUpdatedBy,
+                    last_updated_by    = @lastUpdatedBy
                 WHERE user_id = @userId
             `);
 
@@ -402,6 +406,7 @@ const getLeaderboard = async () => {
         console.error("postGoal error:", error);
     }
 }
+
 
 
 module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal}

@@ -17,11 +17,16 @@ import dayjs from 'dayjs'
 import {FaArrowRight} from "react-icons/fa";
 import {useNavigate} from "react-router-dom";
 import CustomStageEditor from "../../utils/CustomStageEditor.jsx";
+import {usePostUserProfile} from "../../hooks/usePostUSerProfile.js";
+import {useAuth0} from "@auth0/auth0-react";
+import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
+import {queryClient} from "../../../main.jsx";
 
 
 const SetPlan = ({
                      readinessValue,
                      userInfo,
+                     coachInfo,
                      startDate,
                      cigsPerDay,
                      quittingMethod,
@@ -34,7 +39,14 @@ const SetPlan = ({
                      setPlanLog,
                      planLogCloneDDMMYY,
                      setPlanLogCloneDDMMYY,
-                     from
+                     from,
+                     reasonList,
+                     pricePerPack,
+                     cigsPerPack,
+                     timeAfterWaking,
+                     timeOfDayList,
+                     triggers,
+                     customTimeOfDay, customTrigger, stoppedDate, goalList, setPlanEditClicked
                  }) => {
 
     const {errors} = useErrorStore();
@@ -45,13 +57,16 @@ const SetPlan = ({
     const [customStages, setCustomStages] = useState([
         {date: startDate.split("T")[0], cigs: cigsPerDay}
     ]);
+    const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const {addError, removeError} = useErrorStore()
+    const mutation = usePostUserProfile(getAccessTokenSilently, user);
 
     const errorMap = Object.fromEntries(
         onboardingErrorMsg
             .filter(msg => msg.atPage === "createPlan")
             .map(msg => [msg.location, msg])
     );
+    const {openNotification} = useNotificationManager();
 
     const validateCoachPlan = () => {
         if (from !== 'coach-user') return true;
@@ -119,7 +134,6 @@ const SetPlan = ({
     };
 
 
-
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (!scrollRef.current) return
@@ -157,6 +171,55 @@ const SetPlan = ({
             }
         }
     }, [planLog])
+
+    const handleSavePlan = () => {
+        if (!isAuthenticated || !user) return;
+
+        const payload = {
+            userAuth0Id: userInfo?.auth0_id,
+            readiness: readinessValue,
+            reasonList,
+            pricePerPack,
+            cigsPerPack,
+            timeAfterWaking,
+            timeOfDayList,
+            triggers,
+            cigsPerDay,
+            updaterUserAuth0Id: coachInfo?.auth0_id,
+        };
+
+        payload.customTimeOfDay = customTimeOfDay;
+        payload.customTrigger = customTrigger;
+        if (readinessValue === 'ready') {
+            payload.startDate = startDate;
+            payload.quittingMethod = quittingMethod;
+            if (quittingMethod !== 'target-date') {
+                payload.cigsReduced = cigsReduced;
+            }
+            payload.expectedQuitDate = expectedQuitDate;
+            payload.planLog = planLog;
+        } else {
+            payload.stoppedDate = stoppedDate;
+        }
+        payload.goalList = goalList;
+
+
+        mutation.mutate(payload, {
+            onSuccess: (data) => {
+                setPlanEditClicked(false)
+                openNotification('success', {
+                    message: 'Thành công',
+                    content: 'Lưu kế hoạch thành công'
+                })
+                queryClient.invalidateQueries(['user-profile-coach'])
+                queryClient.invalidateQueries(['dataset-coach', userInfo?.auth0_id])
+                queryClient.invalidateQueries(['dataset', userInfo?.auth0_id])
+            },
+            onError: (error) => {
+                console.error('Submission error:', error);
+            }
+        });
+    }
 
     return (
         <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'}`}>
@@ -429,9 +492,9 @@ const SetPlan = ({
                                 </>
                             )}
                             {from === 'coach-user' && <CustomButton type="primary" onClick={() => {
-                                if (validateCoachPlan()) createPlan();
+                                if (validateCoachPlan()) handleSavePlan()
                             }}>Lưu</CustomButton>}
-                            </>
+                        </>
                     )}</> :
                 <>
                     <h2 className="text-left md:text-4xl lg:text-5xl font-bold">

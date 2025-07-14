@@ -34,6 +34,17 @@ export const NotificationProvider = ({ children }) => {
                     icon: <BiConversation className="size-5"/>
                 });
                 break;
+            case 'success':
+                api.open({
+                    key: `success_message`,
+                    message: `${payload.message}`,
+                    description: <div>
+                        {payload.content}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <BiConversation className="size-5"/>
+                });
+                break;
             default:
                 api.warning({
                     message: 'Thông báo',

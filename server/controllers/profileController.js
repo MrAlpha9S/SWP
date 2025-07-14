@@ -51,8 +51,8 @@ const handlePostOnboarding = async (req, res) => {
                 goalList)
         } else {
             result = await postUserProfile(
-                updaterUserAuth0Id,
                 userAuth0Id,
+                updaterUserAuth0Id,
                 readiness,
                 reasonList,
                 pricePerPack,

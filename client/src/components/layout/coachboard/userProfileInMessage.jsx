@@ -29,7 +29,7 @@ const UserProfileInMessage = ({
                                   pricePerPack,
                                   cigsPerPack,
                                   readinessValue,
-                                  planLogCloneDDMMYY,
+                                  coachInfo,
                                   userInfo,
                                   reasonList,
                                   timeAfterWaking,
@@ -38,7 +38,8 @@ const UserProfileInMessage = ({
                                   customTimeOfDay,
                                   customTrigger,
                                   cigsReduced,
-                                  checkInDataSet
+                                  checkInDataSet,
+                                  goalList,
                               }) => {
     const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
     const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
@@ -228,8 +229,18 @@ const UserProfileInMessage = ({
                                 planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
                                 setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
                                 from='coach-user'
+                                reasonList={reasonList}
+                                pricePerPack={pricePerPack}
+                                cigsPerPack={cigsPerPack}
+                                timeAfterWaking={timeAfterWaking}
+                                timeOfDayList={timeOfDayList}
+                                triggers={triggers}
+                                customTimeOfDay={customTimeOfDay} customTrigger={customTrigger}
+                                stoppedDate={stoppedDate} goalList={goalList}
+                                setPlanEditClicked={setPlanEditClicked}
+                                coachInfo={coachInfo}
                             />
-                                <CustomButton>Lưu</CustomButton></>}
+                            </>}
                     </>
                 ) : (
                     <>

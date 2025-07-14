@@ -8,6 +8,7 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists, useUserInfoStore
 } from "../../stores/store.js";
+import {usePostUserProfile} from "../../components/hooks/usePostUSerProfile.js";
 
 const PostOnboardingCallback = () => {
 
@@ -27,70 +28,52 @@ const PostOnboardingCallback = () => {
     const {setIsProfileExist} = useProfileExists()
     const {userInfo} = useUserInfoStore()
 
+    const mutation = usePostUserProfile(getAccessTokenSilently, user);
+
     useEffect(() => {
-        const postUserProfile = async () => {
-            if (!isAuthenticated || !user) return;
+        if (!isAuthenticated || !user) return;
 
-            const token = await getAccessTokenSilently();
-
-            const bodyPayLoad = {
-                userAuth0Id: user.sub,
-                readiness: readinessValue,
-                reasonList: reasonList,
-                pricePerPack: pricePerPack,
-                cigsPerPack: cigsPerPack,
-                timeAfterWaking: timeAfterWaking,
-                timeOfDayList: timeOfDayList,
-                //customTimeOfDay: customTimeOfDay,
-                triggers: triggers,
-                //customTrigger: customTrigger,
-                //startDate: startDate,
-                cigsPerDay: cigsPerDay,
-                //quittingMethod: quittingMethod,
-                //cigsReduced: cigsReduced,
-                //expectedQuitDate: expectedQuitDate,
-                //stoppedDate: stoppedDate,
-                updaterUserAuth0Id: user.sub,
-            }
-
-            if (customTimeOfDayChecked) {
-                bodyPayLoad.customTimeOfDay = customTimeOfDay;
-            }
-            if (customTriggerChecked) {
-                bodyPayLoad.customTrigger = customTrigger;
-            }
-            if (readinessValue === 'ready') {
-                bodyPayLoad.startDate = startDate;
-                bodyPayLoad.quittingMethod = quittingMethod;
-                if (quittingMethod !== 'target-date') {
-                    bodyPayLoad.cigsReduced = cigsReduced
-                }
-                bodyPayLoad.expectedQuitDate = expectedQuitDate
-                bodyPayLoad.planLog = planLog
-            } else {
-                bodyPayLoad.stoppedDate = stoppedDate;
-            }
-            if (createGoalChecked && goalList.length > 0) {
-                bodyPayLoad.goalList = goalList;
-            }
-
-
-            const res = await fetch('http://localhost:3000/profiles/postOnboarding', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bodyPayLoad),
-            });
-
-            const data = await res.json();
-            setOnboardingStatus(data.success);
-            setMsg(data.message)
-            setIsProfileExist(true)
+        const payload = {
+            userAuth0Id: user.sub,
+            readiness: readinessValue,
+            reasonList,
+            pricePerPack,
+            cigsPerPack,
+            timeAfterWaking,
+            timeOfDayList,
+            triggers,
+            cigsPerDay,
+            updaterUserAuth0Id: user.sub,
         };
 
-        postUserProfile();
+        if (customTimeOfDayChecked) payload.customTimeOfDay = customTimeOfDay;
+        if (customTriggerChecked) payload.customTrigger = customTrigger;
+        if (readinessValue === 'ready') {
+            payload.startDate = startDate;
+            payload.quittingMethod = quittingMethod;
+            if (quittingMethod !== 'target-date') {
+                payload.cigsReduced = cigsReduced;
+            }
+            payload.expectedQuitDate = expectedQuitDate;
+            payload.planLog = planLog;
+        } else {
+            payload.stoppedDate = stoppedDate;
+        }
+
+        if (createGoalChecked && goalList.length > 0) {
+            payload.goalList = goalList;
+        }
+
+        mutation.mutate(payload, {
+            onSuccess: (data) => {
+                setOnboardingStatus(data.success);
+                setMsg(data.message);
+                setIsProfileExist(true);
+            },
+            onError: (error) => {
+                console.error('Submission error:', error);
+            }
+        });
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
     useEffect(() => {

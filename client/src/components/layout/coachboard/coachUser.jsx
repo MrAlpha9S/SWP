@@ -7,12 +7,11 @@ import {useAuth0} from "@auth0/auth0-react";
 import ProgressBoard from "../dashboard/progressBoard.jsx";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import NotFoundBanner from "../notFoundBanner.jsx";
-import PostBlog from "./postblog.jsx";
+
 import {Tabs} from "antd";
 import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
-import userProfile from "../../ui/userProfile.jsx";
-import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
+
 
 const CoachUser = () => {
     const {userInfo} = useUserInfoStore()
@@ -21,7 +20,7 @@ const CoachUser = () => {
 
 
     // User profile query
-    const {isPending: isProfilePending, data: profileData} = useQuery({
+    const {isPending: isProfilePending, data: profileData, refetch: refectProfile} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user || !selectedUserAuth0Id) return null;
@@ -37,11 +36,11 @@ const CoachUser = () => {
         error: datasetError,
         data: checkInDataset,
         isFetching: isDatasetFetching,
+        refect: refectDataset,
     } = useQuery({
         queryKey: ['dataset-coach', selectedUserAuth0Id],
         queryFn: async () => {
             if (!selectedUserAuth0Id) return null;
-            console.log('Fetching dataset for user:', selectedUserAuth0Id);
             return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
         },
         enabled: isAuthenticated && !!user && !!userInfo?.auth0_id && !!selectedUserAuth0Id,
@@ -122,6 +121,7 @@ const CoachUser = () => {
                             readinessValue={profileData.userProfile.readiness_value ?? ''}
                             planLogCloneDDMMYY={planLogCloneDDMMYY}
                             reasonList={profileData.userProfile.reasonList ?? []}
+                            coachInfo={userInfo}
                             userInfo={profileData.userInfo}
                             timeAfterWaking={profileData.userProfile.time_after_waking ?? ''}
                             timeOfDayList={profileData.userProfile.timeOfDayList ?? []}
@@ -129,6 +129,7 @@ const CoachUser = () => {
                             customTimeOfDay={profileData.userProfile.custom_time_of_day ?? ''}
                             customTrigger={profileData.userProfile.custom_trigger ?? ''}
                             checkInDataSet={localCheckinDataset}
+                            goalList={profileData.userProfile.goalList ?? []}
                         />
                     ) : (
                         <NotFoundBanner title="Người dùng chưa nhập thông tin"/>

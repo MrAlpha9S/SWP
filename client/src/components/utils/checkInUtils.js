@@ -159,18 +159,22 @@ export function mergeByDate(
     // Build interpolated plan ranges
     const planRanges = [];
     for (let i = 0; i < sortedPlanLog.length; i++) {
-        const start = new Date(sortedPlanLog[i].date + 'T00:00:00Z');
-        const end = sortedPlanLog[i + 1]
-            ? new Date(new Date(sortedPlanLog[i + 1].date + 'T00:00:00Z').getTime() - 1000)
-            : new Date(sortedPlanLog[i].date + 'T00:00:00Z'); // last stage: single day
+        const startRaw = sortedPlanLog[i].date;
+        const endRaw = sortedPlanLog[i + 1]?.date;
+
+        const start = new Date(startRaw.includes("T") ? startRaw : `${startRaw}T00:00:00Z`);
+        const end = endRaw
+            ? new Date(new Date(endRaw.includes("T") ? endRaw : `${endRaw}T00:00:00Z`).getTime() - 1000)
+            : start;
 
         planRanges.push({
             start,
             end,
             cigs: sortedPlanLog[i].cigs,
-            nextCigs: sortedPlanLog[i + 1]?.cigs ?? sortedPlanLog[i].cigs
+            nextCigs: sortedPlanLog[i + 1]?.cigs ?? sortedPlanLog[i].cigs,
         });
     }
+
 
     const getCurrentUTCDate = () => {
         const now = new Date();

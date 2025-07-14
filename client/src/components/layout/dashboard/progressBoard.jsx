@@ -292,12 +292,6 @@ const ProgressBoard = ({
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
         if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        console.log('planLog', planLog);
-        console.log('localCheckInDataSet', localCheckInDataSet);
-        console.log('quittingMethod', quittingMethod);
-        console.log('cigsPerDay', cigsPerDay)
-        console.log('user creation date', userInfo?.created_at)
-        console.log('range', range)
         return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at, range));
     }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending, range]);
 
@@ -351,10 +345,6 @@ const ProgressBoard = ({
         setRange(e);
     }
 
-    useEffect(() => {
-        console.log('mergedDataSet', mergedDataSet);
-    }, [mergedDataSet]);
-
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
@@ -373,6 +363,10 @@ const ProgressBoard = ({
         }
         return null;
     };
+
+    useEffect(() => {
+        console.log('meregedDataSet', mergedDataSet);
+    }, [mergedDataSet]);
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
