@@ -55,13 +55,18 @@ const ProgressBoard = ({
     const [showWarning, setShowWarning] = useState(false);
     const [range, setRange] = useState('overview');
 
+    // Use different query keys based on context (coach vs user)
+    const datasetQueryKey = from === 'coach-user'
+        ? ['dataset-coach', userInfo?.auth0_id]
+        : ['dataset', userInfo?.auth0_id];
+
     const {
         isPending: isDatasetPending,
         error: datasetError,
         data: checkInDataset,
         isFetching: isDatasetFetching,
     } = useQuery({
-        queryKey: ['dataset', userInfo?.auth0_id],
+        queryKey: datasetQueryKey,
         queryFn: async () => {
             return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
@@ -70,11 +75,16 @@ const ProgressBoard = ({
         staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
+    // Use different query keys based on context (coach vs user)
+    const userCreationDateQueryKey = from === 'coach-user'
+        ? ['user-creation-date-coach', userInfo?.auth0_id]
+        : ['user-creation-date', userInfo?.auth0_id];
+
     const {
         isPending: isUserCreationDatePending,
         data: userCreationDate,
     } = useQuery({
-        queryKey: ['user-creation-date', userInfo?.auth0_id],
+        queryKey: userCreationDateQueryKey,
         queryFn: async () => {
             if (!isAuthenticated || !user) return null;
             return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
