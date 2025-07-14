@@ -320,6 +320,7 @@ CREATE TABLE [social_reports] (
   [post_id] INT NULL,
   [comment_id] INT NULL,
   [reason] NVARCHAR(MAX),
+  [description] NVARCHAR(MAX),
   [created_at] DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 

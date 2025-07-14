@@ -140,7 +140,7 @@ export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, 
 };
 
 export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at) => {
-    console.log('AddLike: ',user.sub, post_id, comment_id, created_at)
+
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 

@@ -1,4 +1,4 @@
-// PostPage.tsx
+// PostPage.tsx - Updated with Report Modal Integration and AddReport
 import SideBar from "./sideBar.jsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -7,7 +7,11 @@ import { getComments, getPosts } from "../../utils/forumUtils.js";
 import React, { useEffect, useState } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
 import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
-import { AddComment, AddLike } from '../../utils/forumUtils.js'
+import { AddComment, AddLike } from '../../utils/forumUtils.js'; // Added AddReport import
+import {AddReport} from '../../utils/reportUtils.js'
+import { ReportModal } from './postpagecomponents/reportModal.jsx';
+//import {Comment} from './postpagecomponents/comment.jsx'
+import {ReplyForm} from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -19,6 +23,15 @@ export default function PostPage() {
     const [comments, setComments] = useState([]);
     const [replyContent, setReplyContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isReportSubmitting, setIsReportSubmitting] = useState(false); // Added for report submission state
+
+    // Report Modal State
+    const [reportModal, setReportModal] = useState({
+        isOpen: false,
+        type: null, // 'post' or 'comment'
+        itemId: null,
+        itemAuthor: null
+    });
 
     const { category, postId } = useParams();
 
@@ -113,6 +126,81 @@ export default function PostPage() {
         },
     });
 
+    // Added Report Mutation
+    const addReportMutation = useMutation({
+        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId, reason, description }) => {
+            const currentDate = new Date().toISOString();
+            return await AddReport(
+                user,
+                getAccessTokenSilently,
+                isAuthenticated,
+                postId,
+                commentId,
+                reason,
+                description,
+                currentDate
+            );
+        },
+        onSuccess: (data) => {
+            if (data.success || data.message === 'Report added successfully') {
+                setReportModal({ isOpen: false, type: null, itemId: null, itemAuthor: null });
+                console.log('Report submitted successfully');
+                // Show success message
+                alert('Báo cáo đã được gửi thành công!');
+            }
+        },
+        onError: (error) => {
+            console.error('Error submitting report:', error);
+            alert('Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại!');
+        },
+        onSettled: () => {
+            setIsReportSubmitting(false);
+        },
+    });
+
+    // Report Modal Functions
+    const handleReportClick = (type, itemId, itemAuthor) => {
+        setReportModal({
+            isOpen: true,
+            type: type,
+            itemId: itemId,
+            itemAuthor: itemAuthor
+        });
+    };
+
+    const handleReportSubmit = (reportData) => {
+        if (!isAuthenticated || !user) {
+            console.error('User not authenticated');
+            return;
+        }
+
+        setIsReportSubmitting(true);
+
+        // Prepare the parameters based on report type
+        const reportParams = {
+            user,
+            getAccessTokenSilently,
+            isAuthenticated,
+            postId: reportModal.type === 'post' ? reportModal.itemId : null,
+            commentId: reportModal.type === 'comment' ? reportModal.itemId : null,
+            reason: reportData.reason,
+            description: reportData.description
+        };
+
+        console.log('Submitting report:', {
+            type: reportModal.type,
+            itemId: reportModal.itemId,
+            itemAuthor: reportModal.itemAuthor,
+            reason: reportData.reason,
+            description: reportData.description
+        });
+
+        addReportMutation.mutate(reportParams);
+    };
+
+    const handleReportClose = () => {
+        setReportModal({ isOpen: false, type: null, itemId: null, itemAuthor: null });
+    };
 
     const onSubmit = () => {
         if (!replyContent || replyContent.trim() === '') return;
@@ -134,7 +222,6 @@ export default function PostPage() {
     };
 
     const onLike = (postId = null, commentId = null) => {
-        console.log('id: ', postId, commentId)
 
         if (!isAuthenticated || !user) {
             console.error('User not authenticated');
@@ -267,7 +354,10 @@ export default function PostPage() {
                         <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
                             <FaCommentAlt /> {comments.length} Reply
                         </button>
-                        <button className='flex items-center gap-2 hover:text-red-500 transition-colors'>
+                        <button
+                            className='flex items-center gap-2 hover:text-red-500 transition-colors'
+                            onClick={() => handleReportClick('post', post.post_id, post.username)}
+                        >
                             <FaFlag /> Report
                         </button>
                     </div>
@@ -319,6 +409,7 @@ export default function PostPage() {
                                     auth0_id={comment.auth0_id}
                                     isLiked={comment.isLiked}
                                     onLike={onLike}
+                                    onReportClick={handleReportClick}
                                 />
                             )}
                         </div>
@@ -331,11 +422,21 @@ export default function PostPage() {
             </div>
 
             <SideBar isInPost={true} />
+            
+            {/* Report Modal */}
+            <ReportModal
+                isOpen={reportModal.isOpen}
+                onClose={handleReportClose}
+                onSubmit={handleReportSubmit}
+                isSubmitting={isReportSubmitting}
+                reportType={reportModal.type}
+                itemAuthor={reportModal.itemAuthor}
+            />
         </div>
     );
 }
 
-export function Comment({ key, author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike }) {
+export function Comment({ author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike, onReportClick }) {
     const navigate = useNavigate();
 
     return (
@@ -374,47 +475,11 @@ export function Comment({ key, author, commentId, date, content, role, likes, av
                     )}
                     {likes || 0} Likes
                 </button>
-                <button className='flex items-center gap-2 hover:text-red-500 transition-colors'>
+                <button 
+                    className='flex items-center gap-2 hover:text-red-500 transition-colors'
+                    onClick={() => onReportClick('comment', commentId, author)}
+                >
                     <FaFlag /> Report
-                </button>
-            </div>
-        </div>
-    );
-}
-
-export function ReplyForm({ replyContent, setReplyContent, onSubmit, isSubmitting, isAuthenticated }) {
-    if (!isAuthenticated) {
-        return (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                <p className="text-gray-600">Bạn cần đăng nhập để trả lời bài viết này.</p>
-                <button
-                    onClick={() => window.location.href = '/login'}
-                    className="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                    Đăng nhập
-                </button>
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            <textarea
-                onChange={(e) => setReplyContent(e.target.value)}
-                value={replyContent}
-                placeholder="Viết câu trả lời tại đây..."
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                rows="4"
-                disabled={isSubmitting}
-            />
-            <div className="flex gap-3 mt-3">
-                <button
-                    onClick={onSubmit}
-                    type="submit"
-                    disabled={isSubmitting || !replyContent.trim()}
-                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                >
-                    {isSubmitting ? 'Đang gửi...' : 'Trả lời'}
                 </button>
             </div>
         </div>
