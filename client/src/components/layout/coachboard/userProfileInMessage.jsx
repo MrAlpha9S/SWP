@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
     readinessRadioOptions,
     reasonListOptions,
@@ -14,6 +14,9 @@ import {
     getCurrentUTCDateTime
 } from "../../utils/dateUtils.js";
 import {mergeByDate} from "../../utils/checkInUtils.js";
+import CustomButton from "../../ui/CustomButton.jsx";
+import SetPlan from "../signup/setPlan.jsx";
+import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
 
 const UserProfileInMessage = ({
                                   startDate,
@@ -37,6 +40,29 @@ const UserProfileInMessage = ({
                                   cigsReduced,
                                   checkInDataSet
                               }) => {
+    const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
+    const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
+    const [localStartDate, setLocalStartDate] = useState(startDate ?? '');
+    const [localCigsPerDay, setLocalCigsPerDay] = useState(cigsPerDay ?? 0);
+    const [localQuittingMethod, setLocalQuittingMethod] = useState(quittingMethod ?? '');
+    const [localCigsReduced, setLocalCigsReduced] = useState(cigsReduced ?? 0);
+    const [localExpectedQuitDate, setLocalExpectedQuitDate] = useState(expectedQuitDate ?? '');
+    const [localPlanLog, setLocalPlanLog] = useState(planLog ?? []);
+    const [localPlanLogCloneDDMMYY, _setLocalPlanLogCloneDDMMYY] = useState(
+        () => ConvertPlanlogDdmmyy(planLog) ?? []
+    );
+
+    const setLocalPlanLogCloneDDMMYY = useCallback((valueOrUpdater) => {
+        if (typeof valueOrUpdater === 'function') {
+            _setLocalPlanLogCloneDDMMYY(prev => {
+                const next = valueOrUpdater(prev);
+                return ConvertPlanlogDdmmyy(next);
+            });
+        } else {
+            _setLocalPlanLogCloneDDMMYY(ConvertPlanlogDdmmyy(valueOrUpdater));
+        }
+    }, []);
+    const [planEditClicked, setPlanEditClicked] = useState(false);
     const [totalCigsAfterPlan, setTotalCigsAfterPlan] = useState(0)
     // Fix: Add null checks and default values
     const readinessLabel = readinessValue
@@ -83,13 +109,12 @@ const UserProfileInMessage = ({
 
     useEffect(() => {
         if (mergedDataSet?.length > 0) {
-            console.log('mergedDataSet', mergedDataSet);
             const expectedQuitDateObj = new Date(expectedQuitDate);
             if (today > expectedQuitDateObj) {
                 let totalCigsAfterPlan = 0
                 mergedDataSet.forEach((data) => {
                     const dateInDataObj = new Date(convertDDMMYYYYStrToYYYYMMDDStr(data.date) + 'T00:00:00Z')
-                    if ( dateInDataObj <= today && dateInDataObj >= expectedQuitDateObj) {
+                    if (dateInDataObj <= today && dateInDataObj >= expectedQuitDateObj) {
                         totalCigsAfterPlan += data.actual
                     }
                 })
@@ -102,7 +127,6 @@ const UserProfileInMessage = ({
     }, [expectedQuitDate, mergedDataSet, today]);
 
 
-
     // Show loading state if data is still being fetched
     if (isPending) {
         return (
@@ -113,7 +137,7 @@ const UserProfileInMessage = ({
     }
 
     return (
-        <div>
+        <div className='h-full flex flex-col overflow-y-auto px-5'>
             <div>
                 <p className='font-bold text-2xl'>Mức độ sẵn sàng</p>
                 <p>{readinessLabel}</p>
@@ -170,20 +194,48 @@ const UserProfileInMessage = ({
                 <p className='font-bold text-2xl'>Kế hoạch</p>
                 {planLog?.length > 0 ? (
                     <>
-                        <p><strong>Phương pháp: </strong>{quittingMethodLabel}</p>
-                        {quittingMethod !== 'target-date' ? (
-                            <p><strong>Số điếu giảm mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}: </strong>{cigsReduced || 0}</p>
-                        ) : (
-                            <p><strong>Người dùng chọn ngày kết thúc: </strong>{expectedQuitDate || 'Chưa xác định'}</p>
-                        )}
-                        {quittingMethod !== 'target-date' && expectedQuitDate && (
-                            <p><strong>Ngày dự kiến số điếu giảm về 0: </strong>{convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}</p>
-                        )}
-                        {displayPlanComplete && <span className='text-green-600'>(kế hoạch đã kết thúc)</span>}
-                        {displayWarning && <p className='text-red-500'>Người dùng vẫn hút <strong>{totalCigsAfterPlan}</strong> điếu thuốc sau ngày kết thúc kế hoạch</p>}
+                        {!planEditClicked ? <><p><strong>Phương pháp: </strong>{quittingMethodLabel}</p>
+                                {quittingMethod !== 'target-date' ? (
+                                    <p><strong>Số điếu giảm
+                                        mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}: </strong>{cigsReduced || 0}
+                                    </p>
+                                ) : (
+                                    <p><strong>Người dùng chọn ngày kết thúc: </strong>{expectedQuitDate || 'Chưa xác định'}
+                                    </p>
+                                )}
+                                {quittingMethod !== 'target-date' && expectedQuitDate && (
+                                    <p><strong>Ngày dự kiến số điếu giảm về
+                                        0: </strong>{convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}</p>
+                                )}
+                                {displayPlanComplete && <span className='text-green-600'>(kế hoạch đã kết thúc)</span>}
+                                {displayWarning && <p className='text-red-500'>Người dùng vẫn
+                                    hút <strong>{totalCigsAfterPlan}</strong> điếu thuốc sau ngày kết thúc kế hoạch</p>}
+                                <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế
+                                    hoạch</CustomButton></> :
+                            <><SetPlan
+                                readinessValue={localReadinessValue}
+                                userInfo={localUserInfo}
+                                startDate={localStartDate}
+                                cigsPerDay={localCigsPerDay}
+                                quittingMethod={localQuittingMethod}
+                                setQuittingMethod={setLocalQuittingMethod}
+                                cigsReduced={localCigsReduced}
+                                setCigsReduced={setLocalCigsReduced}
+                                expectedQuitDate={localExpectedQuitDate}
+                                setExpectedQuitDate={setLocalExpectedQuitDate}
+                                planLog={localPlanLog}
+                                setPlanLog={setLocalPlanLog}
+                                planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
+                                setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
+                                from='coach-user'
+                            />
+                                <CustomButton>Lưu</CustomButton></>}
                     </>
                 ) : (
-                    <p>Người dùng chưa tạo kế hoạch</p>
+                    <>
+                        <p>Người dùng chưa tạo kế hoạch</p>
+                        <CustomButton>Tạo kế hoạch</CustomButton>
+                    </>
                 )}
             </div>
         </div>

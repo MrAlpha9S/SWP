@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import Messager from "./messager/messager.jsx";
 import {useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 import {useQuery} from "@tanstack/react-query";
@@ -18,6 +18,7 @@ const CoachUser = () => {
     const {userInfo} = useUserInfoStore()
     const {user, isAuthenticated, getAccessTokenSilently} = useAuth0();
     const {selectedUserAuth0Id} = useSelectedUserAuth0IdStore()
+
 
     // User profile query
     const {isPending: isProfilePending, data: profileData} = useQuery({
@@ -67,9 +68,6 @@ const CoachUser = () => {
     // Loading state - be more specific about when data is actually ready
     const isLoading = isProfilePending || isDatasetPending;
     const hasProfileData = profileData?.userProfile;
-    const hasCompleteData = hasProfileData && !isDatasetPending;
-    console.log('isloading', isLoading)
-    console.log('hasProfileData', hasProfileData);
 
     const items = [
         {
@@ -106,7 +104,7 @@ const CoachUser = () => {
             key: '2',
             label: 'Thông tin chi tiết',
             children: (
-                <div className="w-full flex ">
+                <div className="w-full h-full flex ">
                     {isLoading ? (
                         <UserProfileInMessage isPending={true}/>
                     ) : hasProfileData ? (
@@ -155,7 +153,7 @@ const CoachUser = () => {
                     <Messager role={userInfo?.role}/>
                 </div>
 
-                <div className='w-[50%] flex flex-col items-center'>
+                <div className='w-[50%] h-full flex flex-col items-center overflow-y-auto'>
                     <p className='font-bold text-4xl text-center'>Thông tin người dùng</p>
                     <div className="w-full flex justify-center">
                         <Tabs centered defaultActiveKey="1" items={items}/>

@@ -64,7 +64,7 @@ const Onboarding = () => {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate} = usePlanStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLogCloneDDMMYY, setPlanLogCloneDDMMYY, setQuittingMethod, setCigsReduced, setExpectedQuitDate, planLog, setPlanLog} = usePlanStore();
     const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
@@ -523,7 +523,23 @@ const Onboarding = () => {
                                 {currentStep === 2 && <CigInfo/>}
                                 {currentStep === 3 && <SmokingRoutine/>}
                                 {currentStep === 4 && <SetGoals/>}
-                                {currentStep === 5 && <SetPlan/>}
+                                {currentStep === 5 && <SetPlan
+                                    readinessValue={readinessValue}
+                                    userInfo={userInfo}
+                                    startDate={startDate}
+                                    cigsPerDay={cigsPerDay}
+                                    quittingMethod={quittingMethod}
+                                    setQuittingMethod={setQuittingMethod}
+                                    cigsReduced={cigsReduced}
+                                    setCigsReduced={setCigsReduced}
+                                    expectedQuitDate={expectedQuitDate}
+                                    setExpectedQuitDate={setExpectedQuitDate}
+                                    planLog={planLog}
+                                    setPlanLog={setPlanLog}
+                                    planLogCloneDDMMYY={planLogCloneDDMMYY}
+                                    setPlanLogCloneDDMMYY={setPlanLogCloneDDMMYY}
+                                />
+                                }
                                 {currentStep === 6 && <Summary/>}
                             </div>
                             <div className='flex justify-between gap-5 w-full'>
