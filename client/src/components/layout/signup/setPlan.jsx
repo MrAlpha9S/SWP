@@ -292,6 +292,7 @@ const SetPlan = ({
                             customStages={customStages}
                             setCustomStages={setCustomStages}
                             from={from}
+                            planLog={planLog}
                         />
                     )}
 

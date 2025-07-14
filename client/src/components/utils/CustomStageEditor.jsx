@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DatePicker, InputNumber, Button, Select, Alert } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -9,10 +9,21 @@ const CustomStageEditor = ({
                                cigsPerDay,
                                customStages,
                                setCustomStages,
-    from
+                               planLog = []
                            }) => {
     const [intervalType, setIntervalType] = useState("week"); // 'day' or 'week'
     const [validationError, setValidationError] = useState("");
+
+    // Initialize from planLog if customStages is empty
+    useEffect(() => {
+        if (customStages.length <= 1 && planLog.length > 0) {
+            const stagesFromPlan = planLog.map(stage => ({
+                date: dayjs(stage.date).format("YYYY-MM-DD"),
+                cigs: stage.cigs
+            }));
+            setCustomStages(stagesFromPlan);
+        }
+    }, [planLog, customStages.length, setCustomStages]);
 
     const updateStageDate = (idx, date) => {
         const clone = [...customStages];
@@ -32,7 +43,6 @@ const CustomStageEditor = ({
             .add(intervalType === "week" ? 7 : 1, "day")
             .format("YYYY-MM-DD");
 
-        // Check for duplicate dates
         if (customStages.some((stage) => stage.date === nextDate)) {
             setValidationError("Ngày mới đã tồn tại trong danh sách giai đoạn.");
             return;
@@ -49,7 +59,7 @@ const CustomStageEditor = ({
     };
 
     const removeStage = (idx) => {
-        if (idx === 0) return; // prevent removing the first row
+        if (idx === 0) return;
         const clone = [...customStages];
         clone.splice(idx, 1);
         setCustomStages(clone);
@@ -61,13 +71,13 @@ const CustomStageEditor = ({
     );
 
     return (
-        <div className="flex flex-col gap-4 my-4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
+        <div className="flex flex-col gap-4 mt-4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
             <p className="text-lg font-semibold text-gray-800">Tùy chỉnh từng giai đoạn:</p>
 
             <p className="text-sm text-gray-600 leading-relaxed">
                 Bạn có thể điều chỉnh kế hoạch cai thuốc theo từng giai đoạn cụ thể thay vì giảm đều mỗi ngày hoặc mỗi tuần.
                 Hãy chọn khoảng thời gian phù hợp mà bạn muốn thêm giai đoạn mới, ví dụ như mỗi tuần hoặc mỗi ngày.
-                Sau đó, bạn có thể tự đặt số điếu thuốc tương ứng cho từng thời điểm để phù hợp với thói quen và khả năng của {from === 'coach-user' ? 'người dùng' : 'bản thân'}.
+                Sau đó, bạn có thể tự đặt số điếu thuốc tương ứng cho từng thời điểm để phù hợp với thói quen và khả năng của bản thân.
             </p>
 
             <div className="flex items-center gap-3">
@@ -126,7 +136,7 @@ const CustomStageEditor = ({
                 ))}
             </div>
 
-            <Button onClick={addNewStage} type="primary" ghost icon={<PlusOutlined />}>
+            <Button onClick={addNewStage} type="primary" ghost icon={<PlusOutlined />}>+
                 Thêm giai đoạn mới
             </Button>
         </div>

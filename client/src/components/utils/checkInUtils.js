@@ -140,39 +140,35 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 export function mergeByDate(
     planLog = [],
     checkinLog = [],
-    quittingMethod,
+    quittingMethod, // unused
     cigsPerDay = null,
     userCreationDate = null,
-    range = 'overview'
+    range = "overview"
 ) {
     const map = new Map();
 
     const checkinMap = new Map();
-    for (let i = 0; i < checkinLog.length; i++) {
-        const dateStr = new Date(checkinLog[i].date).toISOString().split('T')[0];
-        checkinMap.set(dateStr, checkinLog[i].cigs);
+    for (const entry of checkinLog) {
+        const dateStr = new Date(entry.date).toISOString().split("T")[0];
+        checkinMap.set(dateStr, entry.cigs);
     }
 
-    const planRanges = [];
-    for (let i = 0; i < planLog.length; i++) {
-        const start = new Date(planLog[i].date);
-        const end = planLog[i + 1]
-            ? new Date(planLog[i + 1].date)
-            : new Date(start);
+    // Sort planLog to ensure proper interpolation
+    const sortedPlanLog = [...planLog].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        if (!planLog[i + 1]) {
-            end.setUTCDate(
-                quittingMethod === 'gradual-weekly'
-                    ? start.getUTCDate() + 6
-                    : start.getUTCDate() + 1
-            );
-        }
+    // Build interpolated plan ranges
+    const planRanges = [];
+    for (let i = 0; i < sortedPlanLog.length; i++) {
+        const start = new Date(sortedPlanLog[i].date + 'T00:00:00Z');
+        const end = sortedPlanLog[i + 1]
+            ? new Date(new Date(sortedPlanLog[i + 1].date + 'T00:00:00Z').getTime() - 1000)
+            : new Date(sortedPlanLog[i].date + 'T00:00:00Z'); // last stage: single day
 
         planRanges.push({
             start,
             end,
-            cigs: planLog[i].cigs,
-            nextCigs: planLog[i + 1]?.cigs ?? 0
+            cigs: sortedPlanLog[i].cigs,
+            nextCigs: sortedPlanLog[i + 1]?.cigs ?? sortedPlanLog[i].cigs
         });
     }
 
@@ -183,33 +179,27 @@ export function mergeByDate(
 
     const currentDate = getCurrentUTCDate();
 
+    // Determine full timeline range
     const allDates = [
         ...checkinLog.map(e => new Date(e.date)),
-        ...planLog.map(e => new Date(e.date))
+        ...planLog.map(e => new Date(e.date)),
+        ...(userCreationDate ? [new Date(userCreationDate)] : [])
     ];
-    if (userCreationDate) {
+
+    if (allDates.length === 0 && userCreationDate) {
         allDates.push(new Date(userCreationDate));
     }
 
-    const firstDate = new Date(Math.min(...allDates));
-    const lastDate = new Date(Math.max(
-        ...checkinLog.map(e => new Date(e.date)),
-        ...planLog.map(e => new Date(e.date)),
-        currentDate
-    ));
+    const firstDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+    const lastDate = new Date(Math.max(...allDates.map(d => d.getTime()), currentDate.getTime()));
 
     const current = new Date(firstDate);
     let lastKnownActual = null;
 
     while (current <= lastDate) {
-        const dayStr = current.toISOString().split('T')[0];
-        const currentCopy = new Date(current); // Copy for comparing
-        const ucDate = userCreationDate ? new Date(userCreationDate) : null;
-        const firstPlanDate = planLog.length > 0 ? new Date(planLog[0].date) : null;
-
-        let actual = checkinMap.get(dayStr);
-        let substituted = false;
-
+        const dayStr = current.toISOString().split("T")[0];
+        const actualFromCheckin = checkinMap.get(dayStr);
+        let actual = actualFromCheckin ?? null;
         let checkinMissed = false;
 
         if (actual == null && lastKnownActual != null && current <= currentDate) {
@@ -219,39 +209,45 @@ export function mergeByDate(
             lastKnownActual = actual;
         }
 
+        // Fill before plan starts with cigsPerDay
+        const ucDate = userCreationDate ? new Date(userCreationDate) : null;
+        const firstPlanDate = sortedPlanLog.length > 0 ? new Date(sortedPlanLog[0].date) : null;
+
+        if (
+            actual == null &&
+            cigsPerDay != null &&
+            ucDate &&
+            current >= ucDate &&
+            (!firstPlanDate || current < firstPlanDate)
+        ) {
+            actual = cigsPerDay;
+            checkinMissed = true;
+        }
 
         let plan = null;
-
         for (const range of planRanges) {
-            const startDate = new Date(range.start);
-            const endDate = new Date(range.end);
+            const { start, end, cigs, nextCigs } = range;
 
-            if (current >= startDate && current <= endDate) {
-                const totalDays = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)));
-                const dayIndex = Math.round((current - startDate) / (1000 * 60 * 60 * 24));
+            if (current >= start && current <= end) {
+                const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                const dayIndex = Math.floor((current - start) / (1000 * 60 * 60 * 24));
 
-                if (quittingMethod === 'gradual-weekly') {
-                    const delta = (range.cigs - range.nextCigs) / totalDays;
-                    const interpolated = range.cigs - delta * dayIndex;
-                    plan = parseFloat(interpolated.toFixed(2));
+                if (totalDays === 1 || cigs === nextCigs) {
+                    plan = cigs;
                 } else {
-                    plan = range.cigs;
+                    const delta = (cigs - nextCigs) / (totalDays - 1);
+                    plan = parseFloat((cigs - delta * dayIndex).toFixed(2));
                 }
                 break;
             }
         }
 
-        // Fill pre-plan actuals from userCreationDate
-        if (actual == null && cigsPerDay != null && ucDate && current >= ucDate && (!firstPlanDate || current < firstPlanDate)) {
-            actual = cigsPerDay;
-        }
+        const inPlanRange =
+            sortedPlanLog.length > 0 &&
+            current >= new Date(sortedPlanLog[0].date) &&
+            current <= new Date(sortedPlanLog[sortedPlanLog.length - 1].date);
 
-        // Apply range filter
-        const isInPlanRange = planLog.length > 0
-            && current >= new Date(planLog[0].date)
-            && current <= new Date(planLog[planLog.length - 1].date);
-
-        if (range === 'plan' && !isInPlanRange) {
+        if (range === "plan" && !inPlanRange) {
             current.setUTCDate(current.getUTCDate() + 1);
             continue;
         }
@@ -268,6 +264,9 @@ export function mergeByDate(
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 }
+
+
+
 
 
 
