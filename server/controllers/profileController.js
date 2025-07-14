@@ -21,7 +21,8 @@ const handlePostOnboarding = async (req, res) => {
         stoppedDate,
         cigsPerDay,
         planLog,
-        goalList
+        goalList,
+        updaterUserAuth0Id
     } = req.body;
 
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userId required'});
@@ -30,7 +31,7 @@ const handlePostOnboarding = async (req, res) => {
     try {
         if (await userProfileExists(userAuth0Id)) {
 
-            result = updateUserProfile(userAuth0Id,
+            result = updateUserProfile(userAuth0Id, updaterUserAuth0Id,
                 readiness,
                 reasonList,
                 pricePerPack,
@@ -50,6 +51,7 @@ const handlePostOnboarding = async (req, res) => {
                 goalList)
         } else {
             result = await postUserProfile(
+                updaterUserAuth0Id,
                 userAuth0Id,
                 readiness,
                 reasonList,

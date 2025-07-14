@@ -50,6 +50,7 @@ const PostOnboardingCallback = () => {
                 //cigsReduced: cigsReduced,
                 //expectedQuitDate: expectedQuitDate,
                 //stoppedDate: stoppedDate,
+                updaterUserAuth0Id: user.sub,
             }
 
             if (customTimeOfDayChecked) {

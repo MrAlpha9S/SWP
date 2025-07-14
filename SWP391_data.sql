@@ -140,11 +140,11 @@ VALUES
 INSERT INTO user_profiles (
     user_id, readiness_value, start_date, quit_date, expected_quit_date,
     cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking, quitting_method,
-    cigs_reduced, custom_time_of_day, custom_trigger, created_at, updated_at, is_public
+    cigs_reduced, custom_time_of_day, custom_trigger, created_at, updated_at, is_public, last_edited_by
 ) VALUES (
     4, 'ready', '2025-06-01 00:00:00', NULL, '2025-07-06 00:00:00',
     15, 15, 35000, 'within_5', 'gradual-weekly',
-    3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 16:03:56', 1
+    3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 16:03:56', 1, 4
 );
 
 

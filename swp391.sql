@@ -118,9 +118,11 @@ CREATE TABLE [user_profiles] (
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
+  [last_edited_by] int,
   [is_public] bit default (1),
 )
 GO
+ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_edited_by]) REFERENCES [users] ([user_id])
 
 CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),

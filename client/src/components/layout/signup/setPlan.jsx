@@ -1,11 +1,10 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-    useErrorStore, usePlanStore,
-    useQuitReadinessStore, useUserInfoStore,
+    useErrorStore,
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
-import {checkboxStyle, quittingMethodOptions} from "../../../constants/constants.js";
-import {DatePicker, Radio} from "antd";
+import {checkboxStyle, quittingMethodOptions, onboardingErrorMsg} from "../../../constants/constants.js";
+import {Checkbox, DatePicker, Radio} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
@@ -17,6 +16,7 @@ import {
 import dayjs from 'dayjs'
 import {FaArrowRight} from "react-icons/fa";
 import {useNavigate} from "react-router-dom";
+import CustomStageEditor from "../../utils/CustomStageEditor.jsx";
 
 
 const SetPlan = ({
@@ -41,6 +41,85 @@ const SetPlan = ({
     const scrollRef = useRef(null);
     const frequencyLabel = quittingMethod === "gradual-weekly" ? "tuần" : "ngày";
     const navigate = useNavigate();
+    const [useCustomStages, setUseCustomStages] = useState(false);
+    const [customStages, setCustomStages] = useState([
+        {date: startDate.split("T")[0], cigs: cigsPerDay}
+    ]);
+    const {addError, removeError} = useErrorStore()
+
+    const errorMap = Object.fromEntries(
+        onboardingErrorMsg
+            .filter(msg => msg.atPage === "createPlan")
+            .map(msg => [msg.location, msg])
+    );
+
+    const validateCoachPlan = () => {
+        if (from !== 'coach-user') return true;
+
+        const {
+            startDate: errStartDate,
+            cigsPerDay: errCigsPerDay,
+            quitMethod: errQuitMethod,
+            cigsReduced: errCigsReduced,
+            cigsReducedLarge: errCigsReducedLarge,
+            expectedQuitDate: errExpectedQuitDate
+        } = errorMap;
+
+        let isValid = true;
+
+        if (!startDate || startDate.length === 0) {
+            addError(errStartDate);
+            isValid = false;
+        } else {
+            removeError(errStartDate);
+        }
+
+        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
+            addError(errCigsPerDay);
+            isValid = false;
+        } else {
+            removeError(errCigsPerDay);
+        }
+
+        if (!quittingMethod || quittingMethod.length === 0) {
+            addError(errQuitMethod);
+            isValid = false;
+        } else {
+            removeError(errQuitMethod);
+        }
+
+        if (quittingMethod === 'target-date') {
+            if (!expectedQuitDate || expectedQuitDate.length === 0) {
+                addError(errExpectedQuitDate);
+                isValid = false;
+            } else {
+                removeError(errExpectedQuitDate);
+            }
+            removeError(errCigsReduced);
+            removeError(errCigsReducedLarge);
+        } else {
+            if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                addError(errCigsReduced);
+                isValid = false;
+            } else {
+                removeError(errCigsReduced);
+            }
+
+            if (cigsReduced > cigsPerDay) {
+                addError(errCigsReducedLarge);
+                isValid = false;
+            } else {
+                removeError(errCigsReducedLarge);
+            }
+
+            removeError(errExpectedQuitDate);
+        }
+
+        return isValid;
+    };
+
+
+
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (!scrollRef.current) return
@@ -54,14 +133,21 @@ const SetPlan = ({
     }, [planLog]);
 
     const createPlan = () => {
-        if (startDate.length > 0 && cigsPerDay > 0 && quittingMethod.length > 0) {
+        if (useCustomStages) {
+            const sorted = [...customStages].sort((a, b) => new Date(a.date) - new Date(b.date));
+            setPlanLog(sorted.map(stage => ({
+                date: new Date(stage.date).toISOString(),
+                cigs: stage.cigs
+            })));
+        } else {
             if (quittingMethod === 'target-date' && expectedQuitDate.length > 0) {
                 setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate));
             } else if (quittingMethod !== 'target-date' && cigsReduced > 0) {
-                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced))
+                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced));
             }
         }
-    }
+    };
+
 
     useEffect(() => {
         if (planLog.length > 0) {
@@ -137,10 +223,19 @@ const SetPlan = ({
                                     style={checkboxStyle}
                                 />
 
+                                <Checkbox
+                                    checked={useCustomStages}
+                                    onChange={(e) => setUseCustomStages(e.target.checked)}
+                                >
+                                    Tuỳ chỉnh từng giai đoạn cai thuốc
+                                </Checkbox>
+
+
                                 {(quittingMethod === "target-date") ? (
                                     <>
                                         <div className='block text-sm md:text-base text-gray-700 mb-1'>
-                                            <h3>Hãy chọn ngày trong tương lai mà {from === 'coach-user' ? 'người dùng' : 'bạn'} quyết định ngừng hút</h3>
+                                            <h3>Hãy chọn ngày trong tương lai
+                                                mà {from === 'coach-user' ? 'người dùng' : 'bạn'} quyết định ngừng hút</h3>
                                         </div>
 
                                         <DatePicker className='h-[42px]' onChange={(date, dateString) => {
@@ -162,7 +257,8 @@ const SetPlan = ({
                                     <>
                                         <label htmlFor="cigsPerInterval"
                                                className="block text-sm md:text-base text-gray-700 mb-1">
-                                            {from === 'coach-user' ? 'Người dùng' : 'Bạn'} quyết định giảm bao nhiêu điếu thuốc
+                                            {from === 'coach-user' ? 'Người dùng' : 'Bạn'} quyết định giảm bao nhiêu điếu
+                                            thuốc
                                             mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}?
                                         </label>
                                         <div className=''>
@@ -188,6 +284,16 @@ const SetPlan = ({
                             </form>
 
                         </>}
+
+                    {useCustomStages && (
+                        <CustomStageEditor
+                            startDate={startDate}
+                            cigsPerDay={cigsPerDay}
+                            customStages={customStages}
+                            setCustomStages={setCustomStages}
+                            from={from}
+                        />
+                    )}
 
 
                     {/*{readinessValue === "relapse-support" &&*/}
@@ -256,9 +362,13 @@ const SetPlan = ({
                                                 <p><strong>Phương pháp:</strong> {quittingMethod === 'target-date'
                                                     ? 'Giảm dần đến ngày mục tiêu'
                                                     : `Giảm dần ${cigsReduced} điếu mỗi ${frequencyLabel}`}</p>
-                                                <p><strong>Ngày bắt đầu:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])}</p>
+                                                <p><strong>Ngày bắt
+                                                    đầu:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])}
+                                                </p>
                                                 <p><strong>Mức ban đầu:</strong> {cigsPerDay} điếu/ngày</p>
-                                                <p><strong>Ngày dự kiến kết thúc:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(planLog[planLog.length - 1].date.split('T')[0])}</p>
+                                                <p><strong>Ngày dự kiến kết
+                                                    thúc:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(planLog[planLog.length - 1].date.split('T')[0])}
+                                                </p>
                                             </div>
                                         ) : (
                                             <p>
@@ -268,7 +378,8 @@ const SetPlan = ({
                                                         ? "giảm dần số lượng thuốc lá bạn hút mỗi ngày cho đến ngày bạn chọn"
                                                         : `giảm dần số lượng thuốc lá bạn hút mỗi ${frequencyLabel}`
                                                 }, bắt đầu từ{" "}
-                                                <strong>{convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])}</strong> với mức ban đầu là{" "}
+                                                <strong>{convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])}</strong> với
+                                                mức ban đầu là{" "}
                                                 <strong>{cigsPerDay}</strong>,{" "}
                                                 {
                                                     quittingMethod === "target-date"
@@ -280,18 +391,26 @@ const SetPlan = ({
                                         )}
 
                                         <ul>
-                                            <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ lúc bắt đầu đến ngày kết thúc.</li>
-                                            <li><strong>Trục dọc (số điếu thuốc):</strong> cho thấy số lượng nên hút mỗi ngày tương ứng.</li>
-                                            <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn và rõ ràng.</li>
+                                            <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ lúc
+                                                bắt đầu đến ngày kết thúc.
+                                            </li>
+                                            <li><strong>Trục dọc (số điếu thuốc):</strong> cho thấy số lượng nên hút mỗi
+                                                ngày tương ứng.
+                                            </li>
+                                            <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn và
+                                                rõ ràng.
+                                            </li>
                                         </ul>
 
                                         {from === 'coach-user' ? (
                                             <p>
-                                                👉 <em>Sử dụng biểu đồ để theo dõi tiến độ và hỗ trợ người dùng trong hành trình cai thuốc.</em>
+                                                👉 <em>Sử dụng biểu đồ để theo dõi tiến độ và hỗ trợ người dùng trong hành
+                                                trình cai thuốc.</em>
                                             </p>
                                         ) : (
                                             <p>
-                                                👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn đang từng bước tiến gần hơn đến mục tiêu bỏ thuốc hoàn toàn!</em>
+                                                👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn đang
+                                                từng bước tiến gần hơn đến mục tiêu bỏ thuốc hoàn toàn!</em>
                                             </p>
                                         )}
                                     </div>
@@ -308,7 +427,10 @@ const SetPlan = ({
                                     </ResponsiveContainer>
                                 </>
                             )}
-                        </>
+                            {from === 'coach-user' && <CustomButton type="primary" onClick={() => {
+                                if (validateCoachPlan()) createPlan();
+                            }}>Lưu</CustomButton>}
+                            </>
                     )}</> :
                 <>
                     <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
