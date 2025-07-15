@@ -54,6 +54,7 @@ const UserProfileInMessage = ({
     const [localPlanLogCloneDDMMYY, _setLocalPlanLogCloneDDMMYY] = useState(
         () => ConvertPlanlogDdmmyy(planLog) ?? []
     );
+    const [planCreation, setPlanCreation] = useState(false)
 
     const setLocalPlanLogCloneDDMMYY = useCallback((valueOrUpdater) => {
         if (typeof valueOrUpdater === 'function') {
@@ -264,8 +265,37 @@ const UserProfileInMessage = ({
                     </>
                 ) : (
                     <>
-                        <p>Người dùng chưa tạo kế hoạch</p>
-                        <CustomButton>Tạo kế hoạch</CustomButton>
+                        {!planCreation && <div>
+                            <p>Người dùng chưa tạo kế hoạch</p>
+                            <CustomButton onClick={() => setPlanCreation(true)}>Tạo kế hoạch</CustomButton>
+                        </div> && <SetPlan
+                            readinessValue={localReadinessValue}
+                            userInfo={localUserInfo}
+                            startDate={localStartDate}
+                            cigsPerDay={localCigsPerDay}
+                            quittingMethod={localQuittingMethod}
+                            setQuittingMethod={setLocalQuittingMethod}
+                            cigsReduced={localCigsReduced}
+                            setCigsReduced={setLocalCigsReduced}
+                            expectedQuitDate={localExpectedQuitDate}
+                            setExpectedQuitDate={setLocalExpectedQuitDate}
+                            planLog={localPlanLog}
+                            setPlanLog={setLocalPlanLog}
+                            planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
+                            setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
+                            from='coach-user'
+                            reasonList={reasonList}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            timeAfterWaking={timeAfterWaking}
+                            timeOfDayList={timeOfDayList}
+                            triggers={triggers}
+                            customTimeOfDay={customTimeOfDay} customTrigger={customTrigger}
+                            stoppedDate={stoppedDate} goalList={goalList}
+                            setPlanEditClicked={setPlanEditClicked}
+                            coachInfo={coachInfo}
+                        />}
+
                     </>
                 )}
             </div>

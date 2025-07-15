@@ -29,9 +29,14 @@ const CoachDashboard = () => {
 
     useEffect(() => {
         if (!isPending && data?.data) {
+            console.log('hey')
             setCoachInfo(data?.data)
         }
     }, [isPending])
+
+    useEffect(() => {
+        console.log('coachInfo', coachInfo)
+    }, [coachInfo, isPending])
 
     if (userInfo && userInfo.sub_id === 1) {
         return (
@@ -99,14 +104,11 @@ const CoachDashboard = () => {
                     </div>
                     <div className='flex-1 w-full flex min-h-0'>
                         <div><CoachUser userAuth0Id={userInfo?.auth0_id} from='user' coach={coachInfo?.coach}/></div>
-                        {!planLog || planLog.length === 0 && <>
-                            <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
-                        </>}
                     </div>
                 </div>
             </div>
         )
-    } else if (userInfo && userInfo.sub_id !== 1 && !coachInfo) {
+    } else if (userInfo && userInfo.sub_id !== 1 && !coachInfo?.coach) {
         return (
             <div className='w-full h-full'>
                 <NotFoundBanner title="Bạn chưa chọn huấn luyện viên" type='userWithoutCoach'/>

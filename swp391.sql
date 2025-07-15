@@ -119,14 +119,10 @@ CREATE TABLE [user_profiles] (
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
   [last_updated_by] int,
-  [plan_created_at] datetime,
-  [plan_updated_at] datetime,
-  [plan_last_updated_by] int,
   [is_public] bit default (1),
 )
 GO
 ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_updated_by]) REFERENCES [users] ([user_id])
-ALTER TABLE [user_profiles] ADD FOREIGN KEY ([plan_last_updated_by]) REFERENCES [users] ([user_id])
 GO
 
 CREATE TABLE [checkin_log] (

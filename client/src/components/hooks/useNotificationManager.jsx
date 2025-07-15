@@ -10,18 +10,20 @@ const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
     const [api, contextHolder] = notification.useNotification();
 
-    const openNotification = (type, payload) => {
+    const openNotification = (type, payload, onClick) => {
         switch (type) {
             case 'coach_selected':
                 api.info({
                     key: 'coach_selection',
                     message: `Người dùng ${payload.username} vừa chọn bạn`,
                     description: <div>
-                        {`Bạn nhận được ${payload.assignResult.toLocaleString()} VNĐ`}
+                        {`Bạn nhận được ${payload.commission.toLocaleString()} VNĐ`}
+                        <p>Nhấn vào thông báo này để đi đến trang người dùng</p>
                         <p>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <BsFillPeopleFill className="size-5"/>
+                    icon: <BsFillPeopleFill className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'new_message':

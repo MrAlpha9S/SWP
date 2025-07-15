@@ -53,7 +53,6 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
-            console.log({user, selectedUserAuth0Id});
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
             return result?.data;
         },
@@ -75,9 +74,9 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         retry: 1,
     })
 
-    useEffect(() => {
-        if (!isProfilePending) console.log('profile data', profileData)
-    }, [isProfilePending, profileData])
+    // useEffect(() => {
+    //     if (!isProfilePending) console.log('profile data', profileData)
+    // }, [isProfilePending, profileData])
 
     // Memoized computed values
     const planLogCloneDDMMYY = useMemo(() => {
@@ -101,7 +100,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
             key: '1',
             label: 'Tổng quan',
             children: (
-                <div className="flex-1 h-full flex justify-center overflow-y-auto">
+                <div className="flex-1 h-full w-full max-w-[600px] flex justify-center overflow-y-auto">
                     {isLoading ? (
                         <ProgressBoard isPending={true}/>
                     ) : hasProfileData ? (
@@ -122,7 +121,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                             from="coach-user"
                         />
                     ) : (
-                        <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
+                        !coach && <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
                     )}
                 </div>
             )
@@ -131,7 +130,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
             key: '2',
             label: 'Thông tin chi tiết',
             children: (
-                <div className="flex-1 h-full flex overflow-y-auto">
+                <div className="flex-1 h-full w-full max-w-[600px] flex overflow-y-auto">
                     {isLoading ? (
                         <UserProfileInMessage isPending={true}/>
                     ) : hasProfileData ? (
@@ -164,7 +163,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                             coach={coach}
                         />
                     ) : (
-                        <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
+                        !coach && <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
                     )}
                 </div>
             )
@@ -199,25 +198,31 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
             </div>
 
             <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
-                <div className='flex gap-4 items-center'><p className='font-bold text-4xl text-center'>Thông tin người
-                    dùng</p>
+                <div className='flex gap-4 items-center'><p
+                    className='font-bold text-4xl text-center'>{coach ? 'Thông tin của bạn' : 'Thông tin người dùng'}</p>
                     <div
                         className={`hover:bg-primary-500 rounded-md cursor-pointer ${isCooldown ? 'opacity-50 pointer-events-none' : ''}`}
                         onClick={handleReload}
                         title={isCooldown ? 'Vui lòng chờ 1 phút trước khi làm mới lại' : 'Làm mới dữ liệu'}
                     >
-                        <IoReload className='size-7' />
+                        <IoReload className='size-7'/>
                     </div>
                 </div>
-                <div className="w-full flex-1 flex justify-center overflow-y-auto">
-                    <Tabs
-                        centered
-                        defaultActiveKey="1"
-                        items={items}
-                        className="w-full"
-                        tabBarStyle={{marginBottom: 16}}
-                    />
-                </div>
+
+                {!profileData?.userProfile?.readiness_value || profileData?.userProfile?.readiness_value.length === 0 ? <>
+                        {!coach ? <NotFoundBanner title="Không tìm thấy thông tin của người dùng"/> :
+                            <NotFoundBanner title="Không tìm thấy thông tin kế hoạch của bạn" type='progressNCoach'/>}
+                    </> :
+                    <div className="w-full flex-1 flex justify-center">
+                        <Tabs
+                            centered
+                            destroyOnHidden
+                            defaultActiveKey="1"
+                            items={items}
+                            className="w-full"
+                            tabBarStyle={{marginBottom: 16}}
+                        />
+                    </div>}
             </div>
         </div>
     );

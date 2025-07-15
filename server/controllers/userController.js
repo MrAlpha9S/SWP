@@ -15,6 +15,7 @@ const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
 const socket = require('../utils/socket');
 const noteDeleteService = require("../services/userService");
+const {getCoachCommissionRate} = require("../services/coachService");
 
 const handleAllMember = async (req, res) => {
     try {
@@ -190,7 +191,7 @@ const updateUserInfo = async (req, res) => {
 };
 
 const assignUserToCoachController = async (req, res) => {
-    const { coachId, userId, username, coachAuth0Id } = req.body;
+    const { userAuth0Id, coachId, userId, username, coachAuth0Id } = req.body;
 
     try {
         if (!coachId || !userId) {
@@ -198,11 +199,14 @@ const assignUserToCoachController = async (req, res) => {
         }
         const assignResult = await assignUserToCoachService(coachId, userId);
         if (assignResult) {
+            const commissionRate = await getCoachCommissionRate(coachId)
+            const commission = assignResult * commissionRate.commission_rate
             const io = socket.getIo()
             io.to(coachAuth0Id).emit('coach_selected', {
                 userId,
                 username,
-                assignResult,
+                commission,
+                userAuth0Id,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
             return res.status(200).json({success: true, message: "Assign successful"});

@@ -1,4 +1,4 @@
-import {Routes, Route} from "react-router-dom";
+import {Routes, Route, useNavigate} from "react-router-dom";
 import {createContext, useMemo} from "react";
 import Navbar from './components/layout/navbar.jsx';
 import './App.css';
@@ -36,13 +36,16 @@ import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import CustomButton from "./components/ui/CustomButton.jsx";
 import {queryClient} from "./main.jsx";
-import {useCurrentStepDashboard} from "./stores/store.js";
+import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
 const Context = createContext({ name: 'Default' });
 
 function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
     const { openNotification } = useNotificationManager();
+    const {setCurrentStepDashboard} = useCurrentStepDashboard();
+    const navigate = useNavigate();
+    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
 
 
     useEffect(() => {
@@ -66,8 +69,13 @@ function AppContent() {
             });
 
             socket.on('coach_selected', (data) => {
-                console.log(data);
-                openNotification('coach_selected', data);
+                const onClick = () => {
+                    console.log('hey')
+                    navigate('/dashboard')
+                    setCurrentStepDashboard('coach-user')
+                    setSelectedUserAuth0Id(data.userAuth0Id)
+                }
+                openNotification('coach_selected', data, onClick);
             });
 
             socket.on('new_message', () => {
@@ -134,7 +142,7 @@ function AppContent() {
                         <Route path="/post-signup" element={<PostSignUpCallback />} />
                         <Route path="/onboarding/:from?" element={<Onboarding />} />
                         <Route path="/error" element={<ErrorPage />} />
-                        <Route path="/post-onboarding" element={<PostOnboardingCallback />} />
+                        <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback />} />
                         <Route path="/my-profile" element={<MyProfile />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/forum" element={<ForumPage />} />

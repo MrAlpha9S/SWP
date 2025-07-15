@@ -1,5 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+    useCurrentStepDashboard,
+    useCurrentStepStore,
     useErrorStore,
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
@@ -60,6 +62,8 @@ const SetPlan = ({
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const {addError, removeError} = useErrorStore()
     const mutation = usePostUserProfile(getAccessTokenSilently, user);
+    const {currentStep, setCurrentStep} = useCurrentStepStore();
+    const {setCurrentStepDashboard} = useCurrentStepDashboard()
 
     const errorMap = Object.fromEntries(
         onboardingErrorMsg
@@ -240,7 +244,7 @@ const SetPlan = ({
 
                     {readinessValue === "ready" &&
                         <>
-                            {from !== 'coach-user' && <div className="text-left text-sm md:text-base">
+                            {from !== 'coach-user' && <div className="text-left text-sm md:text-base space-y-4 my-4">
                                 <p>
                                     Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ
                                     thuốc.
@@ -255,6 +259,14 @@ const SetPlan = ({
                                     và
                                     đạt được mục tiêu bỏ thuốc.
                                 </p>
+                                <div><strong>Lưu ý:</strong> Bạn có thể tự tạo kế hoạch hoặc nhờ Huấn luyện viên hỗ trợ.
+                                    Nếu muốn tự tạo, hãy điền thông tin phía dưới.
+                                    Nếu muốn Huấn luyện viên hỗ trợ, nhấn nút <strong>“Nhờ Huấn luyện viên”</strong> bên dưới – thông tin hiện tại <strong>sẽ được lưu</strong> và bạn sẽ được đưa đến khung trò chuyện.
+                                </div>
+                                <CustomButton onClick={() => {
+                                    setCurrentStepDashboard('coach')
+                                    navigate('/post-onboarding')
+                                }}>Nhờ huấn luyện viên</CustomButton>
                             </div>}
 
                             <form className="w-[60%] flex flex-col gap-3">
@@ -368,58 +380,6 @@ const SetPlan = ({
                             planLog={planLog}
                         />
                     )}
-
-
-                    {/*{readinessValue === "relapse-support" &&*/}
-                    {/*    <>*/}
-                    {/*        <div className="text-left text-sm md:text-base">*/}
-                    {/*            <p>*/}
-                    {/*                Việc duy trì trạng thái không hút thuốc có thể đầy thách thức, nhất là trong những lúc căng*/}
-                    {/*                thẳng,*/}
-                    {/*                mệt mỏi hoặc khi đối mặt với thói quen cũ. Việc xác định rõ ngày bạn đã ngừng hút sẽ giúp*/}
-                    {/*                bạn theo*/}
-                    {/*                dõi hành trình của mình, xây dựng động lực và nhận diện các thời điểm dễ tái nghiện. Dựa vào*/}
-                    {/*                ngày*/}
-                    {/*                bạn đã ngừng hút, chúng tôi sẽ tính toán số điếu đã bỏ, số tiền đã tiết kiệm,... từ thông*/}
-                    {/*                tin đó*/}
-                    {/*                cho bạn theo dõi để có động lực duy trì tình trạng ngừng hút hơn.*/}
-                    {/*            </p>*/}
-                    {/*        </div>*/}
-                    {/*        <form className="w-[60%] flex flex-col gap-3">*/}
-                    {/*            <div className='text-left font-bold text-base md:text-lg'>*/}
-                    {/*                <h3>Hãy chọn ngày mà bạn đã ngừng hút</h3>*/}
-                    {/*            </div>*/}
-
-                    {/*            <div className='my-[-30]'>*/}
-                    {/*                {errors.map((error, index) => {*/}
-                    {/*                    if (error.location === "stoppedDate") {*/}
-                    {/*                        return (*/}
-                    {/*                            <ErrorText key={index}>{error.message}</ErrorText>*/}
-                    {/*                        )*/}
-                    {/*                    }*/}
-                    {/*                })}*/}
-                    {/*            </div>*/}
-                    {/*            <DatePicker className='h-[42px]' onChange={(date, dateString) => {*/}
-                    {/*                setStoppedDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);*/}
-                    {/*            }} format={'DD-MM-YYYY'} value={stoppedDate ? dayjs(stoppedDate) : ''} allowClear={false}/>*/}
-                    {/*            <p className='text-left font-bold text-base md:text-lg'>*/}
-                    {/*                Thống kê kết quả*/}
-                    {/*            </p>*/}
-                    {/*            <p className='text-sm md:text-base'>*/}
-                    {/*                Kể từ khi bạn bỏ thuốc từ ngày <strong>{convertYYYYMMDDStrToDDMMYYYYStr(stoppedDate.split('T')[0])}</strong>, bạn đã: <br/>*/}
-                    {/*                Bỏ thuốc*/}
-                    {/*                được <strong>{Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24))}</strong> ngày <br/>*/}
-                    {/*                Bỏ được <strong>*/}
-                    {/*                {Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay}*/}
-                    {/*            </strong> điếu thuốc <br/>*/}
-                    {/*                Tiết kiệm*/}
-                    {/*                được <strong>{(Math.floor((getCurrentUTCMidnightDate() - new Date(stoppedDate)) / (1000 * 60 * 60 * 24)) * cigsPerDay * (pricePerPack / cigsPerPack)).toLocaleString("vi-VN")} VNĐ</strong>*/}
-                    {/*                <br/>*/}
-                    {/*                <em>Hãy giữ vững tinh thần nhé!</em>*/}
-
-                    {/*            </p>*/}
-                    {/*        </form>*/}
-                    {/*    </>}*/}
                     {readinessValue === 'ready' && (
                         <>
                             <CustomButton type="primary" onClick={createPlan}>Tạo kế hoạch</CustomButton>

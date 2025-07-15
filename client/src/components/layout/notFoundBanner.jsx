@@ -15,7 +15,7 @@ const NotFoundBanner = ({title, content, type = null}) => {
                 {content}
                 {
                     type === 'progressNCoach' && <div className='flex justify-center gap-10'>
-                        <CustomButton>Tự lên kế hoạch</CustomButton>
+                        <CustomButton onClick={() => navigate('/onboarding')}>Tạo ngay</CustomButton>
                         <CustomButton>Chat với huấn luyện viên</CustomButton>
                     </div>
                 }

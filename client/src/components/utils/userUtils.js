@@ -164,7 +164,7 @@ export async function GetAllMembers(user, getAccessTokenSilently, isAuthenticate
 }
 
 
-export async function assignCoachToUser (coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated) {
+export async function assignCoachToUser (user, coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated) {
     if (!isAuthenticated) return
     const token = await getAccessTokenSilently();
 
@@ -179,6 +179,7 @@ export async function assignCoachToUser (coachId, userId, username, coachAuth0Id
             coachId: coachId,
             username: username,
             coachAuth0Id: coachAuth0Id,
+            userAuth0Id: user.sub
         })
     });
 
