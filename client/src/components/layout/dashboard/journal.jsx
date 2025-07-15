@@ -5,7 +5,7 @@ import {convertDDMMYYYYStrToYYYYMMDDStr, getCurrentUTCDateTime} from "../../util
 import {getCheckInData} from "../../utils/checkInUtils.js";
 import {useAuth0} from "@auth0/auth0-react";
 import {useCheckInDataStore} from "../../../stores/checkInStore.js";
-import {usePlanStore, useUserCreationDate} from "../../../stores/store.js";
+import { useUserCreationDate} from "../../../stores/store.js";
 import TimeLineEachMonth from "./timeLineEachMonth.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
 import dayjs from "dayjs";
@@ -19,17 +19,12 @@ const Journal = ({userAuth0Id = null}) => {
     const {setUserCreationDate} = useUserCreationDate();
     const [activeKeys, setActiveKeys] = useState(['2']);
 
-    useEffect(() => {
-        queryClient.invalidateQueries(['all-checkin-data'])
-        queryClient.invalidateQueries(['user-creation-date'])
-    }, [userAuth0Id]);
-
     const {
         isPending: isCheckInDataPending,
         error: CheckInDataError,
         data: CheckInData,
     } = useQuery({
-        queryKey: ['all-checkin-data'],
+        queryKey: ['all-checkin-data', userAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
             return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal', userAuth0Id);
@@ -51,7 +46,7 @@ const Journal = ({userAuth0Id = null}) => {
         isPending: isUserCreationDatePending,
         data: userCreationDate,
     } = useQuery({
-        queryKey: ['user-creation-date'],
+        queryKey: ['user-creation-date', userAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
             return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userAuth0Id);
