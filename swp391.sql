@@ -118,11 +118,16 @@ CREATE TABLE [user_profiles] (
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
-  [last_edited_by] int,
+  [last_updated_by] int,
+  [plan_created_at] datetime,
+  [plan_updated_at] datetime,
+  [plan_last_updated_by] int,
   [is_public] bit default (1),
 )
 GO
-ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_edited_by]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_updated_by]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_profiles] ADD FOREIGN KEY ([plan_last_updated_by]) REFERENCES [users] ([user_id])
+GO
 
 CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -174,6 +179,20 @@ CREATE TABLE [goals] (
 )
 GO
 
+CREATE TABLE [user_notes] (
+  [note_id] int PRIMARY KEY IDENTITY(1, 1),
+  [content] nvarchar(max),
+  [user_id] int,
+  [created_at] datetime,
+  [created_by] int,
+  [updated_at] datetime,
+  [updated_by] int
+)
+GO
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([created_by]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([updated_by]) REFERENCES [users] ([user_id])
+GO
 
 CREATE TABLE [plan_log] (
   [plan_id] int PRIMARY KEY IDENTITY(1, 1),

@@ -12,6 +12,7 @@ import {Tabs} from "antd";
 import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
 import Journal from "../dashboard/journal.jsx";
+import NotesManager from "./notesManager.jsx";
 
 
 const CoachUser = () => {
@@ -132,6 +133,9 @@ const CoachUser = () => {
                             customTrigger={profileData.userProfile.custom_trigger ?? ''}
                             checkInDataSet={localCheckinDataset}
                             goalList={profileData.userProfile.goalList ?? []}
+                            updatedAt={profileData.userProfile.updated_at ?? ''}
+                            createdAt={profileData.userProfile.created_at ?? ''}
+                            updatedBy={profileData.userProfile.last_updated_by ?? ''}
                         />
                     ) : (
                         <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
@@ -145,6 +149,15 @@ const CoachUser = () => {
             children: (
                 <div className="w-full flex justify-center">
                     <Journal userAuth0Id={selectedUserAuth0Id}/>
+                </div>
+            )
+        },
+        {
+            key: '4',
+            label: 'Ghi chú',
+            children: (
+                <div className="w-full flex justify-center">
+                    <NotesManager userAuth0Id={selectedUserAuth0Id}/>
                 </div>
             )
         }

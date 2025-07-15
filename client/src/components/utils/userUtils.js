@@ -188,3 +188,79 @@ export async function assignCoachToUser (coachId, userId, username, coachAuth0Id
 
     return await res.json();
 }
+
+export async function getUserNotes(user, getAccessTokenSilently, isAuthenticated, userAuth0Id) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes/' + userAuth0Id, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return res.json();
+}
+
+export async function createUserNote(user, getAccessTokenSilently, isAuthenticated, noteOfAuth0Id, creatorAuth0Id, content) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            noteOfAuth0Id,
+            creatorAuth0Id,
+            content
+        })
+    });
+
+    return res.json();
+}
+
+export async function updateUserNote(user, getAccessTokenSilently, isAuthenticated, noteId, noteOfAuth0Id, editorAuth0Id, content) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes', {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            noteId,
+            noteOfAuth0Id,
+            editorAuth0Id,
+            content
+        })
+    });
+
+    return res.json();
+}
+
+export async function deleteUserNote(user, getAccessTokenSilently, isAuthenticated, noteId) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/notes/${noteId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return res.json();
+}
+

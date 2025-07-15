@@ -6,12 +6,11 @@ const allMember = async () => {
         const pool = await poolPromise;
         const result = await pool.request()
             .query(`
-                SELECT * FROM users u 
-                WHERE u.role = 'Member' 
-                AND u.user_id NOT IN (
-                    SELECT DISTINCT user_id 
-                    FROM user_conversation
-                )
+                SELECT *
+                FROM users u
+                WHERE u.role = 'Member'
+                  AND u.user_id NOT IN (SELECT DISTINCT user_id
+                                        FROM user_conversation)
             `);
         return result.recordset;
     } catch (error) {
@@ -199,30 +198,30 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
         const coachResult = await pool.request()
             .input('coach_id', sql.Int, coachId)
             .query(`
-        SELECT u.user_id,
-               u.avatar,
-               u.username,
-               u.email,
-               u.role,
-               ci.years_of_exp,
-               ci.bio,
-               ci.detailed_bio,
-               ci.motto,
-               ci.commission_rate,
-               (SELECT COUNT(*)
-                FROM coach_user cu2
-                WHERE cu2.coach_id = u.user_id) AS total_students,
-               (SELECT AVG(CAST(stars AS FLOAT))
-                FROM coach_reviews cr
-                WHERE cr.coach_id = u.user_id)  AS avg_star,
-               (SELECT COUNT(DISTINCT cr.user_id)
-                FROM coach_reviews cr
-                WHERE cr.coach_id = u.user_id)  AS num_reviews
-        FROM users u
-        LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
-        WHERE u.role = 'Coach'
-          AND u.user_id = @coach_id
-      `);
+                SELECT u.user_id,
+                       u.avatar,
+                       u.username,
+                       u.email,
+                       u.role,
+                       ci.years_of_exp,
+                       ci.bio,
+                       ci.detailed_bio,
+                       ci.motto,
+                       ci.commission_rate,
+                       (SELECT COUNT(*)
+                        FROM coach_user cu2
+                        WHERE cu2.coach_id = u.user_id) AS total_students,
+                       (SELECT AVG(CAST(stars AS FLOAT))
+                        FROM coach_reviews cr
+                        WHERE cr.coach_id = u.user_id)  AS avg_star,
+                       (SELECT COUNT(DISTINCT cr.user_id)
+                        FROM coach_reviews cr
+                        WHERE cr.coach_id = u.user_id)  AS num_reviews
+                FROM users u
+                         LEFT JOIN coach_info ci ON ci.coach_id = u.user_id
+                WHERE u.role = 'Coach'
+                  AND u.user_id = @coach_id
+            `);
 
         if (coachResult.recordset.length === 0) {
             return null; // Coach not found
@@ -282,7 +281,6 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
         return null;
     }
 };
-
 
 
 async function getUserByAuth0Id(auth0Id) {
@@ -373,17 +371,106 @@ const assignUserToCoachService = async (coachId, userId) => {
             .input('coach_id', coachId)
             .input('user_id', userId)
             .input('started_date', getCurrentUTCDateTime().toISOString())
-            .query(`INSERT INTO coach_user (coach_id, user_id, started_date) VALUES (@coach_id, @user_id, @started_date)`)
+            .query(`INSERT INTO coach_user (coach_id, user_id, started_date)
+                    VALUES (@coach_id, @user_id, @started_date)`)
         const price = await pool.request()
             .input('userId', userId)
-            .query(`SELECT price FROM users u, subscriptions s WHERE u.sub_id = s.sub_id AND u.user_id = @userId`);
+            .query(`SELECT price
+                    FROM users u,
+                         subscriptions s
+                    WHERE u.sub_id = s.sub_id
+                      AND u.user_id = @userId`);
 
         return price.recordset[0].price;
-    }catch (error) {
+    } catch (error) {
         console.error('error in assignUserToCoachService', error);
         return false;
     }
 }
+
+const getUserNotes = async (userAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .query(`
+                SELECT n.note_id,
+                       n.content,
+                       n.created_at,
+                       n.updated_at,
+                       subject.username AS subject_username,
+                       creator.username AS created_by_username,
+                       updater.username AS updated_by_username
+                FROM user_notes n
+                         JOIN users subject ON n.user_id = subject.user_id
+                         JOIN users creator ON n.created_by = creator.user_id
+                         LEFT JOIN users updater ON n.updated_by = updater.user_id
+                WHERE n.user_id = @userId
+                ORDER BY n.created_at DESC
+            `);
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getUserNotes', error);
+        return [];
+    }
+};
+
+const noteUpdateService = async (noteId, editorAuth0Id, content) => {
+    const editorUserId = await getUserIdFromAuth0Id(editorAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('editorUserId', editorUserId)
+            .input('content', content)
+            .input('updatedAt', getCurrentUTCDateTime().toISOString())
+            .input('note_id', noteId)
+            .query(`UPDATE user_notes
+                    SET content    = @content,
+                        updated_at = @updatedAt,
+                        updated_by = @editorUserId
+                    WHERE note_id = @note_id`)
+        return result.rowsAffected > 0
+    } catch (error) {
+        console.error('error in noteUpdateService', error);
+        return []
+    }
+}
+
+const noteCreateService = async (noteOfAuth0Id, creatorAuth0Id, content) => {
+    const noteOfUserId = await getUserIdFromAuth0Id(noteOfAuth0Id);
+    const creatorUserId = await getUserIdFromAuth0Id(creatorAuth0Id);
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('noteOfUserId', noteOfUserId)
+            .input('creatorUserId', creatorUserId)
+            .input('createdAt', getCurrentUTCDateTime().toISOString())
+            .input('updatedAt', getCurrentUTCDateTime().toISOString())
+            .input('content', content)
+            .query('INSERT INTO user_notes (content, user_id, created_by, created_at, updated_by, updated_at) VALUES (@content, @noteOfUserId, @creatorUserId, @createdAt, @creatorUserId, @updatedAt)')
+        return result.rowsAffected > 0
+    } catch (error) {
+        console.error('error in noteCreateService', error);
+        return false
+    }
+}
+
+const noteDeleteService = async (noteId) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('noteId', noteId)
+            .query('DELETE FROM user_notes WHERE note_id = @noteId');
+
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('Error in noteDeleteService', error);
+        return false;
+    }
+};
+
 
 module.exports = {
     userExists,
@@ -399,5 +486,5 @@ module.exports = {
     updateUserSubscriptionService,
     getCoaches,
     getCoachDetailsById,
-    assignUserToCoachService, allMember
+    assignUserToCoachService, allMember, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService
 };

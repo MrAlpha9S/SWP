@@ -3,7 +3,7 @@ const {
     updateUserSubscriptionService,
     getUserIdFromAuth0Id,
     getCoaches,
-    getCoachDetailsById, assignUserToCoachService
+    getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -14,6 +14,7 @@ const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
 const socket = require('../utils/socket');
+const noteDeleteService = require("../services/userService");
 
 const handleAllMember = async (req, res) => {
     try {
@@ -213,6 +214,93 @@ const assignUserToCoachController = async (req, res) => {
     }
 }
 
+const getUserNotesController = async (req, res) => {
+    const { userAuth0Id } = req.params;
+
+    if (!userAuth0Id) {
+        return res.status(400).json({success: false, message: "Missing userAuth0Id"});
+    }
+    try {
+        const notesResult = await getUserNotes(userAuth0Id);
+        if (!notesResult || notesResult.length === 0) {
+            return res.status(400).json({success: false, message: "No notes found"});
+        } else {
+            return res.status(200).json({success: true, data: notesResult});
+        }
+    } catch (err) {
+        res.status(500).json({success: false, message: err.message});
+    }
+}
+
+const updateUserNoteController = async (req, res) => {
+    const { noteId, noteOfAuth0Id, editorAuth0Id, content } = req.body;
+
+    if (!noteOfAuth0Id || !editorAuth0Id || !content) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing required fields: noteOfAuth0Id, editorAuth0Id, or content",
+        });
+    }
+
+    try {
+        const success = await noteUpdateService(noteId, editorAuth0Id, content);
+
+        if (success) {
+            return res.status(200).json({ success: true, message: "Note updated successfully" });
+        } else {
+            return res.status(400).json({ success: false, message: "Failed to update note" });
+        }
+    } catch (error) {
+        console.error("Error in updateUserNoteController", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const createUserNoteController = async (req, res) => {
+    const { noteOfAuth0Id, creatorAuth0Id, content } = req.body;
+
+    if (!noteOfAuth0Id || !creatorAuth0Id || !content) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing required fields: noteOfAuth0Id, creatorAuth0Id, or content",
+        });
+    }
+
+    try {
+        const success = await noteCreateService(noteOfAuth0Id, creatorAuth0Id, content);
+
+        if (success) {
+            return res.status(201).json({ success: true, message: "Note created successfully" });
+        } else {
+            return res.status(400).json({ success: false, message: "Failed to create note" });
+        }
+    } catch (error) {
+        console.error("Error in createUserNoteController", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const deleteUserNoteController = async (req, res) => {
+    const { noteId } = req.params;
+
+    if (!noteId) {
+        return res.status(400).json({ success: false, message: 'Missing noteId' });
+    }
+
+    try {
+        const success = await noteDeleteService(noteId);
+
+        if (success) {
+            return res.status(200).json({ success: true, message: 'Note deleted successfully' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Note not found or could not be deleted' });
+        }
+    } catch (error) {
+        console.error('Error in deleteUserNoteController', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getAllUsersController,
     handlePostSignup,
@@ -224,5 +312,9 @@ module.exports = {
     getUserInfo,
     updateUserInfo,
     assignUserToCoachController,
-    handleAllMember
+    handleAllMember,
+    getUserNotesController,
+    updateUserNoteController,
+    createUserNoteController,
+    deleteUserNoteController
 };

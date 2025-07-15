@@ -40,6 +40,8 @@ const UserProfileInMessage = ({
                                   cigsReduced,
                                   checkInDataSet,
                                   goalList,
+                                  updatedAt,
+                                  createdAt, updatedBy
                               }) => {
     const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
     const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
@@ -139,6 +141,11 @@ const UserProfileInMessage = ({
 
     return (
         <div className='h-full flex flex-col overflow-y-auto px-5'>
+            <p className='text-gray-400'>Tạo bởi: {userInfo?.username} (người dùng)</p>
+            <p className='text-gray-400'>Tạo vào ngày: {convertYYYYMMDDStrToDDMMYYYYStr(createdAt.split('T')[0])}</p>
+            <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {userInfo?.user_id === updatedBy ? `${userInfo?.username} (người dùng)` : `${coachInfo?.username} (bạn)`}</p>
+            {updatedAt && <p className='text-gray-400'>Chỉnh sửa lần cuối vào
+                lúc: {convertYYYYMMDDStrToDDMMYYYYStr(updatedAt.split('T')[0])}</p>}
             <div>
                 <p className='font-bold text-2xl'>Mức độ sẵn sàng</p>
                 <p>{readinessLabel}</p>

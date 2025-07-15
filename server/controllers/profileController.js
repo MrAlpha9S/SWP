@@ -1,6 +1,7 @@
 const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal} = require("../services/profileService");
-const {getUserWithSubscription} = require("../services/userService");
-
+const {getUserWithSubscription, getUserByAuth0Id} = require("../services/userService");
+const socket = require('../utils/socket');
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const handlePostOnboarding = async (req, res) => {
     const {
@@ -30,7 +31,6 @@ const handlePostOnboarding = async (req, res) => {
 
     try {
         if (await userProfileExists(userAuth0Id)) {
-
             result = updateUserProfile(userAuth0Id, updaterUserAuth0Id,
                 readiness,
                 reasonList,
@@ -49,6 +49,15 @@ const handlePostOnboarding = async (req, res) => {
                 cigsPerDay,
                 planLog,
                 goalList)
+            if (userAuth0Id !== updaterUserAuth0Id) {
+                const updater = await getUserByAuth0Id(updaterUserAuth0Id);
+                socket.getIo().to(`${userAuth0Id}`).emit('plan-edit-by-coach', {
+                    userAuth0Id: userAuth0Id,
+                    updaterUserAuth0Id: updaterUserAuth0Id,
+                    updaterUsername: updater.username,
+                    timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                });
+            }
         } else {
             result = await postUserProfile(
                 userAuth0Id,

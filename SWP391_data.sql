@@ -140,11 +140,11 @@ VALUES
 INSERT INTO user_profiles (
     user_id, readiness_value, start_date, quit_date, expected_quit_date,
     cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking, quitting_method,
-    cigs_reduced, custom_time_of_day, custom_trigger, created_at, updated_at, is_public, last_edited_by
+    cigs_reduced, custom_time_of_day, custom_trigger, created_at, updated_at, is_public, last_updated_by, plan_created_at, plan_updated_at, plan_last_updated_by
 ) VALUES (
     4, 'ready', '2025-06-01 00:00:00', NULL, '2025-07-06 00:00:00',
     15, 15, 35000, 'within_5', 'gradual-weekly',
-    3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 16:03:56', 1, 4
+    3, N'Ngủ', N'Chơi game', '2025-06-12 15:54:59', '2025-06-12 15:54:59', 1, 4, '2025-06-12 17:14:15', '2025-06-12 17:14:15', 4
 );
 
 
@@ -695,6 +695,10 @@ INSERT INTO [social_likes] ([user_id], [post_id], [comment_id], [created_at]) VA
 (7, NULL, 32, '2025-06-08 15:55:00.000'),
 (7, NULL, 6, '2025-06-08 11:10:00.000'),
 (7, NULL, 41, '2025-06-09 17:25:00.000');
+
+INSERT INTO [user_notes] ([content], [user_id], [created_by], [updated_by], [updated_at], [created_at]) VALUES
+(N'Tôi cần tránh hút thuốc trước khi chơi game', 4, 4, 4, '2025-07-15 15:59:00', '2025-07-15 15:59:00'),
+(N'Bạn cần sử dụng NRT', 4, 6, 6, '2025-07-15 15:59:00', '2025-07-15 15:59:00');
 
 
 SELECT * FROM [messages] 

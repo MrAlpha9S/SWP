@@ -81,6 +81,10 @@ function AppContent() {
                 }
             });
 
+            socket.on('plan-edit-by-coach', (data) => {
+                openNotification('plan-edit-by-coach', data);
+            })
+
             return () => {
                 socket.disconnect();
             };

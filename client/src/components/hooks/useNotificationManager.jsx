@@ -2,6 +2,8 @@ import { notification } from 'antd';
 import React, { createContext, useContext, useMemo } from 'react';
 import {BsFillPeopleFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
+import {CiEdit} from "react-icons/ci";
+import {FaCheck} from "react-icons/fa";
 
 const NotificationContext = createContext();
 
@@ -42,7 +44,19 @@ export const NotificationProvider = ({ children }) => {
                         {payload.content}
                     </div>,
                     placement: 'topRight',
-                    icon: <BiConversation className="size-5"/>
+                    icon: <FaCheck className="size-5"/>
+                });
+                break;
+            case 'plan-edit-by-coach':
+                api.open({
+                    key: `plan-edit-by-coach`,
+                    message: `Kế hoạch sửa bởi ${payload.updaterUsername}`,
+                    description: <div>
+                        Kế hoạch của bạn vừa được chỉnh sửa bởi Huấn luyện viên <strong>{payload.updaterUsername}</strong>
+                        <p>{payload.timestamp}</p>
+                    </div>,
+                    placement: 'topRight',
+                    icon: <CiEdit className="size-5"/>
                 });
                 break;
             default:
