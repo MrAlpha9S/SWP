@@ -7,7 +7,7 @@ function Hero({title, heroHeight = 188, role, username}) {
     const {user, isAuthenticated} = useAuth0()
 
     return (
-        <section style={{height : heroHeight, transition: 'height 0.2s'}} className="sticky top-[80px] z-10 py-16 md:py-8 min-h-[50px] w-full bg-primary-100 flex flex-col items-center">
+        <section  className=" z-10 py-16 md:py-8 min-h-[50px] w-full bg-primary-100 flex flex-col items-center">
             <div className="flex px-14 w-[1680px] h-full items-center justify-between">
                 {isAuthenticated ? (
                     <div style={{flexDirection: heroHeight === 188 ? "column" : "row"}} className="hidden md:flex items-center justify-center gap-5">

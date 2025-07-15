@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
-import {Dropdown, Select, Skeleton} from "antd";
+import { Select, Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
@@ -40,7 +40,6 @@ const ProgressBoard = ({
                            pricePerPack,
                            cigsPerPack,
                            readinessValue,
-                           planLogCloneDDMMYY,
                            setCurrentStepDashboard = null,
                            setMoneySaved = null,
                            userInfo,
@@ -373,10 +372,6 @@ const ProgressBoard = ({
         }
         return null;
     };
-
-    useEffect(() => {
-        console.log('meregedDataSet', mergedDataSet);
-    }, [mergedDataSet]);
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>

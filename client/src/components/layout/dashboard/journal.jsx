@@ -10,14 +10,19 @@ import TimeLineEachMonth from "./timeLineEachMonth.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
 import dayjs from "dayjs";
 import {getUserCreationDate} from "../../utils/userUtils.js";
+import {queryClient} from "../../../main.jsx";
 
-const Journal = () => {
+const Journal = ({userAuth0Id = null}) => {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {allCheckInData, setAllCheckInData} = useCheckInDataStore();
-    const {startDate} = usePlanStore()
     const [searchDate, setSearchDate] = useState('')
     const {setUserCreationDate} = useUserCreationDate();
     const [activeKeys, setActiveKeys] = useState(['2']);
+
+    useEffect(() => {
+        queryClient.invalidateQueries(['all-checkin-data'])
+        queryClient.invalidateQueries(['user-creation-date'])
+    }, [userAuth0Id]);
 
     const {
         isPending: isCheckInDataPending,
@@ -27,7 +32,7 @@ const Journal = () => {
         queryKey: ['all-checkin-data'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal');
+            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal', userAuth0Id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -49,7 +54,7 @@ const Journal = () => {
         queryKey: ['user-creation-date'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userAuth0Id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -83,6 +88,7 @@ const Journal = () => {
                         year={searchYear}
                         allCheckInData={allCheckInData}
                         userCreationDate={userCreationDate.data}
+                        userAuth0Id={userAuth0Id}
                     />
                 ),
             });

@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import Messager from "./messager/messager.jsx";
 import {useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 import {useQuery} from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import NotFoundBanner from "../notFoundBanner.jsx";
 import {Tabs} from "antd";
 import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
+import Journal from "../dashboard/journal.jsx";
 
 
 const CoachUser = () => {
@@ -20,7 +21,7 @@ const CoachUser = () => {
 
 
     // User profile query
-    const {isPending: isProfilePending, data: profileData, refetch: refectProfile} = useQuery({
+    const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user || !selectedUserAuth0Id) return null;
@@ -36,7 +37,6 @@ const CoachUser = () => {
         error: datasetError,
         data: checkInDataset,
         isFetching: isDatasetFetching,
-        refect: refectDataset,
     } = useQuery({
         queryKey: ['dataset-coach', selectedUserAuth0Id],
         queryFn: async () => {
@@ -139,10 +139,10 @@ const CoachUser = () => {
         },
         {
             key: '3',
-            label: 'Bài viết chờ duyệt',
+            label: 'Dữ liệu Checkin',
             children: (
                 <div className="w-full flex justify-center">
-                    <p>Bài viết chờ duyệt</p>
+                    <Journal userAuth0Id={selectedUserAuth0Id}/>
                 </div>
             )
         }

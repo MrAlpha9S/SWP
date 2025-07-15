@@ -1,4 +1,4 @@
-import {getCurrentUTCDateTime} from "./dateUtils.js";
+
 
 export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected) {
 
@@ -274,12 +274,12 @@ export function mergeByDate(
 
 
 
-export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null) {
+export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null, userAuth0Id = null) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    let fetchURL = searchDate ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}&date=${searchDate}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${user.sub}`
+    let fetchURL = searchDate ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}&date=${searchDate}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}`
 
     if (action !== null) {
         fetchURL += `&action=${action}`;
