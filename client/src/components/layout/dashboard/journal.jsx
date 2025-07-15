@@ -10,9 +10,9 @@ import TimeLineEachMonth from "./timeLineEachMonth.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
 import dayjs from "dayjs";
 import {getUserCreationDate} from "../../utils/userUtils.js";
-import {queryClient} from "../../../main.jsx";
 
 const Journal = ({userAuth0Id = null}) => {
+    console.log('Journal received userAuth0Id:', userAuth0Id)
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {allCheckInData, setAllCheckInData} = useCheckInDataStore();
     const [searchDate, setSearchDate] = useState('')
@@ -115,6 +115,7 @@ const Journal = ({userAuth0Id = null}) => {
                         year={baseYear}
                         allCheckInData={allCheckInData}
                         userCreationDate={userCreationDate.data}
+                        userAuth0Id={userAuth0Id}
                     />
                 ),
             });
@@ -133,7 +134,7 @@ const Journal = ({userAuth0Id = null}) => {
     }, [searchDate, dropdownItems]);
 
     return <>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-[650px]">
             <div className='flex gap-5'>
                 <DatePicker className='h-[42px] w-[40%]' onChange={(date, dateString) => {
                     setSearchDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);

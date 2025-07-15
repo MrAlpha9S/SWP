@@ -18,6 +18,8 @@ const CoachUser = () => {
     const {userInfo} = useUserInfoStore()
     const {user, isAuthenticated, getAccessTokenSilently} = useAuth0();
     const {selectedUserAuth0Id} = useSelectedUserAuth0IdStore()
+    
+    console.log('CoachUser selectedUserAuth0Id:', selectedUserAuth0Id)
 
 
     // User profile query

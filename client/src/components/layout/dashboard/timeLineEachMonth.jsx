@@ -3,6 +3,7 @@ import { Timeline } from "antd";
 import TimelineEntry from "../../ui/timeLineEntry.jsx" // 👈 import this
 
 const TimeLineEachMonth = ({ day, month, year, allCheckInData, userAuth0Id }) => {
+    console.log('TimeLineEachMonth received userAuth0Id:', userAuth0Id)
     const [timeLineItem, setTimeLineItem] = useState([]);
 
     useEffect(() => {
