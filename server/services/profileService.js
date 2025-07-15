@@ -21,7 +21,7 @@ const userProfileExists = async (auth0_id) => {
     }
 }
 
-const postUserProfile = async (userAuth0Id,
+const postUserProfile = async (userAuth0Id, updaterUserAuth0Id,
                                readiness,
                                reasonList,
                                pricePerPack,
@@ -42,10 +42,7 @@ const postUserProfile = async (userAuth0Id,
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
-
-        console.log('ex', expectedQuitDate)
-        console.log('startDate', startDate)
-        console.log('stoppedDate', stoppedDate)
+        const updaterUserId = await getUserIdFromAuth0Id(updaterUserAuth0Id);
 
         if (actionType !== 'update') {
 
@@ -64,14 +61,15 @@ const postUserProfile = async (userAuth0Id,
                 .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
                 .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
                 .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
+                .input('lastUpdatedBy', sql.Int, updaterUserId)
                 .query(`
                     INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
                                                cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
                                                quitting_method, cigs_reduced, custom_time_of_day, custom_trigger,
-                                               created_at)
+                                               created_at, last_updated_by)
                         OUTPUT INSERTED.profile_id
                     VALUES (
-                        @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at
+                        @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at, @lastUpdatedBy
                         );
                 `);
 
@@ -221,6 +219,7 @@ const getUserProfile = async (userAuth0Id) => {
 
 const updateUserProfile = async (
     userAuth0Id,
+    updaterUserAuth0Id,
     readiness,
     reasonList,
     pricePerPack,
@@ -240,12 +239,19 @@ const updateUserProfile = async (
     goalList
 ) => {
     try {
+        console.log('update service')
+        console.log("▶ updaterUserAuth0Id:", updaterUserAuth0Id);
+        console.log("▶ userAuth0Id:", userAuth0Id);
+
+
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
-        const updatedAt = new Date();
+        const updaterUserId = await getUserIdFromAuth0Id(updaterUserAuth0Id);
+        const updatedAt = getCurrentUTCDateTime().toISOString();
 
         await pool.request()
             .input('userId', sql.Int, userId)
+            .input('lastUpdatedBy', sql.Int, updaterUserId)
             .input('readiness', sql.VarChar(20), readiness)
             .input('startDate', sql.DateTime, startDate ?? null)
             .input('quitDate', sql.DateTime, stoppedDate ?? null)
@@ -273,7 +279,8 @@ const updateUserProfile = async (
                     cigs_reduced       = @cigsReduced,
                     custom_time_of_day = @customTimeOfDay,
                     custom_trigger     = @customTrigger,
-                    updated_at         = @updatedAt
+                    updated_at         = @updatedAt,
+                    last_updated_by    = @lastUpdatedBy
                 WHERE user_id = @userId
             `);
 
@@ -294,7 +301,7 @@ const updateUserProfile = async (
         }
 
         //re-insert new data
-        return await postUserProfile(userAuth0Id,
+        return await postUserProfile(userAuth0Id, updaterUserAuth0Id,
             readiness,
             reasonList,
             pricePerPack,
@@ -399,6 +406,7 @@ const getLeaderboard = async () => {
         console.error("postGoal error:", error);
     }
 }
+
 
 
 module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal}

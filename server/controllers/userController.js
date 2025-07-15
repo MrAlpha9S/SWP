@@ -3,16 +3,28 @@ const {
     updateUserSubscriptionService,
     getUserIdFromAuth0Id,
     getCoaches,
-    getCoachDetailsById
+    getCoachDetailsById, assignUserToCoachService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
-const {userExists, createUser, getUserCreationDateFromAuth0Id} = require('../services/userService');
 const {updateUserAuth0} = require("../services/auth0Service");
 const {getUserByAuth0Id, updateUserByAuth0Id} = require('../services/userService');
+const {userExists, createUser, getUserCreationDateFromAuth0Id, allMember} = require('../services/userService');
 const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
+const socket = require('../utils/socket');
+
+const handleAllMember = async (req, res) => {
+    try {
+
+        const members = await allMember();
+        return res.status(200).json({ data: members });
+    } catch (error) {
+        console.error('Error in handleAllMember:', error);
+        return res.status(500).json({ error: 'Failed to handleAllMember' });
+    }
+};
 
 const handlePostSignup = async (req, res) => {
     const {userAuth0Id} = req.body;
@@ -176,6 +188,31 @@ const updateUserInfo = async (req, res) => {
     }
 };
 
+const assignUserToCoachController = async (req, res) => {
+    const { coachId, userId, username, coachAuth0Id } = req.body;
+
+    try {
+        if (!coachId || !userId) {
+            return res.status(400).json({success: false, message: "Missing ids"});
+        }
+        const assignResult = await assignUserToCoachService(coachId, userId);
+        if (assignResult) {
+            const io = socket.getIo()
+            io.to(coachAuth0Id).emit('coach_selected', {
+                userId,
+                username,
+                assignResult,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+            return res.status(200).json({success: true, message: "Assign successful"});
+        } else {
+            return res.status(500).json({success: false, message: "Assign failed"});
+        }
+    } catch (err) {
+        res.status(500).json({success: false, message: err.message});
+    }
+}
+
 module.exports = {
     getAllUsersController,
     handlePostSignup,
@@ -185,5 +222,7 @@ module.exports = {
     getCoachByIdController,
     updateUserController,
     getUserInfo,
-    updateUserInfo
+    updateUserInfo,
+    assignUserToCoachController,
+    handleAllMember
 };

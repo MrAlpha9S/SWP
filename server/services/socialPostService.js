@@ -217,6 +217,18 @@ const getPostComments = async (postId) => {
     }
 }
 
+const getAllSocialPosts = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`SELECT * from social_posts`)
+        return result.recordset;
+    } catch (err) {
+        console.error('getAllPosts error', err);
+        throw err;
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments };
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, getAllSocialPosts };

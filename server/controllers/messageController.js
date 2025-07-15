@@ -1,4 +1,28 @@
-const { SendMessage, GetUserConversations, GetMessageConversation } = require('../services/messageService');
+const { SendMessage, GetUserConversations, GetMessageConversation, CreateConversation } = require('../services/messageService');
+const socket = require('../utils/socket');
+
+const HandleCreateConversation = async (req, res) => {
+    const auth0_id  = req.body.auth0_id;
+    const conversation_name = req.body.conversation_name;
+    const created_at = req.body.created_at;
+    const user_id = req.body.user_id;
+
+    if (!auth0_id || !conversation_name || !created_at || !user_id) {
+        return res.status(400).json({ success: false, message: 'error in HandleCreateConversation: params is required', data: null });
+    }
+
+    try {
+        const data = await CreateConversation(auth0_id, conversation_name, created_at, user_id);
+        if (!data) {
+            return res.status(404).json({ success: false, message: 'Cant HandleCreateConversation', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'HandleCreateConversation successfully', data: data });
+    } catch (error) {
+        console.error('Error in HandleCreateConversation:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+
+}
 
 const HandleMessageConversations = async (req, res) => {
     const auth0_id  = req.body.auth0_id;
@@ -45,6 +69,14 @@ const HandleSendMessage = async (req, res) => {
     const conversationId = req.body.conversationId;
     const content = req.body.content;
     const created_at = req.body.created_at;
+    const senderName = req.body.senderName;
+    const senderAuth0Id = req.body.senderAuth0Id;
+    console.log('HandleSendMessage called with:', {
+        auth0_id,
+        conversationId,
+        content,
+        created_at
+    });
 
     if (!auth0_id || !conversationId || !content || !created_at) {
         return res.status(400).json({ success: false, message: 'error in HandleSendMessage: params is required', data: null });
@@ -55,6 +87,12 @@ const HandleSendMessage = async (req, res) => {
         if (!data) {
             return res.status(404).json({ success: false, message: 'Cant HandleSendMessage', data: null });
         }
+        socket.getIo().to(`${senderAuth0Id}`).emit('new_message_noti', {
+            conversation_id: conversationId,
+            content: content,
+            created_at: created_at,
+            senderName: senderName
+        });
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {
         console.error('Error in HandleSendMessage:', error);
@@ -67,4 +105,5 @@ module.exports = {
     HandleSendMessage,
     HandleUserConversations,
     HandleMessageConversations,
+    HandleCreateConversation,
 };

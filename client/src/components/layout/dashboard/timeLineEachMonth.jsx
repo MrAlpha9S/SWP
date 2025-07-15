@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Timeline } from "antd";
 import TimelineEntry from "../../ui/timeLineEntry.jsx" // 👈 import this
 
-const TimeLineEachMonth = ({ day, month, year, allCheckInData }) => {
+const TimeLineEachMonth = ({ day, month, year, allCheckInData, userAuth0Id }) => {
+    console.log('TimeLineEachMonth received userAuth0Id:', userAuth0Id)
     const [timeLineItem, setTimeLineItem] = useState([]);
 
     useEffect(() => {
@@ -21,11 +22,11 @@ const TimeLineEachMonth = ({ day, month, year, allCheckInData }) => {
 
         const timelineItems = checkinData.map((entry) => ({
             color: entry.isMissed !== null && entry.isMissed !== true ? 'green' : 'red',
-            children: <TimelineEntry entry={entry} />
+            children: <TimelineEntry entry={entry} userAuth0Id={userAuth0Id}/>
         }));
 
         setTimeLineItem(timelineItems);
-    }, [allCheckInData, day, month, year]);
+    }, [allCheckInData, day, month, userAuth0Id, year]);
 
     return <Timeline items={timeLineItem} />;
 };

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
-import {Skeleton} from "antd";
+import { Select, Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
@@ -40,10 +40,10 @@ const ProgressBoard = ({
                            pricePerPack,
                            cigsPerPack,
                            readinessValue,
-                           planLogCloneDDMMYY,
-                           setCurrentStepDashboard,
-                           setMoneySaved,
-                    userInfo
+                           setCurrentStepDashboard = null,
+                           setMoneySaved = null,
+                           userInfo,
+                           from = null
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -52,6 +52,12 @@ const ProgressBoard = ({
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
     const [showWarning, setShowWarning] = useState(false);
+    const [range, setRange] = useState('overview');
+
+    // Use different query keys based on context (coach vs user)
+    const datasetQueryKey = from === 'coach-user'
+        ? ['dataset-coach', userInfo?.auth0_id]
+        : ['dataset', userInfo?.auth0_id];
 
     const {
         isPending: isDatasetPending,
@@ -59,38 +65,46 @@ const ProgressBoard = ({
         data: checkInDataset,
         isFetching: isDatasetFetching,
     } = useQuery({
-        queryKey: ['dataset'],
+        queryKey: datasetQueryKey,
         queryFn: async () => {
-            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated);
+            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
-        enabled: isAuthenticated && !!user,
+        enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
+
+    // Use different query keys based on context (coach vs user)
+    const userCreationDateQueryKey = from === 'coach-user'
+        ? ['user-creation-date-coach', userInfo?.auth0_id]
+        : ['user-creation-date', userInfo?.auth0_id];
 
     const {
         isPending: isUserCreationDatePending,
         data: userCreationDate,
     } = useQuery({
-        queryKey: ['user-creation-date'],
+        queryKey: userCreationDateQueryKey,
         queryFn: async () => {
-            if (!isAuthenticated || !user) return;
-            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+            if (!isAuthenticated || !user) return null;
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
         },
-        enabled: isAuthenticated && !!user,
+        enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
-    // FIX: Add missing dependency and null check
     useEffect(() => {
-        if (!isUserCreationDatePending && userCreationDate?.data) {
+        if (userCreationDate?.data) {
             setLocalUserCreationDate(userCreationDate.data);
         }
-    }, [isUserCreationDatePending, userCreationDate?.data]);
+    }, [userCreationDate?.data]);
 
     useEffect(() => {
-        if (!isDatasetPending && checkInDataset?.data) {
+        if (checkInDataset?.data) {
             setLocalCheckInDataSet(checkInDataset.data);
             useCheckInDataStore.getState().setCheckInDataSet(checkInDataset.data);
         }
-    }, [checkInDataset, isDatasetPending]);
+    }, [checkInDataset?.data]);
 
     useEffect(() => {
         if (localCheckInDataSet && localCheckInDataSet.length > 0 && planLog && planLog.length > 0) {
@@ -104,14 +118,13 @@ const ProgressBoard = ({
         }
     }, [localCheckInDataSet, planLog]);
 
-    // FIX: Remove infinite timer loop
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentDate(getCurrentUTCDateTime());
         }, 60000);
 
         return () => clearInterval(interval);
-    }, []); // Empty dependency array prevents infinite loop
+    }, []);
 
     const formatDateDifference = useCallback((ms) => {
         const seconds = Math.abs(Math.floor(ms / 1000));
@@ -146,6 +159,30 @@ const ProgressBoard = ({
     const totalDaysPhrase = useMemo(() => {
         const localStartDate = new Date(startDate);
 
+        if (from === 'coach-user') {
+            if (readinessValue === 'relapse-support') {
+                return (
+                    <>
+                        Người dùng đã cai thuốc thành công <br/>
+                        Tổng thời gian kể từ khi họ cai thuốc
+                    </>
+                );
+            } else if (currentDate > new Date(expectedQuitDate)) {
+                return (
+                    <>
+                        Người dùng đã hoàn thành kế hoạch cai thuốc <br/>
+                        Tổng thời gian kể từ khi bắt đầu hành trình
+                    </>
+                );
+            } else if (localStartDate > currentDate) {
+                return 'Thời gian còn lại đến khi bắt đầu hành trình cai thuốc';
+            } else if (currentDate < new Date(expectedQuitDate)) {
+                return 'Tổng thời gian kể từ khi người dùng bắt đầu hành trình cai thuốc';
+            }
+            return 'Tổng thời gian kể từ khi người dùng bắt đầu hành trình cai thuốc';
+        }
+
+        // Default (user perspective)
         if (readinessValue === 'relapse-support') {
             return (
                 <>
@@ -166,17 +203,60 @@ const ProgressBoard = ({
             return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
         }
         return 'Tổng thời gian kể từ khi bạn bắt đầu hành trình cai thuốc';
-    }, [readinessValue, currentDate, expectedQuitDate, startDate]);
+    }, [readinessValue, currentDate, expectedQuitDate, startDate, from]);
 
-    // FIX: Prevent date mutation that caused infinite loops
+
+    // Check if all required data is available for calculation
+    const isDataReady = useMemo(() => {
+        // console.log('Data ready check:', {
+        //     localUserCreationDate,
+        //     currentDate: !!currentDate,
+        //     localCheckInDataSet: Array.isArray(localCheckInDataSet),
+        //     cigsPerDay,
+        //     readinessValue,
+        //     stoppedDate,
+        //     isUserCreationDatePending,
+        //     isDatasetPending,
+        //     isAuthenticated,
+        //     userInfo: !!userInfo?.auth0_id
+        // });
+
+        return !!(
+            localUserCreationDate &&
+            currentDate &&
+            Array.isArray(localCheckInDataSet) &&
+            cigsPerDay &&
+            (readinessValue !== 'relapse-support' || stoppedDate) &&
+            !isUserCreationDatePending &&
+            !isDatasetPending &&
+            isAuthenticated &&
+            userInfo?.auth0_id
+        );
+    }, [
+        localUserCreationDate,
+        currentDate,
+        localCheckInDataSet,
+        cigsPerDay,
+        readinessValue,
+        stoppedDate,
+        isUserCreationDatePending,
+        isDatasetPending,
+        isAuthenticated,
+        userInfo?.auth0_id
+    ]);
+
     const cigsQuit = useMemo(() => {
-        if (typeof localUserCreationDate !== 'string') return 0;
+        // Return null instead of 0 when data isn't ready
+        if (!isDataReady) {
+            //console.log('cigsQuit: Data not ready, returning null');
+            return null;
+        }
 
+        //console.log('cigsQuit: Calculating with data ready');
         const startDay = new Date(readinessValue === 'relapse-support' ? stoppedDate : localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
 
-        // Create a new date object for iteration to avoid mutation
         const iterationDate = new Date(startDay);
 
         while (iterationDate <= endDate) {
@@ -193,15 +273,23 @@ const ProgressBoard = ({
                 total += cigsPerDay;
             }
 
-            // Create new date instead of mutating existing one
             iterationDate.setUTCDate(iterationDate.getUTCDate() + 1);
         }
 
-        return Math.max(0, total); // Ensure non-negative result
-    }, [localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
+        const result = Math.max(0, total);
+        //console.log('cigsQuit calculated:', result);
+        return result;
+    }, [isDataReady, localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
 
     const moneySaved = useMemo(() => {
-        return Math.round(cigsQuit * pricePerCig);
+        // Return null instead of 0 when cigsQuit isn't calculated yet
+        if (cigsQuit === null || !pricePerCig) {
+            //console.log('moneySaved: Not ready, returning null');
+            return null;
+        }
+        const result = Math.round(cigsQuit * pricePerCig);
+        //console.log('moneySaved calculated:', result);
+        return result;
     }, [cigsQuit, pricePerCig]);
 
     useEffect(() => {
@@ -213,8 +301,8 @@ const ProgressBoard = ({
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
         if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod));
-    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending]);
+        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at, range));
+    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending, range]);
 
     const getReferenceArea = useCallback(() => {
         if (!mergedDataSet || mergedDataSet.length === 0) return null;
@@ -253,17 +341,41 @@ const ProgressBoard = ({
     }, [cigsPerDay, currentDate, mergedDataSet]);
 
     const handleCheckIn = useCallback(() => {
-        setCurrentStepDashboard('check-in');
-        handleStepThree();
+        if (setCurrentStepDashboard) {
+            setCurrentStepDashboard('check-in');
+            handleStepThree();
+        }
     }, [setCurrentStepDashboard, handleStepThree]);
 
-    useEffect(() => {
-        console.log(mergedDataSet)
-    }, [mergedDataSet]);
+    // Show loading state for calculations
+    const isCalculating = isPending || isDatasetPending || isUserCreationDatePending || !isDataReady || cigsQuit === null || moneySaved === null;
+
+    const handleSelectChange = (e) => {
+        setRange(e);
+    }
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+
+            return (
+                <div className="bg-white border rounded shadow p-2 text-sm">
+                    <div className="font-semibold">{label}</div>
+                    <div>
+                        <div className={`${data.checkinMissed ? 'text-red-500' : 'text-green-600'}`}>{data.checkinMissed ? 'Chưa check-in (ước lượng)' : 'Đã check-in'}</div>
+                        <div>Đã hút: {data.actual}</div>
+                        {data.plan != null && <div>Kế hoạch: {data.plan}</div>}
+                    </div>
+
+                </div>
+            );
+        }
+        return null;
+    };
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
-            <div className="flex items-center justify-between">
+            {!from && <div className="flex items-center justify-between">
                 {isPending ? (
                     <Skeleton.Button active/>
                 ) : (
@@ -276,7 +388,7 @@ const ProgressBoard = ({
                         What's a check-in and why are they important?
                     </a>
                 )}
-            </div>
+            </div>}
 
             <div className="bg-primary-100 rounded-lg p-6 text-center">
                 <h2 className="text-gray-600 text-sm font-medium">
@@ -301,7 +413,7 @@ const ProgressBoard = ({
             <div className="grid grid-cols-3 gap-3 text-center">
                 {[0, 1, 2].map((i) => (
                     <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
-                        {isPending ? (
+                        {isCalculating ? (
                             <Skeleton active paragraph={{rows: 2}}/>
                         ) : (
                             <>
@@ -309,10 +421,17 @@ const ProgressBoard = ({
                                     <IoLogoNoSmoking className='size-10 text-primary-800'/>,
                                     <FaTrophy className='size-9 text-primary-800'/>][i]}</div>
                                 <div className="text-xl font-semibold text-primary-800">
-                                    {i === 0 ? moneySaved + ' VNĐ' : i === 1 ? cigsQuit : 1}
+                                    {i === 0 ?
+                                        (moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...') :
+                                        i === 1 ?
+                                            (cigsQuit !== null ? cigsQuit : 'Đang tính...') :
+                                            1
+                                    }
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                    {['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
+                                    {from === 'coach-user'
+                                        ? ['Số tiền người dùng tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]
+                                        : ['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
                                 </div>
                             </>
                         )}
@@ -321,21 +440,27 @@ const ProgressBoard = ({
             </div>
 
             <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
-                <div className="absolute right-3 top-3">
+                {!from && <div className="absolute right-3 top-3">
                     {!isPending && (
-                        <a onClick={() => navigate('/onboarding/progress-board-startdate')} className="text-sm text-primary-700 hover:underline">
+                        <a onClick={() => navigate('/onboarding/progress-board-startdate')}
+                           className="text-sm text-primary-700 hover:underline">
                             Chỉnh sửa?
                         </a>
                     )}
-                </div>
+                </div>}
                 <div className="text-2xl flex justify-center"><FaRegCalendarCheck
                     className='size-9 text-primary-800 mb-1'/></div>
-                <h3 className="text-lg font-semibold text-primary-800">{readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc'}</h3>
+                <h3 className="text-lg font-semibold text-primary-800">
+                    {from === 'coach-user'
+                        ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
+                        : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
+                </h3>
+
                 <div className="text-sm text-gray-600">
                     {isPending ?
                         <Skeleton.Input style={{width: 160}} active/> :
                         readinessValue === 'ready' ?
-                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
+                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
                             new Date(stoppedDate).toLocaleDateString('vi-VN')
                     }
                 </div>
@@ -343,86 +468,104 @@ const ProgressBoard = ({
 
             {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (
                 <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
-                    <div className="absolute right-3 top-3">
+                    {!from && <div className="absolute right-3 top-3">
                         {!isPending && (
                             <a onClick={() => navigate('/onboarding/progress-board-plan')}
                                className="text-sm text-primary-700 hover:underline">
                                 Chỉnh sửa?
                             </a>
                         )}
-                    </div>
+                    </div>}
                     <div className="text-2xl flex justify-center"><BsGraphDown
                         className='size-7 text-primary-800 mb-1'/></div>
-                    <h3 className="text-lg font-semibold text-primary-800">Số điếu thuốc theo kế hoạch và thực tế</h3>
-                    {showWarning && <p>Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!</p>}
-                    {isPending ? (
-                        <Skeleton.Input style={{width: '100%', height: 300}} active/>
-                    ) : (mergedDataSet?.length > 0) ? (
-                        <ResponsiveContainer width="100%" height={350}>
-                            {localCheckInDataSet.length > 0 ? (
-                                <LineChart
-                                    data={mergedDataSet}
-                                    margin={{top: 20, right: 30, left: 20, bottom: 25}}
-                                >
-                                    <Line
-                                        type="monotone"
-                                        dataKey="actual"
-                                        stroke="#ef4444"
-                                        dot={{r: 3}}
-                                        name="Đã hút"
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="plan"
-                                        stroke="#14b8a6"
-                                        strokeDasharray="5 5"
-                                        dot={false}
-                                        name="Kế hoạch"
-                                        connectNulls={true}
-                                    />
-                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                                    {quittingMethod === 'gradual-weekly' && getReferenceArea()}
-                                    <ReferenceLine
-                                        x={
-                                            currentDate < new Date(expectedQuitDate)
-                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
-                                                : ''
-                                        }
-                                        stroke="#115e59"
-                                        label={'Hôm nay'}
-                                    />
-                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>}
-                                           // interval={quittingMethod === 'gradual-weekly' ? 5 : 1}
-                                           interval= {1}/>
-                                    <YAxis/>
-                                    <Tooltip/>
-                                    <Legend verticalAlign="top"/>
-                                </LineChart>
-                            ) : (
-                                <LineChart data={planLogCloneDDMMYY}
-                                           margin={{top: 20, right: 30, left: 20, bottom: 25}}>
-                                    <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
-                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                                    <ReferenceLine
-                                        x={
-                                            currentDate < new Date(expectedQuitDate)
-                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
-                                                : ''
-                                        }
-                                        stroke="#115e59"
-                                        label="Hôm nay"
-                                    />
-                                    <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
-                                    <YAxis/>
-                                    <Tooltip/>
-                                </LineChart>
+                    <h3 className="text-lg font-semibold text-primary-800">
+                        {from === 'coach-user'
+                            ? 'Số điếu thuốc theo kế hoạch và thực tế của người dùng'
+                            : 'Số điếu thuốc theo kế hoạch và thực tế'}
+                    </h3>
+                    <Select
+                        defaultValue="overview"
+                        variant="borderless"
+                        style={{ width: 120 }}
+                        onChange={handleSelectChange}
+                        options={[
+                            { value: 'plan', label: 'Kế hoạch' },
+                            { value: 'overview', label: 'Tổng quan' },
+                        ]}
+                    />
+
+                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
+                        <div className='flex flex-col items-center justify-center'>
+                            <p>
+                                {from === 'coach-user'
+                                    ? 'Người dùng chưa tạo kế hoạch cai thuốc.'
+                                    : 'Bạn chưa tạo kế hoạch'}
+                            </p>
+                            {from !== 'coach-user' && (
+                                <CustomButton onClick={() => navigate('/onboarding/progress-board-plan')}>
+                                    Tạo ngay
+                                </CustomButton>
                             )}
+                        </div>
+
+                    }
+                    {showWarning &&
+                        <p><p>
+                            {from === 'coach-user'
+                                ? 'Người dùng dường như vẫn hút thuốc sau khi kết thúc kế hoạch. Bạn có thể đề xuất họ bắt đầu lại.'
+                                : 'Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!'}
+                        </p>
+                        </p>}
+                    {isPending ? (
+                        <Skeleton.Input style={{ width: '100%', height: 300 }} active />
+                    ) : mergedDataSet?.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={350}>
+                            <LineChart
+                                data={mergedDataSet}
+                                margin={{ top: 20, right: 30, left: 20, bottom: 25 }}
+                            >
+                                <Line
+                                    type="monotone"
+                                    dataKey="actual"
+                                    stroke="#ef4444"
+                                    dot={{ r: 3 }}
+                                    name="Đã hút"
+                                    connectNulls={true}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="plan"
+                                    stroke="#14b8a6"
+                                    strokeDasharray="5 5"
+                                    dot={false}
+                                    name="Kế hoạch"
+                                    connectNulls={true}
+                                />
+                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                {quittingMethod === 'gradual-weekly' && getReferenceArea()}
+                                <ReferenceLine
+                                    x={
+                                        currentDate < new Date(expectedQuitDate)
+                                            ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
+                                            : ''
+                                    }
+                                    stroke="#115e59"
+                                    label="Hôm nay"
+                                />
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick />} interval={1} />
+                                <YAxis />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend verticalAlign="top" />
+                            </LineChart>
                         </ResponsiveContainer>
-                    ) : null}
+                    ) : (
+                        <div className="text-center text-gray-500">Không có dữ liệu để hiển thị.</div>
+                    )}
+
                 </div>
             )}
 
-            <div className="text-center">
+            {!from && <div className="text-center">
                 {isPending ? (
                     <Skeleton.Input style={{width: 160}} active/>
                 ) : (
@@ -430,7 +573,7 @@ const ProgressBoard = ({
                         🔗 Chia sẻ tiến trình
                     </a>
                 )}
-            </div>
+            </div>}
         </div>
     );
 };

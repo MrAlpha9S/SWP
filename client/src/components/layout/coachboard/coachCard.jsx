@@ -1,10 +1,82 @@
 
-import {Modal} from "antd";
+import {Modal, Popconfirm} from "antd";
 import React, {useState} from "react";
 import CoachDetailsPage from "../../../pages/subscriptionPage/coachDetailsPage.jsx";
+import {useMutation} from "@tanstack/react-query";
+import {assignCoachToUser} from "../../utils/userUtils.js";
+import {useNavigate} from "react-router-dom";
+import {useCurrentStepDashboard, useUserInfoStore} from "../../../stores/store.js";
+import {useAuth0} from "@auth0/auth0-react";
+import {useSocketStore} from "../../../stores/useSocketStore.js";
+import {getCurrentUTCDateTime} from "../../utils/dateUtils.js";
+import {CreateConversation} from "../../utils/messagerUtils.js";
 
 const CoachCard = ({coach}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const {userInfo} = useUserInfoStore()
+    const {setCurrentStepDashboard} = useCurrentStepDashboard()
+    const {isAuthenticated, getAccessTokenSilently, user} = useAuth0()
+    const { socket } = useSocketStore()
+
+
+    const assignMutation = useMutation({
+        mutationFn: async ({coachId, userId, username, coachAuth0Id}) => {
+            const res = await assignCoachToUser(coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated);
+            return res.data;
+        },
+        onSuccess: async () => {
+            const conversation_name = `${user.name} - ${name}`;
+            const created_at = getCurrentUTCDateTime();
+            const newConversation = await CreateConversation(user, getAccessTokenSilently, isAuthenticated, conversation_name, created_at, coach?.auth0_id);
+            if (socket && newConversation) {
+                socket.emit('new_conversation', {
+                    conversation: newConversation,
+                    participants: [user.sub, coach?.auth0_id],
+                });
+                try {
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_creation_started',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_created_successfully',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        timestamp: new Date().toISOString()
+                    });
+
+                } catch (error) {
+                    console.error('Error creating conversation:', error);
+                    socket?.emit('member_interaction', {
+                        type: 'conversation_creation_failed',
+                        memberId: coach?.auth0_id,
+                        memberName: coach?.username,
+                        error: error.message,
+                        timestamp: new Date().toISOString()
+                    });
+                } finally {
+                    setCurrentStepDashboard('coach')
+                    navigate('/dashboard')
+                }
+            }
+        },
+        onError: (error) => {
+            console.error("Assign failed:", error);
+        }
+    });
+
+    const handleOk = () => {
+        assignMutation.mutate({
+            coachId: coach?.user_id,
+            userId: userInfo?.user_id,
+            username: userInfo?.username,
+            coachAuth0Id: coach?.auth0_id
+        });
+    }
 
     return (
         <div
@@ -81,10 +153,22 @@ const CoachCard = ({coach}) => {
 
             </div>
             <div className="flex gap-3 p-3 mt-auto">
-                <button
-                    className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                    Chọn
-                </button>
+                <Popconfirm
+                    title="Xác nhận chọn Huấn luyện viên?"
+                    description={<div>
+                        <p>Bạn có chắc muốn chọn Huấn luyện viên {coach.username}?</p>
+                        <p> Bạn có thể đổi Huấn luyện viên sau 48 giờ.</p>
+                    </div>}
+                    onConfirm={() => handleOk()}
+                    onCancel={() => console.log("Cancel")}
+                    okText="Xác nhận"
+                    cancelText="Hủy"
+                >
+                    <button
+                        className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                        Chọn
+                    </button>
+                </Popconfirm>
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="px-4 py-2.5 border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-700 font-medium rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">

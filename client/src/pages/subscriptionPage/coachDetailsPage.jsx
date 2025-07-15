@@ -24,7 +24,6 @@ const CoachDetailsPage = ({ coachId }) => {
     useEffect(() => {
         if (!isPending && data) {
             setCoachInfo(data.data)
-            console.log(data.data)
         }
     }, [isPending, data])
 

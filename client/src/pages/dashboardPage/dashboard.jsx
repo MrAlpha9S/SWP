@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
+import React, {useEffect, useState} from "react";
+import {useAuth0} from "@auth0/auth0-react";
+import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
 import {
-    useCigsPerPackStore, useCurrentStepDashboard,
+    useCigsPerPackStore, useCoachInfoStore, useCoachStatsStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
     usePricePerPackStore, useProfileExists,
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
-import { useQuery } from '@tanstack/react-query'
-import { useCheckInDataStore } from "../../stores/checkInStore.js";
+import {useQuery} from '@tanstack/react-query'
+import {useCheckInDataStore} from "../../stores/checkInStore.js";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CoachSideBar from "../../components/layout/dashboard/coachsidebar.jsx"
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
-import { queryClient } from "../../main.jsx";
+import {queryClient} from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
@@ -27,6 +27,12 @@ import PostBlog from '../../components/layout/coachboard/postblog.jsx'
 import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
+import Messager from "../../components/layout/coachboard/messager/messager.jsx";
+import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
+import {getStats} from "../../components/utils/coachUtils.js";
+import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
+import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
+import {getCoachById} from "../../components/utils/userUtils.js";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -55,6 +61,8 @@ function Dashboard() {
     const [heroTitle, setHeroTitle] = useState("");
     const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
     const {userInfo} = useUserInfoStore()
+    const {coachStats, setCoachStats} = useCoachStatsStore()
+    const {coachInfo, setCoachInfo} = useCoachInfoStore()
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
@@ -81,6 +89,40 @@ function Dashboard() {
         },
         enabled: isAuthenticated && !!user,
     })
+
+    const {
+        isPending: isCoachStatsPending,
+        data: coachStatsFetched,
+    } = useQuery({
+        queryKey: ['coachStats'],
+        queryFn: async () => {
+            return await getStats(user, getAccessTokenSilently, isAuthenticated);
+        },
+        enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
+    })
+
+    const {
+        isPending: isCoachInfoPending,
+        data: coachInfoFetched,
+    } = useQuery({
+        queryKey: ['coach-info'],
+        queryFn: async () => {
+            return await getCoachById(userInfo?.user_id);
+        },
+        enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
+    })
+
+    useEffect(() => {
+        if (!isCoachStatsPending && userInfo?.role === 'Coach') {
+            setCoachStats(coachStatsFetched?.data);
+        }
+    }, [coachStatsFetched, isCoachStatsPending, setCoachStats, setCurrentStepDashboard, userInfo]);
+
+    useEffect(() => {
+        if (!isCoachInfoPending && userInfo?.role === 'Coach') {
+            setCoachInfo(coachInfoFetched?.data)
+        }
+    }, [coachInfoFetched, isCoachInfoPending, setCoachInfo, userInfo]);
 
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ['checkin-status']});
@@ -152,60 +194,73 @@ function Dashboard() {
     }, [currentStepDashboard]);
 
     const renderBoard = () => {
-        if (!isAuthenticated || isUserProfilePending) {
+        if ((!isAuthenticated || isUserProfilePending) && userInfo?.role === 'Member') {
             return <ProgressBoard isPending={true}/>;
         }
 
-        switch (currentStepDashboard) {
-            case 'dashboard':
-                return userProfile?.data?.userProfile ? (
-                    <ProgressBoard
-                        startDate={startDate}
-                        pricePerPack={pricePerPack}
-                        cigsPerPack={cigsPerPack}
-                        cigsReduced={cigsReduced}
-                        quittingMethod={quittingMethod}
-                        planLog={planLog}
-                        cigsPerDay={cigsPerDay}
-                        expectedQuitDate={expectedQuitDate}
-                        stoppedDate={stoppedDate}
-                        isPending={false}
-                        readinessValue={readinessValue}
-                        planLogCloneDDMMYY={planLogCloneDDMMYY}
-                        setCurrentStepDashboard={setCurrentStepDashboard}
-                        userInfo={userInfo}
-                        isAuthenticated={isAuthenticated}
-                        getAccessTokenSilently={getAccessTokenSilently}
-                        setMoneySaved={setMoneySaved}
-                    />
-                ) : (
-                    <NotFoundBanner title="Không tìm thấy kế hoạch của bạn"/>
-                );
+        if ((!isAuthenticated || isCoachInfoPending || isCoachStatsPending) && userInfo?.role === 'Coach') {
+            return <CoachOverview isDataPending={true}/>;
+        }
 
-            case 'check-in':
-                return <CheckinMenu/>;
+        if (currentStepDashboard?.length > 0) {
+            switch (currentStepDashboard) {
+                case 'dashboard':
+                    return userProfile?.data?.userProfile ? (
+                        <ProgressBoard
 
-            case 'goals':
-                return <GoalsMenu/>;
+                            startDate={startDate}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            cigsReduced={cigsReduced}
+                            quittingMethod={quittingMethod}
+                            planLog={planLog}
+                            cigsPerDay={cigsPerDay}
+                            expectedQuitDate={expectedQuitDate}
+                            stoppedDate={stoppedDate}
+                            isPending={false}
+                            readinessValue={readinessValue}
+                            planLogCloneDDMMYY={planLogCloneDDMMYY}
+                            setCurrentStepDashboard={setCurrentStepDashboard}
+                            userInfo={userInfo}
+                            isAuthenticated={isAuthenticated}
+                            getAccessTokenSilently={getAccessTokenSilently}
+                            setMoneySaved={setMoneySaved}
+                        />
+                    ) : (
+                        currentStepDashboard === 'dashboard' && <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                    );
 
-            case 'savings':
-                return <SavingsMenu/>
+                case 'check-in':
+                    return <CheckinMenu/>;
 
-            case 'distraction-tools':
-                return <DistractionTools/>
+                case 'goals':
+                    return <GoalsMenu/>;
 
-            case 'badges':
-                return <BadgesMenu/>;
-            case 'messager':
-                return <MessageBox/>
-            case 'post-blog':
-                return <PostBlog/>
+                case 'savings':
+                    return <SavingsMenu/>
 
-            case 'coach':
-                return <CoachDashboard/>;
+                case 'distraction-tools':
+                    return <DistractionTools/>
 
-            default:
-                return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
+                case 'badges':
+                    return <BadgesMenu/>;
+                case 'messager':
+                    return <div className='w-full h-screen'><Messager role={userInfo?.role}/></div>
+                case 'post-blog':
+                    return <ManageBlog/>
+
+                case 'overview':
+                    return <CoachOverview stats={coachStats}/>
+
+                case 'coach-user':
+                    return <CoachUser/>
+
+                case 'coach':
+                    return <CoachDashboard/>;
+
+                default:
+                    return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
+            }
         }
     };
 
@@ -250,16 +305,16 @@ function Dashboard() {
 
     return (
         <PageFadeWrapper>
-        <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
-            <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo.username}/>
-            <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
-                {dashboardHandle(userRole)}
+            <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
+                <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
+                <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
+                    {dashboardHandle(userRole)}
 
-                <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
-                    {renderBoard()}
+                    <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                        {renderBoard()}
+                    </div>
                 </div>
             </div>
-        </div>
         </PageFadeWrapper>
 
     )

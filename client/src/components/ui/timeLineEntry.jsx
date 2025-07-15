@@ -4,7 +4,9 @@ import {convertYYYYMMDDStrToDDMMYYYYStr} from "../utils/dateUtils.js";
 import {MdExpandMore, MdExpandLess} from "react-icons/md";
 import {useNavigate} from "react-router-dom";
 
-const TimelineEntry = ({entry}) => {
+const TimelineEntry = ({entry, userAuth0Id}) => {
+    console.log('TimelineEntry userAuth0Id:', userAuth0Id)
+    console.log(userAuth0Id ? 'người dùng' : 'bạn')
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
     const isMissed = entry.isMissed;
@@ -18,8 +20,8 @@ const TimelineEntry = ({entry}) => {
         return (
             <div className="p-2 border-l-4 border-red-400 bg-red-50 rounded">
                 <p className="text-base font-semibold text-gray-800">{dateStrDDMMYY}</p>
-                <p className="text-sm italic text-gray-700">Bạn đã bỏ lỡ check-in trong ngày này.</p>
-                <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at.split('T')[0])}>Nhấn vào đây để Check-in ngay</button>
+                <p className="text-sm italic text-gray-700">{!userAuth0Id ? 'Bạn' : 'Người dùng'} đã bỏ lỡ check-in trong ngày này.</p>
+                {!userAuth0Id && <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at.split('T')[0])}>Nhấn vào đây để Check-in ngay</button>}
             </div>
         );
     }
@@ -31,9 +33,9 @@ const TimelineEntry = ({entry}) => {
 
     const cigsSmokedPhrase =
         cigsSmoked === 0
-            ? 'Tôi đã không hút điếu nào trong hôm nay'
+            ? `${!userAuth0Id ? 'Tôi' : 'Người dùng'} đã không hút điếu nào trong hôm nay`
             : cigsSmoked > 0
-                ? `Tôi đã hút ${cigsSmoked} điếu thuốc`
+                ? `${!userAuth0Id ? 'Tôi' : 'Người dùng'} đã hút ${cigsSmoked} điếu thuốc`
                 : 'missed';
 
     const shouldShowExpand = freetext?.length > 200 || qna.length > 0;
@@ -53,7 +55,7 @@ const TimelineEntry = ({entry}) => {
                 <p className="text-sm italic text-gray-700">{cigsSmokedPhrase}</p>
 
                 {(freetext || qna.length > 0) && (
-                    <p className="text-sm font-semibold text-primary-700 mt-2">Tôi đã viết:</p>
+                    <p className="text-sm font-semibold text-primary-700 mt-2">{!userAuth0Id ? 'Tôi' : 'Người dùng'} đã viết:</p>
                 )}
 
                 {freetext && (

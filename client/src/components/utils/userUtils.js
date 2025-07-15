@@ -15,12 +15,19 @@ export async function postUserInfo(user, getAccessTokenSilently, isAuthenticated
     return res.json();
 }
 
-export async function getUserCreationDate(user, getAccessTokenSilently, isAuthenticated) {
+export async function getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userAuth0Id = null) {
     if (!isAuthenticated || !user) return;
+
+    let userId
+    if (userAuth0Id) {
+        userId = userAuth0Id;
+    } else if (!userAuth0Id) {
+        userId = user.sub
+    }
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/get-user-creation-date?userAuth0Id=' + user.sub, {
+    const res = await fetch('http://localhost:3000/users/get-user-creation-date?userAuth0Id=' + userId, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -129,6 +136,49 @@ export async function updateUserController(user, getAccessTokenSilently, { usern
             username,
             email,
             avatar
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error(await res.text());
+    }
+
+    return await res.json();
+}
+
+export async function GetAllMembers(user, getAccessTokenSilently, isAuthenticated) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/getAllMembers`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+
+    });
+
+    return await res.json();
+}
+
+
+export async function assignCoachToUser (coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated) {
+    if (!isAuthenticated) return
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch("http://localhost:3000/users/assign-coach", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            userId: userId,
+            coachId: coachId,
+            username: username,
+            coachAuth0Id: coachAuth0Id,
         })
     });
 

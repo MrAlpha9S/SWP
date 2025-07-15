@@ -1,4 +1,5 @@
 import {Routes, Route} from "react-router-dom";
+import {createContext, useMemo} from "react";
 import Navbar from './components/layout/navbar.jsx';
 import './App.css';
 import Homepage from './pages/homepage/homepage.jsx';
@@ -10,7 +11,6 @@ import MyProfile from "./pages/dashboardPage/myProfile.jsx";
 import ErrorPage from "./pages/errorPage.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
-import {useEffect} from "react";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
@@ -30,65 +30,135 @@ import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx"
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
 import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
+import {useQuery} from "@tanstack/react-query";
+import {useEffect} from "react";
+import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
+import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
+import CustomButton from "./components/ui/CustomButton.jsx";
+import {queryClient} from "./main.jsx";
+import {useCurrentStepDashboard} from "./stores/store.js";
+const Context = createContext({ name: 'Default' });
 
-function App() {
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+function AppContent() {
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const initSocket = useSocketStore((state) => state.initSocket);
+    const { openNotification } = useNotificationManager();
+
 
     useEffect(() => {
-        const syncOnLoad = async () => {
-            if (!isAuthenticated || !user) return;
-            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            if (result?.data) {
-                await syncProfileToStores(result.data);
-            }
+        const connectSocket = async () => {
+            if (!isAuthenticated) return;
+
+            const token = await getAccessTokenSilently();
+            const socket = initSocket(token);
+
+            socket.on('connect', () => {
+                socket.emit('user_authenticate', {
+                    userId: user.sub,
+                    username: user.name,
+                    avatar: user.picture
+                });
+            });
+
+            socket.on('online_users_list', (users) => {
+                const usersMap = new Map(users.map(u => [u.userId, u]));
+                useOnlineUsersStore.getState().setOnlineUsers(usersMap);
+            });
+
+            socket.on('coach_selected', (data) => {
+                console.log(data);
+                openNotification('coach_selected', data);
+            });
+
+            socket.on('new_message', () => {
+                queryClient.invalidateQueries(['messageConversations'])
+            });
+
+            socket.on('new_message_noti', (data) => {
+                const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
+                if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
+                    openNotification('new_message', data);
+                }
+            });
+
+            return () => {
+                socket.disconnect();
+            };
         };
 
-        syncOnLoad();
-    }, [isAuthenticated, user, getAccessTokenSilently]);
+        connectSocket();
+    }, [isAuthenticated, getAccessTokenSilently, initSocket, user]);
+
+    const { isPending, data } = useQuery({
+        queryKey: ['user-profile'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return null;
+            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+            return result?.data;
+        },
+        enabled: !!isAuthenticated && !!user,
+    });
+
+    useEffect(() => {
+        if (!isPending && data) {
+            syncProfileToStores(data);
+
+            const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
+            if (data?.userInfo?.role === 'Member' && currentStepDashboard?.length === 0) {
+               useCurrentStepDashboard.getState().setCurrentStepDashboard('dashboard');
+            } else if (data?.userInfo?.role === 'Coach' && currentStepDashboard?.length === 0) {
+                useCurrentStepDashboard.getState().setCurrentStepDashboard('overview');
+            }
+        }
+    }, [data, isPending]);
+
+    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 
     return (
-        <>
+        <Context.Provider value={contextValue}>
             <Navbar />
             <div className="w-full mx-auto bg-[#fff7e5]">
                 <AnimatePresence mode="wait">
-            <Routes>
-                <Route path="/" element={<Homepage />} />
-
-                <Route path="/dashboard" element={<DashBoard />} />
-                <Route path="/dashboard/check-in" element={<CheckIn />} />
-                <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
-
-                <Route path="/topics" element={<TopicsPage />} />
-                <Route path="/topics/:topicId" element={<Topic />} />
-
-                <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
-
-                {/* Auth0 Callback Routes */}
-
-                <Route path="/post-signup" element={<PostSignUpCallback />} />
-                <Route path="/onboarding/:from?" element={<Onboarding />} />
-                <Route path="/error" element={<ErrorPage />} />
-                <Route path="/post-onboarding" element={<PostOnboardingCallback/>}></Route>
-                <Route path="/my-profile" element={<MyProfile/>}></Route>
-                <Route path="/profile" element={<Profile/>}></Route>
-                <Route path="/forum" element={<ForumPage />}></Route>
-
-                <Route path="/forum/quit-experiences" element={<QuitExperiences/>}></Route>
-                <Route path="/forum/getting-started" element={<GettingStarted/>}></Route>
-                <Route path="/forum/staying-quit" element={<StayingQuit/>}></Route>
-                <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}></Route>
-                <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}></Route>
-                <Route path="/forum/all-posts" element={<AllPosts/>}></Route>
-                <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
-                <Route path="/subscription" element={<SubscriptionPage/>}></Route>
-                <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
-                <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
-            </Routes>
+                    <Routes>
+                        <Route path="/" element={<Homepage />} />
+                        <Route path="/dashboard" element={<DashBoard />} />
+                        <Route path="/dashboard/check-in" element={<CheckIn />} />
+                        <Route path="/dashboard/check-in/:date" element={<CheckIn />} />
+                        <Route path="/topics" element={<TopicsPage />} />
+                        <Route path="/topics/:topicId" element={<Topic />} />
+                        <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
+                        <Route path="/post-signup" element={<PostSignUpCallback />} />
+                        <Route path="/onboarding/:from?" element={<Onboarding />} />
+                        <Route path="/error" element={<ErrorPage />} />
+                        <Route path="/post-onboarding" element={<PostOnboardingCallback />} />
+                        <Route path="/my-profile" element={<MyProfile />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/forum" element={<ForumPage />} />
+                        <Route path="/forum/quit-experiences" element={<QuitExperiences />} />
+                        <Route path="/forum/getting-started" element={<GettingStarted />} />
+                        <Route path="/forum/staying-quit" element={<StayingQuit />} />
+                        <Route path="/forum/hints-and-tips" element={<HintsAndTips />} />
+                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit />} />
+                        <Route path="/forum/all-posts" element={<AllPosts />} />
+                        <Route path="/forum/:category/:postId" element={<PostPage />} />
+                        <Route path="/subscription" element={<SubscriptionPage />} />
+                        <Route path="/congratulationPage" element={<CongratulationPage />} />
+                        <Route path="/coach-selection" element={<CoachSelectPage />} />
+                    </Routes>
                 </AnimatePresence>
             </div>
             <Footer />
-        </>
-    )
+        </Context.Provider>
+    );
 }
 
-export default App
+function App() {
+    return (
+        <NotificationProvider>
+            <AppContent />
+        </NotificationProvider>
+    );
+}
+
+export default App;
+

@@ -5,16 +5,16 @@ import {convertDDMMYYYYStrToYYYYMMDDStr, getCurrentUTCDateTime} from "../../util
 import {getCheckInData} from "../../utils/checkInUtils.js";
 import {useAuth0} from "@auth0/auth0-react";
 import {useCheckInDataStore} from "../../../stores/checkInStore.js";
-import {usePlanStore, useUserCreationDate} from "../../../stores/store.js";
+import { useUserCreationDate} from "../../../stores/store.js";
 import TimeLineEachMonth from "./timeLineEachMonth.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
 import dayjs from "dayjs";
 import {getUserCreationDate} from "../../utils/userUtils.js";
 
-const Journal = () => {
+const Journal = ({userAuth0Id = null}) => {
+    console.log('Journal received userAuth0Id:', userAuth0Id)
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {allCheckInData, setAllCheckInData} = useCheckInDataStore();
-    const {startDate} = usePlanStore()
     const [searchDate, setSearchDate] = useState('')
     const {setUserCreationDate} = useUserCreationDate();
     const [activeKeys, setActiveKeys] = useState(['2']);
@@ -24,10 +24,10 @@ const Journal = () => {
         error: CheckInDataError,
         data: CheckInData,
     } = useQuery({
-        queryKey: ['all-checkin-data'],
+        queryKey: ['all-checkin-data', userAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal');
+            return await getCheckInData(user, getAccessTokenSilently, isAuthenticated, null, 'journal', userAuth0Id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -46,10 +46,10 @@ const Journal = () => {
         isPending: isUserCreationDatePending,
         data: userCreationDate,
     } = useQuery({
-        queryKey: ['user-creation-date'],
+        queryKey: ['user-creation-date', userAuth0Id],
         queryFn: async () => {
             if (!isAuthenticated || !user) return;
-            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated);
+            return await getUserCreationDate(user, getAccessTokenSilently, isAuthenticated, userAuth0Id);
         },
         enabled: isAuthenticated && !!user,
     })
@@ -83,6 +83,7 @@ const Journal = () => {
                         year={searchYear}
                         allCheckInData={allCheckInData}
                         userCreationDate={userCreationDate.data}
+                        userAuth0Id={userAuth0Id}
                     />
                 ),
             });
@@ -114,6 +115,7 @@ const Journal = () => {
                         year={baseYear}
                         allCheckInData={allCheckInData}
                         userCreationDate={userCreationDate.data}
+                        userAuth0Id={userAuth0Id}
                     />
                 ),
             });
@@ -132,7 +134,7 @@ const Journal = () => {
     }, [searchDate, dropdownItems]);
 
     return <>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-[650px]">
             <div className='flex gap-5'>
                 <DatePicker className='h-[42px] w-[40%]' onChange={(date, dateString) => {
                     setSearchDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);

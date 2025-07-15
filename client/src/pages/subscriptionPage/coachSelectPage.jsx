@@ -9,6 +9,7 @@ function CoachSelectPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [coaches, setCoaches] = useState([]);
 
+
     const {isPending, data} = useQuery({
         queryFn: async () => {
             return await getCoaches()
@@ -36,10 +37,6 @@ function CoachSelectPage() {
     const handleSearch = (term) => {
         setSearchTerm(term);
     };
-
-    useEffect(() => {
-        console.log(filteredCoaches)
-    }, [filteredCoaches, searchTerm])
 
     return (
         <PageFadeWrapper>

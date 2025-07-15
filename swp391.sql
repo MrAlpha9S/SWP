@@ -65,6 +65,7 @@ CREATE TABLE [coach_info] (
   [bio] nvarchar(200),
   [detailed_bio] nvarchar(max),
   [motto] nvarchar(100),
+  [commission_rate] float DEFAULT(0.3)
 )
 ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 GO
@@ -91,10 +92,10 @@ GO
 
 
 CREATE TABLE [coach_user] (
-  [pair_id] int PRIMARY KEY IDENTITY(1, 1),
   [coach_id] int,
   [user_id] int,
-  [started_date] DATETIME
+  [started_date] DATETIME,
+  PRIMARY KEY ([coach_id], [user_id], [started_date])
 )
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
@@ -117,9 +118,11 @@ CREATE TABLE [user_profiles] (
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
+  [last_edited_by] int,
   [is_public] bit default (1),
 )
 GO
+ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_edited_by]) REFERENCES [users] ([user_id])
 
 CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -266,6 +269,7 @@ CREATE TABLE [blog_posts] (
   [user_id] INT,
   [created_at] DATETIME,
   [isPendingForApprovement] INT DEFAULT (1),
+  [is_pending_for_deletion] INT DEFAULT (0),
   [topic_id] VARCHAR(100),
   FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]),
   FOREIGN KEY ([topic_id]) REFERENCES [Topics] ([topic_id])
@@ -289,6 +293,7 @@ CREATE TABLE [social_posts] (
   [created_at] datetime,
   [is_pinned] bit default(0),
   [is_reported] int DEFAULT (0),
+  [is_pending] bit DEFAULT (1),
 )
 GO
 

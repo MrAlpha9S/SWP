@@ -1,7 +1,7 @@
-
-
+import {useNavigate} from "react-router-dom";
 const CongratulationPage = ({ subscriptionData }) => {
 
+    const navigate = useNavigate();
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const months = [
@@ -95,7 +95,11 @@ const CongratulationPage = ({ subscriptionData }) => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-                        <button className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
+                        <button
+                            onClick={() => {
+                                navigate('/coach-selection')
+                            }}
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
                             Bắt đầu
                         </button>
                         {/*<button className="bg-white text-gray-700 px-8 py-3 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200">*/}

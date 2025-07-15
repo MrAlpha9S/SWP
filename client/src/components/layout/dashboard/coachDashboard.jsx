@@ -1,18 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {useUserInfoStore} from "../../../stores/store.js";
+import {usePlanStore, useUserInfoStore} from "../../../stores/store.js";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {Card} from "antd";
 import {useQuery} from "@tanstack/react-query";
 import {getCoachById} from "../../utils/userUtils.js";
-import {convertDDMMYYYYStrToYYYYMMDDStr, convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
+import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
+import NotFoundBanner from "../notFoundBanner.jsx";
+import Messager from '../coachboard/messager/messager.jsx'
 
 const CoachDashboard = () => {
     const {userInfo} = useUserInfoStore()
     const navigate = useNavigate();
     const [coachInfo, setCoachInfo] = useState();
     const {Meta} = Card
+    const {planLog} = usePlanStore()
 
     const {isPending, data} = useQuery({
         queryFn: async () => {
@@ -23,12 +26,12 @@ const CoachDashboard = () => {
     })
 
     useEffect(() => {
-        if (!isPending) {
+        if (!isPending && data?.data) {
             setCoachInfo(data?.data)
         }
     }, [isPending])
 
-    if (userInfo.sub_id === 1) {
+    if (userInfo && userInfo.sub_id === 1) {
         return (
             <div className='space-y-4'>
                 <p>Chức năng này dành riêng cho người dùng <strong>Premium</strong>. Nâng cấp ngay để truy cập những
@@ -59,9 +62,9 @@ const CoachDashboard = () => {
                 </div>
             </div>
         )
-    } else if (userInfo?.sub_id !== 1 && coachInfo) {
+    } else if (userInfo && userInfo.sub_id !== 1 && coachInfo?.coach) {
         return (
-            <div className='w-full h-full'>
+                <div className='w-full h-screen'>
 
                 <div className=' rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5'>
                     <p className='text-2xl font-bold'>Huấn luyện viên của bạn</p>
@@ -92,13 +95,17 @@ const CoachDashboard = () => {
                             </div>
                         </div>
                     </div>
+                    <div className='h-[70%] w-[50%]'><Messager role={userInfo?.role}/></div>
+                    {!planLog || planLog.length === 0 && <>
+                        <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                    </>}
                 </div>
             </div>
         )
-    } else {
+    } else if (userInfo && userInfo.sub_id !== 1 && !coachInfo) {
         return (
             <div className='w-full h-full'>
-                Chưa có coach
+                <NotFoundBanner title="Bạn chưa chọn huấn luyện viên" type='userWithoutCoach'/>
             </div>
         )
     }
