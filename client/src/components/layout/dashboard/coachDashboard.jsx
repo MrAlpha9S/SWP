@@ -98,7 +98,7 @@ const CoachDashboard = () => {
                         </div>
                     </div>
                     <div className='flex-1 w-full flex min-h-0'>
-                        <div><CoachUser userAuth0Id={userInfo?.auth0_id}/></div>
+                        <div><CoachUser userAuth0Id={userInfo?.auth0_id} from='user' coach={coachInfo?.coach}/></div>
                         {!planLog || planLog.length === 0 && <>
                             <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
                         </>}

@@ -41,7 +41,7 @@ const UserProfileInMessage = ({
                                   checkInDataSet,
                                   goalList,
                                   updatedAt,
-                                  createdAt, updatedBy
+                                  createdAt, updatedBy, coach
                               }) => {
     const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
     const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
@@ -130,6 +130,16 @@ const UserProfileInMessage = ({
     }, [expectedQuitDate, mergedDataSet, today]);
 
 
+    useEffect(() => {
+        console.log(coach ? 'yes coach' : 'no coach')
+    }, [coach]);
+
+    useEffect(() => {
+        console.log('userInfo', userInfo)
+        console.log('coachInfo', coachInfo)
+        console.log('coach', coach)
+    }, [coach, coachInfo, userInfo])
+
     // Show loading state if data is still being fetched
     if (isPending) {
         return (
@@ -139,11 +149,14 @@ const UserProfileInMessage = ({
         );
     }
 
+
+
     return (
         <div className='h-full w-full flex flex-col overflow-y-auto px-5'>
-            <p className='text-gray-400'>Tạo bởi: {userInfo?.username} (người dùng)</p>
+            <p className='text-gray-400'>Tạo bởi: {userInfo?.username} {coach ? '(bạn)' : '(người dùng)'}</p>
             <p className='text-gray-400'>Tạo vào ngày: {convertYYYYMMDDStrToDDMMYYYYStr(createdAt.split('T')[0])}</p>
-            <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {userInfo?.user_id === updatedBy ? `${userInfo?.username} (người dùng)` : `${coachInfo?.username} (bạn)`}</p>
+            {!coach && userInfo && <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {userInfo?.user_id === updatedBy ? `${userInfo?.username} (người dùng)` : `${coachInfo?.username} (bạn)`}</p> }
+            {coach && <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {updatedBy === coach?.user_id ? `${coach?.username} (huấn luyện viên)` : userInfo?.username}</p>}
             {updatedAt && <p className='text-gray-400'>Chỉnh sửa lần cuối vào
                 lúc: {convertYYYYMMDDStrToDDMMYYYYStr(updatedAt.split('T')[0])}</p>}
             <div>

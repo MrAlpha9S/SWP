@@ -13,12 +13,35 @@ import UserProfileInMessage from "./userProfileInMessage.jsx";
 import {getCheckInDataSet} from "../../utils/checkInUtils.js";
 import Journal from "../dashboard/journal.jsx";
 import NotesManager from "./notesManager.jsx";
+import {IoReload} from "react-icons/io5";
+import {queryClient} from "../../../main.jsx";
+import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 
 
-const CoachUser = ({userAuth0Id = null}) => {
+const CoachUser = ({userAuth0Id = null, coach}) => {
     const {userInfo} = useUserInfoStore()
     const {user, isAuthenticated, getAccessTokenSilently} = useAuth0();
     const {selectedUserAuth0Id, setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
+    const [isCooldown, setIsCooldown] = useState(false);
+    const {openNotification} = useNotificationManager()
+
+    const handleReload = () => {
+        if (isCooldown) return;
+
+        // Trigger revalidation
+        queryClient.invalidateQueries(['user-profile-coach']);
+        queryClient.invalidateQueries(['dataset-coach']);
+
+        openNotification('success', {
+            message: 'Làm mới thành công'
+        })
+
+        // Start 1-minute cooldown
+        setIsCooldown(true);
+        setTimeout(() => {
+            setIsCooldown(false);
+        }, 60 * 1000); // 60 seconds
+    };
 
     useEffect(() => {
         if (userAuth0Id) {
@@ -30,7 +53,7 @@ const CoachUser = ({userAuth0Id = null}) => {
     const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
-            console.log({ user, selectedUserAuth0Id });
+            console.log({user, selectedUserAuth0Id});
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
             return result?.data;
         },
@@ -138,6 +161,7 @@ const CoachUser = ({userAuth0Id = null}) => {
                             updatedAt={profileData.userProfile.updated_at ?? ''}
                             createdAt={profileData.userProfile.created_at ?? ''}
                             updatedBy={profileData.userProfile.last_updated_by ?? ''}
+                            coach={coach}
                         />
                     ) : (
                         <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
@@ -169,24 +193,33 @@ const CoachUser = ({userAuth0Id = null}) => {
     }
 
     return (
-            <div className='w-full h-full flex overflow-y-auto'>
-                <div className='w-[650px] h-full'>
-                    <Messager role={userInfo?.role}/>
-                </div>
+        <div className='w-full h-full flex overflow-y-auto'>
+            <div className='w-[650px] h-full'>
+                <Messager role={userInfo?.role}/>
+            </div>
 
-                <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
-                    <p className='font-bold text-4xl text-center'>Thông tin người dùng</p>
-                    <div className="w-full flex-1 flex justify-center overflow-y-auto">
-                        <Tabs
-                            centered
-                            defaultActiveKey="1"
-                            items={items}
-                            className="w-full"
-                            tabBarStyle={{marginBottom: 16}}
-                        />
+            <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
+                <div className='flex gap-4 items-center'><p className='font-bold text-4xl text-center'>Thông tin người
+                    dùng</p>
+                    <div
+                        className={`hover:bg-primary-500 rounded-md cursor-pointer ${isCooldown ? 'opacity-50 pointer-events-none' : ''}`}
+                        onClick={handleReload}
+                        title={isCooldown ? 'Vui lòng chờ 1 phút trước khi làm mới lại' : 'Làm mới dữ liệu'}
+                    >
+                        <IoReload className='size-7' />
                     </div>
                 </div>
+                <div className="w-full flex-1 flex justify-center overflow-y-auto">
+                    <Tabs
+                        centered
+                        defaultActiveKey="1"
+                        items={items}
+                        className="w-full"
+                        tabBarStyle={{marginBottom: 16}}
+                    />
+                </div>
             </div>
+        </div>
     );
 };
 
