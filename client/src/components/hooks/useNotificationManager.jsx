@@ -19,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
                     description: <div>
                         {`Bạn nhận được ${payload.commission.toLocaleString()} VNĐ`}
                         <p>Nhấn vào thông báo này để đi đến trang người dùng</p>
-                        <p>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
+                        <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
                     icon: <BsFillPeopleFill className="size-5"/>,
@@ -32,7 +32,7 @@ export const NotificationProvider = ({ children }) => {
                     message: `Tin nhắn mới từ ${payload.senderName}`,
                     description: <div>
                         {payload.content}
-                        <p>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
+                        <p className='text-gray-400 text-xs'>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
                     icon: <BiConversation className="size-5"/>
@@ -55,7 +55,7 @@ export const NotificationProvider = ({ children }) => {
                     message: `Kế hoạch sửa bởi ${payload.updaterUsername}`,
                     description: <div>
                         Kế hoạch của bạn vừa được chỉnh sửa bởi Huấn luyện viên <strong>{payload.updaterUsername}</strong>
-                        <p>{payload.timestamp}</p>
+                        <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
                     icon: <CiEdit className="size-5"/>
@@ -67,7 +67,20 @@ export const NotificationProvider = ({ children }) => {
                     message: `Kế hoạch sửa bởi ${payload.updaterUsername}`,
                     description: <div>
                         Người dùng {payload.updaterUsername} vừa chỉnh sửa kế hoạch của họ
-                        <p>{payload.timestamp}</p>
+                        <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
+                    </div>,
+                    placement: 'topRight',
+                    icon: <CiEdit className="size-5"/>
+                });
+                break;
+            case 'new-coach-review':
+                api.open({
+                    key: `new-coach-review-${payload.userAuth0Id}`,
+                    message: `Bạn vừa có review mới từ ${payload.username}`,
+                    description: <div>
+                        <p>Nội dung: {payload.content}</p>
+                        <p>Số sao: {payload.stars}</p>
+                        <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
                     icon: <CiEdit className="size-5"/>

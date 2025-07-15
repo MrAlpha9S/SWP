@@ -16,6 +16,7 @@ import NotesManager from "./notesManager.jsx";
 import {IoReload} from "react-icons/io5";
 import {queryClient} from "../../../main.jsx";
 import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
+import ReviewForm from "../dashboard/reviewForCoach.jsx";
 
 
 const CoachUser = ({userAuth0Id = null, coach}) => {
@@ -189,6 +190,17 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                 </div>
             )
         });
+    }
+    if (userAuth0Id) {
+        items.push(
+            {
+                key: '5',
+                label: 'Đánh giá huấn luyện viên',
+                children: (
+                    <div className='px-5'><ReviewForm coachAuth0Id={coach?.auth0_id} username={userInfo?.username}/></div>
+                )
+            }
+        )
     }
 
     return (

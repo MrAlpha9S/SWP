@@ -32,7 +32,8 @@ import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx"
 import {getStats} from "../../components/utils/coachUtils.js";
 import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
-import {getCoachById} from "../../components/utils/userUtils.js";
+import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
+import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -107,7 +108,7 @@ function Dashboard() {
     } = useQuery({
         queryKey: ['coach-info'],
         queryFn: async () => {
-            return await getCoachById(userInfo?.user_id);
+            return await getCoachByIdOrAuth0Id(userInfo?.user_id);
         },
         enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
     })
@@ -257,6 +258,9 @@ function Dashboard() {
 
                 case 'coach':
                     return <CoachDashboard/>;
+
+                    case 'user-review':
+                        return <UserReviews/>
 
                 default:
                     return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;

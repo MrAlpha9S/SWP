@@ -4,7 +4,7 @@ import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {Card} from "antd";
 import {useQuery} from "@tanstack/react-query";
-import {getCoachById} from "../../utils/userUtils.js";
+import {getCoachByIdOrAuth0Id} from "../../utils/userUtils.js";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
 import NotFoundBanner from "../notFoundBanner.jsx";
@@ -21,7 +21,7 @@ const CoachDashboard = () => {
 
     const {isPending, data} = useQuery({
         queryFn: async () => {
-            return await getCoachById(userInfo?.user_id)
+            return await getCoachByIdOrAuth0Id(userInfo?.user_id)
         },
         queryKey: ['coach-info-dashboard'],
         enabled: userInfo !== null,

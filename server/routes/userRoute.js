@@ -3,7 +3,8 @@ const userRouter = express.Router();
 const checkJwt = require('../middlewares/jwtChecker');
 const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserSubscription,
     getCoachesController, getCoachByIdController, assignUserToCoachController, getUserNotesController,
-    createUserNoteController, updateUserNoteController
+    createUserNoteController, updateUserNoteController, getAllReviewsController, createReviewController,
+    updateReviewController, deleteReviewController
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 const {handleAllMember} = require("../controllers/userController");
@@ -22,6 +23,10 @@ userRouter.put('/notes', checkJwt, updateUserNoteController);
 userRouter.post('/notes', checkJwt, createUserNoteController);
 userRouter.delete('/notes/:noteId', checkJwt, createUserNoteController);
 userRouter.get('/notes/:userAuth0Id', checkJwt, getUserNotesController);
+userRouter.get('/coach-reviews/:userAuth0Id/:coachAuth0Id',checkJwt, getAllReviewsController);
+userRouter.post('/coach-reviews',checkJwt, createReviewController);
+userRouter.put('/coach-reviews',checkJwt, updateReviewController);
+userRouter.delete('/coach-reviews/:reviewId', checkJwt,deleteReviewController);
 
 
 module.exports = userRouter;

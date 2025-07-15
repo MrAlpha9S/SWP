@@ -66,13 +66,15 @@ const handlePostOnboarding = async (req, res) => {
                 });
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
-                const user = await getUserByAuth0Id(userAuth0Id);
-                socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
-                    userAuth0Id: userAuth0Id,
-                    updaterUserAuth0Id: updaterUserAuth0Id,
-                    updaterUsername: user.username,
-                    timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
-                });
+                if (coach) {
+                    const user = await getUserByAuth0Id(userAuth0Id);
+                    socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
+                        userAuth0Id: userAuth0Id,
+                        updaterUserAuth0Id: updaterUserAuth0Id,
+                        updaterUsername: user.username,
+                        timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                    });
+                }
             }
         } else {
             result = await postUserProfile(
@@ -105,13 +107,15 @@ const handlePostOnboarding = async (req, res) => {
                 });
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
-                const user = await getUserByAuth0Id(userAuth0Id);
-                socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
-                    userAuth0Id: userAuth0Id,
-                    updaterUserAuth0Id: updaterUserAuth0Id,
-                    updaterUsername: user.username,
-                    timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
-                });
+                if (coach) {
+                    const user = await getUserByAuth0Id(userAuth0Id);
+                    socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
+                        userAuth0Id: userAuth0Id,
+                        updaterUserAuth0Id: updaterUserAuth0Id,
+                        updaterUsername: user.username,
+                        timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                    });
+                }
             }
         }
         if (result)

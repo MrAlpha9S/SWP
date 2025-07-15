@@ -3,7 +3,8 @@ const {
     updateUserSubscriptionService,
     getUserIdFromAuth0Id,
     getCoaches,
-    getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService
+    getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
+    deleteReviewService, updateReviewService, createReviewService, getAllReviews
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -113,12 +114,15 @@ const getCoachesController = async (req, res) => {
 
 const getCoachByIdController = async (req, res) => {
     const { coachId } = req.params;
-    const id = parseInt(coachId);
 
-    if (isNaN(id)) {
-        return res.status(400).json({ message: 'Invalid ID' });
+    let id = coachId
+    if ( coachId.length === 1 ) {
+        id = parseInt(coachId);
+        if (isNaN(id)) {
+            return res.status(400).json({ message: 'Invalid ID' });
+        }
     }
-
+    console.log('id', id);
     try {
         let coachDetails = await getCoachDetailsById(id, null);
 
@@ -305,6 +309,91 @@ const deleteUserNoteController = async (req, res) => {
     }
 };
 
+const getAllReviewsController = async (req, res) => {
+    const { userAuth0Id, coachAuth0Id } = req.params;
+
+    if (!userAuth0Id || !coachAuth0Id) {
+        return res.status(400).json({ success: false, message: 'Missing userAuth0Id or coachAuth0Id' });
+    }
+
+    try {
+        const reviews = await getAllReviews(userAuth0Id, coachAuth0Id);
+        return res.status(200).json({ success: true, data: reviews });
+    } catch (error) {
+        console.error('Error in getAllReviewsController', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const createReviewController = async (req, res) => {
+    const { userAuth0Id, coachAuth0Id, stars, content, username } = req.body;
+
+    if (!userAuth0Id || !coachAuth0Id || !stars || !content?.trim()) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid fields' });
+    }
+
+    try {
+        const success = await createReviewService(userAuth0Id, coachAuth0Id, stars, content.trim());
+        if (success) {
+            const io = socket.getIo()
+            io.to(coachAuth0Id).emit('new-coach-review', {
+                userAuth0Id: userAuth0Id,
+                username: username,
+                content: content,
+                stars: stars,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+            return res.status(201).json({ success: true, message: 'Review created' });
+        } else {
+            return res.status(400).json({ success: false, message: 'Failed to create review' });
+        }
+    } catch (error) {
+        console.error('Error in createReviewController', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const updateReviewController = async (req, res) => {
+    const { reviewId, content, stars } = req.body;
+
+    if (!reviewId || !stars || !content?.trim()) {
+        return res.status(400).json({ success: false, message: 'Missing or invalid fields' });
+    }
+
+    try {
+        const success = await updateReviewService(reviewId, content.trim(), stars);
+        if (success) {
+            return res.status(200).json({ success: true, message: 'Review updated' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Review not found or update failed' });
+        }
+    } catch (error) {
+        console.error('Error in updateReviewController', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const deleteReviewController = async (req, res) => {
+    const { reviewId } = req.params;
+
+    if (!reviewId) {
+        return res.status(400).json({ success: false, message: 'Missing reviewId' });
+    }
+
+    try {
+        const success = await deleteReviewService(reviewId);
+        if (success) {
+            return res.status(200).json({ success: true, message: 'Review deleted' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Review not found or already deleted' });
+        }
+    } catch (error) {
+        console.error('Error in deleteReviewController', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
 module.exports = {
     getAllUsersController,
     handlePostSignup,
@@ -320,5 +409,5 @@ module.exports = {
     getUserNotesController,
     updateUserNoteController,
     createUserNoteController,
-    deleteUserNoteController
+    deleteUserNoteController, getAllReviewsController, updateReviewController, deleteReviewController, createReviewController,
 };

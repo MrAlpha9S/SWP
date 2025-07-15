@@ -178,6 +178,8 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
         if (userId && userId.length > 1) {
             userId = await getUserIdFromAuth0Id(userId);
         }
+        console.log('coachId', coachId);
+        console.log('userId', userId);
         const pool = await poolPromise;
 
         let startedDate = null;
@@ -478,6 +480,102 @@ const noteDeleteService = async (noteId) => {
     }
 };
 
+const getAllReviews = async (userAuth0Id, coachAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+    const coachId = await getUserIdFromAuth0Id(coachAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .input('coachId', coachId)
+            .query(`
+        SELECT r.review_id,
+               r.review_content,
+               r.stars,
+               r.created_date,
+               reviewer.username AS reviewer_username,
+               coach.username AS coach_username
+        FROM coach_reviews r
+                 JOIN users reviewer ON r.user_id = reviewer.user_id
+                 JOIN users coach ON r.coach_id = coach.user_id
+        WHERE r.user_id = @userId AND r.coach_id = @coachId
+        ORDER BY r.created_date DESC
+      `);
+
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getAllReviews', error);
+        return [];
+    }
+};
+
+const createReviewService = async (userAuth0Id, coachAuth0Id, stars, reviewContent) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+    const coachId = await getUserIdFromAuth0Id(coachAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .input('coachId', coachId)
+            .input('stars', stars)
+            .input('reviewContent', reviewContent)
+            .input('createdDate', getCurrentUTCDateTime().toISOString())
+            .input('updatedDate', getCurrentUTCDateTime().toISOString())
+            .query(`
+        INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
+        VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
+      `);
+
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in createReviewService', error);
+        return false;
+    }
+};
+
+const updateReviewService = async (reviewId, reviewContent, stars) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('reviewId', reviewId)
+            .input('reviewContent', reviewContent)
+            .input('stars', stars)
+            .input('updatedDate', getCurrentUTCDateTime().toISOString())
+            .query(`
+        UPDATE coach_reviews
+        SET review_content = @reviewContent,
+            stars = @stars,
+            updated_date = @updatedDate
+        WHERE review_id = @reviewId
+      `);
+
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in updateReviewService', error);
+        return false;
+    }
+};
+
+const deleteReviewService = async (reviewId) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('reviewId', reviewId)
+            .query(`
+        DELETE FROM coach_reviews
+        WHERE review_id = @reviewId
+      `);
+
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deleteReviewService', error);
+        return false;
+    }
+};
+
+
 
 module.exports = {
     userExists,
@@ -493,5 +591,5 @@ module.exports = {
     updateUserSubscriptionService,
     getCoaches,
     getCoachDetailsById,
-    assignUserToCoachService, allMember, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService
+    assignUserToCoachService, allMember, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService, createReviewService, updateReviewService, deleteReviewService, getAllReviews
 };

@@ -97,6 +97,10 @@ function AppContent() {
                 openNotification('plan-edit-by-user', data);
             })
 
+            socket.on('new-coach-review', (data) => {
+                openNotification('new-coach-review', data);
+            })
+
             return () => {
                 socket.disconnect();
             };

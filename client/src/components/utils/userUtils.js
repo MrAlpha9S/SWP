@@ -107,7 +107,7 @@ export async function getCoaches() {
     return await res.json();
 }
 
-export async function getCoachById(coachId) {
+export async function getCoachByIdOrAuth0Id(coachId) {
     const res = await fetch('http://localhost:3000/users/coaches/' + coachId, {
         method: 'GET',
         headers: {
