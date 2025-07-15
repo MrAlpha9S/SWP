@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import Messager from "./messager/messager.jsx";
 import {useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 import {useQuery} from "@tanstack/react-query";
@@ -15,19 +15,22 @@ import Journal from "../dashboard/journal.jsx";
 import NotesManager from "./notesManager.jsx";
 
 
-const CoachUser = () => {
+const CoachUser = ({userAuth0Id = null}) => {
     const {userInfo} = useUserInfoStore()
     const {user, isAuthenticated, getAccessTokenSilently} = useAuth0();
-    const {selectedUserAuth0Id} = useSelectedUserAuth0IdStore()
-    
-    console.log('CoachUser selectedUserAuth0Id:', selectedUserAuth0Id)
+    const {selectedUserAuth0Id, setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
 
+    useEffect(() => {
+        if (userAuth0Id) {
+            setSelectedUserAuth0Id(userAuth0Id);
+        }
+    }, [setSelectedUserAuth0Id, userAuth0Id])
 
     // User profile query
     const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
-            if (!isAuthenticated || !user || !selectedUserAuth0Id) return null;
+            console.log({ user, selectedUserAuth0Id });
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
             return result?.data;
         },
@@ -43,7 +46,6 @@ const CoachUser = () => {
     } = useQuery({
         queryKey: ['dataset-coach', selectedUserAuth0Id],
         queryFn: async () => {
-            if (!selectedUserAuth0Id) return null;
             return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
         },
         enabled: isAuthenticated && !!user && !!userInfo?.auth0_id && !!selectedUserAuth0Id,
@@ -76,7 +78,7 @@ const CoachUser = () => {
             key: '1',
             label: 'Tổng quan',
             children: (
-                <div className="w-full flex justify-center">
+                <div className="flex-1 h-full flex justify-center overflow-y-auto">
                     {isLoading ? (
                         <ProgressBoard isPending={true}/>
                     ) : hasProfileData ? (
@@ -106,7 +108,7 @@ const CoachUser = () => {
             key: '2',
             label: 'Thông tin chi tiết',
             children: (
-                <div className="w-full h-full flex ">
+                <div className="flex-1 h-full flex overflow-y-auto">
                     {isLoading ? (
                         <UserProfileInMessage isPending={true}/>
                     ) : hasProfileData ? (
@@ -144,35 +146,44 @@ const CoachUser = () => {
             )
         },
         {
-            key: '3',
-            label: 'Dữ liệu Checkin',
-            children: (
-                <div className="w-full flex justify-center">
-                    <Journal userAuth0Id={selectedUserAuth0Id}/>
-                </div>
-            )
-        },
-        {
             key: '4',
             label: 'Ghi chú',
             children: (
-                <div className="w-full flex justify-center">
+                <div className="flex-1 h-full flex justify-center overflow-y-auto p-5">
                     <NotesManager userAuth0Id={selectedUserAuth0Id}/>
                 </div>
             )
         }
     ];
 
+    if (!userAuth0Id) {
+        items.splice(2, 0, {
+            key: '3',
+            label: 'Dữ liệu Checkin',
+            children: (
+                <div className="flex-1 h-full flex justify-center overflow-y-auto p-5">
+                    <Journal userAuth0Id={selectedUserAuth0Id}/>
+                </div>
+            )
+        });
+    }
+
     return (
-            <div className='w-full h-screen flex'>
-                <div className='w-[50%] h-screen'>
+            <div className='w-full h-full flex overflow-y-auto'>
+                <div className='w-[650px] h-full'>
                     <Messager role={userInfo?.role}/>
                 </div>
 
-                <div className='w-[50%] h-full flex flex-col items-center overflow-y-auto'>
+                <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
                     <p className='font-bold text-4xl text-center'>Thông tin người dùng</p>
-                    <div className="w-full flex justify-center">
-                        <Tabs centered defaultActiveKey="1" items={items}/>
+                    <div className="w-full flex-1 flex justify-center overflow-y-auto">
+                        <Tabs
+                            centered
+                            defaultActiveKey="1"
+                            items={items}
+                            className="w-full"
+                            tabBarStyle={{marginBottom: 16}}
+                        />
                     </div>
                 </div>
             </div>

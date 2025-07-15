@@ -9,6 +9,8 @@ import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
 import NotFoundBanner from "../notFoundBanner.jsx";
 import Messager from '../coachboard/messager/messager.jsx'
+import NotesManager from "../coachboard/notesManager.jsx";
+import CoachUser from "../coachboard/coachUser.jsx";
 
 const CoachDashboard = () => {
     const {userInfo} = useUserInfoStore()
@@ -64,9 +66,9 @@ const CoachDashboard = () => {
         )
     } else if (userInfo && userInfo.sub_id !== 1 && coachInfo?.coach) {
         return (
-                <div className='w-full h-screen'>
+            <div className='w-full h-full min-h-0'>
 
-                <div className=' rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5'>
+                <div className=' rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5 '>
                     <p className='text-2xl font-bold'>Huấn luyện viên của bạn</p>
                     <div className="bg-gradient-to-r from-primary-600 to-primary-500 p-8">
                         <div className="flex flex-col md:flex-row items-center gap-6">
@@ -95,10 +97,12 @@ const CoachDashboard = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='h-[70%] w-[50%]'><Messager role={userInfo?.role}/></div>
-                    {!planLog || planLog.length === 0 && <>
-                        <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
-                    </>}
+                    <div className='flex-1 w-full flex min-h-0'>
+                        <div><CoachUser userAuth0Id={userInfo?.auth0_id}/></div>
+                        {!planLog || planLog.length === 0 && <>
+                            <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                        </>}
+                    </div>
                 </div>
             </div>
         )

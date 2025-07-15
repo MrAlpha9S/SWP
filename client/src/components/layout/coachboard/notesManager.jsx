@@ -77,7 +77,7 @@ const NotesManager = ({ userAuth0Id }) => {
     }, [isPending])
 
     return (
-        <div>
+        <div className='w-full'>
             <Title level={4}>Ghi chú</Title>
             <TextArea
                 value={newContent}

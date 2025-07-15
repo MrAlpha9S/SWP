@@ -211,21 +211,19 @@ const SetPlan = ({
                     message: 'Thành công',
                     content: 'Lưu kế hoạch thành công'
                 })
-                // Invalidate coach-specific queries
-                queryClient.invalidateQueries(['user-profile-coach'])
-                queryClient.invalidateQueries(['dataset-coach'])
-                queryClient.invalidateQueries(['user-creation-date-coach'])
-                
-                // Invalidate regular user queries (for when coach updates their own plan)
-                queryClient.invalidateQueries(['dataset'])
-                queryClient.invalidateQueries(['user-creation-date'])
-                
-                // Invalidate specific user queries if updating from coach context
-                if (payload.userAuth0Id) {
-                    queryClient.invalidateQueries(['dataset-coach', payload.userAuth0Id])
-                    queryClient.invalidateQueries(['user-creation-date-coach', payload.userAuth0Id])
-                    queryClient.invalidateQueries(['user-profile-coach', payload.userAuth0Id])
-                }
+                // // Invalidate coach-specific queries
+                // queryClient.invalidateQueries(['user-profile-coach'])
+                // queryClient.invalidateQueries(['dataset-coach'])
+                // queryClient.invalidateQueries(['user-creation-date-coach'])
+                //
+                // // Invalidate regular user queries (for when coach updates their own plan)
+                // queryClient.invalidateQueries(['dataset'])
+                // queryClient.invalidateQueries(['user-creation-date'])
+                setTimeout(() => {
+                    queryClient.invalidateQueries(['user-profile-coach']);
+                    queryClient.invalidateQueries(['dataset-coach']);
+                }, 300); // 300ms is usually enough
+
             },
             onError: (error) => {
                 console.error('Submission error:', error);

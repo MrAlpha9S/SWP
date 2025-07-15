@@ -139,7 +139,7 @@ export default function Messenger({ role }) {
   if (!contacts || !allMessages) return <div>Loading...</div>;
 
   return (
-    <div className="w-full h-full flex bg-primary-700 rounded-lg text-white">
+    <div className="w-[650px] h-full flex bg-primary-700 rounded-lg text-white">
       <ChatList
         role={role}
         user={user.name}

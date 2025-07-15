@@ -307,10 +307,10 @@ function Dashboard() {
         <PageFadeWrapper>
             <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
                 <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
-                <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
+                <div className="w-[1680px] flex flex-col max-h-[1500px] md:flex-row gap-4 px-1 py-4 md:px-4">
                     {dashboardHandle(userRole)}
 
-                    <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                    <div className="w-full max-h-screen flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
                         {renderBoard()}
                     </div>
                 </div>

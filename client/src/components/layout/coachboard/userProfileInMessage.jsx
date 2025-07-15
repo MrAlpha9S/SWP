@@ -140,7 +140,7 @@ const UserProfileInMessage = ({
     }
 
     return (
-        <div className='h-full flex flex-col overflow-y-auto px-5'>
+        <div className='h-full w-full flex flex-col overflow-y-auto px-5'>
             <p className='text-gray-400'>Tạo bởi: {userInfo?.username} (người dùng)</p>
             <p className='text-gray-400'>Tạo vào ngày: {convertYYYYMMDDStrToDDMMYYYYStr(createdAt.split('T')[0])}</p>
             <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {userInfo?.user_id === updatedBy ? `${userInfo?.username} (người dùng)` : `${coachInfo?.username} (bạn)`}</p>

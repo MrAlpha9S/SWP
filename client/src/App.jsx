@@ -121,7 +121,7 @@ function AppContent() {
     return (
         <Context.Provider value={contextValue}>
             <Navbar />
-            <div className="w-full mx-auto bg-[#fff7e5]">
+            <div className="w-full mx-auto min-h-screen bg-[#fff7e5]">
                 <AnimatePresence mode="wait">
                     <Routes>
                         <Route path="/" element={<Homepage />} />
