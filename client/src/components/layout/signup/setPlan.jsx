@@ -13,7 +13,7 @@ import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
 import {
     convertDDMMYYYYStrToYYYYMMDDStr,
-    convertYYYYMMDDStrToDDMMYYYYStr
+    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime
 } from "../../utils/dateUtils.js";
 import dayjs from 'dayjs'
 import {FaArrowRight} from "react-icons/fa";
@@ -23,6 +23,7 @@ import {usePostUserProfile} from "../../hooks/usePostUSerProfile.js";
 import {useAuth0} from "@auth0/auth0-react";
 import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 import {queryClient} from "../../../main.jsx";
+import {useSocketStore} from "../../../stores/useSocketStore.js";
 
 
 const SetPlan = ({
@@ -48,7 +49,7 @@ const SetPlan = ({
                      timeAfterWaking,
                      timeOfDayList,
                      triggers,
-                     customTimeOfDay, customTrigger, stoppedDate, goalList, setPlanEditClicked
+                     customTimeOfDay, customTrigger, stoppedDate, goalList, setPlanEditClicked, coach
                  }) => {
 
     const {errors} = useErrorStore();
@@ -71,6 +72,7 @@ const SetPlan = ({
             .map(msg => [msg.location, msg])
     );
     const {openNotification} = useNotificationManager();
+    const { socket } = useSocketStore()
 
     const validateCoachPlan = () => {
         if (from !== 'coach-user') return true;
@@ -190,6 +192,7 @@ const SetPlan = ({
             triggers,
             cigsPerDay,
             updaterUserAuth0Id: coachInfo?.auth0_id,
+
         };
 
         payload.customTimeOfDay = customTimeOfDay;
@@ -236,7 +239,7 @@ const SetPlan = ({
     }
 
     return (
-        <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'}`}>
+        <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'} space-y-4`}>
             {userInfo && userInfo.sub_id !== 1 ? <>
                     {from !== 'coach-user' && <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
                         6. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}

@@ -93,6 +93,10 @@ function AppContent() {
                 openNotification('plan-edit-by-coach', data);
             })
 
+            socket.on('plan-edit-by-user', (data) => {
+                openNotification('plan-edit-by-user', data);
+            })
+
             return () => {
                 socket.disconnect();
             };

@@ -61,6 +61,18 @@ export const NotificationProvider = ({ children }) => {
                     icon: <CiEdit className="size-5"/>
                 });
                 break;
+            case 'plan-edit-by-user':
+                api.open({
+                    key: `plan-edit-by-user`,
+                    message: `Kế hoạch sửa bởi ${payload.updaterUsername}`,
+                    description: <div>
+                        Người dùng {payload.updaterUsername} vừa chỉnh sửa kế hoạch của họ
+                        <p>{payload.timestamp}</p>
+                    </div>,
+                    placement: 'topRight',
+                    icon: <CiEdit className="size-5"/>
+                });
+                break;
             default:
                 api.warning({
                     message: 'Thông báo',

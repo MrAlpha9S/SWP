@@ -172,6 +172,12 @@ const getCoaches = async () => {
 
 const getCoachDetailsById = async (coachId = null, userId = null) => {
     try {
+        if (coachId && coachId.length > 1) {
+            coachId = await getUserIdFromAuth0Id(coachId);
+        }
+        if (userId && userId.length > 1) {
+            userId = await getUserIdFromAuth0Id(userId);
+        }
         const pool = await poolPromise;
 
         let startedDate = null;
@@ -199,6 +205,7 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
             .input('coach_id', sql.Int, coachId)
             .query(`
                 SELECT u.user_id,
+                       u.auth0_id,
                        u.avatar,
                        u.username,
                        u.email,

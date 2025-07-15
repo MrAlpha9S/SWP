@@ -265,10 +265,10 @@ const UserProfileInMessage = ({
                     </>
                 ) : (
                     <>
-                        {!planCreation && <div>
+                        {!planCreation ? <div>
                             <p>Người dùng chưa tạo kế hoạch</p>
                             <CustomButton onClick={() => setPlanCreation(true)}>Tạo kế hoạch</CustomButton>
-                        </div> && <SetPlan
+                        </div> : <SetPlan
                             readinessValue={localReadinessValue}
                             userInfo={localUserInfo}
                             startDate={localStartDate}
@@ -294,8 +294,8 @@ const UserProfileInMessage = ({
                             stoppedDate={stoppedDate} goalList={goalList}
                             setPlanEditClicked={setPlanEditClicked}
                             coachInfo={coachInfo}
+                            coach={coach}
                         />}
-
                     </>
                 )}
             </div>
