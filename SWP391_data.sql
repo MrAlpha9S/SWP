@@ -39,6 +39,33 @@ INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [r
 VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
 
+INSERT INTO [achievements] ([achievement_id], [achievement_name], [criteria])
+VALUES 
+('7-days-smoke-free', N'7 Ngày Không Hút Thuốc', N'7 ngày không khói thuốc.'),
+('streak-starter', N'Bắt đầu nào!', N'Hoàn thành check-in đầu tiên.'),
+('new-member', N'Thành Viên Mới', N'Tham gia EzQuit.'),
+
+('1-year-quit', N'1 Năm Cai Thuốc', N'1 năm không hút thuốc – một cột mốc tuyệt vời trong hành trình cai thuốc.'),
+('1-year-streak', N'1 Năm Liên Tiếp', N'Duy trì chuỗi 1 năm liên tục không hút thuốc.'),
+('10-day-streak', N'10 Ngày Liên Tiếp', N'Duy trì 10 ngày liên tiếp không hút thuốc.'),
+('100-day-streak', N'100 Ngày Liên Tiếp', N'100 ngày kiên trì không bỏ cuộc.'),
+('14-days-smoke-free', N'14 Ngày Không Hút Thuốc', N'2 tuần không hút thuốc'),
+('180-days-smoke-free', N'180 Ngày Không Hút Thuốc', N'Nửa năm sạch khói thuốc.'),
+('30-days-smoke-free', N'30 Ngày Không Hút Thuốc', N'Một tháng không hút thuốc – tuyệt vời!'),
+('goal-hitter', N'5 Ngày Liên Tiếp', N'5 ngày đầu tiên là bước khởi đầu quan trọng.'),
+('50-day-streak', N'50 Ngày Liên Tiếp', N'50 ngày liên tiếp không hút thuốc.'),
+('90-days-smoke-free', N'90 Ngày Không Hút Thuốc', N'3 tháng không hút thuốc – bạn đã vượt qua những giai đoạn khó khăn nhất.'),
+
+('cheer-champion', N'Nhà Cổ Vũ Nhiệt Tình', N'Thích 100 bình luận hoặc bài viết.'),
+('community-guru', N'Bậc Thầy Cộng Đồng', N'Tạo 100 bài viết hoặc bình luận trong cộng đồng.'),
+('kind-heart', N'Người Tử Tế', N'Thích 50 bình luận hoặc bài viết.'),
+('new-me', N'Phiên Bản Mới', N'Tạo bài viết hoặc bình luận đầu tiên của bạn trong cộng đồng.'),
+('smart-saver', N'Người Tiết Kiệm Thông Minh', N'Hoàn thành mục tiêu tiết kiệm đầu tiên của bạn.'),
+('social-butterfly', N'Người Kết Nối', N'Tạo 25 bài viết hoặc bình luận trong cộng đồng.'),
+('story-teller', N'Người Kể Chuyện', N'Tạo 50 bài viết hoặc bình luận trong cộng đồng.'),
+('warm-welcomer', N'Người Chào Đón Nồng Nhiệt', N'Thích 10 bình luận hoặc bài viết.');
+
+
 
 INSERT INTO coach_info (coach_id, years_of_exp, bio, detailed_bio, motto)
 VALUES 
