@@ -62,10 +62,6 @@ export default function PostPage() {
     }, [postData, isPostPending, post])
 
     useEffect(() => {
-        console.log('isLiked: ', comments)
-    }, [comments])
-
-    useEffect(() => {
         if (!isCommentsPending && commentsData?.data) {
             setComments(commentsData.data);
         }
@@ -317,6 +313,7 @@ export default function PostPage() {
                     </p>
                 </div>
 
+
                 <div className="bg-white p-6 rounded-xl shadow space-y-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
@@ -332,6 +329,12 @@ export default function PostPage() {
                             <p>đăng bởi </p>
                             <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
                         </div>
+                        {user.sub === post.auth0_id && (
+                            <div 
+                            className="text-primary-600 ml-auto hover:underline cursor-pointer"
+                            onClick={() => navigate(`/forum/edit/${post.post_id}`)}
+                            >Sửa</div>
+                        )}
                     </div>
 
                     <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">

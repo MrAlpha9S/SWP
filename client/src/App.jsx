@@ -21,8 +21,9 @@ import HintsAndTips from "./pages/forumPage/hintsAndTips.jsx";
 import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 import AllPosts from "./pages/forumPage/allPosts.jsx";
 import PostPage from "./components/layout/forum/postPage.jsx";
-import ForumEditor from './components/layout/forum/forumeditor.jsx'
+import ForumEditor from './components/layout/forum/editor/forumeditor.jsx'
 import ForumProfile from './pages/forumPage/forumprofile.jsx'
+import UpdateForumEditor from './components/layout/forum/editor/updateforumeditor.jsx'
 
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
@@ -84,6 +85,9 @@ function App() {
                 <Route path="/forum/:category/:postId" element={<PostPage/>}></Route>
                 <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                 <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
+
+                <Route path="/forum/edit/:postId" element={<UpdateForumEditor/>}></Route>
+
                 <Route path="/subscription" element={<SubscriptionPage/>}></Route>
                 <Route path="/congratulationPage" element={<CongratulationPage/>}></Route>
                 <Route path="/coach-selection" element={<CoachSelectPage/>}></Route>
