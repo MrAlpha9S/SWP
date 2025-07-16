@@ -471,63 +471,86 @@ CREATE OR ALTER PROCEDURE UpdateUserAchievementProgress
 AS
 BEGIN
     SET NOCOUNT ON;
-
+    
     DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-
+    
+    -- Ensure user exists in progress table
     IF NOT EXISTS (SELECT 1 FROM user_achievement_progress WHERE user_id = @UserId)
     BEGIN
         INSERT INTO user_achievement_progress (user_id) VALUES (@UserId);
     END
-
-    -------------------------
-    -- UPDATE PROGRESS TRACK
-    -------------------------
-
-    UPDATE uap
-    SET days_without_smoking = (
-        SELECT COUNT(DISTINCT CAST(logged_at AS DATE))
-        FROM checkin_log
-        WHERE user_id = @UserId AND cigs_smoked = 0
-    )
-    FROM user_achievement_progress uap
-    WHERE user_id = @UserId;
-
-    DECLARE @consecutive INT = 0;
-    DECLARE @curDate DATE = @Today;
-
-    WHILE EXISTS (
-        SELECT 1 FROM checkin_log
+    
+    -- Get the most recent check-in date instead of today (handles timezone issues)
+    DECLARE @latestDate DATE = (
+        SELECT MAX(CAST(logged_at AS DATE)) 
+        FROM checkin_log 
         WHERE user_id = @UserId
+    );
+    
+    -- If no check-ins exist, use today
+    IF @latestDate IS NULL
+        SET @latestDate = @Today;
+    
+    -- Calculate current consecutive smoke-free days from latest check-in backwards
+    DECLARE @consecutive INT = 0;
+    DECLARE @checkDate DATE = @latestDate;
+    
+    -- Count consecutive days, handling timezone discrepancies
+    WHILE EXISTS (
+        SELECT 1 FROM checkin_log 
+        WHERE user_id = @UserId 
+        AND CAST(logged_at AS DATE) = @checkDate 
         AND cigs_smoked = 0
-        AND CAST(logged_at AS DATE) = @curDate
     )
     BEGIN
-        SET @consecutive += 1;
-        SET @curDate = DATEADD(DAY, -1, @curDate);
+        SET @consecutive = @consecutive + 1;
+        SET @checkDate = DATEADD(DAY, -1, @checkDate);
     END
-
+    
+    -- Calculate longest streak in history (robust for out-of-order edits)
+    DECLARE @longestStreak INT = 0;
+    
+    WITH SmokeFreeData AS (
+        SELECT DISTINCT CAST(logged_at AS DATE) as check_date
+        FROM checkin_log
+        WHERE user_id = @UserId AND cigs_smoked = 0
+    ),
+    DateSequences AS (
+        SELECT check_date,
+               DATEADD(DAY, -ROW_NUMBER() OVER (ORDER BY check_date), check_date) as grp
+        FROM SmokeFreeData
+    ),
+    StreakLengths AS (
+        SELECT COUNT(*) as streak_length
+        FROM DateSequences
+        GROUP BY grp
+    )
+    SELECT @longestStreak = ISNULL(MAX(streak_length), 0)
+    FROM StreakLengths;
+    
+    -- Update all progress metrics
     UPDATE user_achievement_progress
     SET
-        consecutive_smoke_free_days = @consecutive,
-        max_consecutive_smoke_free_days = 
-            CASE WHEN @consecutive > max_consecutive_smoke_free_days 
-                 THEN @consecutive ELSE max_consecutive_smoke_free_days END,
-        last_smoke_free_date = (
-            SELECT MAX(CAST(logged_at AS DATE))
+        days_without_smoking = (
+            SELECT COUNT(DISTINCT CAST(logged_at AS DATE))
             FROM checkin_log
             WHERE user_id = @UserId AND cigs_smoked = 0
-        )
-    WHERE user_id = @UserId;
-
-    UPDATE user_achievement_progress
-    SET
-        posts_created = (SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId),
-        comments_created = (SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId),
-        total_likes_given = (SELECT COUNT(*) FROM social_likes WHERE user_id = @UserId),
+        ),
+        consecutive_smoke_free_days = @consecutive,
+        max_consecutive_smoke_free_days = @longestStreak,
+        posts_created = (
+            SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId
+        ),
+        comments_created = (
+            SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId
+        ),
+        total_likes_given = (
+            SELECT COUNT(*) FROM social_likes WHERE user_id = @UserId
+        ),
         total_likes_received = (
-            SELECT COUNT(*) FROM social_likes 
-            WHERE post_id IN (SELECT post_id FROM social_posts WHERE user_id = @UserId)
-               OR comment_id IN (SELECT comment_id FROM social_comments WHERE user_id = @UserId)
+            SELECT COUNT(*) FROM social_likes sl
+            WHERE sl.post_id IN (SELECT post_id FROM social_posts sp WHERE sp.user_id = @UserId)
+               OR sl.comment_id IN (SELECT comment_id FROM social_comments sc WHERE sc.user_id = @UserId)
         ),
         first_check_in_completed = CASE WHEN EXISTS (
             SELECT 1 FROM checkin_log WHERE user_id = @UserId
@@ -536,141 +559,221 @@ BEGIN
             SELECT 1 FROM goals g
             JOIN user_profiles up ON g.profile_id = up.profile_id
             WHERE up.user_id = @UserId AND g.is_completed = 1
-        ) THEN 1 ELSE 0 END
+        ) THEN 1 ELSE 0 END,
+        last_smoke_free_date = @latestDate
     WHERE user_id = @UserId;
-
-    --------------------------------
-    -- INSERT UNLOCKED ACHIEVEMENTS
-    --------------------------------
-
+    
+    -- Grant achievements (new-member removed since it's handled by trigger)
     INSERT INTO user_achievements (user_id, achievement_id, achieved_at)
     SELECT @UserId, a.achievement_id, GETDATE()
     FROM achievements a
-    WHERE NOT EXISTS (
+    CROSS JOIN user_achievement_progress uap
+    WHERE uap.user_id = @UserId
+    AND NOT EXISTS (
         SELECT 1 FROM user_achievements ua
         WHERE ua.user_id = @UserId AND ua.achievement_id = a.achievement_id
     )
     AND (
-        (a.achievement_id = '7-days-smoke-free' AND @consecutive >= 7)
-        OR (a.achievement_id = '5-days-streak' AND @consecutive >= 5)
-        OR (a.achievement_id = '10-days-streak' AND @consecutive >= 10)
-        OR (a.achievement_id = '30-days-smoke-free' AND @consecutive >= 30)
-        OR (a.achievement_id = '90-days-smoke-free' AND @consecutive >= 90)
-        OR (a.achievement_id = '100-days-streak' AND @consecutive >= 100)
-        OR (a.achievement_id = '1-year-streak' AND @consecutive >= 365)
-        OR (a.achievement_id = '14-days-smoke-free' AND @consecutive >= 14)
-        OR (a.achievement_id = '180-days-smoke-free' AND @consecutive >= 180)
-        OR (a.achievement_id = '1-year-quit' AND @consecutive >= 100)
-        OR (a.achievement_id = '50-days-streak' AND @consecutive >= 50)
-        OR (a.achievement_id = 'new-member' AND (SELECT DATEDIFF(DAY, created_at, GETDATE()) FROM users WHERE user_id = @UserId) = 0)
-        OR (a.achievement_id = 'streak-starter' AND EXISTS (SELECT 1 FROM checkin_log WHERE user_id = @UserId))
-        OR (a.achievement_id = 'kind-heart' AND (
-            SELECT total_likes_given FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 50)
-        OR (a.achievement_id = 'cheer-champion' AND (
-            SELECT total_likes_given FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 100)
-        OR (a.achievement_id = 'new-me' AND (
-            SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId
-        ) + (
-            SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId
-        ) >= 1)
-        OR (a.achievement_id = 'story-teller' AND (
-            SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 50)
-        OR (a.achievement_id = 'smart-saver' AND (
-            SELECT first_saving_goal_completed FROM user_achievement_progress WHERE user_id = @UserId
-        ) = 1)
-        OR (a.achievement_id = 'community-guru' AND (
-        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 100)
-        OR (a.achievement_id = 'social-butterfly' AND (
-        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 25)
-        OR (a.achievement_id = 'warm-welcomer' AND (
-        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
-        ) >= 10)
- 
+        -- STREAK-BASED ACHIEVEMENTS (use consecutive_smoke_free_days for current streak)
+        (a.achievement_id = '5-days-streak' AND uap.consecutive_smoke_free_days >= 5)
+        OR (a.achievement_id = '7-days-smoke-free' AND uap.consecutive_smoke_free_days >= 7)
+        OR (a.achievement_id = '10-days-streak' AND uap.consecutive_smoke_free_days >= 10)
+        OR (a.achievement_id = '14-days-smoke-free' AND uap.consecutive_smoke_free_days >= 14)
+        OR (a.achievement_id = '30-days-smoke-free' AND uap.consecutive_smoke_free_days >= 30)
+        OR (a.achievement_id = '50-days-streak' AND uap.consecutive_smoke_free_days >= 50)
+        OR (a.achievement_id = '90-days-smoke-free' AND uap.consecutive_smoke_free_days >= 90)
+        OR (a.achievement_id = '100-days-streak' AND uap.consecutive_smoke_free_days >= 100)
+        OR (a.achievement_id = '180-days-smoke-free' AND uap.consecutive_smoke_free_days >= 180)
+        OR (a.achievement_id = '1-year-streak' AND uap.consecutive_smoke_free_days >= 365)
+        OR (a.achievement_id = '1-year-quit' AND uap.consecutive_smoke_free_days >= 365)
+        
+        -- SOCIAL ACHIEVEMENTS (use posts/comments/likes)
+        OR (a.achievement_id = 'new-me' AND (uap.posts_created + uap.comments_created) >= 1)
+        OR (a.achievement_id = 'social-butterfly' AND (uap.posts_created + uap.comments_created) >= 25)
+        OR (a.achievement_id = 'story-teller' AND (uap.posts_created + uap.comments_created) >= 50)
+        OR (a.achievement_id = 'community-guru' AND (uap.posts_created + uap.comments_created) >= 100)
+        OR (a.achievement_id = 'kind-heart' AND uap.total_likes_given >= 100)
+        OR (a.achievement_id = 'cheer-champion' AND uap.total_likes_given >= 100)
+        OR (a.achievement_id = 'warm-welcomer' AND uap.total_likes_given >= 10)
+        
+        -- MILESTONE ACHIEVEMENTS
+        OR (a.achievement_id = 'streak-starter' AND uap.first_check_in_completed = 1)
+        OR (a.achievement_id = 'smart-saver' AND uap.first_saving_goal_completed = 1)
+        -- new-member is handled by the trigger, not here
     );
-
-    -- Optional: return recently unlocked
+    
+    -- Return recently unlocked achievements (optional - for immediate feedback)
     SELECT a.achievement_id, a.achievement_name
     FROM user_achievements ua
     JOIN achievements a ON a.achievement_id = ua.achievement_id
     WHERE ua.user_id = @UserId
     AND ua.achieved_at >= DATEADD(SECOND, -10, GETDATE());
 END
+GO
 
 
 GO
+-- 1. Check-in Log Trigger
 CREATE OR ALTER TRIGGER trg_checkin_log_progress
 ON checkin_log
 AFTER INSERT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
+    -- Process all unique users from inserted rows
     DECLARE @userId INT;
-    SELECT TOP 1 @userId = user_id FROM inserted;
-    EXEC UpdateUserAchievementProgress @UserId = @userId;
+    DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id FROM inserted;
+    
+    OPEN user_cursor;
+    FETCH NEXT FROM user_cursor INTO @userId;
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC UpdateUserAchievementProgress @UserId = @userId;
+        FETCH NEXT FROM user_cursor INTO @userId;
+    END
+    
+    CLOSE user_cursor;
+    DEALLOCATE user_cursor;
 END
 GO
 
+-- 2. Social Posts Trigger
 CREATE OR ALTER TRIGGER trg_social_posts_progress
 ON social_posts
 AFTER INSERT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
     DECLARE @userId INT;
-    SELECT TOP 1 @userId = user_id FROM inserted;
-    EXEC UpdateUserAchievementProgress @UserId = @userId;
+    DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id FROM inserted;
+    
+    OPEN user_cursor;
+    FETCH NEXT FROM user_cursor INTO @userId;
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC UpdateUserAchievementProgress @UserId = @userId;
+        FETCH NEXT FROM user_cursor INTO @userId;
+    END
+    
+    CLOSE user_cursor;
+    DEALLOCATE user_cursor;
 END
 GO
 
+-- 3. Social Comments Trigger
 CREATE OR ALTER TRIGGER trg_social_comments_progress
 ON social_comments
 AFTER INSERT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
     DECLARE @userId INT;
-    SELECT TOP 1 @userId = user_id FROM inserted;
-    EXEC UpdateUserAchievementProgress @UserId = @userId;
+    DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id FROM inserted;
+    
+    OPEN user_cursor;
+    FETCH NEXT FROM user_cursor INTO @userId;
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC UpdateUserAchievementProgress @UserId = @userId;
+        FETCH NEXT FROM user_cursor INTO @userId;
+    END
+    
+    CLOSE user_cursor;
+    DEALLOCATE user_cursor;
 END
 GO
 
+-- 4. Social Likes Trigger (More Complex - Need to Handle Both Giver and Receiver)
 CREATE OR ALTER TRIGGER trg_social_likes_progress
 ON social_likes
 AFTER INSERT
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
     DECLARE @userId INT;
-    SELECT TOP 1 @userId = user_id FROM inserted;
-    EXEC UpdateUserAchievementProgress @UserId = @userId;
+    DECLARE user_cursor CURSOR FOR
+        -- Get all users who gave likes
+        SELECT DISTINCT user_id FROM inserted
+        UNION
+        -- Get all users who received likes on their posts
+        SELECT DISTINCT sp.user_id
+        FROM inserted i
+        INNER JOIN social_posts sp ON i.post_id = sp.post_id
+        WHERE i.post_id IS NOT NULL
+        UNION
+        -- Get all users who received likes on their comments
+        SELECT DISTINCT sc.user_id
+        FROM inserted i
+        INNER JOIN social_comments sc ON i.comment_id = sc.comment_id
+        WHERE i.comment_id IS NOT NULL;
+    
+    OPEN user_cursor;
+    FETCH NEXT FROM user_cursor INTO @userId;
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXEC UpdateUserAchievementProgress @UserId = @userId;
+        FETCH NEXT FROM user_cursor INTO @userId;
+    END
+    
+    CLOSE user_cursor;
+    DEALLOCATE user_cursor;
 END
 GO
 
+-- 5. Goals Trigger (On UPDATE when is_completed changes)
 CREATE OR ALTER TRIGGER trg_goals_progress
 ON goals
 AFTER UPDATE
 AS
 BEGIN
-    DECLARE @profileId INT;
-    SELECT TOP 1 @profileId = profile_id FROM inserted;
-
-    DECLARE @userId INT;
-    SELECT TOP 1 @userId = user_id
-    FROM user_profiles
-    WHERE profile_id = @profileId;
-
-    IF @userId IS NOT NULL
-        EXEC UpdateUserAchievementProgress @UserId = @userId;
+    SET NOCOUNT ON;
+    
+    -- Only process if is_completed actually changed
+    IF UPDATE(is_completed)
+    BEGIN
+        DECLARE @userId INT;
+        DECLARE user_cursor CURSOR FOR
+            SELECT DISTINCT up.user_id
+            FROM inserted i
+            INNER JOIN user_profiles up ON i.profile_id = up.profile_id
+            INNER JOIN deleted d ON i.goal_id = d.goal_id
+            WHERE i.is_completed != d.is_completed;  -- Only where completion status changed
+        
+        OPEN user_cursor;
+        FETCH NEXT FROM user_cursor INTO @userId;
+        
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            EXEC UpdateUserAchievementProgress @UserId = @userId;
+            FETCH NEXT FROM user_cursor INTO @userId;
+        END
+        
+        CLOSE user_cursor;
+        DEALLOCATE user_cursor;
+    END
 END
 GO
 
-CREATE TRIGGER trg_NewUser_GrantInitialAchievements
+-- 6. New User Trigger (Already handles multiple, but let's optimize)
+CREATE OR ALTER TRIGGER trg_NewUser_GrantInitialAchievements
 ON [users]
 AFTER INSERT
 AS
 BEGIN
-    -- Insert into progress table (if not already handled)
+    SET NOCOUNT ON;
+    
+    -- Insert into progress table for all new users
     INSERT INTO user_achievement_progress (user_id)
     SELECT i.user_id
     FROM inserted i
@@ -678,17 +781,16 @@ BEGIN
         SELECT 1 FROM user_achievement_progress p WHERE p.user_id = i.user_id
     );
 
-    -- Grant "new-member" achievement
-    INSERT INTO user_achievements (user_id, achievement_id)
-    SELECT i.user_id, 'new-member'
+    -- Grant "new-member" achievement to all new users
+    INSERT INTO user_achievements (user_id, achievement_id, achieved_at)
+    SELECT i.user_id, 'new-member', GETDATE()
     FROM inserted i
     WHERE NOT EXISTS (
         SELECT 1
         FROM user_achievements ua
         WHERE ua.user_id = i.user_id AND ua.achievement_id = 'new-member'
     );
-END;
+END
 GO
-
 
 select * from users
