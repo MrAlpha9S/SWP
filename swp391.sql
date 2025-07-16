@@ -254,9 +254,10 @@ CREATE TABLE [user_achievements] (
 GO
 
 CREATE TABLE [achievements] (
-  [achievement_id] varchar(40),
+  [achievement_id] varchar(40) PRIMARY KEY,
   [achievement_name] nvarchar(250),
-  [criteria] nvarchar(max)
+  [criteria] nvarchar(max),
+  [icon_url] varchar(255)
 )
 GO
 
@@ -510,7 +511,11 @@ BEGIN
         max_consecutive_smoke_free_days = 
             CASE WHEN @consecutive > max_consecutive_smoke_free_days 
                  THEN @consecutive ELSE max_consecutive_smoke_free_days END,
-        last_smoke_free_date = @Today
+        last_smoke_free_date = (
+            SELECT MAX(CAST(logged_at AS DATE))
+            FROM checkin_log
+            WHERE user_id = @UserId AND cigs_smoked = 0
+        )
     WHERE user_id = @UserId;
 
     UPDATE user_achievement_progress
@@ -546,15 +551,24 @@ BEGIN
     )
     AND (
         (a.achievement_id = '7-days-smoke-free' AND @consecutive >= 7)
-        OR (a.achievement_id = '5-day-streak' AND @consecutive >= 5)
-        OR (a.achievement_id = '10-day-streak' AND @consecutive >= 10)
+        OR (a.achievement_id = '5-days-streak' AND @consecutive >= 5)
+        OR (a.achievement_id = '10-days-streak' AND @consecutive >= 10)
         OR (a.achievement_id = '30-days-smoke-free' AND @consecutive >= 30)
+        OR (a.achievement_id = '90-days-smoke-free' AND @consecutive >= 90)
+        OR (a.achievement_id = '100-days-streak' AND @consecutive >= 100)
         OR (a.achievement_id = '1-year-streak' AND @consecutive >= 365)
+        OR (a.achievement_id = '14-days-smoke-free' AND @consecutive >= 14)
+        OR (a.achievement_id = '180-days-smoke-free' AND @consecutive >= 180)
+        OR (a.achievement_id = '1-year-quit' AND @consecutive >= 100)
+        OR (a.achievement_id = '50-days-streak' AND @consecutive >= 50)
         OR (a.achievement_id = 'new-member' AND (SELECT DATEDIFF(DAY, created_at, GETDATE()) FROM users WHERE user_id = @UserId) = 0)
         OR (a.achievement_id = 'streak-starter' AND EXISTS (SELECT 1 FROM checkin_log WHERE user_id = @UserId))
-        OR (a.achievement_id = 'kind-hearted' AND (
+        OR (a.achievement_id = 'kind-heart' AND (
             SELECT total_likes_given FROM user_achievement_progress WHERE user_id = @UserId
         ) >= 50)
+        OR (a.achievement_id = 'cheer-champion' AND (
+            SELECT total_likes_given FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 100)
         OR (a.achievement_id = 'new-me' AND (
             SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId
         ) + (
@@ -566,6 +580,16 @@ BEGIN
         OR (a.achievement_id = 'smart-saver' AND (
             SELECT first_saving_goal_completed FROM user_achievement_progress WHERE user_id = @UserId
         ) = 1)
+        OR (a.achievement_id = 'community-guru' AND (
+        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 100)
+        OR (a.achievement_id = 'social-butterfly' AND (
+        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 25)
+        OR (a.achievement_id = 'warm-welcomer' AND (
+        SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 10)
+ 
     );
 
     -- Optional: return recently unlocked
@@ -575,6 +599,7 @@ BEGIN
     WHERE ua.user_id = @UserId
     AND ua.achieved_at >= DATEADD(SECOND, -10, GETDATE());
 END
+
 
 GO
 CREATE OR ALTER TRIGGER trg_checkin_log_progress

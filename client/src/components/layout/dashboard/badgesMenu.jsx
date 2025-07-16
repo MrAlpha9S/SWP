@@ -1,107 +1,11 @@
-import React from 'react';
-import { LockOutlined } from '@ant-design/icons';
+import React, {useEffect, useMemo, useState} from 'react';
+import {LockOutlined} from '@ant-design/icons';
 import {Popover} from "antd";
+import {useQuery} from "@tanstack/react-query";
+import {getAchieved, getAchievementProgress, getAchievements} from "../../utils/achievementsUtils.js";
+import {useAuth0} from "@auth0/auth0-react";
 
-const achievedBadges = [
-    { label: '7 Ngày Không Hút Thuốc', icon: '/7-days-smoke-free.svg', description: '7 ngày không khói thuốc.', },
-    { label: 'Bắt đầu nào!', icon: '/streak-starter.svg', description: 'Hoàn thành check-in đầu tiên.' },
-    { label: 'Thành Viên Mới', icon: '/badge-support-3.png', description: 'Tham gia EzQuit.' },
-];
-
-const lockedBadges = [
-    {
-        label: '1 Năm Cai Thuốc',
-        icon: '/1-year-quit.svg',
-        description: '1 năm không hút thuốc – một cột mốc tuyệt vời trong hành trình cai thuốc.',
-    },
-    {
-        label: '1 Năm Liên Tiếp',
-        icon: '/1-year-streak.svg',
-        description: 'Duy trì chuỗi 1 năm liên tục không hút thuốc.',
-    },
-    {
-        label: '10 Ngày Liên Tiếp',
-        icon: '/10-day-streak.svg',
-        description: 'Duy trì 10 ngày liên tiếp không hút thuốc.',
-    },
-    {
-        label: '100 Ngày Liên Tiếp',
-        icon: '/100-day-streak.svg',
-        description: '100 ngày kiên trì không bỏ cuộc.',
-    },
-    {
-        label: '14 Ngày Không Hút Thuốc',
-        icon: '/14-days-smoke-free.svg',
-        description: '2 tuần không hút thuốc',
-    },
-    {
-        label: '180 Ngày Không Hút Thuốc',
-        icon: '/180-days-smoke-free.svg',
-        description: 'Nửa năm sạch khói thuốc.',
-    },
-    {
-        label: '30 Ngày Không Hút Thuốc',
-        icon: '/30-days-smoke-free.svg',
-        description: 'Một tháng không hút thuốc – tuyệt vời!',
-    },
-    {
-        label: '5 Ngày Liên Tiếp',
-        icon: '/goal-hitter.svg',
-        description: '5 ngày đầu tiên là bước khởi đầu quan trọng.',
-    },
-    {
-        label: '50 Ngày Liên Tiếp',
-        icon: '/50-day-streak.svg',
-        description: '50 ngày liên tiếp không hút thuốc.',
-    },
-    {
-        label: '90 Ngày Không Hút Thuốc',
-        icon: '/90-days-smoke-free.svg',
-        description: '3 tháng không hút thuốc – bạn đã vượt qua những giai đoạn khó khăn nhất.',
-    },
-    {
-        label: 'Nhà Cổ Vũ Nhiệt Tình',
-        icon: '/cheer-champion.svg',
-        description: 'Thích 100 bình luận hoặc bài viết.',
-    },
-    {
-        label: 'Bậc Thầy Cộng Đồng',
-        icon: '/community-guru.svg',
-        description: 'Tạo 100 bài viết hoặc bình luận trong cộng đồng.',
-    },
-    {
-        label: 'Người Tử Tế',
-        icon: '/badge-support-3.png',
-        description: 'Thích 50 bình luận hoặc bài viết.',
-    },
-    {
-        label: 'Phiên Bản Mới',
-        icon: '/new-me.svg',
-        description: 'Tạo bài viết hoặc bình luận đầu tiên của bạn trong cộng đồng.',
-    },
-    {
-        label: 'Người Tiết Kiệm Thông Minh',
-        icon: '/streak-starter.svg',
-        description: 'Hoàn thành mục tiêu tiết kiệm đầu tiên của bạn.',
-    },
-    {
-        label: 'Người Kết Nối',
-        icon: '/social-butterfly.svg',
-        description: 'Tạo 25 bài viết hoặc bình luận trong cộng đồng.',
-    },
-    {
-        label: 'Người Kể Chuyện',
-        icon: '/story-teller.svg',
-        description: 'Tạo 50 bài viết hoặc bình luận trong cộng đồng.',
-    },
-    {
-        label: 'Người Chào Đón Nồng Nhiệt',
-        icon: '/warm-welcomer.svg',
-        description: 'Thích 10 bình luận hoặc bài viết.',
-    },
-];
-
-const Badge = ({ label, icon, locked = false, description = '' }) => {
+const Badge = ({ label, icon, locked = false, description = '', progressInfo = '' }) => {
     const badgeContent = (
         <div className="flex flex-col items-center space-y-2 text-center">
             <div className="relative">
@@ -116,21 +20,140 @@ const Badge = ({ label, icon, locked = false, description = '' }) => {
         </div>
     );
 
-    return <Popover content={description} title={label} placement="top">
+    return (
+        <Popover content={<div><p>{description}</p><p className="text-xs text-gray-500">{progressInfo}</p></div>} title={label} placement="top">
             {badgeContent}
         </Popover>
-
-
+    );
 };
 
+const getProgressInfo = (achievementId, progress) => {
+    switch (achievementId) {
+        case '5-days-streak':
+            return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days} / 5`
+        case '10-days-streak':
+            return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days} / 10`;
+        case '50-days-streak':
+            return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days} / 50`;
+        case '100-days-streak':
+            return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days} / 100`;
+        case '1-year-streak':
+            return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days} / 365`;
+        case '30-days-smoke-free':
+            return `Tổng: ${progress.days_without_smoking} / 30`;
+        case '90-days-smoke-free':
+            return `Tổng: ${progress.days_without_smoking} / 90`;
+        case '180-days-smoke-free':
+            return `Tổng: ${progress.days_without_smoking} / 180`;
+        case '1-year-quit':
+            return `Tổng: ${progress.days_without_smoking} / 365`;
+        case '7-days-smoke-free':
+            return `Tổng: ${progress.days_without_smoking} / 7`;
+        case '14-days-smoke-free':
+            return `Tổng: ${progress.days_without_smoking} / 14`;
+
+        case 'new-me':
+            return `${progress.posts_created + progress.comments_created >= 1 ? 'Đã hoàn thành' : '0 / 1'}`;
+        case 'community-guru':
+            return `${progress.posts_created + progress.comments_created} / 100`;
+        case 'story-teller':
+            return `${progress.posts_created + progress.comments_created} / 50`;
+        case 'social-butterfly':
+            return `${progress.posts_created + progress.comments_created} / 25`;
+
+        case 'cheer-champion':
+            return `${progress.total_likes_given} / 100`;
+        case 'kind-heart':
+            return `${progress.total_likes_given} / 50`;
+        case 'warm-welcomer':
+            return `${progress.total_likes_given} / 10`;
+
+        case 'smart-saver':
+            return progress.first_saving_goal_completed ? 'Đã hoàn thành' : 'Chưa hoàn thành';
+        case 'streak-starter':
+            return progress.first_check_in_completed ? 'Đã hoàn thành' : 'Chưa hoàn thành';
+
+        case 'new-member':
+            return `Đã tham gia`;
+
+        default:
+            return '';
+    }
+};
+
+
+
 const BadgesMenu = () => {
+    const {user, isAuthenticated, getAccessTokenSilently} = useAuth0()
+    const [localAchievements, setLocalAchievements] = useState([])
+    const [localProgress, setLocalProgress] = useState([])
+    const [localAchieved, setLocalAchieved] = useState([])
+    const [locked, setLocked] = useState([])
+
+    const {isPending: isAchievementPending, data: achievements} = useQuery({
+        queryKey: ['achievements'],
+        queryFn: async () => {
+            return await getAchievements(user, getAccessTokenSilently, isAuthenticated)
+        },
+        enabled: !!isAuthenticated && !!user,
+    })
+
+    const {isPending: isAchievementProgressPending, data: achievementProgress} = useQuery({
+        queryKey: ['achievement-progress'],
+        queryFn: async () => {
+            return await getAchievementProgress(user, getAccessTokenSilently, isAuthenticated)
+        },
+        enabled: !!isAuthenticated && !!user,
+    })
+
+    const {isPending: isAchievedPending, data: achieved} = useQuery({
+        queryKey: ['achieved'],
+        queryFn: async () => {
+            return await getAchieved(user, getAccessTokenSilently, isAuthenticated)
+        },
+        enabled: !!isAuthenticated && !!user,
+    })
+
+    useEffect(() => {
+        if (!isAchievementPending && achievements && achievements.success) {
+            setLocalAchievements(achievements?.data)
+        }
+    }, [isAchievementPending])
+
+    useEffect(() => {
+        if (!isAchievementProgressPending && achievementProgress && achievementProgress.success) {
+            setLocalProgress(achievementProgress?.data)
+        }
+    }, [isAchievementProgressPending])
+
+    useEffect(() => {
+        if (!isAchievedPending && achieved && achieved.success) {
+            setLocalAchieved(achieved?.data)
+        }
+    }, [isAchievedPending])
+
+    useEffect(() => {
+        if (localAchieved && !isAchievedPending && localAchievements?.length) {
+            const achievedSet = new Set(localAchieved.map(a => a.achievement_id));
+            const lockedAchievements = localAchievements.filter(a => !achievedSet.has(a.achievement_id));
+            setLocked(lockedAchievements);
+        }
+    }, [localAchieved, isAchievedPending, localAchievements]);
+
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-10">
             <section className="flex flex-col gap-5">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Đã đạt được</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {achievedBadges.map((badge) => (
-                        <Badge key={badge.label} label={badge.label} icon={badge.icon} description={badge.description}/>
+                    {localAchieved?.map((badge) => (
+                        <Badge
+                            key={badge.achievement_id}
+                            label={badge.achievement_name}
+                            icon={badge.icon_url}
+                            description={badge.criteria}
+                            progressInfo={getProgressInfo(badge.achievement_id, localProgress)}
+                        />
                     ))}
                 </div>
             </section>
@@ -138,8 +161,15 @@ const BadgesMenu = () => {
             <section className="flex flex-col gap-5">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Huy hiệu bị khóa</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {lockedBadges.map((badge) => (
-                        <Badge key={badge.label} label={badge.label} icon={badge.icon} locked description={badge.description} />
+                    {locked?.map((badge) => (
+                        <Badge
+                            key={badge.achievement_id}
+                            label={badge.achievement_name}
+                            icon={badge.icon_url}
+                            description={badge.criteria}
+                            locked
+                            progressInfo={getProgressInfo(badge.achievement_id, localProgress)}
+                        />
                     ))}
                 </div>
             </section>
