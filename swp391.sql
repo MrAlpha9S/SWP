@@ -480,22 +480,29 @@ BEGIN
         INSERT INTO user_achievement_progress (user_id) VALUES (@UserId);
     END
     
-    -- Get the most recent check-in date instead of today (handles timezone issues)
+    -- Smart date selection: use latest check-in if it's in the future, otherwise use today
     DECLARE @latestDate DATE = (
         SELECT MAX(CAST(logged_at AS DATE)) 
         FROM checkin_log 
         WHERE user_id = @UserId
     );
     
-    -- If no check-ins exist, use today
+    DECLARE @startDate DATE;
+    
+    -- If latest check-in is in the future (due to timezone), use it
+    -- Otherwise, use today to encourage daily check-ins
     IF @latestDate IS NULL
-        SET @latestDate = @Today;
+        SET @startDate = @Today;
+    ELSE IF @latestDate > @Today
+        SET @startDate = @latestDate;
+    ELSE
+        SET @startDate = @Today;
     
-    -- Calculate current consecutive smoke-free days from latest check-in backwards
+    -- Calculate current consecutive smoke-free days from start date backwards
     DECLARE @consecutive INT = 0;
-    DECLARE @checkDate DATE = @latestDate;
+    DECLARE @checkDate DATE = @startDate;
     
-    -- Count consecutive days, handling timezone discrepancies
+    -- Count consecutive days
     WHILE EXISTS (
         SELECT 1 FROM checkin_log 
         WHERE user_id = @UserId 
@@ -560,7 +567,11 @@ BEGIN
             JOIN user_profiles up ON g.profile_id = up.profile_id
             WHERE up.user_id = @UserId AND g.is_completed = 1
         ) THEN 1 ELSE 0 END,
-        last_smoke_free_date = @latestDate
+        last_smoke_free_date = (
+            SELECT MAX(CAST(logged_at AS DATE))
+            FROM checkin_log
+            WHERE user_id = @UserId AND cigs_smoked = 0
+        )
     WHERE user_id = @UserId;
     
     -- Grant achievements (new-member removed since it's handled by trigger)
@@ -574,18 +585,18 @@ BEGIN
         WHERE ua.user_id = @UserId AND ua.achievement_id = a.achievement_id
     )
     AND (
-        -- STREAK-BASED ACHIEVEMENTS (use consecutive_smoke_free_days for current streak)
-        (a.achievement_id = '5-days-streak' AND uap.consecutive_smoke_free_days >= 5)
-        OR (a.achievement_id = '7-days-smoke-free' AND uap.consecutive_smoke_free_days >= 7)
-        OR (a.achievement_id = '10-days-streak' AND uap.consecutive_smoke_free_days >= 10)
-        OR (a.achievement_id = '14-days-smoke-free' AND uap.consecutive_smoke_free_days >= 14)
-        OR (a.achievement_id = '30-days-smoke-free' AND uap.consecutive_smoke_free_days >= 30)
-        OR (a.achievement_id = '50-days-streak' AND uap.consecutive_smoke_free_days >= 50)
-        OR (a.achievement_id = '90-days-smoke-free' AND uap.consecutive_smoke_free_days >= 90)
-        OR (a.achievement_id = '100-days-streak' AND uap.consecutive_smoke_free_days >= 100)
-        OR (a.achievement_id = '180-days-smoke-free' AND uap.consecutive_smoke_free_days >= 180)
-        OR (a.achievement_id = '1-year-streak' AND uap.consecutive_smoke_free_days >= 365)
-        OR (a.achievement_id = '1-year-quit' AND uap.consecutive_smoke_free_days >= 365)
+        -- STREAK-BASED ACHIEVEMENTS (use max_consecutive_smoke_free_days for best streak ever)
+        (a.achievement_id = '5-days-streak' AND uap.max_consecutive_smoke_free_days >= 5)
+        OR (a.achievement_id = '7-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 7)
+        OR (a.achievement_id = '10-days-streak' AND uap.max_consecutive_smoke_free_days >= 10)
+        OR (a.achievement_id = '14-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 14)
+        OR (a.achievement_id = '30-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 30)
+        OR (a.achievement_id = '50-days-streak' AND uap.max_consecutive_smoke_free_days >= 50)
+        OR (a.achievement_id = '90-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 90)
+        OR (a.achievement_id = '100-days-streak' AND uap.max_consecutive_smoke_free_days >= 100)
+        OR (a.achievement_id = '180-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 180)
+        OR (a.achievement_id = '1-year-streak' AND uap.max_consecutive_smoke_free_days >= 365)
+        OR (a.achievement_id = '1-year-quit' AND uap.max_consecutive_smoke_free_days >= 365)
         
         -- SOCIAL ACHIEVEMENTS (use posts/comments/likes)
         OR (a.achievement_id = 'new-me' AND (uap.posts_created + uap.comments_created) >= 1)
