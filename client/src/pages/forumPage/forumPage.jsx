@@ -7,7 +7,8 @@ import {
     EditOutlined,
     MessageOutlined,
     ProfileOutlined,
-    CompassOutlined
+    CompassOutlined,
+    HighlightOutlined
 } from '@ant-design/icons';
 import Hero from "../../components/layout/forum/hero.jsx";
 import {useQuery} from "@tanstack/react-query";
@@ -16,15 +17,16 @@ import {useNavigate} from "react-router-dom";
 import SideBar from "../../components/layout/forum/sideBar.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
-const SidebarLinks = [
-    {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
-    {icon: <BookOutlined/>, label: 'Chia sẻ trải nghiệm'},
-    {icon: <CompassOutlined/>, label: 'Bắt đầu hành trình'},
-    {icon: <FlagOutlined/>, label: 'Duy trì cai thuốc'},
-    {icon: <AppstoreOutlined/>, label: 'Mẹo và lời khuyên'},
-    {icon: <ProfileOutlined/>, label: 'Lý do bỏ thuốc'},
-    {icon: <EditOutlined/>, label: 'Hướng dẫn cộng đồng'},
-];
+// const SidebarLinks = [
+//     {icon: <MessageOutlined/>, label: 'Tất cả bài viết'},
+//     {icon: <BookOutlined/>, label: 'Chia sẻ trải nghiệm'},
+//     {icon: <CompassOutlined/>, label: 'Bắt đầu hành trình'},
+//     {icon: <FlagOutlined/>, label: 'Duy trì cai thuốc'},
+//     {icon: <AppstoreOutlined/>, label: 'Mẹo và lời khuyên'},
+//     {icon: <ProfileOutlined/>, label: 'Lý do bỏ thuốc'},
+//     {icon: <EditOutlined/>, label: 'Hướng dẫn cộng đồng'},
+//     {icon: <HighlightOutlined/>, label: 'Tạo bài viết'},
+// ];
 
 export default function ForumPage() {
 

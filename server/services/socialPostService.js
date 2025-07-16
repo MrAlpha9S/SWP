@@ -1,5 +1,5 @@
-const {poolPromise, sql} = require("../configs/sqlConfig");
-
+const { poolPromise, sql } = require("../configs/sqlConfig");
+const { getUserIdFromAuth0Id } = require('./userService')
 
 const getTotalPostCount = async () => {
     try {
@@ -87,13 +87,28 @@ async function getPostsByCategoryTag(categoryTag) {
     }
 }
 
-async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null, postId = null }) {
+async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize = 4, fromDate = null, toDate = null, postId = null, auth0_id = null, currentUserId = null }) {
     try {
         const pool = await poolPromise;
         const offset = (page - 1) * pageSize;
 
         const filters = [];
         const request = pool.request();
+
+        // Handle currentUserId (auth0_id) for isLiked check
+        if (currentUserId) {
+            const currentUserIdInt = await getUserIdFromAuth0Id(currentUserId);
+            request.input('currentUserId', sql.Int, currentUserIdInt);
+        } else {
+            // If no user context, set to 0 so no posts show as liked
+            request.input('currentUserId', sql.Int, 0);
+        }
+
+        if (auth0_id) {
+            const user_id = await getUserIdFromAuth0Id(auth0_id);
+            filters.push(`u.user_id = @user_id`);
+            request.input('user_id', sql.Int, user_id);
+        }
 
         if (categoryTag) {
             filters.push(`sc.category_tag = @categoryTag`);
@@ -139,9 +154,14 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             SELECT 
               sp.post_id, sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
-              u.user_id, u.username, u.role, u.avatar,
+              u.user_id, u.username, u.role, u.avatar, u.auth0_id,
               COUNT(DISTINCT sl.like_id) AS likes,
-              COUNT(DISTINCT scmt.comment_id) AS comments
+              COUNT(DISTINCT scmt.comment_id) AS comments,
+              CASE 
+                WHEN MAX(CASE WHEN sl.user_id = @currentUserId THEN 1 ELSE 0 END) = 1 
+                THEN 1 
+                ELSE 0 
+              END AS isLiked
             FROM social_posts sp
             JOIN social_category sc ON sc.category_id = sp.category_id
             LEFT JOIN social_likes sl ON sp.post_id = sl.post_id
@@ -150,7 +170,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             ${whereClause}
             GROUP BY 
               sp.title, sp.content, sp.created_at, sp.is_pinned,
-              sc.category_tag, sc.category_name,
+              sc.category_tag, sc.category_name, u.auth0_id,
               u.user_id, u.username, u.role, u.avatar, sp.post_id
             ORDER BY sp.created_at DESC
             OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
@@ -169,54 +189,116 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
     }
 }
 
-const getPostComments = async (postId) => {
+const getPostComments = async ({postId, currentUserId = null}) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request()
-            .input('postId', sql.Int, postId)
-            .query(`
-                WITH CommentTree AS (SELECT scmt.comment_id,
-                                            scmt.parent_comment_id,
-                                            scmt.post_id,
-                                            scmt.user_id,
-                                            scmt.content,
-                                            scmt.created_at,
-                                            CAST(0 AS INT) AS depth
-                                     FROM social_comments scmt
-                                     WHERE scmt.post_id = @postId
-                                       AND scmt.parent_comment_id IS NULL
+        const request = pool.request()
+            .input('postId', sql.Int, postId);
 
-                                     UNION ALL
+        // Handle currentUserId for isLiked check
+        if (currentUserId) {
+            console.log('currentUserId: ', currentUserId)
+            const currentUserIdInt = await getUserIdFromAuth0Id(currentUserId);
+            request.input('currentUserId', sql.Int, currentUserIdInt);
+        } else {
+            // If no user context, set to 0 so no comments show as liked
+            request.input('currentUserId', sql.Int, 0);
+        }
 
-                                     SELECT scmt.comment_id,
-                                            scmt.parent_comment_id,
-                                            scmt.post_id,
-                                            scmt.user_id,
-                                            scmt.content,
-                                            scmt.created_at,
-                                            ct.depth + 1
-                                     FROM social_comments scmt
-                                              INNER JOIN CommentTree ct ON scmt.parent_comment_id = ct.comment_id)
-                SELECT ct.*,
-                       u.username, u.avatar,
-                       u.role,
-                       COALESCE(COUNT(sl.like_id), 0) AS like_count
-                FROM CommentTree ct
-                         LEFT JOIN users u ON ct.user_id = u.user_id
-                         LEFT JOIN social_likes sl ON ct.comment_id = sl.comment_id
-                GROUP BY ct.comment_id, ct.parent_comment_id, ct.post_id, ct.user_id,
-                         ct.content, ct.created_at, ct.depth, u.username, u.avatar,
-                         u.role
-                ORDER BY ct.created_at;
-            `);
+        const result = await request.query(`
+            WITH CommentTree AS (SELECT scmt.comment_id,
+                                        scmt.parent_comment_id,
+                                        scmt.post_id,
+                                        scmt.user_id,
+                                        scmt.content,
+                                        scmt.created_at,
+                                        CAST(0 AS INT) AS depth
+                                 FROM social_comments scmt
+                                 WHERE scmt.post_id = @postId
+                                   AND scmt.parent_comment_id IS NULL
 
-        return result.recordset;
+                                 UNION ALL
+
+                                 SELECT scmt.comment_id,
+                                        scmt.parent_comment_id,
+                                        scmt.post_id,
+                                        scmt.user_id,
+                                        scmt.content,
+                                        scmt.created_at,
+                                        ct.depth + 1
+                                 FROM social_comments scmt
+                                          INNER JOIN CommentTree ct ON scmt.parent_comment_id = ct.comment_id)
+            SELECT ct.*,
+                   u.username, u.avatar, u.auth0_id,
+                   u.role,
+                   COALESCE(COUNT(sl.like_id), 0) AS like_count,
+                   CASE 
+                     WHEN MAX(CASE WHEN sl.user_id = @currentUserId THEN 1 ELSE 0 END) = 1 
+                     THEN 1 
+                     ELSE 0 
+                   END AS isLiked
+            FROM CommentTree ct
+                     LEFT JOIN users u ON ct.user_id = u.user_id
+                     LEFT JOIN social_likes sl ON ct.comment_id = sl.comment_id
+            GROUP BY ct.comment_id, ct.parent_comment_id, ct.post_id, ct.user_id,
+                     ct.content, ct.created_at, ct.depth, u.username, u.avatar,
+                     u.role, u.auth0_id
+            ORDER BY ct.created_at;
+        `);
+
+        return result.recordset || null;
     } catch (err) {
         console.error('SQL error', err);
         throw err;
     }
 }
 
+const PostSocialPosts = async (category_id, auth0_id, title, content, created_at) => {
+    try {
+        const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
+        const result = await pool.request()
+            .input('postId', sql.Int, category_id)
+            .input('user_id', sql.Int, user_id)
+            .input('title', title)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .query(`INSERT INTO [social_posts] ([category_id], [user_id], [title], [content], [created_at])
+VALUES (@postId, @user_id, @title, @content, @created_at);
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
+
+const PostAddComment = async (parent_comment_id, auth0_id, post_id, content, created_at, is_reported) => {
+    try {
+        const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
+        const result = await pool.request()
+            .input('parent_comment_id', sql.Int, null, parent_comment_id)
+            .input('user_id', sql.Int, user_id)
+            .input('post_id', sql.Int, post_id)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .input('is_reported', sql.Int, is_reported)
+            .query(`INSERT INTO [social_comments] ([parent_comment_id], [user_id], [post_id], [content], [created_at], [is_reported])
+VALUES (@parent_comment_id, @user_id, @post_id, @content, @created_at, @is_reported);
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
 const getAllSocialPosts = async () => {
     try {
         const pool = await poolPromise;
@@ -229,6 +311,28 @@ const getAllSocialPosts = async () => {
     }
 }
 
+const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at ) => {
+    try {
+        const pool = await poolPromise;
+        const user_id = await getUserIdFromAuth0Id(auth0_id);
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .input('post_id', sql.Int, post_id)
+            .input('comment_id', sql.Int, comment_id)
+            .input('created_at', sql.DateTime, created_at)
+            .query(`INSERT INTO [social_likes] ([user_id], [post_id], [comment_id], [created_at]) VALUES
+(@user_id, @post_id, @comment_id, @created_at);
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, getAllSocialPosts };
+
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };

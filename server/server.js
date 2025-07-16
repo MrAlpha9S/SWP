@@ -21,6 +21,7 @@ const subscriptionRouter = require("./routes/subscriptionRoute");
 const paymentRouter = require("./routes/paymentRoute");
 const coachRouter = require("./routes/coachRoute");
 const achievementRouter = require("./routes/achievementRoute");
+const reportRouter = require("./routes/reportRoute")
 
 const server = http.createServer(app);
 
@@ -332,6 +333,7 @@ app.use('/subscription', subscriptionRouter)
 app.use('/payment', paymentRouter)
 app.use('/coaches', coachRouter)
 app.use('/achievements', achievementRouter)
+app.use('/reports', reportRouter)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
