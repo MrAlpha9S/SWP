@@ -71,12 +71,6 @@ const HandleSendMessage = async (req, res) => {
     const created_at = req.body.created_at;
     const senderName = req.body.senderName;
     const senderAuth0Id = req.body.senderAuth0Id;
-    console.log('HandleSendMessage called with:', {
-        auth0_id,
-        conversationId,
-        content,
-        created_at
-    });
 
     if (!auth0_id || !conversationId || !content || !created_at) {
         return res.status(400).json({ success: false, message: 'error in HandleSendMessage: params is required', data: null });
@@ -91,7 +85,8 @@ const HandleSendMessage = async (req, res) => {
             conversation_id: conversationId,
             content: content,
             created_at: created_at,
-            senderName: senderName
+            senderName: senderName,
+            senderAuth0Id: senderAuth0Id
         });
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {

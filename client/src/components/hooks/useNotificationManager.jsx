@@ -35,7 +35,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <BiConversation className="size-5"/>
+                    icon: <BiConversation className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'success':
@@ -58,7 +59,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'plan-edit-by-user':
@@ -70,7 +72,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'new-coach-review':
@@ -83,7 +86,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'new-achievement':
@@ -95,7 +99,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <FaMedal className="size-5"/>
+                    icon: <FaMedal className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             default:
