@@ -28,6 +28,7 @@ import {
 import {useQuery} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserCreationDate} from "../../utils/userUtils.js";
+import {getAchieved} from "../../utils/achievementsUtils.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -51,6 +52,7 @@ const ProgressBoard = ({
     const [currentDate, setCurrentDate] = useState(getCurrentUTCDateTime());
     const [localCheckInDataSet, setLocalCheckInDataSet] = useState([]);
     const [localUserCreationDate, setLocalUserCreationDate] = useState(null);
+    const [localAchieved, setLocalAchieved] = useState([])
     const [showWarning, setShowWarning] = useState(false);
     const [range, setRange] = useState('overview');
 
@@ -74,6 +76,14 @@ const ProgressBoard = ({
         staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
+    const {isPending: isAchievedPending, data: achieved} = useQuery({
+        queryKey: ['achieved'],
+        queryFn: async () => {
+            return await getAchieved(user, getAccessTokenSilently, isAuthenticated)
+        },
+        enabled: !!isAuthenticated && !!user,
+    })
+
     // Use different query keys based on context (coach vs user)
     const userCreationDateQueryKey = from === 'coach-user'
         ? ['user-creation-date-coach', userInfo?.auth0_id]
@@ -92,6 +102,13 @@ const ProgressBoard = ({
         retry: 1,
         staleTime: 5 * 60 * 1000, // 5 minutes
     })
+
+    useEffect(() => {
+        if (!isAchievedPending && achieved && achieved.success) {
+            console.log(achieved.data)
+            setLocalAchieved(achieved?.data)
+        }
+    }, [isAchievedPending])
 
     useEffect(() => {
         if (userCreationDate?.data) {
@@ -414,19 +431,24 @@ const ProgressBoard = ({
                 {[0, 1, 2].map((i) => (
                     <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
                         {isCalculating ? (
-                            <Skeleton active paragraph={{rows: 2}}/>
+                            <Skeleton active paragraph={{ rows: 2 }} />
                         ) : (
                             <>
-                                <div className="text-2xl">{[<PiPiggyBankLight className='size-10 text-primary-800'/>,
-                                    <IoLogoNoSmoking className='size-10 text-primary-800'/>,
-                                    <FaTrophy className='size-9 text-primary-800'/>][i]}</div>
-                                <div className="text-xl font-semibold text-primary-800">
-                                    {i === 0 ?
-                                        (moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...') :
-                                        i === 1 ?
-                                            (cigsQuit !== null ? cigsQuit : 'Đang tính...') :
-                                            1
+                                <div className="text-2xl">
+                                    {
+                                        [
+                                            <PiPiggyBankLight className="size-10 text-primary-800" />,
+                                            <IoLogoNoSmoking className="size-10 text-primary-800" />,
+                                            <FaTrophy className="size-9 text-primary-800" />
+                                        ][i]
                                     }
+                                </div>
+                                <div className="text-xl font-semibold text-primary-800">
+                                    {i === 0
+                                        ? moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...'
+                                        : i === 1
+                                            ? cigsQuit !== null ? cigsQuit : 'Đang tính...'
+                                            : localAchieved?.length ?? 'Đang tính...'}
                                 </div>
                                 <div className="text-sm text-gray-600">
                                     {from === 'coach-user'
