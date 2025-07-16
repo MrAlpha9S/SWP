@@ -40,6 +40,7 @@ import CustomButton from "./components/ui/CustomButton.jsx";
 import {queryClient} from "./main.jsx";
 import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
 import userProfile from "./components/ui/userProfile.jsx";
+import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
 const Context = createContext({ name: 'Default' });
 
 function AppContent() {
@@ -201,6 +202,7 @@ function AppContent() {
                         <Route path="/coach-selection" element={<CoachSelectPage />} />
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
+                        <Route path="/coach-register" element={<CoachRegistration/>}></Route>
                     </Routes>
                 </AnimatePresence>
             </div>
