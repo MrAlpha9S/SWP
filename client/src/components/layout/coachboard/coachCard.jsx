@@ -22,7 +22,7 @@ const CoachCard = ({coach}) => {
 
     const assignMutation = useMutation({
         mutationFn: async ({coachId, userId, username, coachAuth0Id}) => {
-            const res = await assignCoachToUser(coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated);
+            const res = await assignCoachToUser(user, coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated);
             return res.data;
         },
         onSuccess: async () => {

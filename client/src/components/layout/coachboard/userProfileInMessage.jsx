@@ -40,18 +40,21 @@ const UserProfileInMessage = ({
                                   cigsReduced,
                                   checkInDataSet,
                                   goalList,
+                                  updatedAt,
+                                  createdAt, updatedBy, coach
                               }) => {
     const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
     const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
-    const [localStartDate, setLocalStartDate] = useState(startDate ?? '');
+    const [localStartDate, setLocalStartDate] = useState(startDate ?? null);
     const [localCigsPerDay, setLocalCigsPerDay] = useState(cigsPerDay ?? 0);
-    const [localQuittingMethod, setLocalQuittingMethod] = useState(quittingMethod ?? '');
-    const [localCigsReduced, setLocalCigsReduced] = useState(cigsReduced ?? 0);
-    const [localExpectedQuitDate, setLocalExpectedQuitDate] = useState(expectedQuitDate ?? '');
+    const [localQuittingMethod, setLocalQuittingMethod] = useState(quittingMethod ?? null);
+    const [localCigsReduced, setLocalCigsReduced] = useState(cigsReduced ?? null);
+    const [localExpectedQuitDate, setLocalExpectedQuitDate] = useState(expectedQuitDate ?? null);
     const [localPlanLog, setLocalPlanLog] = useState(planLog ?? []);
     const [localPlanLogCloneDDMMYY, _setLocalPlanLogCloneDDMMYY] = useState(
         () => ConvertPlanlogDdmmyy(planLog) ?? []
     );
+    const [planCreation, setPlanCreation] = useState(false)
 
     const setLocalPlanLogCloneDDMMYY = useCallback((valueOrUpdater) => {
         if (typeof valueOrUpdater === 'function') {
@@ -128,6 +131,16 @@ const UserProfileInMessage = ({
     }, [expectedQuitDate, mergedDataSet, today]);
 
 
+    useEffect(() => {
+        console.log(coach ? 'yes coach' : 'no coach')
+    }, [coach]);
+
+    useEffect(() => {
+        console.log('userInfo', userInfo)
+        console.log('coachInfo', coachInfo)
+        console.log('coach', coach)
+    }, [coach, coachInfo, userInfo])
+
     // Show loading state if data is still being fetched
     if (isPending) {
         return (
@@ -137,8 +150,16 @@ const UserProfileInMessage = ({
         );
     }
 
+
+
     return (
-        <div className='h-full flex flex-col overflow-y-auto px-5'>
+        <div className='h-full w-full flex flex-col overflow-y-auto px-5'>
+            <p className='text-gray-400'>Tạo bởi: {userInfo?.username} {coach ? '(bạn)' : '(người dùng)'}</p>
+            <p className='text-gray-400'>Tạo vào ngày: {convertYYYYMMDDStrToDDMMYYYYStr(createdAt.split('T')[0])}</p>
+            {!coach && userInfo && <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {userInfo?.user_id === updatedBy ? `${userInfo?.username} (người dùng)` : `${coachInfo?.username} (bạn)`}</p> }
+            {coach && <p className='text-gray-400'>Chỉnh sửa lần cuối bởi: {updatedBy === coach?.user_id ? `${coach?.username} (huấn luyện viên)` : userInfo?.username}</p>}
+            {updatedAt && <p className='text-gray-400'>Chỉnh sửa lần cuối vào
+                lúc: {convertYYYYMMDDStrToDDMMYYYYStr(updatedAt.split('T')[0])}</p>}
             <div>
                 <p className='font-bold text-2xl'>Mức độ sẵn sàng</p>
                 <p>{readinessLabel}</p>
@@ -244,8 +265,37 @@ const UserProfileInMessage = ({
                     </>
                 ) : (
                     <>
-                        <p>Người dùng chưa tạo kế hoạch</p>
-                        <CustomButton>Tạo kế hoạch</CustomButton>
+                        {!planCreation ? <div>
+                            <p>Người dùng chưa tạo kế hoạch</p>
+                            <CustomButton onClick={() => setPlanCreation(true)}>Tạo kế hoạch</CustomButton>
+                        </div> : <SetPlan
+                            readinessValue={localReadinessValue}
+                            userInfo={localUserInfo}
+                            startDate={localStartDate}
+                            cigsPerDay={localCigsPerDay}
+                            quittingMethod={localQuittingMethod}
+                            setQuittingMethod={setLocalQuittingMethod}
+                            cigsReduced={localCigsReduced}
+                            setCigsReduced={setLocalCigsReduced}
+                            expectedQuitDate={localExpectedQuitDate}
+                            setExpectedQuitDate={setLocalExpectedQuitDate}
+                            planLog={localPlanLog}
+                            setPlanLog={setLocalPlanLog}
+                            planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
+                            setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
+                            from='coach-user'
+                            reasonList={reasonList}
+                            pricePerPack={pricePerPack}
+                            cigsPerPack={cigsPerPack}
+                            timeAfterWaking={timeAfterWaking}
+                            timeOfDayList={timeOfDayList}
+                            triggers={triggers}
+                            customTimeOfDay={customTimeOfDay} customTrigger={customTrigger}
+                            stoppedDate={stoppedDate} goalList={goalList}
+                            setPlanEditClicked={setPlanEditClicked}
+                            coachInfo={coachInfo}
+                            coach={coach}
+                        />}
                     </>
                 )}
             </div>

@@ -21,4 +21,22 @@ const getSubscribedUsers = async (userAuth0Id) => {
     }
 }
 
-module.exports = {getSubscribedUsers}
+const getCoachCommissionRate = async (userId) => {
+    let userIdForFetch = userId
+    if (userId.length > 1) {
+        userIdForFetch = await getUserIdFromAuth0Id(userId);
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userIdForFetch)
+            .query('SELECT commission_rate from coach_info')
+        return result.recordset[0];
+    }catch (error) {
+        console.error('error in getCoachCommissionRate', error);
+        return [];
+    }
+}
+
+module.exports = {getSubscribedUsers, getCoachCommissionRate}

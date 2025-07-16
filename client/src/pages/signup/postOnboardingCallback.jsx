@@ -9,6 +9,7 @@ import {
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists, useUserInfoStore
 } from "../../stores/store.js";
 import {usePostUserProfile} from "../../components/hooks/usePostUSerProfile.js";
+import {queryClient} from "../../main.jsx";
 
 const PostOnboardingCallback = () => {
 
@@ -66,9 +67,11 @@ const PostOnboardingCallback = () => {
 
         mutation.mutate(payload, {
             onSuccess: (data) => {
-                setOnboardingStatus(data.success);
                 setMsg(data.message);
                 setIsProfileExist(true);
+                setTimeout(() => {
+                    setOnboardingStatus(data.success);
+                }, 300)
             },
             onError: (error) => {
                 console.error('Submission error:', error);

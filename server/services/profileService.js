@@ -239,11 +239,6 @@ const updateUserProfile = async (
     goalList
 ) => {
     try {
-        console.log('update service')
-        console.log("▶ updaterUserAuth0Id:", updaterUserAuth0Id);
-        console.log("▶ userAuth0Id:", userAuth0Id);
-
-
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
         const updaterUserId = await getUserIdFromAuth0Id(updaterUserAuth0Id);

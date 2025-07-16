@@ -32,7 +32,8 @@ import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx"
 import {getStats} from "../../components/utils/coachUtils.js";
 import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
-import {getCoachById} from "../../components/utils/userUtils.js";
+import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
+import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -107,7 +108,7 @@ function Dashboard() {
     } = useQuery({
         queryKey: ['coach-info'],
         queryFn: async () => {
-            return await getCoachById(userInfo?.user_id);
+            return await getCoachByIdOrAuth0Id(userInfo?.user_id);
         },
         enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
     })
@@ -227,7 +228,7 @@ function Dashboard() {
                             setMoneySaved={setMoneySaved}
                         />
                     ) : (
-                        currentStepDashboard === 'dashboard' && <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type='progressNCoach'/>
+                        currentStepDashboard === 'dashboard' && <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type="progressNCoach" />
                     );
 
                 case 'check-in':
@@ -257,6 +258,9 @@ function Dashboard() {
 
                 case 'coach':
                     return <CoachDashboard/>;
+
+                    case 'user-review':
+                        return <UserReviews/>
 
                 default:
                     return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
@@ -307,10 +311,10 @@ function Dashboard() {
         <PageFadeWrapper>
             <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
                 <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
-                <div className="w-[1680px] flex flex-col  md:flex-row gap-4 px-1 py-4 md:px-4">
+                <div className="w-[1680px] flex flex-col max-h-[1500px] md:flex-row gap-4 px-1 py-4 md:px-4">
                     {dashboardHandle(userRole)}
 
-                    <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                    <div className="w-full h-screen flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
                         {renderBoard()}
                     </div>
                 </div>

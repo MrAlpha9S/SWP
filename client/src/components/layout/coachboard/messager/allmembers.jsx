@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, {useState, useCallback, useMemo, useEffect} from "react";
 import { Search, User, Users, Circle, MessageCircle, X } from "lucide-react";
+import {useSelectedUserAuth0IdStore} from "../../../../stores/store.js";
 
 export default function AllMembers({
     members,
@@ -9,12 +10,16 @@ export default function AllMembers({
     getUserLastSeen,
     formatLastSeen
 }) {
-    const [selectedMemberId, setSelectedMemberId] = useState(null);
+    const {selectedUserAuth0Id, setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
     const [selectedName, setSelectedName] = useState(null);
     const [isCreatingConversation, setIsCreatingConversation] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState("grid"); // grid or list
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+
+    useEffect(() => {
+        console.log(selectedUserAuth0Id)
+    }, [selectedUserAuth0Id]);
 
     // Filter members based on search term and online status
     const filteredMembers = useMemo(() => {
@@ -42,7 +47,7 @@ export default function AllMembers({
     }, [members, searchTerm, showOnlineOnly, getUserOnlineStatus]);
 
     const handleSelectMember = useCallback((id, name) => {
-        setSelectedMemberId(id);
+        setSelectedUserAuth0Id(id);
         setSelectedName(name);
 
         // Emit member selection event via socket
@@ -57,7 +62,7 @@ export default function AllMembers({
     }, [onEmitMemberInteraction]);
 
     const handleStartConversation = useCallback(async () => {
-        if (!selectedMemberId || !selectedName) {
+        if (!selectedUserAuth0Id || !selectedName) {
             alert('Please select a member first');
             return;
         }
@@ -69,27 +74,27 @@ export default function AllMembers({
             if (onEmitMemberInteraction) {
                 onEmitMemberInteraction({
                     type: 'conversation_creation_started',
-                    memberId: selectedMemberId,
+                    memberId: selectedUserAuth0Id,
                     memberName: selectedName,
                     timestamp: new Date().toISOString()
                 });
             }
 
             // Call the parent function to create conversation
-            await onSelectMember(selectedMemberId, selectedName);
+            await onSelectMember(selectedUserAuth0Id, selectedName);
 
             // Emit successful conversation creation
             if (onEmitMemberInteraction) {
                 onEmitMemberInteraction({
                     type: 'conversation_created_successfully',
-                    memberId: selectedMemberId,
+                    memberId: selectedUserAuth0Id,
                     memberName: selectedName,
                     timestamp: new Date().toISOString()
                 });
             }
 
             // Reset selection after successful creation
-            setSelectedMemberId(null);
+            setSelectedUserAuth0Id(null);
             setSelectedName(null);
 
         } catch (error) {
@@ -99,7 +104,7 @@ export default function AllMembers({
             if (onEmitMemberInteraction) {
                 onEmitMemberInteraction({
                     type: 'conversation_creation_failed',
-                    memberId: selectedMemberId,
+                    memberId: selectedUserAuth0Id,
                     memberName: selectedName,
                     error: error.message,
                     timestamp: new Date().toISOString()
@@ -108,10 +113,10 @@ export default function AllMembers({
         } finally {
             setIsCreatingConversation(false);
         }
-    }, [selectedMemberId, selectedName, onSelectMember, onEmitMemberInteraction]);
+    }, [selectedUserAuth0Id, selectedName, onSelectMember, onEmitMemberInteraction]);
 
     const clearSelection = useCallback(() => {
-        setSelectedMemberId(null);
+        setSelectedUserAuth0Id(null);
         setSelectedName(null);
     }, []);
 
@@ -132,7 +137,7 @@ export default function AllMembers({
     };
 
     const renderMemberCard = (member) => {
-        const isSelected = selectedMemberId === member.auth0_id;
+        const isSelected = selectedUserAuth0Id === member.auth0_id;
         const isOnline = getUserOnlineStatus ? getUserOnlineStatus(member.auth0_id) : false;
 
         return (
@@ -182,7 +187,7 @@ export default function AllMembers({
     };
 
     const renderMemberList = (member) => {
-        const isSelected = selectedMemberId === member.auth0_id;
+        const isSelected = selectedUserAuth0Id === member.auth0_id;
         const isOnline = getUserOnlineStatus ? getUserOnlineStatus(member.auth0_id) : false;
 
         return (
@@ -317,7 +322,7 @@ export default function AllMembers({
             </div>
 
             {/* Selected Member Banner */}
-            {selectedMemberId && (
+            {selectedUserAuth0Id && (
                 <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <User className="w-5 h-5 text-primary-600" />
@@ -367,12 +372,12 @@ export default function AllMembers({
                 <div className="bg-white border-t border-gray-200 p-4 -m-6 mt-0">
                     <button
                         className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-                            selectedMemberId && !isCreatingConversation
+                            selectedUserAuth0Id && !isCreatingConversation
                                 ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-md hover:shadow-lg'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                         onClick={handleStartConversation}
-                        disabled={!selectedMemberId || isCreatingConversation}
+                        disabled={!selectedUserAuth0Id || isCreatingConversation}
                     >
                         {isCreatingConversation ? (
                             <div className="flex items-center justify-center gap-2">

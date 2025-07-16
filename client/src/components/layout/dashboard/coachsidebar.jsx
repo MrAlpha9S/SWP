@@ -26,6 +26,11 @@ const items = [
         label: 'Quản lý cộng đồng',
         icon: <RiUserCommunityLine className="mr-4"/>,
     },
+    {
+        key:'user-review',
+        label: 'Review từ người dùng',
+        icon: <RiUserCommunityLine className="mr-4"/>,
+    }
 ];
 const CoachSideBar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
     return (

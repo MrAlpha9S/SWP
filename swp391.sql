@@ -85,6 +85,7 @@ CREATE TABLE [coach_reviews] (
   [user_id] int,
   [coach_id] int,
   [created_date] DATETIME,
+  [updated_date] DATETIME
 )
 ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
@@ -118,11 +119,12 @@ CREATE TABLE [user_profiles] (
   [custom_trigger] nvarchar(100),
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
-  [last_edited_by] int,
+  [last_updated_by] int,
   [is_public] bit default (1),
 )
 GO
-ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_edited_by]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_updated_by]) REFERENCES [users] ([user_id])
+GO
 
 CREATE TABLE [checkin_log] (
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -174,6 +176,20 @@ CREATE TABLE [goals] (
 )
 GO
 
+CREATE TABLE [user_notes] (
+  [note_id] int PRIMARY KEY IDENTITY(1, 1),
+  [content] nvarchar(max),
+  [user_id] int,
+  [created_at] datetime,
+  [created_by] int,
+  [updated_at] datetime,
+  [updated_by] int
+)
+GO
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([created_by]) REFERENCES [users] ([user_id])
+ALTER TABLE [user_notes] ADD FOREIGN KEY ([updated_by]) REFERENCES [users] ([user_id])
+GO
 
 CREATE TABLE [plan_log] (
   [plan_id] int PRIMARY KEY IDENTITY(1, 1),
@@ -231,17 +247,33 @@ GO
 
 CREATE TABLE [user_achievements] (
   [user_id] int,
-  [achievement_id] int,
+  [achievement_id] varchar(40),
   [achieved_at] datetime DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY ([user_id], [achievement_id])
 )
 GO
 
 CREATE TABLE [achievements] (
-  [achievement_id] int PRIMARY KEY IDENTITY(1, 1),
+  [achievement_id] varchar(40),
   [achievement_name] nvarchar(250),
   [criteria] nvarchar(max)
 )
+GO
+
+CREATE TABLE [user_achievement_progress] (
+  [user_id] INT NOT NULL PRIMARY KEY, -- assumes 1 row per user
+  [days_without_smoking] INT DEFAULT 0, -- total days smoke-free
+  [consecutive_smoke_free_days] INT DEFAULT 0, -- current streak
+  [max_consecutive_smoke_free_days] INT DEFAULT 0, -- longest streak
+  [posts_created] INT DEFAULT 0, -- total posts
+  [comments_created] INT DEFAULT 0, -- total comments
+  [total_likes_given] INT DEFAULT 0, -- how many likes user has given
+  [total_likes_received] INT DEFAULT 0, -- how many likes their posts/comments received
+  [first_check_in_completed] BIT DEFAULT 0, -- whether first check-in was done
+  [first_saving_goal_completed] BIT DEFAULT 0, -- whether first financial goal achieved
+  [last_smoke_free_date] DATE NULL, -- most recent smoke-free date to calculate streaks
+  FOREIGN KEY ([user_id]) REFERENCES [users]([user_id])
+);
 GO
 
 CREATE TABLE [feedbacks] (
@@ -431,20 +463,206 @@ ALTER TABLE [social_comments]
 ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id]);
 
 use SWP391
-SELECT * FROM users
+GO
+CREATE OR ALTER PROCEDURE UpdateUserAchievementProgress
+    @UserId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+
+    IF NOT EXISTS (SELECT 1 FROM user_achievement_progress WHERE user_id = @UserId)
+    BEGIN
+        INSERT INTO user_achievement_progress (user_id) VALUES (@UserId);
+    END
+
+    -------------------------
+    -- UPDATE PROGRESS TRACK
+    -------------------------
+
+    UPDATE uap
+    SET days_without_smoking = (
+        SELECT COUNT(DISTINCT CAST(logged_at AS DATE))
+        FROM checkin_log
+        WHERE user_id = @UserId AND cigs_smoked = 0
+    )
+    FROM user_achievement_progress uap
+    WHERE user_id = @UserId;
+
+    DECLARE @consecutive INT = 0;
+    DECLARE @curDate DATE = @Today;
+
+    WHILE EXISTS (
+        SELECT 1 FROM checkin_log
+        WHERE user_id = @UserId
+        AND cigs_smoked = 0
+        AND CAST(logged_at AS DATE) = @curDate
+    )
+    BEGIN
+        SET @consecutive += 1;
+        SET @curDate = DATEADD(DAY, -1, @curDate);
+    END
+
+    UPDATE user_achievement_progress
+    SET
+        consecutive_smoke_free_days = @consecutive,
+        max_consecutive_smoke_free_days = 
+            CASE WHEN @consecutive > max_consecutive_smoke_free_days 
+                 THEN @consecutive ELSE max_consecutive_smoke_free_days END,
+        last_smoke_free_date = @Today
+    WHERE user_id = @UserId;
+
+    UPDATE user_achievement_progress
+    SET
+        posts_created = (SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId),
+        comments_created = (SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId),
+        total_likes_given = (SELECT COUNT(*) FROM social_likes WHERE user_id = @UserId),
+        total_likes_received = (
+            SELECT COUNT(*) FROM social_likes 
+            WHERE post_id IN (SELECT post_id FROM social_posts WHERE user_id = @UserId)
+               OR comment_id IN (SELECT comment_id FROM social_comments WHERE user_id = @UserId)
+        ),
+        first_check_in_completed = CASE WHEN EXISTS (
+            SELECT 1 FROM checkin_log WHERE user_id = @UserId
+        ) THEN 1 ELSE 0 END,
+        first_saving_goal_completed = CASE WHEN EXISTS (
+            SELECT 1 FROM goals g
+            JOIN user_profiles up ON g.profile_id = up.profile_id
+            WHERE up.user_id = @UserId AND g.is_completed = 1
+        ) THEN 1 ELSE 0 END
+    WHERE user_id = @UserId;
+
+    --------------------------------
+    -- INSERT UNLOCKED ACHIEVEMENTS
+    --------------------------------
+
+    INSERT INTO user_achievements (user_id, achievement_id, achieved_at)
+    SELECT @UserId, a.achievement_id, GETDATE()
+    FROM achievements a
+    WHERE NOT EXISTS (
+        SELECT 1 FROM user_achievements ua
+        WHERE ua.user_id = @UserId AND ua.achievement_id = a.achievement_id
+    )
+    AND (
+        (a.achievement_id = '7-days-smoke-free' AND @consecutive >= 7)
+        OR (a.achievement_id = '5-day-streak' AND @consecutive >= 5)
+        OR (a.achievement_id = '10-day-streak' AND @consecutive >= 10)
+        OR (a.achievement_id = '30-days-smoke-free' AND @consecutive >= 30)
+        OR (a.achievement_id = '1-year-streak' AND @consecutive >= 365)
+        OR (a.achievement_id = 'new-member' AND (SELECT DATEDIFF(DAY, created_at, GETDATE()) FROM users WHERE user_id = @UserId) = 0)
+        OR (a.achievement_id = 'streak-starter' AND EXISTS (SELECT 1 FROM checkin_log WHERE user_id = @UserId))
+        OR (a.achievement_id = 'kind-hearted' AND (
+            SELECT total_likes_given FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 50)
+        OR (a.achievement_id = 'new-me' AND (
+            SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId
+        ) + (
+            SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId
+        ) >= 1)
+        OR (a.achievement_id = 'story-teller' AND (
+            SELECT comments_created + posts_created FROM user_achievement_progress WHERE user_id = @UserId
+        ) >= 50)
+        OR (a.achievement_id = 'smart-saver' AND (
+            SELECT first_saving_goal_completed FROM user_achievement_progress WHERE user_id = @UserId
+        ) = 1)
+    );
+
+    -- Optional: return recently unlocked
+    SELECT a.achievement_id, a.achievement_name
+    FROM user_achievements ua
+    JOIN achievements a ON a.achievement_id = ua.achievement_id
+    WHERE ua.user_id = @UserId
+    AND ua.achieved_at >= DATEADD(SECOND, -10, GETDATE());
+END
+
+GO
+CREATE OR ALTER TRIGGER trg_checkin_log_progress
+ON checkin_log
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @userId INT;
+    SELECT TOP 1 @userId = user_id FROM inserted;
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+END
+GO
+
+CREATE OR ALTER TRIGGER trg_social_posts_progress
+ON social_posts
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @userId INT;
+    SELECT TOP 1 @userId = user_id FROM inserted;
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+END
+GO
+
+CREATE OR ALTER TRIGGER trg_social_comments_progress
+ON social_comments
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @userId INT;
+    SELECT TOP 1 @userId = user_id FROM inserted;
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+END
+GO
+
+CREATE OR ALTER TRIGGER trg_social_likes_progress
+ON social_likes
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @userId INT;
+    SELECT TOP 1 @userId = user_id FROM inserted;
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+END
+GO
+
+CREATE OR ALTER TRIGGER trg_goals_progress
+ON goals
+AFTER UPDATE
+AS
+BEGIN
+    DECLARE @profileId INT;
+    SELECT TOP 1 @profileId = profile_id FROM inserted;
+
+    DECLARE @userId INT;
+    SELECT TOP 1 @userId = user_id
+    FROM user_profiles
+    WHERE profile_id = @profileId;
+
+    IF @userId IS NOT NULL
+        EXEC UpdateUserAchievementProgress @UserId = @userId;
+END
+GO
+
+CREATE TRIGGER trg_NewUser_GrantInitialAchievements
+ON [users]
+AFTER INSERT
+AS
+BEGIN
+    -- Insert into progress table (if not already handled)
+    INSERT INTO user_achievement_progress (user_id)
+    SELECT i.user_id
+    FROM inserted i
+    WHERE NOT EXISTS (
+        SELECT 1 FROM user_achievement_progress p WHERE p.user_id = i.user_id
+    );
+
+    -- Grant "new-member" achievement
+    INSERT INTO user_achievements (user_id, achievement_id)
+    SELECT i.user_id, 'new-member'
+    FROM inserted i
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM user_achievements ua
+        WHERE ua.user_id = i.user_id AND ua.achievement_id = 'new-member'
+    );
+END;
+GO
 
 
-DELETE FROM users where user_id = 17
-
-SELECT * FROM user_profiles
-select * from plan_log
-select * from profiles_reasons
-select * from goals
-select * from triggers_profiles
-select * from checkin_log
-select * from qna
-select * from quitting_items
-select * from free_text
-select * from social_category
-select * from social_posts
-
+select * from users

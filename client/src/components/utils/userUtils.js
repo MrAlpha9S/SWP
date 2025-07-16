@@ -107,7 +107,7 @@ export async function getCoaches() {
     return await res.json();
 }
 
-export async function getCoachById(coachId) {
+export async function getCoachByIdOrAuth0Id(coachId) {
     const res = await fetch('http://localhost:3000/users/coaches/' + coachId, {
         method: 'GET',
         headers: {
@@ -164,7 +164,7 @@ export async function GetAllMembers(user, getAccessTokenSilently, isAuthenticate
 }
 
 
-export async function assignCoachToUser (coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated) {
+export async function assignCoachToUser (user, coachId, userId, username, coachAuth0Id, getAccessTokenSilently, isAuthenticated) {
     if (!isAuthenticated) return
     const token = await getAccessTokenSilently();
 
@@ -179,6 +179,7 @@ export async function assignCoachToUser (coachId, userId, username, coachAuth0Id
             coachId: coachId,
             username: username,
             coachAuth0Id: coachAuth0Id,
+            userAuth0Id: user.sub
         })
     });
 
@@ -188,3 +189,79 @@ export async function assignCoachToUser (coachId, userId, username, coachAuth0Id
 
     return await res.json();
 }
+
+export async function getUserNotes(user, getAccessTokenSilently, isAuthenticated, userAuth0Id) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes/' + userAuth0Id, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return res.json();
+}
+
+export async function createUserNote(user, getAccessTokenSilently, isAuthenticated, noteOfAuth0Id, creatorAuth0Id, content) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            noteOfAuth0Id,
+            creatorAuth0Id,
+            content
+        })
+    });
+
+    return res.json();
+}
+
+export async function updateUserNote(user, getAccessTokenSilently, isAuthenticated, noteId, noteOfAuth0Id, editorAuth0Id, content) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/users/notes', {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            noteId,
+            noteOfAuth0Id,
+            editorAuth0Id,
+            content
+        })
+    });
+
+    return res.json();
+}
+
+export async function deleteUserNote(user, getAccessTokenSilently, isAuthenticated, noteId) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/notes/${noteId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return res.json();
+}
+

@@ -1,6 +1,14 @@
-const {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal} = require("../services/profileService");
-const {getUserWithSubscription} = require("../services/userService");
-
+const {
+    userProfileExists,
+    postUserProfile,
+    getUserProfile,
+    updateUserProfile,
+    postGoal,
+    deleteGoal
+} = require("../services/profileService");
+const {getUserWithSubscription, getUserByAuth0Id, getCoachDetailsById} = require("../services/userService");
+const socket = require('../utils/socket');
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const handlePostOnboarding = async (req, res) => {
     const {
@@ -30,7 +38,6 @@ const handlePostOnboarding = async (req, res) => {
 
     try {
         if (await userProfileExists(userAuth0Id)) {
-
             result = updateUserProfile(userAuth0Id, updaterUserAuth0Id,
                 readiness,
                 reasonList,
@@ -49,6 +56,26 @@ const handlePostOnboarding = async (req, res) => {
                 cigsPerDay,
                 planLog,
                 goalList)
+            if (userAuth0Id !== updaterUserAuth0Id) {
+                const updater = await getUserByAuth0Id(updaterUserAuth0Id);
+                socket.getIo().to(`${userAuth0Id}`).emit('plan-edit-by-coach', {
+                    userAuth0Id: userAuth0Id,
+                    updaterUserAuth0Id: updaterUserAuth0Id,
+                    updaterUsername: updater.username,
+                    timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                });
+            } else {
+                const coach = await getCoachDetailsById(null, userAuth0Id)
+                if (coach) {
+                    const user = await getUserByAuth0Id(userAuth0Id);
+                    socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
+                        userAuth0Id: userAuth0Id,
+                        updaterUserAuth0Id: updaterUserAuth0Id,
+                        updaterUsername: user.username,
+                        timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                    });
+                }
+            }
         } else {
             result = await postUserProfile(
                 userAuth0Id,
@@ -70,9 +97,29 @@ const handlePostOnboarding = async (req, res) => {
                 cigsPerDay,
                 planLog,
                 goalList)
+            if (userAuth0Id !== updaterUserAuth0Id) {
+                const updater = await getUserByAuth0Id(updaterUserAuth0Id);
+                socket.getIo().to(`${userAuth0Id}`).emit('plan-edit-by-coach', {
+                    userAuth0Id: userAuth0Id,
+                    updaterUserAuth0Id: updaterUserAuth0Id,
+                    updaterUsername: updater.username,
+                    timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                });
+            } else {
+                const coach = await getCoachDetailsById(null, userAuth0Id)
+                if (coach) {
+                    const user = await getUserByAuth0Id(userAuth0Id);
+                    socket.getIo().to(`${coach.coach.auth0_id}`).emit('plan-edit-by-user', {
+                        userAuth0Id: userAuth0Id,
+                        updaterUserAuth0Id: updaterUserAuth0Id,
+                        updaterUsername: user.username,
+                        timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
+                    });
+                }
+            }
         }
         if (result)
-        return res.status(201).json({success: true, message: 'User profile inserted'});
+            return res.status(201).json({success: true, message: 'User profile inserted'});
     } catch (err) {
         console.error('post onboarding error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
@@ -103,7 +150,7 @@ const handleGetProfile = async (req, res) => {
                 : !userInfo
                     ? 'User profile fetched, but subscription info not found'
                     : 'User profile and subscription info fetched',
-            data: { userProfile, userInfo }
+            data: {userProfile, userInfo}
         });
 
     } catch (err) {
