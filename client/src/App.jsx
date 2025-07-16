@@ -103,6 +103,10 @@ function AppContent() {
                 openNotification('new-coach-review', data);
             })
 
+            socket.on('new-achievement', (data) => {
+                openNotification('new-achievement', data);
+            })
+
             return () => {
                 socket.disconnect();
             };

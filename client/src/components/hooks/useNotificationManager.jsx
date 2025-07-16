@@ -3,7 +3,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import {BsFillPeopleFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
-import {FaCheck} from "react-icons/fa";
+import {FaCheck, FaMedal} from "react-icons/fa";
 
 const NotificationContext = createContext();
 
@@ -84,6 +84,18 @@ export const NotificationProvider = ({ children }) => {
                     </div>,
                     placement: 'topRight',
                     icon: <CiEdit className="size-5"/>
+                });
+                break;
+            case 'new-achievement':
+                api.open({
+                    key: `new-achievement`,
+                    message: `Bạn vừa đạt thành tựu mới`,
+                    description: <div>
+                        <p><strong>{payload.achievement_name}:</strong> {payload.criteria}</p>
+                        <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
+                    </div>,
+                    placement: 'topRight',
+                    icon: <FaMedal className="size-5"/>
                 });
                 break;
             default:

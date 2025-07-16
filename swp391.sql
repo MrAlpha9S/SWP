@@ -352,6 +352,10 @@ CREATE TABLE [social_likes] (
   [created_at] DATETIME
 );
 
+ALTER TABLE [social_likes] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]);
+ALTER TABLE [social_likes] ADD FOREIGN KEY ([post_id]) REFERENCES [social_posts] ([post_id]);
+ALTER TABLE [social_likes] ADD FOREIGN KEY ([comment_id]) REFERENCES [social_comments] ([comment_id]);
+
 CREATE TABLE [social_reports] (
   [report_id] INT PRIMARY KEY IDENTITY(1,1),
   [user_id] INT,
@@ -603,7 +607,7 @@ BEGIN
         OR (a.achievement_id = 'social-butterfly' AND (uap.posts_created + uap.comments_created) >= 25)
         OR (a.achievement_id = 'story-teller' AND (uap.posts_created + uap.comments_created) >= 50)
         OR (a.achievement_id = 'community-guru' AND (uap.posts_created + uap.comments_created) >= 100)
-        OR (a.achievement_id = 'kind-heart' AND uap.total_likes_given >= 100)
+        OR (a.achievement_id = 'kind-heart' AND uap.total_likes_given >= 50)
         OR (a.achievement_id = 'cheer-champion' AND uap.total_likes_given >= 100)
         OR (a.achievement_id = 'warm-welcomer' AND uap.total_likes_given >= 10)
         
@@ -614,7 +618,7 @@ BEGIN
     );
     
     -- Return recently unlocked achievements (optional - for immediate feedback)
-    SELECT a.achievement_id, a.achievement_name
+    SELECT a.achievement_id, a.achievement_name, a.criteria
     FROM user_achievements ua
     JOIN achievements a ON a.achievement_id = ua.achievement_id
     WHERE ua.user_id = @UserId
@@ -622,9 +626,8 @@ BEGIN
 END
 GO
 
-
+select * from achievements
 GO
--- 1. Check-in Log Trigger
 CREATE OR ALTER TRIGGER trg_checkin_log_progress
 ON checkin_log
 AFTER INSERT
@@ -632,7 +635,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Process all unique users from inserted rows
     DECLARE @userId INT;
     DECLARE user_cursor CURSOR FOR
         SELECT DISTINCT user_id FROM inserted;
@@ -642,7 +644,15 @@ BEGIN
     
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        DECLARE @NewAchievements TABLE (
+            achievement_id VARCHAR(40),
+            achievement_name NVARCHAR(250),
+            criteria NVARCHAR(MAX)
+        );
+        
+        INSERT INTO @NewAchievements
         EXEC UpdateUserAchievementProgress @UserId = @userId;
+
         FETCH NEXT FROM user_cursor INTO @userId;
     END
     
@@ -651,7 +661,7 @@ BEGIN
 END
 GO
 
--- 2. Social Posts Trigger
+-- Social Posts Trigger
 CREATE OR ALTER TRIGGER trg_social_posts_progress
 ON social_posts
 AFTER INSERT
@@ -668,7 +678,15 @@ BEGIN
     
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        DECLARE @NewAchievements TABLE (
+            achievement_id VARCHAR(40),
+            achievement_name NVARCHAR(250),
+            criteria NVARCHAR(MAX)
+        );
+        
+        INSERT INTO @NewAchievements
         EXEC UpdateUserAchievementProgress @UserId = @userId;
+        
         FETCH NEXT FROM user_cursor INTO @userId;
     END
     
@@ -677,7 +695,7 @@ BEGIN
 END
 GO
 
--- 3. Social Comments Trigger
+-- Social Comments Trigger
 CREATE OR ALTER TRIGGER trg_social_comments_progress
 ON social_comments
 AFTER INSERT
@@ -694,7 +712,15 @@ BEGIN
     
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        DECLARE @NewAchievements TABLE (
+            achievement_id VARCHAR(40),
+            achievement_name NVARCHAR(250),
+            criteria NVARCHAR(MAX)
+        );
+        
+        INSERT INTO @NewAchievements
         EXEC UpdateUserAchievementProgress @UserId = @userId;
+        
         FETCH NEXT FROM user_cursor INTO @userId;
     END
     
@@ -703,7 +729,7 @@ BEGIN
 END
 GO
 
--- 4. Social Likes Trigger (More Complex - Need to Handle Both Giver and Receiver)
+-- Social Likes Trigger (More Complex - Need to Handle Both Giver and Receiver)
 CREATE OR ALTER TRIGGER trg_social_likes_progress
 ON social_likes
 AFTER INSERT
@@ -733,7 +759,15 @@ BEGIN
     
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        DECLARE @NewAchievements TABLE (
+            achievement_id VARCHAR(40),
+            achievement_name NVARCHAR(250),
+            criteria NVARCHAR(MAX)
+        );
+        
+        INSERT INTO @NewAchievements
         EXEC UpdateUserAchievementProgress @UserId = @userId;
+        
         FETCH NEXT FROM user_cursor INTO @userId;
     END
     
@@ -742,7 +776,7 @@ BEGIN
 END
 GO
 
--- 5. Goals Trigger (On UPDATE when is_completed changes)
+-- Goals Trigger (On UPDATE when is_completed changes)
 CREATE OR ALTER TRIGGER trg_goals_progress
 ON goals
 AFTER UPDATE
@@ -766,7 +800,15 @@ BEGIN
         
         WHILE @@FETCH_STATUS = 0
         BEGIN
+            DECLARE @NewAchievements TABLE (
+                achievement_id VARCHAR(40),
+                achievement_name NVARCHAR(250),
+                criteria NVARCHAR(MAX)
+            );
+            
+            INSERT INTO @NewAchievements
             EXEC UpdateUserAchievementProgress @UserId = @userId;
+            
             FETCH NEXT FROM user_cursor INTO @userId;
         END
         

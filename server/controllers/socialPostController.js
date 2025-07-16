@@ -1,4 +1,5 @@
 const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
+const {processAchievementsWithNotifications} = require("../services/achievementService");
 
 const getPostAndCommentCount = async (req, res) => {
 
@@ -152,6 +153,7 @@ const handlePostSocialPosts = async (req, res) => {
         if (!socialPosts) {
             return res.status(404).json({ success: false, message: 'Cant handlePostSocialPosts', data: null });
         }
+        await processAchievementsWithNotifications(auth0_id);
         return res.status(200).json({ success: true, message: 'handlePostSocialPosts successfully', data: socialPosts });
     } catch (error) {
         console.error('Error in handleGetBlog:', error);
@@ -172,6 +174,7 @@ const handleAddComment = async (req, res) => {
         if (!add) {
             return res.status(404).json({ success: false, message: 'Cant handleAddComment', data: null });
         }
+        await processAchievementsWithNotifications(auth0_id);
         return res.status(200).json({ success: true, message: 'handleAddComment successfully', data: add });
     } catch (error) {
         console.error('Error in handleAddComment:', error);
@@ -193,12 +196,12 @@ const handleAddLike = async (req, res) => {
         if (!add) {
             return res.status(404).json({ success: false, message: 'Cant handleAddLike', data: null });
         }
+        await processAchievementsWithNotifications(auth0_id);
         return res.status(200).json({ success: true, message: 'handleAddLike successfully', data: add });
     } catch (error) {
         console.error('Error in handleAddLike:', error);
         return res.status(500).json({ success: false, message: 'Internal server error', data: null });
     }
-
 }
 
 
