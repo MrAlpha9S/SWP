@@ -3,6 +3,7 @@ const {
     getCheckInLogDataset,
     getCheckInDataService
 } = require("../services/checkInService");
+const {processAchievementsWithNotifications} = require("../services/achievementService");
 
 const handlePostCheckIn = async (req, res) => {
     const {
@@ -27,10 +28,11 @@ const handlePostCheckIn = async (req, res) => {
         if (!result) {
             return res.status(404).json({success: false, message: 'Check-in data insert failed', data: null});
         } else {
+            await processAchievementsWithNotifications(userAuth0Id);
             return res.status(200).json({success: true, message: 'Check-in data insert successful', data: result});
         }
     } catch (err) {
-        console.error('handleGetProfile error:', err);
+        console.error('handlePostCheckIn error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
     }
 }

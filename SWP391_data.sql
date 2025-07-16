@@ -19,6 +19,38 @@ VALUES
   (2, N'Tương tác 1-1 với Huấn luyện viên'),
   (2, N'Tạo kế hoạch cá nhân hóa với Huấn luyện viên');
 
+INSERT INTO [achievements] ([achievement_id], [achievement_name], [criteria], [icon_url])
+VALUES 
+('7-days-smoke-free', N'7 Ngày Không Hút Thuốc', N'7 ngày không khói thuốc.', '/7-days-smoke-free.svg'),
+('streak-starter', N'Bắt đầu nào!', N'Hoàn thành check-in đầu tiên.', '/streak-starter.svg'),
+('new-member', N'Thành Viên Mới', N'Tham gia EzQuit.', '/badge-support-3.png'),
+
+('1-year-quit', N'1 Năm Cai Thuốc', N'1 năm không hút thuốc – một cột mốc tuyệt vời trong hành trình cai thuốc.', '/1-year-quit.svg'),
+('1-year-streak', N'1 Năm Liên Tiếp', N'Duy trì chuỗi 1 năm liên tục không hút thuốc.', '/1-year-streak.svg'),
+('10-days-streak', N'10 Ngày Liên Tiếp', N'Duy trì 10 ngày liên tiếp không hút thuốc.', '/10-day-streak.svg'),
+('100-days-streak', N'100 Ngày Liên Tiếp', N'100 ngày kiên trì không bỏ cuộc.', '/100-day-streak.svg'),
+('14-days-smoke-free', N'14 Ngày Không Hút Thuốc', N'2 tuần không hút thuốc', '/14-days-smoke-free.svg'),
+('180-days-smoke-free', N'180 Ngày Không Hút Thuốc', N'Nửa năm sạch khói thuốc.', '/180-days-smoke-free.svg'),
+('30-days-smoke-free', N'30 Ngày Không Hút Thuốc', N'Một tháng không hút thuốc – tuyệt vời!', '/30-days-smoke-free.svg'),
+('5-days-streak', N'5 Ngày Liên Tiếp', N'5 ngày đầu tiên là bước khởi đầu quan trọng.', '/goal-hitter.svg'),
+('50-days-streak', N'50 Ngày Liên Tiếp', N'50 ngày liên tiếp không hút thuốc.', '/50-day-streak.svg'),
+('90-days-smoke-free', N'90 Ngày Không Hút Thuốc', N'3 tháng không hút thuốc – bạn đã vượt qua những giai đoạn khó khăn nhất.', '/90-days-smoke-free.svg'),
+
+('cheer-champion', N'Nhà Cổ Vũ Nhiệt Tình', N'Thích 100 bình luận hoặc bài viết.', '/cheer-champion.svg'),
+('community-guru', N'Bậc Thầy Cộng Đồng', N'Tạo 100 bài viết hoặc bình luận trong cộng đồng.', '/community-guru.svg'),
+('kind-heart', N'Người Tử Tế', N'Thích 50 bình luận hoặc bài viết.', '/badge-support-3.png'),
+('new-me', N'Phiên Bản Mới', N'Tạo bài viết hoặc bình luận đầu tiên của bạn trong cộng đồng.', '/new-me.svg'),
+('smart-saver', N'Người Tiết Kiệm Thông Minh', N'Hoàn thành mục tiêu tiết kiệm đầu tiên của bạn.', '/streak-starter.svg'),
+('social-butterfly', N'Người Kết Nối', N'Tạo 25 bài viết hoặc bình luận trong cộng đồng.', '/social-butterfly.svg'),
+('story-teller', N'Người Kể Chuyện', N'Tạo 50 bài viết hoặc bình luận trong cộng đồng.', '/story-teller.svg'),
+('100k', N'Khởi Đầu Tiết Kiệm', N'Bạn đã tiết kiệm được 100.000 VNĐ – một bước nhỏ cho hành trình lớn!', '/100k.svg'),
+('500k', N'Nửa Triệu Sạch Khói', N'Bạn đã để dành 500.000 VNĐ nhờ nói không với thuốc lá.', '/500k.svg'),
+('1m', N'Triệu Phú Không Khói', N'1.000.000 VNĐ đã được giữ lại – sức khỏe và ví tiền cùng được bảo vệ!', '/1m.svg'),
+('5m', N'Ngân Hàng Sức Khỏe', N'Bạn đã tiết kiệm 5 triệu – hãy tưởng tượng bạn sẽ làm gì với số tiền đó!', '/5m.svg'),
+('10m', N'Mười Triệu – Mười Thắng Lợi', N'10 triệu VNĐ đã ở lại với bạn, không phải với thuốc lá – một chiến thắng lớn!', '/10m.svg');
+
+
+
 --Sample user info
 INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social], [sub_id], [vip_end_date], [role])
 VALUES 
@@ -38,33 +70,6 @@ VALUES
 INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [role], [is_social])
 VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
-
-INSERT INTO [achievements] ([achievement_id], [achievement_name], [criteria])
-VALUES 
-('7-days-smoke-free', N'7 Ngày Không Hút Thuốc', N'7 ngày không khói thuốc.'),
-('streak-starter', N'Bắt đầu nào!', N'Hoàn thành check-in đầu tiên.'),
-('new-member', N'Thành Viên Mới', N'Tham gia EzQuit.'),
-
-('1-year-quit', N'1 Năm Cai Thuốc', N'1 năm không hút thuốc – một cột mốc tuyệt vời trong hành trình cai thuốc.'),
-('1-year-streak', N'1 Năm Liên Tiếp', N'Duy trì chuỗi 1 năm liên tục không hút thuốc.'),
-('10-day-streak', N'10 Ngày Liên Tiếp', N'Duy trì 10 ngày liên tiếp không hút thuốc.'),
-('100-day-streak', N'100 Ngày Liên Tiếp', N'100 ngày kiên trì không bỏ cuộc.'),
-('14-days-smoke-free', N'14 Ngày Không Hút Thuốc', N'2 tuần không hút thuốc'),
-('180-days-smoke-free', N'180 Ngày Không Hút Thuốc', N'Nửa năm sạch khói thuốc.'),
-('30-days-smoke-free', N'30 Ngày Không Hút Thuốc', N'Một tháng không hút thuốc – tuyệt vời!'),
-('goal-hitter', N'5 Ngày Liên Tiếp', N'5 ngày đầu tiên là bước khởi đầu quan trọng.'),
-('50-day-streak', N'50 Ngày Liên Tiếp', N'50 ngày liên tiếp không hút thuốc.'),
-('90-days-smoke-free', N'90 Ngày Không Hút Thuốc', N'3 tháng không hút thuốc – bạn đã vượt qua những giai đoạn khó khăn nhất.'),
-
-('cheer-champion', N'Nhà Cổ Vũ Nhiệt Tình', N'Thích 100 bình luận hoặc bài viết.'),
-('community-guru', N'Bậc Thầy Cộng Đồng', N'Tạo 100 bài viết hoặc bình luận trong cộng đồng.'),
-('kind-heart', N'Người Tử Tế', N'Thích 50 bình luận hoặc bài viết.'),
-('new-me', N'Phiên Bản Mới', N'Tạo bài viết hoặc bình luận đầu tiên của bạn trong cộng đồng.'),
-('smart-saver', N'Người Tiết Kiệm Thông Minh', N'Hoàn thành mục tiêu tiết kiệm đầu tiên của bạn.'),
-('social-butterfly', N'Người Kết Nối', N'Tạo 25 bài viết hoặc bình luận trong cộng đồng.'),
-('story-teller', N'Người Kể Chuyện', N'Tạo 50 bài viết hoặc bình luận trong cộng đồng.'),
-('warm-welcomer', N'Người Chào Đón Nồng Nhiệt', N'Thích 10 bình luận hoặc bài viết.');
-
 
 
 INSERT INTO coach_info (coach_id, years_of_exp, bio, detailed_bio, motto)

@@ -19,9 +19,12 @@ const postCheckIn = async (userAuth0Id,
             .input('feeling', sql.VarChar(10), feel)
             .input('logged_at', sql.DateTime, checkInDate)
             .input('cigs_smoked', sql.Int, typeof cigsSmoked === 'number' ? cigsSmoked : null)
-            .query(`INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked)
-                        OUTPUT INSERTED.log_id
-                    VALUES (@user_id, @feeling, @logged_at, @cigs_smoked)`);
+            .query(`
+                INSERT INTO checkin_log (user_id, feeling, logged_at, cigs_smoked)
+                VALUES (@user_id, @feeling, @logged_at, @cigs_smoked);
+
+                SELECT SCOPE_IDENTITY() as log_id;
+            `);
 
         const log_id = result.recordset[0].log_id;
 

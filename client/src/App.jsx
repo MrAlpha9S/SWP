@@ -21,6 +21,8 @@ import HintsAndTips from "./pages/forumPage/hintsAndTips.jsx";
 import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 import AllPosts from "./pages/forumPage/allPosts.jsx";
 import PostPage from "./components/layout/forum/postPage.jsx";
+import ForumEditor from './components/layout/forum/forumeditor.jsx'
+import ForumProfile from './pages/forumPage/forumprofile.jsx'
 
 import TopicsPage from "./pages/topicsPage/topicsPage.jsx";
 import Topic from "./pages/topicsPage/topic.jsx";
@@ -37,6 +39,7 @@ import {NotificationProvider, useNotificationManager} from './components/hooks/u
 import CustomButton from "./components/ui/CustomButton.jsx";
 import {queryClient} from "./main.jsx";
 import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
+import userProfile from "./components/ui/userProfile.jsx";
 const Context = createContext({ name: 'Default' });
 
 function AppContent() {
@@ -46,6 +49,30 @@ function AppContent() {
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
+
+    const { isPending, data : userData  } = useQuery({
+        queryKey: ['user-profile'],
+        queryFn: async () => {
+            if (!isAuthenticated || !user) return null;
+            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
+            return result?.data;
+        },
+        enabled: !!isAuthenticated && !!user,
+    });
+
+    useEffect(() => {
+        if (!isPending && userData) {
+            console.log('userdate avail', userData);
+            syncProfileToStores(userData);
+
+            const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
+            if (userData?.userInfo?.role === 'Member' && currentStepDashboard?.length === 0) {
+                useCurrentStepDashboard.getState().setCurrentStepDashboard('dashboard');
+            } else if (userData?.userInfo?.role === 'Coach' && currentStepDashboard?.length === 0) {
+                useCurrentStepDashboard.getState().setCurrentStepDashboard('overview');
+            }
+        }
+    }, [userData, isPending]);
 
 
     useEffect(() => {
@@ -70,7 +97,6 @@ function AppContent() {
 
             socket.on('coach_selected', (data) => {
                 const onClick = () => {
-                    console.log('hey')
                     navigate('/dashboard')
                     setCurrentStepDashboard('coach-user')
                     setSelectedUserAuth0Id(data.userAuth0Id)
@@ -85,20 +111,51 @@ function AppContent() {
             socket.on('new_message_noti', (data) => {
                 const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
                 if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
-                    openNotification('new_message', data);
+                    const onClick = () => {
+                        if (userData?.userInfo?.role === 'Coach') {
+                            setCurrentStepDashboard('coach-user')
+                            setSelectedUserAuth0Id(data.senderAuth0Id)
+                            navigate('/dashboard')
+                        } else if (userData?.userInfo?.role === 'Member') {
+                            setCurrentStepDashboard('coach')
+                            navigate('/dashboard')
+                        }
+                    }
+                    openNotification('new_message', data, onClick);
                 }
             });
 
             socket.on('plan-edit-by-coach', (data) => {
-                openNotification('plan-edit-by-coach', data);
+                const onClick = () => {
+                    setCurrentStepDashboard('coach')
+                    navigate('/dashboard')
+                }
+                openNotification('plan-edit-by-coach', data, onClick);
             })
 
             socket.on('plan-edit-by-user', (data) => {
-                openNotification('plan-edit-by-user', data);
+                const onClick = () => {
+                    navigate('/dashboard')
+                    setCurrentStepDashboard('coach-user')
+                    setSelectedUserAuth0Id(data.userAuth0Id)
+                }
+                openNotification('plan-edit-by-user', data, onClick);
             })
 
             socket.on('new-coach-review', (data) => {
-                openNotification('new-coach-review', data);
+                const onClick = () => {
+                    setCurrentStepDashboard('user-review')
+                    navigate('/dashboard')
+                }
+                openNotification('new-coach-review', data, onClick);
+            })
+
+            socket.on('new-achievement', (data) => {
+                const onClick = () => {
+                    setCurrentStepDashboard('badges')
+                    navigate('/dashboard')
+                }
+                openNotification('new-achievement', data, onClick);
             })
 
             return () => {
@@ -107,30 +164,8 @@ function AppContent() {
         };
 
         connectSocket();
-    }, [isAuthenticated, getAccessTokenSilently, initSocket, user]);
+    }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData]);
 
-    const { isPending, data } = useQuery({
-        queryKey: ['user-profile'],
-        queryFn: async () => {
-            if (!isAuthenticated || !user) return null;
-            const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
-            return result?.data;
-        },
-        enabled: !!isAuthenticated && !!user,
-    });
-
-    useEffect(() => {
-        if (!isPending && data) {
-            syncProfileToStores(data);
-
-            const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
-            if (data?.userInfo?.role === 'Member' && currentStepDashboard?.length === 0) {
-               useCurrentStepDashboard.getState().setCurrentStepDashboard('dashboard');
-            } else if (data?.userInfo?.role === 'Coach' && currentStepDashboard?.length === 0) {
-                useCurrentStepDashboard.getState().setCurrentStepDashboard('overview');
-            }
-        }
-    }, [data, isPending]);
 
     const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 
@@ -164,6 +199,8 @@ function AppContent() {
                         <Route path="/subscription" element={<SubscriptionPage />} />
                         <Route path="/congratulationPage" element={<CongratulationPage />} />
                         <Route path="/coach-selection" element={<CoachSelectPage />} />
+                        <Route path="/forum/editor" element={<ForumEditor/>}></Route>
+                        <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                     </Routes>
                 </AnimatePresence>
             </div>

@@ -1,4 +1,5 @@
-const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments} = require("../services/socialPostService");
+const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
+const {processAchievementsWithNotifications} = require("../services/achievementService");
 
 const getPostAndCommentCount = async (req, res) => {
 
@@ -81,12 +82,10 @@ const handleGetPostByCategory = async (req, res) => {
 };
 
 const handleGetPosts = async (req, res) => {
-    const { categoryTag, keyword, page, fromDate, toDate, postId } = req.query;
-
-    console.log(categoryTag, keyword, page, fromDate, toDate, postId);
+    const { categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId} = req.query;
 
     try {
-        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate, postId});
+        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId});
 
         if (!result || result.length === 0) {
             return res.status(404).json({
@@ -113,14 +112,14 @@ const handleGetPosts = async (req, res) => {
 };
 
 const handleGetPostComments = async (req, res) => {
-    const { postId } = req.params;
+    const { postId, currentUserId } = req.params;
 
     try {
-        const result = await getPostComments(postId);
+        const result = await getPostComments({postId, currentUserId});
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                success: true,
                 message: 'No comments found',
                 data: []
             });
@@ -142,6 +141,69 @@ const handleGetPostComments = async (req, res) => {
     }
 };
 
+const handlePostSocialPosts = async (req, res) => {
+    const {category_id, auth0_id, title, content, created_at}  = req.body;
+
+    if (!category_id || !auth0_id || !title || !content || !created_at) {
+        return res.status(400).json({ success: false, message: 'error in handlePostSocialPosts: params is required', data: null });
+    }
+
+    try {
+        const socialPosts = await PostSocialPosts(category_id, auth0_id, title, content, created_at);
+        if (!socialPosts) {
+            return res.status(404).json({ success: false, message: 'Cant handlePostSocialPosts', data: null });
+        }
+        await processAchievementsWithNotifications(auth0_id);
+        return res.status(200).json({ success: true, message: 'handlePostSocialPosts successfully', data: socialPosts });
+    } catch (error) {
+        console.error('Error in handleGetBlog:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+
+}
+
+const handleAddComment = async (req, res) => {
+    const {parent_comment_id, auth0_id, post_id, content, created_at, is_reported}  = req.body;
+
+    if (!auth0_id || !post_id || !content || !created_at || is_reported === undefined) {
+        return res.status(400).json({ success: false, message: 'error in handleAddComment: params is required', data: null });
+    }
+
+    try {
+        const add = await PostAddComment(parent_comment_id, auth0_id, post_id, content, created_at, is_reported);
+        if (!add) {
+            return res.status(404).json({ success: false, message: 'Cant handleAddComment', data: null });
+        }
+        await processAchievementsWithNotifications(auth0_id);
+        return res.status(200).json({ success: true, message: 'handleAddComment successfully', data: add });
+    } catch (error) {
+        console.error('Error in handleAddComment:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+
+}
+
+const handleAddLike = async (req, res) => {
+    const {auth0_id, post_id, comment_id, created_at}  = req.body;
+    console.log('handleAddLike: ', auth0_id, post_id, comment_id, created_at)
+
+    if (!auth0_id || !created_at === undefined) {
+        return res.status(400).json({ success: false, message: 'error in handleAddLike: params is required', data: null });
+    }
+
+    try {
+        const add = await AddLike(auth0_id, post_id, comment_id, created_at);
+        if (!add) {
+            return res.status(404).json({ success: false, message: 'Cant handleAddLike', data: null });
+        }
+        await processAchievementsWithNotifications(auth0_id);
+        return res.status(200).json({ success: true, message: 'handleAddLike successfully', data: add });
+    } catch (error) {
+        console.error('Error in handleAddLike:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+}
 
 
-module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments};
+
+module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};

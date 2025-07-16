@@ -3,7 +3,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import {BsFillPeopleFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
-import {FaCheck} from "react-icons/fa";
+import {FaCheck, FaMedal} from "react-icons/fa";
 
 const NotificationContext = createContext();
 
@@ -35,7 +35,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <BiConversation className="size-5"/>
+                    icon: <BiConversation className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'success':
@@ -58,7 +59,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'plan-edit-by-user':
@@ -70,7 +72,8 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             case 'new-coach-review':
@@ -83,7 +86,21 @@ export const NotificationProvider = ({ children }) => {
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
                     </div>,
                     placement: 'topRight',
-                    icon: <CiEdit className="size-5"/>
+                    icon: <CiEdit className="size-5"/>,
+                    onClick: onClick
+                });
+                break;
+            case 'new-achievement':
+                api.open({
+                    key: `new-achievement`,
+                    message: `Bạn vừa đạt thành tựu mới`,
+                    description: <div>
+                        <p><strong>{payload.achievement_name}:</strong> {payload.criteria}</p>
+                        <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p>
+                    </div>,
+                    placement: 'topRight',
+                    icon: <FaMedal className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             default:
