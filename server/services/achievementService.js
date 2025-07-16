@@ -46,6 +46,10 @@ const getAchievedService = async (userAuth0Id) => {
     }
 }
 
+const addAchievementService = async (userAuth0Id, achievementId) => {
+
+}
+
 const achievementCache = new NodeCache({stdTTL: 60});
 
 const processAchievements = async (userAuth0Id) => {

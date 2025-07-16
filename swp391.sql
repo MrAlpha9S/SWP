@@ -1,8 +1,10 @@
 USE master;
-IF EXISTS (SELECT name FROM sys.databases WHERE name = 'SWP391')
+IF EXISTS (SELECT name
+FROM sys.databases
+WHERE name = 'SWP391')
 BEGIN
-    ALTER DATABASE SWP391 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE SWP391;
+  ALTER DATABASE SWP391 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+  DROP DATABASE SWP391;
 END
 GO
 
@@ -13,7 +15,8 @@ GO
 ALTER DATABASE SWP391 COLLATE Vietnamese_CI_AS;
 GO
 
-CREATE TABLE [users] (
+CREATE TABLE [users]
+(
   [user_id] int PRIMARY KEY IDENTITY(1, 1),
   [auth0_id] varchar(255) UNIQUE NOT NULL,
   [avatar] nvarchar(MAX),
@@ -29,7 +32,8 @@ CREATE TABLE [users] (
 )
 GO
 
-CREATE TABLE [subscriptions] (
+CREATE TABLE [subscriptions]
+(
   [sub_id] int PRIMARY KEY IDENTITY(1, 1),
   [sub_type] varchar(50),
   [sub_name] nvarchar(50),
@@ -38,7 +42,8 @@ CREATE TABLE [subscriptions] (
 )
 GO
 
-CREATE TABLE [users_subscriptions] (
+CREATE TABLE [users_subscriptions]
+(
   [user_id] int,
   [sub_id] int,
   [purchased_date] DATETIME,
@@ -49,7 +54,8 @@ ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscri
 GO
 
 
-CREATE TABLE [subs_features] (
+CREATE TABLE [subs_features]
+(
   [feature_id] int PRIMARY KEY IDENTITY(1, 1),
   [sub_id] int,
   [feature] nvarchar(100)
@@ -59,7 +65,8 @@ GO
 ALTER TABLE [subs_features] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 
-CREATE TABLE [coach_info] (
+CREATE TABLE [coach_info]
+(
   [coach_id] int PRIMARY KEY,
   [years_of_exp] int,
   [bio] nvarchar(200),
@@ -70,7 +77,8 @@ CREATE TABLE [coach_info] (
 ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 GO
 
-CREATE TABLE [coach_specialties_achievements] (
+CREATE TABLE [coach_specialties_achievements]
+(
   [id] int PRIMARY KEY IDENTITY(1, 1),
   [content] nvarchar(50),
   [is_specialties] BIT,
@@ -78,7 +86,8 @@ CREATE TABLE [coach_specialties_achievements] (
 )
 ALTER TABLE [coach_specialties_achievements] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
 
-CREATE TABLE [coach_reviews] (
+CREATE TABLE [coach_reviews]
+(
   [review_id] int PRIMARY KEY IDENTITY(1, 1),
   [review_content] nvarchar(200),
   [stars] int,
@@ -92,7 +101,8 @@ ALTER TABLE [coach_reviews] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([us
 GO
 
 
-CREATE TABLE [coach_user] (
+CREATE TABLE [coach_user]
+(
   [coach_id] int,
   [user_id] int,
   [started_date] DATETIME,
@@ -102,7 +112,8 @@ ALTER TABLE [coach_user] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_
 ALTER TABLE [coach_user] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 GO
 
-CREATE TABLE [user_profiles] (
+CREATE TABLE [user_profiles]
+(
   [profile_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [readiness_value] varchar(20),
@@ -126,7 +137,8 @@ GO
 ALTER TABLE [user_profiles] ADD FOREIGN KEY ([last_updated_by]) REFERENCES [users] ([user_id])
 GO
 
-CREATE TABLE [checkin_log] (
+CREATE TABLE [checkin_log]
+(
   [log_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [feeling] varchar(10),
@@ -137,7 +149,8 @@ CREATE TABLE [checkin_log] (
 ALTER TABLE [checkin_log] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
 GO
 
-CREATE TABLE [qna] (
+CREATE TABLE [qna]
+(
   [qna_id] int PRIMARY KEY IDENTITY(1, 1),
   [log_id] int,
   [qna_question] varchar(30),
@@ -147,7 +160,8 @@ CREATE TABLE [qna] (
 ALTER TABLE [qna] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
-CREATE TABLE [free_text] (
+CREATE TABLE [free_text]
+(
   [free_text_id] int PRIMARY KEY IDENTITY(1, 1),
   [log_id] int,
   [free_text_content] nvarchar(max)
@@ -156,7 +170,8 @@ CREATE TABLE [free_text] (
 ALTER TABLE [free_text] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
-CREATE TABLE [quitting_items] (
+CREATE TABLE [quitting_items]
+(
   [item_value] varchar(30),
   [log_id] int,
   PRIMARY KEY ([item_value], [log_id])
@@ -165,7 +180,8 @@ CREATE TABLE [quitting_items] (
 ALTER TABLE [quitting_items] ADD FOREIGN KEY ([log_id]) REFERENCES [checkin_log] ([log_id])
 GO
 
-CREATE TABLE [goals] (
+CREATE TABLE [goals]
+(
   [goal_id] int PRIMARY KEY IDENTITY(1, 1),
   [goal_name] nvarchar(50),
   [goal_amount] float,
@@ -176,7 +192,8 @@ CREATE TABLE [goals] (
 )
 GO
 
-CREATE TABLE [user_notes] (
+CREATE TABLE [user_notes]
+(
   [note_id] int PRIMARY KEY IDENTITY(1, 1),
   [content] nvarchar(max),
   [user_id] int,
@@ -191,7 +208,8 @@ ALTER TABLE [user_notes] ADD FOREIGN KEY ([created_by]) REFERENCES [users] ([use
 ALTER TABLE [user_notes] ADD FOREIGN KEY ([updated_by]) REFERENCES [users] ([user_id])
 GO
 
-CREATE TABLE [plan_log] (
+CREATE TABLE [plan_log]
+(
   [plan_id] int PRIMARY KEY IDENTITY(1, 1),
   [profile_id] int,
   [date] datetime,
@@ -199,28 +217,32 @@ CREATE TABLE [plan_log] (
 )
 GO
 
-CREATE TABLE [time_profile] (
+CREATE TABLE [time_profile]
+(
   [profile_id] int,
   [time_value] varchar(30),
   PRIMARY KEY ([profile_id], [time_value])
 )
 GO
 
-CREATE TABLE [triggers_profiles] (
+CREATE TABLE [triggers_profiles]
+(
   [profile_id] int,
   [trigger_value] varchar(30),
   PRIMARY KEY ([trigger_value], [profile_id])
 )
 GO
 
-CREATE TABLE [profiles_reasons] (
+CREATE TABLE [profiles_reasons]
+(
   [profile_id] int,
   [reason_value] varchar(30),
   PRIMARY KEY ([profile_id], [reason_value])
 )
 GO
 
-CREATE TABLE [user_progresses] (
+CREATE TABLE [user_progresses]
+(
   [progress_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [cigs_per_day] int,
@@ -229,7 +251,8 @@ CREATE TABLE [user_progresses] (
 )
 GO
 
-CREATE TABLE [progress_benefit] (
+CREATE TABLE [progress_benefit]
+(
   [progress_id] int,
   [benefit_id] int,
   [current_percentage] decimal(5,2),
@@ -237,7 +260,8 @@ CREATE TABLE [progress_benefit] (
 )
 GO
 
-CREATE TABLE [health_benefits] (
+CREATE TABLE [health_benefits]
+(
   [benefit_id] int PRIMARY KEY IDENTITY(1, 1),
   [benefit_name] nvarchar(100),
   [time_length] time,
@@ -245,7 +269,8 @@ CREATE TABLE [health_benefits] (
 )
 GO
 
-CREATE TABLE [user_achievements] (
+CREATE TABLE [user_achievements]
+(
   [user_id] int,
   [achievement_id] varchar(40),
   [achieved_at] datetime DEFAULT (CURRENT_TIMESTAMP),
@@ -253,7 +278,8 @@ CREATE TABLE [user_achievements] (
 )
 GO
 
-CREATE TABLE [achievements] (
+CREATE TABLE [achievements]
+(
   [achievement_id] varchar(40) PRIMARY KEY,
   [achievement_name] nvarchar(250),
   [criteria] nvarchar(max),
@@ -261,23 +287,38 @@ CREATE TABLE [achievements] (
 )
 GO
 
-CREATE TABLE [user_achievement_progress] (
-  [user_id] INT NOT NULL PRIMARY KEY, -- assumes 1 row per user
-  [days_without_smoking] INT DEFAULT 0, -- total days smoke-free
-  [consecutive_smoke_free_days] INT DEFAULT 0, -- current streak
-  [max_consecutive_smoke_free_days] INT DEFAULT 0, -- longest streak
-  [posts_created] INT DEFAULT 0, -- total posts
-  [comments_created] INT DEFAULT 0, -- total comments
-  [total_likes_given] INT DEFAULT 0, -- how many likes user has given
-  [total_likes_received] INT DEFAULT 0, -- how many likes their posts/comments received
-  [first_check_in_completed] BIT DEFAULT 0, -- whether first check-in was done
-  [first_saving_goal_completed] BIT DEFAULT 0, -- whether first financial goal achieved
-  [last_smoke_free_date] DATE NULL, -- most recent smoke-free date to calculate streaks
+CREATE TABLE [user_achievement_progress]
+(
+  [user_id] INT NOT NULL PRIMARY KEY,
+  -- assumes 1 row per user
+  [days_without_smoking] INT DEFAULT 0,
+  -- total days smoke-free
+  [consecutive_smoke_free_days] INT DEFAULT 0,
+  -- current streak
+  [max_consecutive_smoke_free_days] INT DEFAULT 0,
+  -- longest streak
+  [posts_created] INT DEFAULT 0,
+  -- total posts
+  [comments_created] INT DEFAULT 0,
+  -- total comments
+  [total_likes_given] INT DEFAULT 0,
+  -- how many likes user has given
+  [total_likes_received] INT DEFAULT 0,
+  -- how many likes their posts/comments received
+  [first_check_in_completed] BIT DEFAULT 0,
+  -- whether first check-in was done
+  [first_saving_goal_completed] BIT DEFAULT 0,
+  -- whether first financial goal achieved
+  [last_smoke_free_date] DATE NULL,
+  -- most recent smoke-free date to calculate streaks
+  [money_saved] DECIMAL(12,2) DEFAULT 0,
+  --money saved by quit smoking
   FOREIGN KEY ([user_id]) REFERENCES [users]([user_id])
 );
 GO
 
-CREATE TABLE [feedbacks] (
+CREATE TABLE [feedbacks]
+(
   [feedback_id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [title] nvarchar(250),
@@ -287,14 +328,16 @@ CREATE TABLE [feedbacks] (
 )
 GO
 
-CREATE TABLE [Topics] (
+CREATE TABLE [Topics]
+(
   [topic_id] VARCHAR(100) PRIMARY KEY,
   [topic_name] NVARCHAR(255) NOT NULL,
   [topic_content] NVARCHAR(2000)
 )
 GO
 
-CREATE TABLE [blog_posts] (
+CREATE TABLE [blog_posts]
+(
   [blog_id] INT PRIMARY KEY IDENTITY(1, 1),
   [title] NVARCHAR(255),
   [description] NVARCHAR(255),
@@ -309,7 +352,8 @@ CREATE TABLE [blog_posts] (
 )
 GO
 
-CREATE TABLE [social_category] (
+CREATE TABLE [social_category]
+(
   [category_id] int PRIMARY KEY IDENTITY(1, 1),
   [category_tag] varchar(20),
   [category_name] nvarchar(50),
@@ -317,7 +361,8 @@ CREATE TABLE [social_category] (
   [description] nvarchar(max)
 )
 
-CREATE TABLE [social_posts] (
+CREATE TABLE [social_posts]
+(
   [post_id] int PRIMARY KEY IDENTITY(1, 1),
   [category_id] int,
   [user_id] int,
@@ -333,7 +378,8 @@ GO
 ALTER TABLE [social_posts] ADD FOREIGN KEY ([category_id]) REFERENCES [social_category] ([category_id])
 GO
 
-CREATE TABLE [social_comments] (
+CREATE TABLE [social_comments]
+(
   [comment_id] int PRIMARY KEY IDENTITY(1, 1),
   [parent_comment_id] int,
   [user_id] int,
@@ -344,7 +390,8 @@ CREATE TABLE [social_comments] (
 )
 GO
 
-CREATE TABLE [social_likes] (
+CREATE TABLE [social_likes]
+(
   [like_id] INT PRIMARY KEY IDENTITY(1,1),
   [user_id] INT,
   [post_id] INT NULL,
@@ -356,7 +403,8 @@ ALTER TABLE [social_likes] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user
 ALTER TABLE [social_likes] ADD FOREIGN KEY ([post_id]) REFERENCES [social_posts] ([post_id]);
 ALTER TABLE [social_likes] ADD FOREIGN KEY ([comment_id]) REFERENCES [social_comments] ([comment_id]);
 
-CREATE TABLE [social_reports] (
+CREATE TABLE [social_reports]
+(
   [report_id] INT PRIMARY KEY IDENTITY(1,1),
   [user_id] INT,
   [post_id] INT NULL,
@@ -366,14 +414,16 @@ CREATE TABLE [social_reports] (
   [created_at] DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
-CREATE TABLE [conversations] (
+CREATE TABLE [conversations]
+(
   [conversation_id] int PRIMARY KEY IDENTITY(1, 1),
   [conversation_name] nvarchar(50),
   [created_at] datetime DEFAULT (CURRENT_TIMESTAMP)
 )
 GO
 
-CREATE TABLE [messages] (
+CREATE TABLE [messages]
+(
   [message_id] int PRIMARY KEY IDENTITY(1, 1),
   [conversation_id] int,
   [user_id] int,
@@ -382,7 +432,8 @@ CREATE TABLE [messages] (
 )
 GO
 
-CREATE TABLE [user_conversation] (
+CREATE TABLE [user_conversation]
+(
   [conversation_id] int,
   [user_id] int,
   PRIMARY KEY ([conversation_id], [user_id])
@@ -471,193 +522,229 @@ ADD FOREIGN KEY ([parent_comment_id]) REFERENCES [social_comments]([comment_id])
 use SWP391
 GO
 CREATE OR ALTER PROCEDURE UpdateUserAchievementProgress
-    @UserId INT
+  @UserId INT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-    
-    -- Ensure user exists in progress table
-    IF NOT EXISTS (SELECT 1 FROM user_achievement_progress WHERE user_id = @UserId)
+  SET NOCOUNT ON;
+
+  DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+
+  -- Ensure user exists in progress table
+  IF NOT EXISTS (SELECT 1
+  FROM user_achievement_progress
+  WHERE user_id = @UserId)
     BEGIN
-        INSERT INTO user_achievement_progress (user_id) VALUES (@UserId);
-    END
-    
-    -- Smart date selection: use latest check-in if it's in the future, otherwise use today
-    DECLARE @latestDate DATE = (
-        SELECT MAX(CAST(logged_at AS DATE)) 
-        FROM checkin_log 
-        WHERE user_id = @UserId
+    INSERT INTO user_achievement_progress
+      (user_id)
+    VALUES
+      (@UserId);
+  END
+
+  -- Smart date selection: use latest check-in if it's in the future, otherwise use today
+  DECLARE @latestDate DATE = (
+        SELECT MAX(CAST(logged_at AS DATE))
+  FROM checkin_log
+  WHERE user_id = @UserId
     );
-    
-    DECLARE @startDate DATE;
-    
-    -- If latest check-in is in the future (due to timezone), use it
-    -- Otherwise, use today to encourage daily check-ins
-    IF @latestDate IS NULL
+
+  DECLARE @startDate DATE;
+
+  -- If latest check-in is in the future (due to timezone), use it
+  -- Otherwise, use today to encourage daily check-ins
+  IF @latestDate IS NULL
         SET @startDate = @Today;
     ELSE IF @latestDate > @Today
         SET @startDate = @latestDate;
     ELSE
         SET @startDate = @Today;
-    
-    -- Calculate current consecutive smoke-free days from start date backwards
-    DECLARE @consecutive INT = 0;
-    DECLARE @checkDate DATE = @startDate;
-    
-    -- Count consecutive days
-    WHILE EXISTS (
-        SELECT 1 FROM checkin_log 
-        WHERE user_id = @UserId 
-        AND CAST(logged_at AS DATE) = @checkDate 
-        AND cigs_smoked = 0
+
+  -- Calculate current consecutive smoke-free days from start date backwards
+  DECLARE @consecutive INT = 0;
+  DECLARE @checkDate DATE = @startDate;
+
+  -- Count consecutive days
+  WHILE EXISTS (
+        SELECT 1
+  FROM checkin_log
+  WHERE user_id = @UserId
+    AND CAST(logged_at AS DATE) = @checkDate
+    AND cigs_smoked = 0
     )
     BEGIN
-        SET @consecutive = @consecutive + 1;
-        SET @checkDate = DATEADD(DAY, -1, @checkDate);
-    END
-    
-    -- Calculate longest streak in history (robust for out-of-order edits)
-    DECLARE @longestStreak INT = 0;
-    
-    WITH SmokeFreeData AS (
-        SELECT DISTINCT CAST(logged_at AS DATE) as check_date
-        FROM checkin_log
-        WHERE user_id = @UserId AND cigs_smoked = 0
+    SET @consecutive = @consecutive + 1;
+    SET @checkDate = DATEADD(DAY, -1, @checkDate);
+  END
+
+  -- Calculate longest streak in history (robust for out-of-order edits)
+  DECLARE @longestStreak INT = 0;
+
+  WITH
+    SmokeFreeData
+    AS
+    (
+      SELECT DISTINCT CAST(logged_at AS DATE) as check_date
+      FROM checkin_log
+      WHERE user_id = @UserId AND cigs_smoked = 0
     ),
-    DateSequences AS (
-        SELECT check_date,
-               DATEADD(DAY, -ROW_NUMBER() OVER (ORDER BY check_date), check_date) as grp
-        FROM SmokeFreeData
+    DateSequences
+    AS
+    (
+      SELECT check_date,
+        DATEADD(DAY, -ROW_NUMBER() OVER (ORDER BY check_date), check_date) as grp
+      FROM SmokeFreeData
     ),
-    StreakLengths AS (
-        SELECT COUNT(*) as streak_length
-        FROM DateSequences
-        GROUP BY grp
+    StreakLengths
+    AS
+    (
+      SELECT COUNT(*) as streak_length
+      FROM DateSequences
+      GROUP BY grp
     )
-    SELECT @longestStreak = ISNULL(MAX(streak_length), 0)
-    FROM StreakLengths;
-    
-    -- Update all progress metrics
-    UPDATE user_achievement_progress
+  SELECT @longestStreak = ISNULL(MAX(streak_length), 0)
+  FROM StreakLengths;
+
+  -- Update all progress metrics
+  UPDATE user_achievement_progress
     SET
         days_without_smoking = (
             SELECT COUNT(DISTINCT CAST(logged_at AS DATE))
-            FROM checkin_log
-            WHERE user_id = @UserId AND cigs_smoked = 0
+  FROM checkin_log
+  WHERE user_id = @UserId AND cigs_smoked = 0
         ),
         consecutive_smoke_free_days = @consecutive,
         max_consecutive_smoke_free_days = @longestStreak,
         posts_created = (
-            SELECT COUNT(*) FROM social_posts WHERE user_id = @UserId
+            SELECT COUNT(*)
+  FROM social_posts
+  WHERE user_id = @UserId
         ),
         comments_created = (
-            SELECT COUNT(*) FROM social_comments WHERE user_id = @UserId
+            SELECT COUNT(*)
+  FROM social_comments
+  WHERE user_id = @UserId
         ),
         total_likes_given = (
-            SELECT COUNT(*) FROM social_likes WHERE user_id = @UserId
+            SELECT COUNT(*)
+  FROM social_likes
+  WHERE user_id = @UserId
         ),
         total_likes_received = (
-            SELECT COUNT(*) FROM social_likes sl
-            WHERE sl.post_id IN (SELECT post_id FROM social_posts sp WHERE sp.user_id = @UserId)
-               OR sl.comment_id IN (SELECT comment_id FROM social_comments sc WHERE sc.user_id = @UserId)
+            SELECT COUNT(*)
+  FROM social_likes sl
+  WHERE sl.post_id IN (SELECT post_id
+    FROM social_posts sp
+    WHERE sp.user_id = @UserId)
+    OR sl.comment_id IN (SELECT comment_id
+    FROM social_comments sc
+    WHERE sc.user_id = @UserId)
         ),
         first_check_in_completed = CASE WHEN EXISTS (
-            SELECT 1 FROM checkin_log WHERE user_id = @UserId
+            SELECT 1
+  FROM checkin_log
+  WHERE user_id = @UserId
         ) THEN 1 ELSE 0 END,
         first_saving_goal_completed = CASE WHEN EXISTS (
-            SELECT 1 FROM goals g
-            JOIN user_profiles up ON g.profile_id = up.profile_id
-            WHERE up.user_id = @UserId AND g.is_completed = 1
+            SELECT 1
+  FROM goals g
+    JOIN user_profiles up ON g.profile_id = up.profile_id
+  WHERE up.user_id = @UserId AND g.is_completed = 1
         ) THEN 1 ELSE 0 END,
         last_smoke_free_date = (
             SELECT MAX(CAST(logged_at AS DATE))
-            FROM checkin_log
-            WHERE user_id = @UserId AND cigs_smoked = 0
+  FROM checkin_log
+  WHERE user_id = @UserId AND cigs_smoked = 0
         )
     WHERE user_id = @UserId;
-    
-    -- Grant achievements (new-member removed since it's handled by trigger)
-    INSERT INTO user_achievements (user_id, achievement_id, achieved_at)
-    SELECT @UserId, a.achievement_id, GETDATE()
-    FROM achievements a
+
+  -- Grant achievements (new-member removed since it's handled by trigger)
+  INSERT INTO user_achievements
+    (user_id, achievement_id, achieved_at)
+  SELECT @UserId, a.achievement_id, GETDATE()
+  FROM achievements a
     CROSS JOIN user_achievement_progress uap
-    WHERE uap.user_id = @UserId
+  WHERE uap.user_id = @UserId
     AND NOT EXISTS (
-        SELECT 1 FROM user_achievements ua
-        WHERE ua.user_id = @UserId AND ua.achievement_id = a.achievement_id
+        SELECT 1
+    FROM user_achievements ua
+    WHERE ua.user_id = @UserId AND ua.achievement_id = a.achievement_id
     )
     AND (
         -- STREAK-BASED ACHIEVEMENTS (use max_consecutive_smoke_free_days for best streak ever)
         (a.achievement_id = '5-days-streak' AND uap.max_consecutive_smoke_free_days >= 5)
-        OR (a.achievement_id = '7-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 7)
-        OR (a.achievement_id = '10-days-streak' AND uap.max_consecutive_smoke_free_days >= 10)
-        OR (a.achievement_id = '14-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 14)
-        OR (a.achievement_id = '30-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 30)
-        OR (a.achievement_id = '50-days-streak' AND uap.max_consecutive_smoke_free_days >= 50)
-        OR (a.achievement_id = '90-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 90)
-        OR (a.achievement_id = '100-days-streak' AND uap.max_consecutive_smoke_free_days >= 100)
-        OR (a.achievement_id = '180-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 180)
-        OR (a.achievement_id = '1-year-streak' AND uap.max_consecutive_smoke_free_days >= 365)
-        OR (a.achievement_id = '1-year-quit' AND uap.max_consecutive_smoke_free_days >= 365)
-        
-        -- SOCIAL ACHIEVEMENTS (use posts/comments/likes)
-        OR (a.achievement_id = 'new-me' AND (uap.posts_created + uap.comments_created) >= 1)
-        OR (a.achievement_id = 'social-butterfly' AND (uap.posts_created + uap.comments_created) >= 25)
-        OR (a.achievement_id = 'story-teller' AND (uap.posts_created + uap.comments_created) >= 50)
-        OR (a.achievement_id = 'community-guru' AND (uap.posts_created + uap.comments_created) >= 100)
-        OR (a.achievement_id = 'kind-heart' AND uap.total_likes_given >= 50)
-        OR (a.achievement_id = 'cheer-champion' AND uap.total_likes_given >= 100)
-        OR (a.achievement_id = 'warm-welcomer' AND uap.total_likes_given >= 10)
-        
-        -- MILESTONE ACHIEVEMENTS
-        OR (a.achievement_id = 'streak-starter' AND uap.first_check_in_completed = 1)
-        OR (a.achievement_id = 'smart-saver' AND uap.first_saving_goal_completed = 1)
+    OR (a.achievement_id = '7-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 7)
+    OR (a.achievement_id = '10-days-streak' AND uap.max_consecutive_smoke_free_days >= 10)
+    OR (a.achievement_id = '14-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 14)
+    OR (a.achievement_id = '30-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 30)
+    OR (a.achievement_id = '50-days-streak' AND uap.max_consecutive_smoke_free_days >= 50)
+    OR (a.achievement_id = '90-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 90)
+    OR (a.achievement_id = '100-days-streak' AND uap.max_consecutive_smoke_free_days >= 100)
+    OR (a.achievement_id = '180-days-smoke-free' AND uap.max_consecutive_smoke_free_days >= 180)
+    OR (a.achievement_id = '1-year-streak' AND uap.max_consecutive_smoke_free_days >= 365)
+    OR (a.achievement_id = '1-year-quit' AND uap.max_consecutive_smoke_free_days >= 365)
+
+    -- SOCIAL ACHIEVEMENTS (use posts/comments/likes)
+    OR (a.achievement_id = 'new-me' AND (uap.posts_created + uap.comments_created) >= 1)
+    OR (a.achievement_id = 'social-butterfly' AND (uap.posts_created + uap.comments_created) >= 25)
+    OR (a.achievement_id = 'story-teller' AND (uap.posts_created + uap.comments_created) >= 50)
+    OR (a.achievement_id = 'community-guru' AND (uap.posts_created + uap.comments_created) >= 100)
+    OR (a.achievement_id = 'kind-heart' AND uap.total_likes_given >= 50)
+    OR (a.achievement_id = 'cheer-champion' AND uap.total_likes_given >= 100)
+    OR (a.achievement_id = 'warm-welcomer' AND uap.total_likes_given >= 10)
+
+    -- MILESTONE ACHIEVEMENTS
+    OR (a.achievement_id = 'streak-starter' AND uap.first_check_in_completed = 1)
+    OR (a.achievement_id = 'smart-saver' AND uap.first_saving_goal_completed = 1)
+    OR (a.achievement_id = '100k' AND uap.money_saved >= 100000)
+    OR (a.achievement_id = '500k' AND uap.money_saved >= 500000)
+    OR (a.achievement_id = '1m' AND uap.money_saved >= 1000000)
+    OR (a.achievement_id = '5m' AND uap.money_saved >= 5000000)
+    OR (a.achievement_id = '10m' AND uap.money_saved >= 10000000)
         -- new-member is handled by the trigger, not here
     );
-    
-    -- Return recently unlocked achievements (optional - for immediate feedback)
-    SELECT a.achievement_id, a.achievement_name, a.criteria
-    FROM user_achievements ua
+
+  -- Return recently unlocked achievements (optional - for immediate feedback)
+  SELECT a.achievement_id, a.achievement_name, a.criteria
+  FROM user_achievements ua
     JOIN achievements a ON a.achievement_id = ua.achievement_id
-    WHERE ua.user_id = @UserId
+  WHERE ua.user_id = @UserId
     AND ua.achieved_at >= DATEADD(SECOND, -10, GETDATE());
 END
 GO
 
-select * from achievements
+select *
+from achievements
 GO
 CREATE OR ALTER TRIGGER trg_checkin_log_progress
 ON checkin_log
 AFTER INSERT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @userId INT;
-    DECLARE user_cursor CURSOR FOR
-        SELECT DISTINCT user_id FROM inserted;
-    
-    OPEN user_cursor;
-    FETCH NEXT FROM user_cursor INTO @userId;
-    
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        DECLARE @NewAchievements TABLE (
-            achievement_id VARCHAR(40),
-            achievement_name NVARCHAR(250),
-            criteria NVARCHAR(MAX)
-        );
-        
-        INSERT INTO @NewAchievements
-        EXEC UpdateUserAchievementProgress @UserId = @userId;
+  SET NOCOUNT ON;
 
-        FETCH NEXT FROM user_cursor INTO @userId;
-    END
-    
-    CLOSE user_cursor;
-    DEALLOCATE user_cursor;
+  DECLARE @userId INT;
+  DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id
+  FROM inserted;
+
+  OPEN user_cursor;
+  FETCH NEXT FROM user_cursor INTO @userId;
+
+  WHILE @@FETCH_STATUS = 0
+    BEGIN
+    DECLARE @NewAchievements TABLE (
+      achievement_id VARCHAR(40),
+      achievement_name NVARCHAR(250),
+      criteria NVARCHAR(MAX)
+        );
+
+    INSERT INTO @NewAchievements
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+
+    FETCH NEXT FROM user_cursor INTO @userId;
+  END
+
+  CLOSE user_cursor;
+  DEALLOCATE user_cursor;
 END
 GO
 
@@ -667,31 +754,32 @@ ON social_posts
 AFTER INSERT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @userId INT;
-    DECLARE user_cursor CURSOR FOR
-        SELECT DISTINCT user_id FROM inserted;
-    
-    OPEN user_cursor;
-    FETCH NEXT FROM user_cursor INTO @userId;
-    
-    WHILE @@FETCH_STATUS = 0
+  SET NOCOUNT ON;
+
+  DECLARE @userId INT;
+  DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id
+  FROM inserted;
+
+  OPEN user_cursor;
+  FETCH NEXT FROM user_cursor INTO @userId;
+
+  WHILE @@FETCH_STATUS = 0
     BEGIN
-        DECLARE @NewAchievements TABLE (
-            achievement_id VARCHAR(40),
-            achievement_name NVARCHAR(250),
-            criteria NVARCHAR(MAX)
+    DECLARE @NewAchievements TABLE (
+      achievement_id VARCHAR(40),
+      achievement_name NVARCHAR(250),
+      criteria NVARCHAR(MAX)
         );
-        
-        INSERT INTO @NewAchievements
-        EXEC UpdateUserAchievementProgress @UserId = @userId;
-        
-        FETCH NEXT FROM user_cursor INTO @userId;
-    END
-    
-    CLOSE user_cursor;
-    DEALLOCATE user_cursor;
+
+    INSERT INTO @NewAchievements
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+
+    FETCH NEXT FROM user_cursor INTO @userId;
+  END
+
+  CLOSE user_cursor;
+  DEALLOCATE user_cursor;
 END
 GO
 
@@ -701,31 +789,32 @@ ON social_comments
 AFTER INSERT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @userId INT;
-    DECLARE user_cursor CURSOR FOR
-        SELECT DISTINCT user_id FROM inserted;
-    
-    OPEN user_cursor;
-    FETCH NEXT FROM user_cursor INTO @userId;
-    
-    WHILE @@FETCH_STATUS = 0
+  SET NOCOUNT ON;
+
+  DECLARE @userId INT;
+  DECLARE user_cursor CURSOR FOR
+        SELECT DISTINCT user_id
+  FROM inserted;
+
+  OPEN user_cursor;
+  FETCH NEXT FROM user_cursor INTO @userId;
+
+  WHILE @@FETCH_STATUS = 0
     BEGIN
-        DECLARE @NewAchievements TABLE (
-            achievement_id VARCHAR(40),
-            achievement_name NVARCHAR(250),
-            criteria NVARCHAR(MAX)
+    DECLARE @NewAchievements TABLE (
+      achievement_id VARCHAR(40),
+      achievement_name NVARCHAR(250),
+      criteria NVARCHAR(MAX)
         );
-        
-        INSERT INTO @NewAchievements
-        EXEC UpdateUserAchievementProgress @UserId = @userId;
-        
-        FETCH NEXT FROM user_cursor INTO @userId;
-    END
-    
-    CLOSE user_cursor;
-    DEALLOCATE user_cursor;
+
+    INSERT INTO @NewAchievements
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+
+    FETCH NEXT FROM user_cursor INTO @userId;
+  END
+
+  CLOSE user_cursor;
+  DEALLOCATE user_cursor;
 END
 GO
 
@@ -735,44 +824,45 @@ ON social_likes
 AFTER INSERT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    DECLARE @userId INT;
-    DECLARE user_cursor CURSOR FOR
+  SET NOCOUNT ON;
+
+  DECLARE @userId INT;
+  DECLARE user_cursor CURSOR FOR
         -- Get all users who gave likes
-        SELECT DISTINCT user_id FROM inserted
-        UNION
-        -- Get all users who received likes on their posts
-        SELECT DISTINCT sp.user_id
-        FROM inserted i
-        INNER JOIN social_posts sp ON i.post_id = sp.post_id
-        WHERE i.post_id IS NOT NULL
-        UNION
-        -- Get all users who received likes on their comments
-        SELECT DISTINCT sc.user_id
-        FROM inserted i
-        INNER JOIN social_comments sc ON i.comment_id = sc.comment_id
-        WHERE i.comment_id IS NOT NULL;
-    
-    OPEN user_cursor;
-    FETCH NEXT FROM user_cursor INTO @userId;
-    
-    WHILE @@FETCH_STATUS = 0
+              SELECT DISTINCT user_id
+    FROM inserted
+  UNION
+    -- Get all users who received likes on their posts
+    SELECT DISTINCT sp.user_id
+    FROM inserted i
+      INNER JOIN social_posts sp ON i.post_id = sp.post_id
+    WHERE i.post_id IS NOT NULL
+  UNION
+    -- Get all users who received likes on their comments
+    SELECT DISTINCT sc.user_id
+    FROM inserted i
+      INNER JOIN social_comments sc ON i.comment_id = sc.comment_id
+    WHERE i.comment_id IS NOT NULL;
+
+  OPEN user_cursor;
+  FETCH NEXT FROM user_cursor INTO @userId;
+
+  WHILE @@FETCH_STATUS = 0
     BEGIN
-        DECLARE @NewAchievements TABLE (
-            achievement_id VARCHAR(40),
-            achievement_name NVARCHAR(250),
-            criteria NVARCHAR(MAX)
+    DECLARE @NewAchievements TABLE (
+      achievement_id VARCHAR(40),
+      achievement_name NVARCHAR(250),
+      criteria NVARCHAR(MAX)
         );
-        
-        INSERT INTO @NewAchievements
-        EXEC UpdateUserAchievementProgress @UserId = @userId;
-        
-        FETCH NEXT FROM user_cursor INTO @userId;
-    END
-    
-    CLOSE user_cursor;
-    DEALLOCATE user_cursor;
+
+    INSERT INTO @NewAchievements
+    EXEC UpdateUserAchievementProgress @UserId = @userId;
+
+    FETCH NEXT FROM user_cursor INTO @userId;
+  END
+
+  CLOSE user_cursor;
+  DEALLOCATE user_cursor;
 END
 GO
 
@@ -782,39 +872,40 @@ ON goals
 AFTER UPDATE
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    -- Only process if is_completed actually changed
-    IF UPDATE(is_completed)
+  SET NOCOUNT ON;
+
+  -- Only process if is_completed actually changed
+  IF UPDATE(is_completed)
     BEGIN
-        DECLARE @userId INT;
-        DECLARE user_cursor CURSOR FOR
+    DECLARE @userId INT;
+    DECLARE user_cursor CURSOR FOR
             SELECT DISTINCT up.user_id
-            FROM inserted i
-            INNER JOIN user_profiles up ON i.profile_id = up.profile_id
-            INNER JOIN deleted d ON i.goal_id = d.goal_id
-            WHERE i.is_completed != d.is_completed;  -- Only where completion status changed
-        
-        OPEN user_cursor;
-        FETCH NEXT FROM user_cursor INTO @userId;
-        
-        WHILE @@FETCH_STATUS = 0
+    FROM inserted i
+      INNER JOIN user_profiles up ON i.profile_id = up.profile_id
+      INNER JOIN deleted d ON i.goal_id = d.goal_id
+    WHERE i.is_completed != d.is_completed;
+    -- Only where completion status changed
+
+    OPEN user_cursor;
+    FETCH NEXT FROM user_cursor INTO @userId;
+
+    WHILE @@FETCH_STATUS = 0
         BEGIN
-            DECLARE @NewAchievements TABLE (
-                achievement_id VARCHAR(40),
-                achievement_name NVARCHAR(250),
-                criteria NVARCHAR(MAX)
+      DECLARE @NewAchievements TABLE (
+        achievement_id VARCHAR(40),
+        achievement_name NVARCHAR(250),
+        criteria NVARCHAR(MAX)
             );
-            
-            INSERT INTO @NewAchievements
-            EXEC UpdateUserAchievementProgress @UserId = @userId;
-            
-            FETCH NEXT FROM user_cursor INTO @userId;
-        END
-        
-        CLOSE user_cursor;
-        DEALLOCATE user_cursor;
+
+      INSERT INTO @NewAchievements
+      EXEC UpdateUserAchievementProgress @UserId = @userId;
+
+      FETCH NEXT FROM user_cursor INTO @userId;
     END
+
+    CLOSE user_cursor;
+    DEALLOCATE user_cursor;
+  END
 END
 GO
 
@@ -824,26 +915,31 @@ ON [users]
 AFTER INSERT
 AS
 BEGIN
-    SET NOCOUNT ON;
-    
-    -- Insert into progress table for all new users
-    INSERT INTO user_achievement_progress (user_id)
-    SELECT i.user_id
-    FROM inserted i
-    WHERE NOT EXISTS (
-        SELECT 1 FROM user_achievement_progress p WHERE p.user_id = i.user_id
+  SET NOCOUNT ON;
+
+  -- Insert into progress table for all new users
+  INSERT INTO user_achievement_progress
+    (user_id)
+  SELECT i.user_id
+  FROM inserted i
+  WHERE NOT EXISTS (
+        SELECT 1
+  FROM user_achievement_progress p
+  WHERE p.user_id = i.user_id
     );
 
-    -- Grant "new-member" achievement to all new users
-    INSERT INTO user_achievements (user_id, achievement_id, achieved_at)
-    SELECT i.user_id, 'new-member', GETDATE()
-    FROM inserted i
-    WHERE NOT EXISTS (
+  -- Grant "new-member" achievement to all new users
+  INSERT INTO user_achievements
+    (user_id, achievement_id, achieved_at)
+  SELECT i.user_id, 'new-member', GETDATE()
+  FROM inserted i
+  WHERE NOT EXISTS (
         SELECT 1
-        FROM user_achievements ua
-        WHERE ua.user_id = i.user_id AND ua.achievement_id = 'new-member'
+  FROM user_achievements ua
+  WHERE ua.user_id = i.user_id AND ua.achievement_id = 'new-member'
     );
 END
 GO
 
-select * from users
+select *
+from users

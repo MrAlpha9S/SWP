@@ -1,4 +1,9 @@
-const {getAllAchievementsService, getAchievementProgressService, getAchievedService} = require("../services/achievementService");
+const {getAllAchievementsService, getAchievementProgressService, getAchievedService,
+    processAchievementsWithNotifications
+} = require("../services/achievementService");
+const {getUserIdFromAuth0Id} = require("../services/userService");
+const {poolPromise, sql} = require("../configs/sqlConfig");
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const handleGetAllAchievements = async (req, res) => {
     try {
@@ -48,4 +53,36 @@ const handleGetAchieved = async (req, res) => {
 
 }
 
-module.exports = {handleGetAllAchievements, handleGetAchievementProgress, handleGetAchieved};
+// Simplified backend endpoint
+const updateMoneySaved = async (req, res) => {
+    try {
+        const { userAuth0Id, moneySaved } = req.body;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+        const pool = await poolPromise;
+
+        // Update money_saved
+        await pool.request()
+            .input('userId', sql.Int, userId)
+            .input('moneySaved', sql.Decimal(12,2), moneySaved)
+            .query(`
+                UPDATE user_achievement_progress
+                SET money_saved = @moneySaved
+                WHERE user_id = @userId
+            `);
+
+        // Process all achievements (including financial ones)
+        const newAchievements = await processAchievementsWithNotifications(userAuth0Id);
+
+        res.json({
+            success: true,
+            newAchievements: newAchievements,
+            moneySaved: moneySaved
+        });
+
+    } catch (error) {
+        console.error('Error updating money saved:', error);
+        res.status(500).json({ error: 'Failed to update money saved' });
+    }
+};
+module.exports = {handleGetAllAchievements, handleGetAchievementProgress, handleGetAchieved, updateMoneySaved};

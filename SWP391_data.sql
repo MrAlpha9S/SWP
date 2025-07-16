@@ -43,7 +43,11 @@ VALUES
 ('smart-saver', N'Người Tiết Kiệm Thông Minh', N'Hoàn thành mục tiêu tiết kiệm đầu tiên của bạn.', '/streak-starter.svg'),
 ('social-butterfly', N'Người Kết Nối', N'Tạo 25 bài viết hoặc bình luận trong cộng đồng.', '/social-butterfly.svg'),
 ('story-teller', N'Người Kể Chuyện', N'Tạo 50 bài viết hoặc bình luận trong cộng đồng.', '/story-teller.svg'),
-('warm-welcomer', N'Người Chào Đón Nồng Nhiệt', N'Thích 10 bình luận hoặc bài viết.', '/warm-welcomer.svg');
+('100k', N'Khởi Đầu Tiết Kiệm', N'Bạn đã tiết kiệm được 100.000 VNĐ – một bước nhỏ cho hành trình lớn!', '/100k.svg'),
+('500k', N'Nửa Triệu Sạch Khói', N'Bạn đã để dành 500.000 VNĐ nhờ nói không với thuốc lá.', '/500k.svg'),
+('1m', N'Triệu Phú Không Khói', N'1.000.000 VNĐ đã được giữ lại – sức khỏe và ví tiền cùng được bảo vệ!', '/1m.svg'),
+('5m', N'Ngân Hàng Sức Khỏe', N'Bạn đã tiết kiệm 5 triệu – hãy tưởng tượng bạn sẽ làm gì với số tiền đó!', '/5m.svg'),
+('10m', N'Mười Triệu – Mười Thắng Lợi', N'10 triệu VNĐ đã ở lại với bạn, không phải với thuốc lá – một chiến thắng lớn!', '/10m.svg');
 
 
 

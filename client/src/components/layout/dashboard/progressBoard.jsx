@@ -28,7 +28,7 @@ import {
 import {useQuery} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserCreationDate} from "../../utils/userUtils.js";
-import {getAchieved} from "../../utils/achievementsUtils.js";
+import {addFinancialAchievement, getAchieved} from "../../utils/achievementsUtils.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -305,9 +305,41 @@ const ProgressBoard = ({
             return null;
         }
         const result = Math.round(cigsQuit * pricePerCig);
-        //console.log('moneySaved calculated:', result);
         return result;
     }, [cigsQuit, pricePerCig]);
+
+    useEffect(() => {
+        if (moneySaved === null || moneySaved === undefined) return;
+
+        const timeoutId = setTimeout(async () => {
+            try {
+                const token = await getAccessTokenSilently();
+
+                const response = await fetch('http://localhost:3000/achievements/update-money-saved', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        userAuth0Id: user.sub,
+                        moneySaved: moneySaved
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.newAchievements && result.newAchievements.length > 0) {
+                        console.log(`🎉 New achievements unlocked:`, result.newAchievements);
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating money saved:', error);
+            }
+        }, 2000); // Increased debounce time
+
+        return () => clearTimeout(timeoutId);
+    }, [moneySaved, user, getAccessTokenSilently, isAuthenticated]);
 
     useEffect(() => {
         if (typeof setMoneySaved === 'function' && typeof moneySaved === 'number') {
