@@ -29,6 +29,7 @@ CREATE TABLE [users]
   [vip_end_date] datetime DEFAULT (null),
   [isBanned] int DEFAULT (0),
   [is_social] int,
+  [fcm_token] varchar(255)
 )
 GO
 
@@ -464,6 +465,13 @@ CREATE TABLE [user_conversation]
 )
 GO
 
+CREATE TABLE [quotes]
+(
+  [quote_id] int PRIMARY KEY IDENTITY(1,1),
+  [content] nvarchar(max),
+  [author] nvarchar(100)
+)
+GO
 
 ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
