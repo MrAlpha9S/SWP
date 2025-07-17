@@ -490,18 +490,19 @@ const getAllReviews = async (userAuth0Id, coachAuth0Id) => {
             .input('userId', userId)
             .input('coachId', coachId)
             .query(`
-        SELECT r.review_id,
-               r.review_content,
-               r.stars,
-               r.created_date,
-               reviewer.username AS reviewer_username,
-               coach.username AS coach_username
-        FROM coach_reviews r
-                 JOIN users reviewer ON r.user_id = reviewer.user_id
-                 JOIN users coach ON r.coach_id = coach.user_id
-        WHERE r.user_id = @userId AND r.coach_id = @coachId
-        ORDER BY r.created_date DESC
-      `);
+                SELECT r.review_id,
+                       r.review_content,
+                       r.stars,
+                       r.created_date,
+                       reviewer.username AS reviewer_username,
+                       coach.username    AS coach_username
+                FROM coach_reviews r
+                         JOIN users reviewer ON r.user_id = reviewer.user_id
+                         JOIN users coach ON r.coach_id = coach.user_id
+                WHERE r.user_id = @userId
+                  AND r.coach_id = @coachId
+                ORDER BY r.created_date DESC
+            `);
 
         return result.recordset;
     } catch (error) {
@@ -524,9 +525,9 @@ const createReviewService = async (userAuth0Id, coachAuth0Id, stars, reviewConte
             .input('createdDate', getCurrentUTCDateTime().toISOString())
             .input('updatedDate', getCurrentUTCDateTime().toISOString())
             .query(`
-        INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
-        VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
-      `);
+                INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
+                VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -544,12 +545,12 @@ const updateReviewService = async (reviewId, reviewContent, stars) => {
             .input('stars', stars)
             .input('updatedDate', getCurrentUTCDateTime().toISOString())
             .query(`
-        UPDATE coach_reviews
-        SET review_content = @reviewContent,
-            stars = @stars,
-            updated_date = @updatedDate
-        WHERE review_id = @reviewId
-      `);
+                UPDATE coach_reviews
+                SET review_content = @reviewContent,
+                    stars          = @stars,
+                    updated_date   = @updatedDate
+                WHERE review_id = @reviewId
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -564,9 +565,10 @@ const deleteReviewService = async (reviewId) => {
         const result = await pool.request()
             .input('reviewId', reviewId)
             .query(`
-        DELETE FROM coach_reviews
-        WHERE review_id = @reviewId
-      `);
+                DELETE
+                FROM coach_reviews
+                WHERE review_id = @reviewId
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -575,6 +577,59 @@ const deleteReviewService = async (reviewId) => {
     }
 };
 
+const updateUserFCMToken = async (userAuth0Id, token, force = false) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+
+        // Step 1: Check if token is already used
+        const existingTokenUser = await pool.request()
+            .input('token', token)
+            .query('SELECT user_id FROM users WHERE fcm_token = @token');
+
+        if (existingTokenUser.recordset.length > 0) {
+            const existingUserId = existingTokenUser.recordset[0].user_id;
+
+            if (existingUserId === userId) {
+                // Token already belongs to this user — nothing to do
+                return true;
+            }
+
+            if (!force) {
+                // Token belongs to another user and we're not forcing
+                return false;
+            }
+        }
+
+        // Step 2: Update token for this user
+        const update = await pool.request()
+            .input('token', token)
+            .input('userId', userId)
+            .query('UPDATE users SET fcm_token = @token WHERE user_id = @userId');
+
+        return update.rowsAffected[0] > 0;
+
+    } catch (error) {
+        console.error('error in updateUserFCMToken', error);
+        return false;
+    }
+};
+
+const getUserFcmTokenFromAuth0Id = async (userAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .query('SELECT token FROM users WHERE user_id = @userId');
+        return result.recordset[0].fcm_token;
+    } catch (error) {
+        console.error('error in updateUserFCMToken', error);
+        return null;
+    }
+}
 
 
 module.exports = {
@@ -591,5 +646,16 @@ module.exports = {
     updateUserSubscriptionService,
     getCoaches,
     getCoachDetailsById,
-    assignUserToCoachService, allMember, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService, createReviewService, updateReviewService, deleteReviewService, getAllReviews
+    assignUserToCoachService,
+    allMember,
+    getUserNotes,
+    noteUpdateService,
+    noteCreateService,
+    noteDeleteService,
+    createReviewService,
+    updateReviewService,
+    deleteReviewService,
+    getAllReviews,
+    updateUserFCMToken,
+    getUserFcmTokenFromAuth0Id
 };

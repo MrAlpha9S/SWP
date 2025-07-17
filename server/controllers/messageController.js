@@ -1,5 +1,6 @@
 const { SendMessage, GetUserConversations, GetMessageConversation, CreateConversation } = require('../services/messageService');
 const socket = require('../utils/socket');
+const {sendPushNotification} = require("../utils/sendPushNotification");
 
 const HandleCreateConversation = async (req, res) => {
     const auth0_id  = req.body.auth0_id;
@@ -88,6 +89,7 @@ const HandleSendMessage = async (req, res) => {
             senderName: senderName,
             senderAuth0Id: senderAuth0Id
         });
+        await sendPushNotification(senderAuth0Id, `Bạn có tin nhắn mới từ ${senderName}`, content);
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {
         console.error('Error in HandleSendMessage:', error);

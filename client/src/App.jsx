@@ -10,7 +10,7 @@ import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
 import MyProfile from "./pages/dashboardPage/myProfile.jsx";
 import ErrorPage from "./pages/errorPage.jsx";
 import {useAuth0} from "@auth0/auth0-react";
-import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
+import {deleteGoal, getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
@@ -32,7 +32,7 @@ import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx"
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
 import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import {useEffect} from "react";
 import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
@@ -41,7 +41,12 @@ import {queryClient} from "./main.jsx";
 import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
 import userProfile from "./components/ui/userProfile.jsx";
 import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
+import {generateToken} from "../notifications/firebase.js";
+import { onMessage } from 'firebase/messaging'
+import { messaging } from '../notifications/firebase.js'
+import {updateUserToken} from "./components/utils/userUtils.js";
 const Context = createContext({ name: 'Default' });
+
 
 function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -50,6 +55,33 @@ function AppContent() {
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
+
+    const updateFCMMutation = useMutation({
+        mutationFn: async ({ token, user, getAccessTokenSilently, isAuthenticated }) => {
+            return await updateUserToken(user, getAccessTokenSilently, isAuthenticated, token);
+        },
+    });
+
+    useEffect(() => {
+        const setupFCM = async () => {
+            const token = await generateToken();
+            console.log('token', token);
+            if (token) {
+                updateFCMMutation.mutate({ user, getAccessTokenSilently, isAuthenticated, token });
+
+                onMessage(messaging, (payload) => {
+                    console.log('📩 Foreground push:', payload);
+                });
+            } else {
+                console.warn('🔕 User denied or blocked notifications');
+            }
+        };
+
+        if (!user && !isAuthenticated) return
+        setupFCM();
+    }, [getAccessTokenSilently, isAuthenticated, user]);
+
+
 
     const { isPending, data : userData  } = useQuery({
         queryKey: ['user-profile'],

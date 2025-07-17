@@ -4,11 +4,13 @@ const checkJwt = require('../middlewares/jwtChecker');
 const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserSubscription,
     getCoachesController, getCoachByIdController, assignUserToCoachController, getUserNotesController,
     createUserNoteController, updateUserNoteController, getAllReviewsController, createReviewController,
-    updateReviewController, deleteReviewController
+    updateReviewController, deleteReviewController, handleUpdateUserFCMToken, sendPushNotificationTo
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 const {handleAllMember} = require("../controllers/userController");
 userRouter.get('/getAllUsers', checkJwt, getAllUsersController);
+userRouter.post('/token', checkJwt, handleUpdateUserFCMToken)
+userRouter.post('/send-push-notification', checkJwt, sendPushNotificationTo)
 userRouter.post('/postSignup', checkJwt, handlePostSignup);
 userRouter.get('/get-user-creation-date', checkJwt, getUserCreationDate)
 userRouter.patch('/update-user', checkJwt, updateUserController)
@@ -27,6 +29,7 @@ userRouter.get('/coach-reviews/:userAuth0Id/:coachAuth0Id',checkJwt, getAllRevie
 userRouter.post('/coach-reviews',checkJwt, createReviewController);
 userRouter.put('/coach-reviews',checkJwt, updateReviewController);
 userRouter.delete('/coach-reviews/:reviewId', checkJwt,deleteReviewController);
+
 
 
 module.exports = userRouter;
