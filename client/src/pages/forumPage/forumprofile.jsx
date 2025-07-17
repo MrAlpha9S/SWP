@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import useForumPage from '../../components/hooks/useForumPage.js';
 import ForumLayout from '../../components/layout/forum/forumLayout';
+import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 
 export default function ForumProfile() {
     const { auth0_id } = useParams();
@@ -23,23 +24,26 @@ export default function ForumProfile() {
 
     if (posts.length > 0) {
         return (
-            <ForumLayout
-                title={posts[0].username}
-                heroImg={posts[0].avatar}
-                heroDesc=""
-                posts={posts}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalItems={total}
-                keyword={keyword}
-                setKeyword={setKeyword}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                fromDate={fromDate}
-                setFromDate={setFromDate}
-                toDate={toDate}
-                setToDate={setToDate}
-            />
+            <PageFadeWrapper>
+                <ForumLayout
+                    title={posts[0].username}
+                    heroImg={posts[0].avatar}
+                    heroDesc=""
+                    posts={posts}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    totalItems={total}
+                    keyword={keyword}
+                    setKeyword={setKeyword}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    fromDate={fromDate}
+                    setFromDate={setFromDate}
+                    toDate={toDate}
+                    setToDate={setToDate}
+                />
+            </PageFadeWrapper>
+
         );
     }
 }

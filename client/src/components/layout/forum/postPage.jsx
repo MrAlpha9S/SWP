@@ -14,6 +14,7 @@ import { ReportModal } from './postpagecomponents/reportModal.jsx';
 import {ReplyForm} from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
+import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
 
 export default function PostPage() {
     const navigate = useNavigate();
@@ -240,199 +241,210 @@ export default function PostPage() {
     // Loading state
     if (isPostPending) {
         return (
-            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-                <div className="space-y-6 w-[92%]">
-                    <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <div className="animate-pulse space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                                <div className="h-4 bg-gray-200 rounded w-32"></div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="h-4 bg-gray-200 rounded"></div>
-                                <div className="h-4 bg-gray-200 rounded"></div>
-                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <PageFadeWrapper>
+                <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+                    <div className="space-y-6 w-[92%]">
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                        <div className="bg-white p-6 rounded-xl shadow">
+                            <div className="animate-pulse space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded"></div>
+                                    <div className="h-4 bg-gray-200 rounded"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <SideBar isInPost={true} />
                 </div>
-                <SideBar isInPost={true} />
-            </div>
+            </PageFadeWrapper>
+
         );
     }
 
     // Error state
     if (postError) {
         return (
-            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-                <div className="space-y-6 w-[92%]">
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                        <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Post</h2>
-                        <p className="text-red-600">Unable to load the post. Please try again later.</p>
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                        >
-                            Go Back
-                        </button>
+            <PageFadeWrapper>
+                <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+                    <div className="space-y-6 w-[92%]">
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                            <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Post</h2>
+                            <p className="text-red-600">Unable to load the post. Please try again later.</p>
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                                Go Back
+                            </button>
+                        </div>
                     </div>
+                    <SideBar isInPost={true} />
                 </div>
-                <SideBar isInPost={true} />
-            </div>
+            </PageFadeWrapper>
+
         );
     }
 
     // No post found
     if (!post || !user) {
         return (
-            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-                <div className="space-y-6 w-[92%]">
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                        <h2 className="text-lg font-semibold text-yellow-800 mb-2">Post Not Found</h2>
-                        <p className="text-yellow-600">The post you're looking for doesn't exist.</p>
-                        <button
-                            onClick={() => navigate('/forum')}
-                            className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-                        >
-                            Back to Forum
-                        </button>
+            <PageFadeWrapper>
+                <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+                    <div className="space-y-6 w-[92%]">
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                            <h2 className="text-lg font-semibold text-yellow-800 mb-2">Post Not Found</h2>
+                            <p className="text-yellow-600">The post you're looking for doesn't exist.</p>
+                            <button
+                                onClick={() => navigate('/forum')}
+                                className="mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                            >
+                                Back to Forum
+                            </button>
+                        </div>
                     </div>
+                    <SideBar isInPost={true} />
                 </div>
-                <SideBar isInPost={true} />
-            </div>
+            </PageFadeWrapper>
+
         );
     }
 
     return (
-        <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-            <div className="space-y-6 w-[92%]">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
-                    <p className="text-sm text-gray-600">
-                        Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl shadow space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                            {post.avatar ? (
-                                <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
-                            ) : (
-                                <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex gap-1">
-                            <p>đăng bởi </p>
-                            <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
-                        </div>
+        <PageFadeWrapper>
+            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+                <div className="space-y-6 w-[92%]">
+                    <div>
+                        <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
+                        <p className="text-sm text-gray-600">
+                            Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
+                        </p>
                     </div>
 
-                    <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-                    </div>
-
-                    <div className="flex gap-6 text-sm text-gray-500 pt-2 border-t">
-                        <button
-                            className='flex items-center gap-2 hover:text-primary-600 transition-colors'
-                            onClick={() => onLike(post.post_id, null)}
-                            disabled={post.isLiked === 1}
-                        >
-                            {post.isLiked === 1 ? (
-                                <FaHeart className='size-4 text-primary-600' />
-                            ) : (
-                                <FaRegHeart className='size-4' />
-                            )}
-                            {post.likes || 0} Likes
-                        </button>
-                        <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
-                            <FaCommentAlt /> {comments.length} Reply
-                        </button>
-                        <button
-                            className='flex items-center gap-2 hover:text-red-500 transition-colors'
-                            onClick={() => handleReportClick('post', post.post_id, post.username)}
-                        >
-                            <FaFlag /> Report
-                        </button>
-                    </div>
-                    <ReplyForm
-                        replyContent={replyContent}
-                        setReplyContent={setReplyContent}
-                        onSubmit={onSubmit}
-                        isSubmitting={isSubmitting}
-                        isAuthenticated={isAuthenticated}
-                    />
-                </div>
-
-                <div className="space-y-4 mt-6">
-                    <h2 className="text-lg font-semibold">
-                        {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
-                    </h2>
-
-                    {isCommentsPending ? (
-                        <div className="space-y-4">
-                            {[...Array(3)].map((_, i) => (
-                                <div key={i} className="bg-white p-4 rounded-xl shadow">
-                                    <div className="animate-pulse space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-32"></div>
-                                        </div>
-                                        <div className="h-4 bg-gray-200 rounded"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="bg-white p-6 rounded-xl shadow space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                                {post.avatar ? (
+                                    <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
+                                        <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
                                     </div>
-                                </div>
-                            ))}
+                                )}
+                            </div>
+                            <div className="flex gap-1">
+                                <p>đăng bởi </p>
+                                <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
+                            </div>
                         </div>
-                    ) : commentsError ? (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                            <p className="text-red-600">Error loading comments. Please try again later.</p>
-                        </div>
-                    ) : comments.length > 0 ? (
-                        <div className="space-y-4">
-                            {comments.map((comment) =>
-                                <Comment
-                                    key={comment.comment_id}
-                                    commentId={comment.comment_id}
-                                    date={comment.created_at}
-                                    author={comment.username}
-                                    content={comment.content}
-                                    role={comment.role}
-                                    avatar={comment.avatar}
-                                    likes={comment.like_count}
-                                    auth0_id={comment.auth0_id}
-                                    isLiked={comment.isLiked}
-                                    onLike={onLike}
-                                    onReportClick={handleReportClick}
-                                />
-                            )}
-                        </div>
-                    ) : (
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
-                            <p className="text-gray-600">Chưa có chưa trả lời nào. Hãy là người đầu tiên!</p>
-                        </div>
-                    )}
-                </div>
-            </div>
 
-            <SideBar isInPost={true} />
-            
-            {/* Report Modal */}
-            <ReportModal
-                isOpen={reportModal.isOpen}
-                onClose={handleReportClose}
-                onSubmit={handleReportSubmit}
-                isSubmitting={isReportSubmitting}
-                reportType={reportModal.type}
-                itemAuthor={reportModal.itemAuthor}
-            />
-        </div>
+                        <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
+                            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                        </div>
+
+                        <div className="flex gap-6 text-sm text-gray-500 pt-2 border-t">
+                            <button
+                                className='flex items-center gap-2 hover:text-primary-600 transition-colors'
+                                onClick={() => onLike(post.post_id, null)}
+                                disabled={post.isLiked === 1}
+                            >
+                                {post.isLiked === 1 ? (
+                                    <FaHeart className='size-4 text-primary-600' />
+                                ) : (
+                                    <FaRegHeart className='size-4' />
+                                )}
+                                {post.likes || 0} Likes
+                            </button>
+                            <button className='flex items-center gap-2 hover:text-primary-600 transition-colors'>
+                                <FaCommentAlt /> {comments.length} Reply
+                            </button>
+                            <button
+                                className='flex items-center gap-2 hover:text-red-500 transition-colors'
+                                onClick={() => handleReportClick('post', post.post_id, post.username)}
+                            >
+                                <FaFlag /> Report
+                            </button>
+                        </div>
+                        <ReplyForm
+                            replyContent={replyContent}
+                            setReplyContent={setReplyContent}
+                            onSubmit={onSubmit}
+                            isSubmitting={isSubmitting}
+                            isAuthenticated={isAuthenticated}
+                        />
+                    </div>
+
+                    <div className="space-y-4 mt-6">
+                        <h2 className="text-lg font-semibold">
+                            {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
+                        </h2>
+
+                        {isCommentsPending ? (
+                            <div className="space-y-4">
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="bg-white p-4 rounded-xl shadow">
+                                        <div className="animate-pulse space-y-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                            </div>
+                                            <div className="h-4 bg-gray-200 rounded"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : commentsError ? (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <p className="text-red-600">Error loading comments. Please try again later.</p>
+                            </div>
+                        ) : comments.length > 0 ? (
+                            <div className="space-y-4">
+                                {comments.map((comment) =>
+                                    <Comment
+                                        key={comment.comment_id}
+                                        commentId={comment.comment_id}
+                                        date={comment.created_at}
+                                        author={comment.username}
+                                        content={comment.content}
+                                        role={comment.role}
+                                        avatar={comment.avatar}
+                                        likes={comment.like_count}
+                                        auth0_id={comment.auth0_id}
+                                        isLiked={comment.isLiked}
+                                        onLike={onLike}
+                                        onReportClick={handleReportClick}
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
+                                <p className="text-gray-600">Chưa có chưa trả lời nào. Hãy là người đầu tiên!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <SideBar isInPost={true} />
+
+                {/* Report Modal */}
+                <ReportModal
+                    isOpen={reportModal.isOpen}
+                    onClose={handleReportClose}
+                    onSubmit={handleReportSubmit}
+                    isSubmitting={isReportSubmitting}
+                    reportType={reportModal.type}
+                    itemAuthor={reportModal.itemAuthor}
+                />
+            </div>
+        </PageFadeWrapper>
     );
 }
 

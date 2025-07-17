@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {differenceInMilliseconds} from "date-fns";
@@ -30,6 +30,8 @@ import {useAuth0} from "@auth0/auth0-react";
 import {getUserCreationDate} from "../../utils/userUtils.js";
 import {addFinancialAchievement, getAchieved} from "../../utils/achievementsUtils.js";
 import QuoteCarousel from "../../ui/quotesCarousel.jsx";
+import html2canvas from "html2canvas";
+import {useEditorContentStore} from "../../../stores/store.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -56,6 +58,8 @@ const ProgressBoard = ({
     const [localAchieved, setLocalAchieved] = useState([])
     const [showWarning, setShowWarning] = useState(false);
     const [range, setRange] = useState('overview');
+    const progressBoardRef = useRef(null);
+    const {setTitle, setContent} = useEditorContentStore()
 
     // Use different query keys based on context (coach vs user)
     const datasetQueryKey = from === 'coach-user'
@@ -423,6 +427,33 @@ const ProgressBoard = ({
         return null;
     };
 
+    const exportAsBase64 = async () => {
+        if (!progressBoardRef.current) {
+            console.warn('Progress board ref is not available');
+            return null;
+        }
+
+        try {
+            const canvas = await html2canvas(progressBoardRef.current, {
+                scale: 1,
+                useCORS: true,
+                backgroundColor: '#ffffff', // Add background color if needed
+            });
+
+            const base64 = canvas.toDataURL('image/png');
+
+            setTitle('Chia sẻ tiến trình cai thuốc')
+            setContent(`<p>Tôi đã bắt đầu một hành trình không khói thuốc, bạn có muốn cùng tôi không?</p><img src="${base64}">`)
+            navigate('/forum/editor')
+
+            return base64;
+        } catch (error) {
+            console.error('Error exporting as base64:', error);
+            // You might want to show a user-friendly error message here
+            return null;
+        }
+    };
+
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
             {isPending ? ( <Skeleton active paragraph={{ rows: 2 }} /> ) : <div><QuoteCarousel/></div>}
@@ -441,84 +472,86 @@ const ProgressBoard = ({
                 )}
             </div>}
 
-            <div className="bg-primary-100 rounded-lg p-6 text-center">
-                <h2 className="text-gray-600 text-sm font-medium">
-                    {totalDaysPhrase}
-                </h2>
-                <div className="flex justify-center items-baseline space-x-2 mt-2">
-                    {isPending ? (
-                        <Skeleton.Input style={{width: 250}} active/>
-                    ) : (
-                        <>
-                            <span className="text-4xl font-bold text-primary-800">{timeDifference.days}</span>
-                            <span className="text-sm text-gray-500">ngày</span>
-                            <span className="text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
-                            <span className="text-sm text-gray-500">giờ</span>
-                            <span className="text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
-                            <span className="text-sm text-gray-500">phút</span>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-center">
-                {[0, 1, 2].map((i) => (
-                    <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
-                        {isCalculating ? (
-                            <Skeleton active paragraph={{ rows: 2 }} />
+            <div ref={progressBoardRef} className='space-y-3'>
+                <div className="bg-primary-100 rounded-lg p-6 text-center">
+                    <h2 className="text-gray-600 text-sm font-medium">
+                        {totalDaysPhrase}
+                    </h2>
+                    <div className="flex justify-center items-baseline space-x-2 mt-2">
+                        {isPending ? (
+                            <Skeleton.Input style={{width: 250}} active/>
                         ) : (
                             <>
-                                <div className="text-2xl">
-                                    {
-                                        [
-                                            <PiPiggyBankLight className="size-10 text-primary-800" />,
-                                            <IoLogoNoSmoking className="size-10 text-primary-800" />,
-                                            <FaTrophy className="size-9 text-primary-800" />
-                                        ][i]
-                                    }
-                                </div>
-                                <div className="text-xl font-semibold text-primary-800">
-                                    {i === 0
-                                        ? moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...'
-                                        : i === 1
-                                            ? cigsQuit !== null ? cigsQuit : 'Đang tính...'
-                                            : localAchieved?.length ?? 'Đang tính...'}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                    {from === 'coach-user'
-                                        ? ['Số tiền người dùng tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]
-                                        : ['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
-                                </div>
+                                <span className="text-4xl font-bold text-primary-800">{timeDifference.days}</span>
+                                <span className="text-sm text-gray-500">ngày</span>
+                                <span className="text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
+                                <span className="text-sm text-gray-500">giờ</span>
+                                <span className="text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
+                                <span className="text-sm text-gray-500">phút</span>
                             </>
                         )}
                     </div>
-                ))}
-            </div>
+                </div>
 
-            <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
-                {!from && <div className="absolute right-3 top-3">
-                    {!isPending && (
-                        <a onClick={() => navigate('/onboarding/progress-board-startdate')}
-                           className="text-sm text-primary-700 hover:underline">
-                            Chỉnh sửa?
-                        </a>
-                    )}
-                </div>}
-                <div className="text-2xl flex justify-center"><FaRegCalendarCheck
-                    className='size-9 text-primary-800 mb-1'/></div>
-                <h3 className="text-lg font-semibold text-primary-800">
-                    {from === 'coach-user'
-                        ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
-                        : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
-                </h3>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                    {[0, 1, 2].map((i) => (
+                        <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
+                            {isCalculating ? (
+                                <Skeleton active paragraph={{ rows: 2 }} />
+                            ) : (
+                                <>
+                                    <div className="text-2xl">
+                                        {
+                                            [
+                                                <PiPiggyBankLight className="size-10 text-primary-800" />,
+                                                <IoLogoNoSmoking className="size-10 text-primary-800" />,
+                                                <FaTrophy className="size-9 text-primary-800" />
+                                            ][i]
+                                        }
+                                    </div>
+                                    <div className="text-xl font-semibold text-primary-800">
+                                        {i === 0
+                                            ? moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...'
+                                            : i === 1
+                                                ? cigsQuit !== null ? cigsQuit : 'Đang tính...'
+                                                : localAchieved?.length ?? 'Đang tính...'}
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        {from === 'coach-user'
+                                            ? ['Số tiền người dùng tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]
+                                            : ['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ))}
+                </div>
 
-                <div className="text-sm text-gray-600">
-                    {isPending ?
-                        <Skeleton.Input style={{width: 160}} active/> :
-                        readinessValue === 'ready' ?
-                            `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
-                            new Date(stoppedDate).toLocaleDateString('vi-VN')
-                    }
+                <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
+                    {!from && <div className="absolute right-3 top-3">
+                        {!isPending && (
+                            <a onClick={() => navigate('/onboarding/progress-board-startdate')}
+                               className="text-sm text-primary-700 hover:underline">
+                                Chỉnh sửa?
+                            </a>
+                        )}
+                    </div>}
+                    <div className="text-2xl flex justify-center"><FaRegCalendarCheck
+                        className='size-9 text-primary-800 mb-1'/></div>
+                    <h3 className="text-lg font-semibold text-primary-800">
+                        {from === 'coach-user'
+                            ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
+                            : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
+                    </h3>
+
+                    <div className="text-sm text-gray-600">
+                        {isPending ?
+                            <Skeleton.Input style={{width: 160}} active/> :
+                            readinessValue === 'ready' ?
+                                `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
+                                new Date(stoppedDate).toLocaleDateString('vi-VN')
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -625,9 +658,9 @@ const ProgressBoard = ({
                 {isPending ? (
                     <Skeleton.Input style={{width: 160}} active/>
                 ) : (
-                    <a href="#" className="text-sm text-primary-700 hover:underline">
+                    <CustomButton type='secondary' onClick={() => exportAsBase64()} href="#" className="text-sm text-primary-700 hover:underline">
                         🔗 Chia sẻ tiến trình
-                    </a>
+                    </CustomButton>
                 )}
             </div>}
         </div>

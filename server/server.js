@@ -16,7 +16,7 @@ const firebaseApp = initializeApp({
 
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 const userRouter = require("./routes/userRoute");
 const profileRouter = require("./routes/profileRoute");
