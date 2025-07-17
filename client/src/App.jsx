@@ -73,8 +73,7 @@ function AppContent() {
 
                 onMessage(messaging, (payload) => {
                     const isVisible = document.visibilityState === 'visible';
-                    const isFocused = document.hasFocus();
-                    if (payload?.data?.type === 'motivation' && isVisible && isFocused) {
+                    if (payload?.data?.type === 'motivation' && isVisible) {
                         openNotification('motivation', payload.data);
                     }
                 });

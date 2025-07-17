@@ -50,7 +50,7 @@ const schedulePushForUser = (userAuth0Id, timeString, reasonsCSV) => {
             console.log(`Sending push to user ${userAuth0Id} at ${time}`);
             await sendPushNotification(userAuth0Id,
                 `💪 Tiếp tục kiên trì nhé!`,
-                `Lý do bạn đang cố gắng: ${reasonText}`
+                `Lý do bạn đang cố gắng: ${reasonText.length > 0 ? reasonText : 'chưa có'}`
             );
         });
 
