@@ -646,6 +646,21 @@ const updateUserTimesForPush = async (userAuth0Id, times) => {
     }
 }
 
+const getUserReasonsCSVByAuth0Id = async (auth0Id) => {
+    const pool = await poolPromise;
+    const result = await pool.request()
+        .input('auth0Id', auth0Id)
+        .query(`
+            SELECT STRING_AGG(pr.reason_value, ',') AS reasons
+            FROM users u
+            JOIN user_profiles up ON u.user_id = up.user_id
+            JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
+            WHERE u.auth0_id = @auth0Id
+            GROUP BY u.user_id
+        `);
+    return result.recordset[0]?.reasons || '';
+};
+
 
 module.exports = {
     userExists,
@@ -673,5 +688,6 @@ module.exports = {
     getAllReviews,
     updateUserFCMToken,
     getUserFcmTokenFromAuth0Id,
-    updateUserTimesForPush
+    updateUserTimesForPush,
+    getUserReasonsCSVByAuth0Id
 };

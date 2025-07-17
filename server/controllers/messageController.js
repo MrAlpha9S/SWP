@@ -89,7 +89,7 @@ const HandleSendMessage = async (req, res) => {
             senderName: senderName,
             senderAuth0Id: senderAuth0Id
         });
-        await sendPushNotification(senderAuth0Id, `Bạn có tin nhắn mới từ ${senderName}`, content);
+        await sendPushNotification(senderAuth0Id, senderName, content);
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {
         console.error('Error in HandleSendMessage:', error);

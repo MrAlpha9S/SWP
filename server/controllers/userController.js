@@ -5,7 +5,7 @@ const {
     getCoaches,
     getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
     deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken,
-    updateUserTimesForPush
+    updateUserTimesForPush, getUserReasonsCSVByAuth0Id
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -437,23 +437,35 @@ const sendPushNotificationTo = async (req, res) => {
     }
 }
 
+const { schedulePushForUser } = require('../utils/pushScheduler');
+
 const handleUpdateUserTimesForPush = async (req, res) => {
-    const {userAuth0Id, times} = req.body;
+    const { userAuth0Id, times } = req.body;
     if (!userAuth0Id || !times) {
-        return res.status(400).json({success: false, message: 'Missing or invalid fields'});
+        return res.status(400).json({ success: false, message: 'Missing or invalid fields' });
     }
+
     try {
         const result = await updateUserTimesForPush(userAuth0Id, times);
+
         if (result) {
-            return res.status(200).json({success: true, message: 'Update times successful'});
+            // ✅ Get updated time and reasons
+            const user = await getUserByAuth0Id(userAuth0Id);
+            const reasonsCSV = await getUserReasonsCSVByAuth0Id(userAuth0Id);
+
+            // ✅ Re-schedule push
+            schedulePushForUser(userAuth0Id, user.time_to_send_push, reasonsCSV);
+
+            return res.status(200).json({ success: true, message: 'Update times successful' });
         } else {
-            return res.status(404).json({success: false, message: 'Failed to update Times'});
+            return res.status(404).json({ success: false, message: 'Failed to update Times' });
         }
     } catch (error) {
         console.error('Error in handleUpdateUserTimesForPush', error);
-        return res.status(500).json({success: false, message: error.message});
+        return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
+
 
 
 module.exports = {

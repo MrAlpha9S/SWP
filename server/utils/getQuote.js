@@ -1,6 +1,6 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
 
-export const getQuote = async () => {
+const getQuote = async () => {
     const numberOfQuotes = 30;
     try {
         // Generate random number from 1 to numberOfQuotes (inclusive)
@@ -19,3 +19,5 @@ export const getQuote = async () => {
         throw error;
     }
 }
+
+module.exports = {getQuote};

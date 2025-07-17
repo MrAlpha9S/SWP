@@ -42,24 +42,25 @@ import {useCurrentStepDashboard, useNotificationAllowedStore, useSelectedUserAut
 import userProfile from "./components/ui/userProfile.jsx";
 import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
 import {generateToken} from "../notifications/firebase.js";
-import { onMessage } from 'firebase/messaging'
-import { messaging } from '../notifications/firebase.js'
+import {onMessage} from 'firebase/messaging'
+import {messaging} from '../notifications/firebase.js'
 import {updateUserToken} from "./components/utils/userUtils.js";
 import Settings from "./pages/profilePage/settings.jsx";
-const Context = createContext({ name: 'Default' });
+
+const Context = createContext({name: 'Default'});
 
 
 function AppContent() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
-    const { openNotification } = useNotificationManager();
+    const {openNotification} = useNotificationManager();
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
-    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
+    const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
     const {notificationAllowed} = useNotificationAllowedStore();
 
     const updateFCMMutation = useMutation({
-        mutationFn: async ({ token, user, getAccessTokenSilently, isAuthenticated }) => {
+        mutationFn: async ({token, user, getAccessTokenSilently, isAuthenticated}) => {
             return await updateUserToken(user, getAccessTokenSilently, isAuthenticated, token);
         },
     });
@@ -68,10 +69,14 @@ function AppContent() {
         const setupFCM = async () => {
             const token = await generateToken();
             if (token) {
-                updateFCMMutation.mutate({ user, getAccessTokenSilently, isAuthenticated, token });
+                updateFCMMutation.mutate({user, getAccessTokenSilently, isAuthenticated, token});
 
                 onMessage(messaging, (payload) => {
-                    console.log('📩 Foreground push:', payload);
+                    const isVisible = document.visibilityState === 'visible';
+                    const isFocused = document.hasFocus();
+                    if (payload?.data?.type === 'motivation' && isVisible && isFocused) {
+                        openNotification('motivation', payload.data);
+                    }
                 });
             } else {
                 console.warn('🔕 User denied or blocked notifications');
@@ -83,8 +88,7 @@ function AppContent() {
     }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed]);
 
 
-
-    const { isPending, data : userData  } = useQuery({
+    const {isPending, data: userData} = useQuery({
         queryKey: ['user-profile'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return null;
@@ -143,7 +147,14 @@ function AppContent() {
 
             socket.on('new_message_noti', (data) => {
                 const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
-                if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
+                const isVisible = document.visibilityState === 'visible';
+                const isUserCurrentlyFocused = isVisible
+
+                if (!isUserCurrentlyFocused) {
+                    // User is not focused, let push notification handle it
+                    return;
+                }
+                if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
                     const onClick = () => {
                         if (userData?.userInfo?.role === 'Coach') {
                             setCurrentStepDashboard('coach-user')
@@ -184,11 +195,13 @@ function AppContent() {
             })
 
             socket.on('new-achievement', (data) => {
+
                 const onClick = () => {
                     setCurrentStepDashboard('badges')
                     navigate('/dashboard')
                 }
                 openNotification('new-achievement', data, onClick);
+
             })
 
             return () => {
@@ -200,46 +213,46 @@ function AppContent() {
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData]);
 
 
-    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
+    const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
 
     return (
         <Context.Provider value={contextValue}>
-            <Navbar />
+            <Navbar/>
             <div className="w-full mx-auto min-h-screen bg-[#fff7e5]">
                 <AnimatePresence mode="wait">
                     <Routes>
-                        <Route path="/" element={<Homepage />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/dashboard" element={<DashBoard />} />
-                        <Route path="/dashboard/check-in" element={<CheckIn />} />
-                        <Route path="/dashboard/check-in/:date" element={<CheckIn />} />
-                        <Route path="/topics" element={<TopicsPage />} />
-                        <Route path="/topics/:topicId" element={<Topic />} />
-                        <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
-                        <Route path="/post-signup" element={<PostSignUpCallback />} />
-                        <Route path="/onboarding/:from?" element={<Onboarding />} />
-                        <Route path="/error" element={<ErrorPage />} />
-                        <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback />} />
-                        <Route path="/my-profile" element={<MyProfile />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/forum" element={<ForumPage />} />
-                        <Route path="/forum/quit-experiences" element={<QuitExperiences />} />
-                        <Route path="/forum/getting-started" element={<GettingStarted />} />
-                        <Route path="/forum/staying-quit" element={<StayingQuit />} />
-                        <Route path="/forum/hints-and-tips" element={<HintsAndTips />} />
-                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit />} />
-                        <Route path="/forum/all-posts" element={<AllPosts />} />
-                        <Route path="/forum/:category/:postId" element={<PostPage />} />
-                        <Route path="/subscription" element={<SubscriptionPage />} />
-                        <Route path="/congratulationPage" element={<CongratulationPage />} />
-                        <Route path="/coach-selection" element={<CoachSelectPage />} />
+                        <Route path="/" element={<Homepage/>}/>
+                        <Route path="/settings" element={<Settings/>}/>
+                        <Route path="/dashboard" element={<DashBoard/>}/>
+                        <Route path="/dashboard/check-in" element={<CheckIn/>}/>
+                        <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
+                        <Route path="/topics" element={<TopicsPage/>}/>
+                        <Route path="/topics/:topicId" element={<Topic/>}/>
+                        <Route path="/topics/:topicId/:blogId" element={<BlogPost/>}/>
+                        <Route path="/post-signup" element={<PostSignUpCallback/>}/>
+                        <Route path="/onboarding/:from?" element={<Onboarding/>}/>
+                        <Route path="/error" element={<ErrorPage/>}/>
+                        <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback/>}/>
+                        <Route path="/my-profile" element={<MyProfile/>}/>
+                        <Route path="/profile" element={<Profile/>}/>
+                        <Route path="/forum" element={<ForumPage/>}/>
+                        <Route path="/forum/quit-experiences" element={<QuitExperiences/>}/>
+                        <Route path="/forum/getting-started" element={<GettingStarted/>}/>
+                        <Route path="/forum/staying-quit" element={<StayingQuit/>}/>
+                        <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}/>
+                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}/>
+                        <Route path="/forum/all-posts" element={<AllPosts/>}/>
+                        <Route path="/forum/:category/:postId" element={<PostPage/>}/>
+                        <Route path="/subscription" element={<SubscriptionPage/>}/>
+                        <Route path="/congratulationPage" element={<CongratulationPage/>}/>
+                        <Route path="/coach-selection" element={<CoachSelectPage/>}/>
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                         <Route path="/coach-register" element={<CoachRegistration/>}></Route>
                     </Routes>
                 </AnimatePresence>
             </div>
-            <Footer />
+            <Footer/>
         </Context.Provider>
     );
 }
@@ -247,7 +260,7 @@ function AppContent() {
 function App() {
     return (
         <NotificationProvider>
-            <AppContent />
+            <AppContent/>
         </NotificationProvider>
     );
 }

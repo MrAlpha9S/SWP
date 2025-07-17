@@ -1,5 +1,5 @@
 const {poolPromise, sql} = require("../configs/sqlConfig");
-const {getUserIdFromAuth0Id} = require("./userService");
+const {getUserIdFromAuth0Id, getUserByAuth0Id} = require("./userService");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const socket = require('../utils/socket');
 const NodeCache = require("node-cache");
@@ -83,16 +83,15 @@ const processAchievements = async (userAuth0Id) => {
 // Send achievement notifications using your existing socket.io setup
 const sendAchievementNotifications = async (userAuth0Id, achievements) => {
     try {
-        const userId = await getUserIdFromAuth0Id(userAuth0Id);
-        console.log('userAuth0Id', userAuth0Id);
-        console.log('achievements', achievements);
+        const user = await getUserByAuth0Id(userAuth0Id);
+        if (user.role === 'Coach') return
         const io = socket.getIo();
 
         // Send notification for each new achievement
         for (const achievement of achievements) {
-            console.log(`🎉 Achievement unlocked for user ${userId}: ${achievement.achievement_name}`);
+            console.log(`🎉 Achievement unlocked for user ${user.user_id}: ${achievement.achievement_name}`);
 
-            // Send real-time notification using your existing setup
+
             io.to(userAuth0Id).emit('new-achievement', {
                 achievement_name: achievement.achievement_name,
                 criteria: achievement.criteria,

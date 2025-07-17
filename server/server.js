@@ -29,6 +29,7 @@ const paymentRouter = require("./routes/paymentRoute");
 const coachRouter = require("./routes/coachRoute");
 const achievementRouter = require("./routes/achievementRoute");
 const reportRouter = require("./routes/reportRoute")
+const {scheduleUserPushes} = require("./utils/pushScheduler");
 
 
 const server = http.createServer(app);
@@ -350,5 +351,7 @@ app.listen(port, () => {
 server.listen(portSocket, () => {
     console.log(`Socket.IO server running at http://localhost:${portSocket}`);
 });
+
+scheduleUserPushes()
 
 module.exports = { io, firebaseApp }
