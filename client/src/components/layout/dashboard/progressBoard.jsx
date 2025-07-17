@@ -29,6 +29,7 @@ import {useQuery} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
 import {getUserCreationDate} from "../../utils/userUtils.js";
 import {addFinancialAchievement, getAchieved} from "../../utils/achievementsUtils.js";
+import QuoteCarousel from "../../ui/quotesCarousel.jsx";
 
 const ProgressBoard = ({
                            startDate,
@@ -424,6 +425,7 @@ const ProgressBoard = ({
 
     return (
         <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
+            {isPending ? ( <Skeleton active paragraph={{ rows: 2 }} /> ) : <div><QuoteCarousel/></div>}
             {!from && <div className="flex items-center justify-between">
                 {isPending ? (
                     <Skeleton.Button active/>

@@ -12,6 +12,7 @@ import {Button, Card, Col, Row, TimePicker, Form} from "antd";
 import {DeleteOutlined, PlusOutlined, ClockCircleOutlined} from "@ant-design/icons";
 import dayjs from 'dayjs';
 import {useNotificationManager} from "../../components/hooks/useNotificationManager.jsx";
+import QuoteCarousel from "../../components/ui/quotesCarousel.jsx";
 
 const Settings = () => {
     const {userInfo} = useUserInfoStore();
@@ -166,6 +167,7 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
+            <QuoteCarousel/>
         </PageFadeWrapper>
     );
 };
