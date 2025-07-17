@@ -4,13 +4,15 @@ const checkJwt = require('../middlewares/jwtChecker');
 const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserSubscription,
     getCoachesController, getCoachByIdController, assignUserToCoachController, getUserNotesController,
     createUserNoteController, updateUserNoteController, getAllReviewsController, createReviewController,
-    updateReviewController, deleteReviewController, handleUpdateUserFCMToken, sendPushNotificationTo
+    updateReviewController, deleteReviewController, handleUpdateUserFCMToken, sendPushNotificationTo,
+    handleUpdateUserTimesForPush
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 const {handleAllMember} = require("../controllers/userController");
 userRouter.get('/getAllUsers', checkJwt, getAllUsersController);
 userRouter.post('/token', checkJwt, handleUpdateUserFCMToken)
 userRouter.post('/send-push-notification', checkJwt, sendPushNotificationTo)
+userRouter.post('/push-notification-times', checkJwt, handleUpdateUserTimesForPush)
 userRouter.post('/postSignup', checkJwt, handlePostSignup);
 userRouter.get('/get-user-creation-date', checkJwt, getUserCreationDate)
 userRouter.patch('/update-user', checkJwt, updateUserController)

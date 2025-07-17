@@ -776,6 +776,7 @@ INSERT INTO [quotes] ([content], [author]) VALUES
 (N'Tự do khỏi thuốc lá là món quà tuyệt vời nhất bạn có thể tặng cho bản thân.', N'Benjamin Franklin'),
 (N'Mỗi hơi thở sạch là một lời cảm ơn đến cơ thể bạn.', N'Thich Nhat Hanh'),
 (N'Bạn không cần phải hoàn hảo, chỉ cần tiến bộ một chút mỗi ngày.', N'James Clear'),
+(N'Một người chiến thắng là một kẻ thua cuộc không bao giờ bỏ cuộc.', N'Nelson Mandela'),
 (N'Cuộc sống quá ngắn ngủi để lãng phí cho những thói quen hủy hoại sức khỏe.', N'Steve Jobs');
 
 INSERT INTO [blog_posts] ([title], [description], [content], [user_id], [topic_id]) VALUES

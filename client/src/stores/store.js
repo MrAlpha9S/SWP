@@ -214,6 +214,11 @@ export const useCoachStatsStore = create((set) => ({
     },
 }))
 
+export const useNotificationAllowedStore = create((set) => ({
+    notificationAllowed: Notification.permission,
+    setNotificationAllowed: (value) => set({notificationAllowed: value}),
+}))
+
 
 
 

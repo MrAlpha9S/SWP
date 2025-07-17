@@ -29,7 +29,8 @@ CREATE TABLE [users]
   [vip_end_date] datetime DEFAULT (null),
   [isBanned] int DEFAULT (0),
   [is_social] int,
-  [fcm_token] varchar(255)
+  [fcm_token] varchar(255),
+  [time_to_send_push] varchar(40)
 )
 GO
 

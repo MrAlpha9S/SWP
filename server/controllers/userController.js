@@ -4,7 +4,8 @@ const {
     getUserIdFromAuth0Id,
     getCoaches,
     getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
-    deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken
+    deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken,
+    updateUserTimesForPush
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -418,7 +419,7 @@ const handleUpdateUserFCMToken = async (req, res) => {
 }
 
 const sendPushNotificationTo = async (req, res) => {
-    const { receiverUserAuth0Id, senderUserAuth0Id = null } = req.body;
+    const {receiverUserAuth0Id, senderUserAuth0Id = null} = req.body;
     if (!receiverUserAuth0Id) {
         return res.status(400).json({success: false, message: 'Missing or invalid fields'});
     }
@@ -432,6 +433,24 @@ const sendPushNotificationTo = async (req, res) => {
         }
     } catch (error) {
         console.error('Error in sendPushNotificationTo', error);
+        return res.status(500).json({success: false, message: error.message});
+    }
+}
+
+const handleUpdateUserTimesForPush = async (req, res) => {
+    const {userAuth0Id, times} = req.body;
+    if (!userAuth0Id || !times) {
+        return res.status(400).json({success: false, message: 'Missing or invalid fields'});
+    }
+    try {
+        const result = await updateUserTimesForPush(userAuth0Id, times);
+        if (result) {
+            return res.status(200).json({success: true, message: 'Update times successful'});
+        } else {
+            return res.status(404).json({success: false, message: 'Failed to update Times'});
+        }
+    } catch (error) {
+        console.error('Error in handleUpdateUserTimesForPush', error);
         return res.status(500).json({success: false, message: error.message});
     }
 }
@@ -458,5 +477,6 @@ module.exports = {
     deleteReviewController,
     createReviewController,
     handleUpdateUserFCMToken,
-    sendPushNotificationTo
+    sendPushNotificationTo,
+    handleUpdateUserTimesForPush
 };

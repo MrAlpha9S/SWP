@@ -38,13 +38,14 @@ import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import CustomButton from "./components/ui/CustomButton.jsx";
 import {queryClient} from "./main.jsx";
-import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
+import {useCurrentStepDashboard, useNotificationAllowedStore, useSelectedUserAuth0IdStore} from "./stores/store.js";
 import userProfile from "./components/ui/userProfile.jsx";
 import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
 import {generateToken} from "../notifications/firebase.js";
 import { onMessage } from 'firebase/messaging'
 import { messaging } from '../notifications/firebase.js'
 import {updateUserToken} from "./components/utils/userUtils.js";
+import Settings from "./pages/profilePage/settings.jsx";
 const Context = createContext({ name: 'Default' });
 
 
@@ -55,6 +56,7 @@ function AppContent() {
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
+    const {notificationAllowed} = useNotificationAllowedStore();
 
     const updateFCMMutation = useMutation({
         mutationFn: async ({ token, user, getAccessTokenSilently, isAuthenticated }) => {
@@ -65,7 +67,6 @@ function AppContent() {
     useEffect(() => {
         const setupFCM = async () => {
             const token = await generateToken();
-            console.log('token', token);
             if (token) {
                 updateFCMMutation.mutate({ user, getAccessTokenSilently, isAuthenticated, token });
 
@@ -79,7 +80,7 @@ function AppContent() {
 
         if (!user && !isAuthenticated) return
         setupFCM();
-    }, [getAccessTokenSilently, isAuthenticated, user]);
+    }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed]);
 
 
 
@@ -95,7 +96,6 @@ function AppContent() {
 
     useEffect(() => {
         if (!isPending && userData) {
-            console.log('userdate avail', userData);
             syncProfileToStores(userData);
 
             const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
@@ -209,6 +209,7 @@ function AppContent() {
                 <AnimatePresence mode="wait">
                     <Routes>
                         <Route path="/" element={<Homepage />} />
+                        <Route path="/settings" element={<Settings />} />
                         <Route path="/dashboard" element={<DashBoard />} />
                         <Route path="/dashboard/check-in" element={<CheckIn />} />
                         <Route path="/dashboard/check-in/:date" element={<CheckIn />} />

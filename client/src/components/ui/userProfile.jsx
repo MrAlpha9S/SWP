@@ -44,6 +44,10 @@ const Profile = () => {
         navigate("/profile");
     }
 
+    const handleSettingsClick = () => {
+        navigate("/settings");
+    }
+
     const items = [
         {
             key: "1",
@@ -59,6 +63,10 @@ const Profile = () => {
         },
         {
             key: "4",
+            label: <span onClick={handleSettingsClick}>Cài đặt thông báo</span>,
+        },
+        {
+            key: "5",
             danger: true,
             label: (
                 <a
