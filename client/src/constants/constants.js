@@ -139,3 +139,38 @@ export const savingsTiers = [
     { label: '100,000,000 VNĐ', amount: 100000000, suggestions: ['Du lịch nước ngoài dài hạn', 'Tiết kiệm dài hạn', 'Học cao học'] },
 ];
 
+export const quotes = [
+    { content: 'Sức khỏe là tài sản quý giá nhất của chúng ta. Đừng để thuốc lá cướp đi điều đó.', author: 'Mark Twain' },
+    { content: 'Mỗi ngày không hút thuốc là một chiến thắng nhỏ dẫn đến thành công lớn.', author: 'Winston Churchill' },
+    { content: 'Ý chí mạnh mẽ có thể chinh phục mọi thói quen xấu. Bạn mạnh mẽ hơn bạn nghĩ.', author: 'Maya Angelou' },
+    { content: 'Tự do thực sự là khi bạn không còn nô lệ cho bất kỳ thói quen nào.', author: 'Nelson Mandela' },
+    { content: 'Hãy yêu thương cơ thể bạn. Nó là nơi duy nhất bạn có để sống.', author: 'Jim Rohn' },
+    { content: 'Thay đổi khó khăn ban đầu, lộn xộn ở giữa, nhưng tuyệt đẹp ở cuối.', author: 'Robin Sharma' },
+    { content: 'Bạn không cần phải hoàn hảo, bạn chỉ cần bắt đầu và kiên trì.', author: 'Tony Robbins' },
+    { content: 'Mỗi lần từ chối thuốc lá, bạn đang chọn sự sống thay vì từ từ chết.', author: 'Steve Jobs' },
+    { content: 'Sức mạnh không đến từ khả năng vật lý, mà từ ý chí bất khuất.', author: 'Mahatma Gandhi' },
+    { content: 'Hành trình ngàn dặm bắt đầu bằng một bước chân. Hôm nay là ngày bắt đầu.', author: 'Lao Tzu' },
+    { content: 'Đừng để thói quen của ngày hôm qua cản trở giấc mơ của ngày mai.', author: 'Oprah Winfrey' },
+    { content: 'Bạn có thể chịu đựng gần như mọi thứ nếu bạn có lý do đủ mạnh.', author: 'Friedrich Nietzsche' },
+    { content: 'Thành công không phải là cuối đích, thất bại không phải là chết người. Điều quan trọng là lòng can đảm tiếp tục.', author: 'Winston Churchill' },
+    { content: 'Cơ thể bạn xứng đáng được tôn trọng. Hãy nuôi dưỡng nó, đừng hủy hoại nó.', author: 'Buddha' },
+    { content: 'Mỗi phút không hút thuốc là một phút bạn đang tự chữa lành.', author: 'Deepak Chopra' },
+    { content: 'Ý chí của bạn mạnh hơn bất kỳ cơn thèm nào. Tin tương vào sức mạnh bên trong.', author: 'Tony Robbins' },
+    { content: 'Đôi khi điều nhỏ nhặt nhất tạo nên sự khác biệt lớn nhất trong cuộc đời bạn.', author: 'Dalai Lama' },
+    { content: 'Bạn không thể thay đổi quá khứ, nhưng bạn có thể tạo ra một tương lai khỏe mạnh.', author: 'Zig Ziglar' },
+    { content: 'Mỗi ngày mới là cơ hội để trở thành phiên bản tốt hơn của chính mình.', author: 'Ralph Waldo Emerson' },
+    { content: 'Sự kiên trì có thể biến thất bại thành thành tích phi thường.', author: 'Matt Biondi' },
+    { content: 'Hãy nhớ lý do tại sao bạn bắt đầu khi con đường trở nên khó khăn.', author: 'Paulo Coelho' },
+    { content: 'Thói quen tốt là chìa khóa của mọi thành công. Thói quen xấu là cánh cửa mở ra thất bại.', author: 'Og Mandino' },
+    { content: 'Bạn đủ mạnh để vượt qua điều này. Bạn đã vượt qua những khó khăn trước đây.', author: 'Maya Angelou' },
+    { content: 'Sức khỏe không phải là mọi thứ, nhưng không có sức khỏe thì mọi thứ đều không có ý nghĩa.', author: 'Schopenhauer' },
+    { content: 'Quyết định quan trọng nhất bạn có thể đưa ra là chăm sóc sức khỏe của mình.', author: 'Warren Buffett' },
+    { content: 'Đừng đợi đến ngày mai. Hôm nay là ngày hoàn hảo để bắt đầu cuộc sống mới.', author: 'Napoleon Hill' },
+    { content: 'Tự do khỏi thuốc lá là món quà tuyệt vời nhất bạn có thể tặng cho bản thân.', author: 'Benjamin Franklin' },
+    { content: 'Mỗi hơi thở sạch là một lời cảm ơn đến cơ thể bạn.', author: 'Thich Nhat Hanh' },
+    { content: 'Bạn không cần phải hoàn hảo, chỉ cần tiến bộ một chút mỗi ngày.', author: 'James Clear' },
+    { content: 'Một người chiến thắng là một kẻ thua cuộc không bao giờ bỏ cuộc.', author: 'Nelson Mandela' },
+    { content: 'Cuộc sống quá ngắn ngủi để lãng phí cho những thói quen hủy hoại sức khỏe.', author: 'Steve Jobs' },
+];
+
+

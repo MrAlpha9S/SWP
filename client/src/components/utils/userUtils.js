@@ -265,3 +265,36 @@ export async function deleteUserNote(user, getAccessTokenSilently, isAuthenticat
     return res.json();
 }
 
+export async function updateUserToken(user, getAccessTokenSilently, isAuthenticated, fcmToken) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/token/`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userAuth0Id: user.sub, token : fcmToken, force: import.meta.env.DEV})
+    });
+
+    return res.json();
+}
+
+export async function updateUserTimesForPush(user, getAccessTokenSilently, isAuthenticated, times) {
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/users/push-notification-times/`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({userAuth0Id: user.sub, times : times})
+    });
+
+    return res.json();
+}

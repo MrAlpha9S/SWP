@@ -82,7 +82,7 @@ const getUserWithSubscription = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', user_id)
-            .query('SELECT u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
+            .query('SELECT u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, u.time_to_send_push, u.fcm_token, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
         return result.recordset[0];
     } catch (error) {
         console.error('error in getUser', error);
@@ -490,18 +490,19 @@ const getAllReviews = async (userAuth0Id, coachAuth0Id) => {
             .input('userId', userId)
             .input('coachId', coachId)
             .query(`
-        SELECT r.review_id,
-               r.review_content,
-               r.stars,
-               r.created_date,
-               reviewer.username AS reviewer_username,
-               coach.username AS coach_username
-        FROM coach_reviews r
-                 JOIN users reviewer ON r.user_id = reviewer.user_id
-                 JOIN users coach ON r.coach_id = coach.user_id
-        WHERE r.user_id = @userId AND r.coach_id = @coachId
-        ORDER BY r.created_date DESC
-      `);
+                SELECT r.review_id,
+                       r.review_content,
+                       r.stars,
+                       r.created_date,
+                       reviewer.username AS reviewer_username,
+                       coach.username    AS coach_username
+                FROM coach_reviews r
+                         JOIN users reviewer ON r.user_id = reviewer.user_id
+                         JOIN users coach ON r.coach_id = coach.user_id
+                WHERE r.user_id = @userId
+                  AND r.coach_id = @coachId
+                ORDER BY r.created_date DESC
+            `);
 
         return result.recordset;
     } catch (error) {
@@ -524,9 +525,9 @@ const createReviewService = async (userAuth0Id, coachAuth0Id, stars, reviewConte
             .input('createdDate', getCurrentUTCDateTime().toISOString())
             .input('updatedDate', getCurrentUTCDateTime().toISOString())
             .query(`
-        INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
-        VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
-      `);
+                INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
+                VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -544,12 +545,12 @@ const updateReviewService = async (reviewId, reviewContent, stars) => {
             .input('stars', stars)
             .input('updatedDate', getCurrentUTCDateTime().toISOString())
             .query(`
-        UPDATE coach_reviews
-        SET review_content = @reviewContent,
-            stars = @stars,
-            updated_date = @updatedDate
-        WHERE review_id = @reviewId
-      `);
+                UPDATE coach_reviews
+                SET review_content = @reviewContent,
+                    stars          = @stars,
+                    updated_date   = @updatedDate
+                WHERE review_id = @reviewId
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -564,9 +565,10 @@ const deleteReviewService = async (reviewId) => {
         const result = await pool.request()
             .input('reviewId', reviewId)
             .query(`
-        DELETE FROM coach_reviews
-        WHERE review_id = @reviewId
-      `);
+                DELETE
+                FROM coach_reviews
+                WHERE review_id = @reviewId
+            `);
 
         return result.rowsAffected[0] > 0;
     } catch (error) {
@@ -575,6 +577,89 @@ const deleteReviewService = async (reviewId) => {
     }
 };
 
+const updateUserFCMToken = async (userAuth0Id, token, force = false) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+
+        // Step 1: Check if token is already used
+        const existingTokenUser = await pool.request()
+            .input('token', token)
+            .query('SELECT user_id FROM users WHERE fcm_token = @token');
+
+        if (existingTokenUser.recordset.length > 0) {
+            const existingUserId = existingTokenUser.recordset[0].user_id;
+
+            if (existingUserId === userId) {
+                // Token already belongs to this user — nothing to do
+                return true;
+            }
+
+            if (!force) {
+                // Token belongs to another user and we're not forcing
+                return false;
+            }
+        }
+
+        // Step 2: Update token for this user
+        const update = await pool.request()
+            .input('token', token)
+            .input('userId', userId)
+            .query('UPDATE users SET fcm_token = @token WHERE user_id = @userId');
+
+        return update.rowsAffected[0] > 0;
+
+    } catch (error) {
+        console.error('error in updateUserFCMToken', error);
+        return false;
+    }
+};
+
+const getUserFcmTokenFromAuth0Id = async (userAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .query('SELECT token FROM users WHERE user_id = @userId');
+        return result.recordset[0].fcm_token;
+    } catch (error) {
+        console.error('error in updateUserFCMToken', error);
+        return null;
+    }
+}
+
+const updateUserTimesForPush = async (userAuth0Id, times) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', userId)
+            .input('times', times)
+            .query('UPDATE users SET time_to_send_push = @times WHERE user_id = @userId');
+        return result.rowsAffected > 0;
+    } catch (error) {
+        console.error('error in updateUserTimesForPush', error);
+        return false;
+    }
+}
+
+const getUserReasonsCSVByAuth0Id = async (auth0Id) => {
+    const pool = await poolPromise;
+    const result = await pool.request()
+        .input('auth0Id', auth0Id)
+        .query(`
+            SELECT STRING_AGG(pr.reason_value, ',') AS reasons
+            FROM users u
+            JOIN user_profiles up ON u.user_id = up.user_id
+            JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
+            WHERE u.auth0_id = @auth0Id
+            GROUP BY u.user_id
+        `);
+    return result.recordset[0]?.reasons || '';
+};
 
 
 module.exports = {
@@ -591,5 +676,18 @@ module.exports = {
     updateUserSubscriptionService,
     getCoaches,
     getCoachDetailsById,
-    assignUserToCoachService, allMember, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService, createReviewService, updateReviewService, deleteReviewService, getAllReviews
+    assignUserToCoachService,
+    allMember,
+    getUserNotes,
+    noteUpdateService,
+    noteCreateService,
+    noteDeleteService,
+    createReviewService,
+    updateReviewService,
+    deleteReviewService,
+    getAllReviews,
+    updateUserFCMToken,
+    getUserFcmTokenFromAuth0Id,
+    updateUserTimesForPush,
+    getUserReasonsCSVByAuth0Id
 };

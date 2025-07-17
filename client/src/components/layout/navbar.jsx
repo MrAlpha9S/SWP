@@ -9,12 +9,14 @@ import Profile from "../ui/userProfile.jsx";
 import { FaSpinner } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import TopicsDropdown from "./topics.jsx";
+import {useUserInfoStore} from "../../stores/store.js";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const { isAuthenticated, isLoading } = useAuth0();
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
     const navigate = useNavigate();
+    const {userInfo} = useUserInfoStore()
 
     return (
         <nav className="bg-primary-800 shadow-sm sticky top-0 z-50 py-2">
@@ -37,6 +39,11 @@ function Navbar() {
                             {isAuthenticated === true && (
                                 <a onClick={() => navigate('/topics')} className="text-white hover:text-primary-500 font-medium transition-colors">
                                     <TopicsDropdown />
+                                </a>
+                            )}
+                            {isAuthenticated === true && userInfo?.role !== 'Coach' && (
+                                <a onClick={() => navigate('/coach-register')} className="text-white cursor-pointer hover:text-primary-500 font-medium transition-colors">
+                                    Trở thành HLV
                                 </a>
                             )}
 

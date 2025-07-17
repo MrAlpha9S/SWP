@@ -29,6 +29,8 @@ CREATE TABLE [users]
   [vip_end_date] datetime DEFAULT (null),
   [isBanned] int DEFAULT (0),
   [is_social] int,
+  [fcm_token] varchar(255),
+  [time_to_send_push] varchar(40)
 )
 GO
 
@@ -72,9 +74,33 @@ CREATE TABLE [coach_info]
   [bio] nvarchar(200),
   [detailed_bio] nvarchar(max),
   [motto] nvarchar(100),
-  [commission_rate] float DEFAULT(0.3)
+  [commission_rate] float DEFAULT(0.3),
+  [date_of_birth] datetime,
+  [sex] nvarchar(5),
+  [cccd] varchar(12),
+  [cccd_issued_date] datetime,
+  [address] nvarchar(100)
 )
 ALTER TABLE [coach_info] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [coach_degree]
+(
+  [degree_id] int PRIMARY KEY IDENTITY(1,1),
+  [img] nvarchar(max),
+  [achieved_at] DATETIME,
+  [coach_id] INT 
+)
+ALTER TABLE [coach_degree] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id])
+GO
+
+CREATE TABLE [degree_img]
+(
+  [img_id] int PRIMARY KEY IDENTITY(1,1),
+  [img] nvarchar(max),
+  [degree_id] int
+)
+ALTER TABLE [degree_img] ADD FOREIGN KEY ([degree_id]) REFERENCES [coach_degree] ([degree_id])
 GO
 
 CREATE TABLE [coach_specialties_achievements]
@@ -440,6 +466,13 @@ CREATE TABLE [user_conversation]
 )
 GO
 
+CREATE TABLE [quotes]
+(
+  [quote_id] int PRIMARY KEY IDENTITY(1,1),
+  [content] nvarchar(max),
+  [author] nvarchar(100)
+)
+GO
 
 ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO

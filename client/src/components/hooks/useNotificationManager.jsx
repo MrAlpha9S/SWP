@@ -3,7 +3,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import {BsFillPeopleFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
-import {FaCheck, FaMedal} from "react-icons/fa";
+import {FaCheck, FaCross, FaMedal, FaRegLightbulb} from "react-icons/fa";
 
 const NotificationContext = createContext();
 
@@ -29,7 +29,7 @@ export const NotificationProvider = ({ children }) => {
             case 'new_message':
                 api.open({
                     key: `message_${payload.conversation_id}_${payload.created_at}`,
-                    message: `Tin nhắn mới từ ${payload.senderName}`,
+                    message: `${payload.senderName}`,
                     description: <div>
                         {payload.content}
                         <p className='text-gray-400 text-xs'>{`${new Date(payload.created_at).getUTCHours()}:${new Date(payload.created_at).getUTCMinutes()}`}</p>
@@ -48,6 +48,17 @@ export const NotificationProvider = ({ children }) => {
                     </div>,
                     placement: 'topRight',
                     icon: <FaCheck className="size-5"/>
+                });
+                break;
+            case 'failed':
+                api.open({
+                    key: `failed_message`,
+                    message: `${payload.message}`,
+                    description: <div>
+                        {payload.content}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <FaCross className="size-5"/>
                 });
                 break;
             case 'plan-edit-by-coach':
@@ -101,6 +112,17 @@ export const NotificationProvider = ({ children }) => {
                     placement: 'topRight',
                     icon: <FaMedal className="size-5"/>,
                     onClick: onClick
+                });
+                break;
+            case 'motivation':
+                api.open({
+                    key: `motivation`,
+                    message: payload.title,
+                    description: <div>
+                        {payload.body}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <FaRegLightbulb className="size-5"/>,
                 });
                 break;
             default:

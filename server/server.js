@@ -7,6 +7,13 @@ const port = 3000;
 const portSocket = 3001; // Port for Socket.IO server
 const cors = require('cors');
 const socket = require('./utils/socket');
+const {initializeApp} = require("firebase-admin/app");
+
+const firebaseApp = initializeApp({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+});
+
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +29,8 @@ const paymentRouter = require("./routes/paymentRoute");
 const coachRouter = require("./routes/coachRoute");
 const achievementRouter = require("./routes/achievementRoute");
 const reportRouter = require("./routes/reportRoute")
+const {scheduleUserPushes} = require("./utils/pushScheduler");
+
 
 const server = http.createServer(app);
 
@@ -343,4 +352,6 @@ server.listen(portSocket, () => {
     console.log(`Socket.IO server running at http://localhost:${portSocket}`);
 });
 
-module.exports = { io }
+scheduleUserPushes()
+
+module.exports = { io, firebaseApp }

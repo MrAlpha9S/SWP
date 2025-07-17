@@ -10,7 +10,7 @@ import PostOnboardingCallback from "./pages/signup/postOnboardingCallback.jsx";
 import MyProfile from "./pages/dashboardPage/myProfile.jsx";
 import ErrorPage from "./pages/errorPage.jsx";
 import {useAuth0} from "@auth0/auth0-react";
-import {getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
+import {deleteGoal, getUserProfile, syncProfileToStores} from "./components/utils/profileUtils.js";
 import ForumPage from "./pages/forumPage/forumPage.jsx";
 import CheckIn from "./pages/dashboardPage/checkInPage/checkIn.jsx";
 import Footer from "./components/layout/footer.jsx";
@@ -32,25 +32,62 @@ import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx"
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
 import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import {useEffect} from "react";
 import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import CustomButton from "./components/ui/CustomButton.jsx";
 import {queryClient} from "./main.jsx";
-import {useCurrentStepDashboard, useSelectedUserAuth0IdStore} from "./stores/store.js";
+import {useCurrentStepDashboard, useNotificationAllowedStore, useSelectedUserAuth0IdStore} from "./stores/store.js";
 import userProfile from "./components/ui/userProfile.jsx";
-const Context = createContext({ name: 'Default' });
+import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
+import {generateToken} from "../notifications/firebase.js";
+import {onMessage} from 'firebase/messaging'
+import {messaging} from '../notifications/firebase.js'
+import {updateUserToken} from "./components/utils/userUtils.js";
+import Settings from "./pages/profilePage/settings.jsx";
+
+const Context = createContext({name: 'Default'});
+
 
 function AppContent() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
-    const { openNotification } = useNotificationManager();
+    const {openNotification} = useNotificationManager();
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
-    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
+    const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
+    const {notificationAllowed} = useNotificationAllowedStore();
 
-    const { isPending, data : userData  } = useQuery({
+    const updateFCMMutation = useMutation({
+        mutationFn: async ({token, user, getAccessTokenSilently, isAuthenticated}) => {
+            return await updateUserToken(user, getAccessTokenSilently, isAuthenticated, token);
+        },
+    });
+
+    useEffect(() => {
+        const setupFCM = async () => {
+            const token = await generateToken();
+            if (token) {
+                updateFCMMutation.mutate({user, getAccessTokenSilently, isAuthenticated, token});
+
+                onMessage(messaging, (payload) => {
+                    const isVisible = document.visibilityState === 'visible';
+                    if (payload?.data?.type === 'motivation' && isVisible) {
+                        openNotification('motivation', payload.data);
+                    }
+                });
+            } else {
+                console.warn('🔕 User denied or blocked notifications');
+            }
+        };
+
+        if (!user && !isAuthenticated) return
+        setupFCM();
+    }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed]);
+
+
+    const {isPending, data: userData} = useQuery({
         queryKey: ['user-profile'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return null;
@@ -62,7 +99,6 @@ function AppContent() {
 
     useEffect(() => {
         if (!isPending && userData) {
-            console.log('userdate avail', userData);
             syncProfileToStores(userData);
 
             const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
@@ -110,7 +146,14 @@ function AppContent() {
 
             socket.on('new_message_noti', (data) => {
                 const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;
-                if (!location.pathname.startsWith('/dashboard') ||  (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
+                const isVisible = document.visibilityState === 'visible';
+                const isUserCurrentlyFocused = isVisible
+
+                if (!isUserCurrentlyFocused) {
+                    // User is not focused, let push notification handle it
+                    return;
+                }
+                if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
                     const onClick = () => {
                         if (userData?.userInfo?.role === 'Coach') {
                             setCurrentStepDashboard('coach-user')
@@ -151,11 +194,13 @@ function AppContent() {
             })
 
             socket.on('new-achievement', (data) => {
+
                 const onClick = () => {
                     setCurrentStepDashboard('badges')
                     navigate('/dashboard')
                 }
                 openNotification('new-achievement', data, onClick);
+
             })
 
             return () => {
@@ -167,44 +212,46 @@ function AppContent() {
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData]);
 
 
-    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
+    const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
 
     return (
         <Context.Provider value={contextValue}>
-            <Navbar />
+            <Navbar/>
             <div className="w-full mx-auto min-h-screen bg-[#fff7e5]">
                 <AnimatePresence mode="wait">
                     <Routes>
-                        <Route path="/" element={<Homepage />} />
-                        <Route path="/dashboard" element={<DashBoard />} />
-                        <Route path="/dashboard/check-in" element={<CheckIn />} />
-                        <Route path="/dashboard/check-in/:date" element={<CheckIn />} />
-                        <Route path="/topics" element={<TopicsPage />} />
-                        <Route path="/topics/:topicId" element={<Topic />} />
-                        <Route path="/topics/:topicId/:blogId" element={<BlogPost />} />
-                        <Route path="/post-signup" element={<PostSignUpCallback />} />
-                        <Route path="/onboarding/:from?" element={<Onboarding />} />
-                        <Route path="/error" element={<ErrorPage />} />
-                        <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback />} />
-                        <Route path="/my-profile" element={<MyProfile />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/forum" element={<ForumPage />} />
-                        <Route path="/forum/quit-experiences" element={<QuitExperiences />} />
-                        <Route path="/forum/getting-started" element={<GettingStarted />} />
-                        <Route path="/forum/staying-quit" element={<StayingQuit />} />
-                        <Route path="/forum/hints-and-tips" element={<HintsAndTips />} />
-                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit />} />
-                        <Route path="/forum/all-posts" element={<AllPosts />} />
-                        <Route path="/forum/:category/:postId" element={<PostPage />} />
-                        <Route path="/subscription" element={<SubscriptionPage />} />
-                        <Route path="/congratulationPage" element={<CongratulationPage />} />
-                        <Route path="/coach-selection" element={<CoachSelectPage />} />
+                        <Route path="/" element={<Homepage/>}/>
+                        <Route path="/settings" element={<Settings/>}/>
+                        <Route path="/dashboard" element={<DashBoard/>}/>
+                        <Route path="/dashboard/check-in" element={<CheckIn/>}/>
+                        <Route path="/dashboard/check-in/:date" element={<CheckIn/>}/>
+                        <Route path="/topics" element={<TopicsPage/>}/>
+                        <Route path="/topics/:topicId" element={<Topic/>}/>
+                        <Route path="/topics/:topicId/:blogId" element={<BlogPost/>}/>
+                        <Route path="/post-signup" element={<PostSignUpCallback/>}/>
+                        <Route path="/onboarding/:from?" element={<Onboarding/>}/>
+                        <Route path="/error" element={<ErrorPage/>}/>
+                        <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback/>}/>
+                        <Route path="/my-profile" element={<MyProfile/>}/>
+                        <Route path="/profile" element={<Profile/>}/>
+                        <Route path="/forum" element={<ForumPage/>}/>
+                        <Route path="/forum/quit-experiences" element={<QuitExperiences/>}/>
+                        <Route path="/forum/getting-started" element={<GettingStarted/>}/>
+                        <Route path="/forum/staying-quit" element={<StayingQuit/>}/>
+                        <Route path="/forum/hints-and-tips" element={<HintsAndTips/>}/>
+                        <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}/>
+                        <Route path="/forum/all-posts" element={<AllPosts/>}/>
+                        <Route path="/forum/:category/:postId" element={<PostPage/>}/>
+                        <Route path="/subscription" element={<SubscriptionPage/>}/>
+                        <Route path="/congratulationPage" element={<CongratulationPage/>}/>
+                        <Route path="/coach-selection" element={<CoachSelectPage/>}/>
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
+                        <Route path="/coach-register" element={<CoachRegistration/>}></Route>
                     </Routes>
                 </AnimatePresence>
             </div>
-            <Footer />
+            <Footer/>
         </Context.Provider>
     );
 }
@@ -212,7 +259,7 @@ function AppContent() {
 function App() {
     return (
         <NotificationProvider>
-            <AppContent />
+            <AppContent/>
         </NotificationProvider>
     );
 }

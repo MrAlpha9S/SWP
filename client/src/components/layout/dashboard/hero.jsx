@@ -13,9 +13,10 @@ function Hero({title, heroHeight = 188, role, username}) {
                     <div style={{flexDirection: heroHeight === 188 ? "column" : "row"}} className="hidden md:flex items-center justify-center gap-5">
                         <img style={heroHeight === 188 ? {height:80, width: 80} : {height:30, width:30}} src={user.picture} className='rounded-full max-h-20 max-w-20' alt='user avatar'/>
                         <p>Xin chào, <strong>{username}</strong> ({role})</p>
-                        
+
                     </div>
                 ) : <div className="w-[20%]"><Skeleton active/></div>}
+
                 <p style={heroHeight === 188 ? {} : {fontSize : 30}} className="text-xl md:text-2xl lg:text-5xl font-bold text-gray-900">
                     {title}
                 </p>
