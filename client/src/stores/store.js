@@ -219,6 +219,13 @@ export const useNotificationAllowedStore = create((set) => ({
     setNotificationAllowed: (value) => set({notificationAllowed: value}),
 }))
 
+export const useEditorContentStore = create((set) => ({
+    title: '',
+    content: '',
+    setTitle: (value) => set({title: value}),
+    setContent: (value) => set({content: value}),
+}))
+
 
 
 
