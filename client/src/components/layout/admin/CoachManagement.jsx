@@ -72,6 +72,9 @@ const CoachManagement = () => {
     { title: 'Email', dataIndex: 'email', key: 'email' },
     { title: 'Role', dataIndex: 'role', key: 'role' },
     { title: 'Bio', dataIndex: 'bio', key: 'bio' },
+    { title: 'Years of Exp', dataIndex: 'years_of_exp', key: 'years_of_exp' },
+    { title: 'Detailed Bio', dataIndex: 'detailed_bio', key: 'detailed_bio' },
+    { title: 'Motto', dataIndex: 'motto', key: 'motto' },
     {
       title: 'Hành động',
       key: 'action',
@@ -105,14 +108,55 @@ const CoachManagement = () => {
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="username" label="Username" rules={[{ required: true, message: 'Nhập username' }]}> <Input /> </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Nhập email' }]}> <Input /> </Form.Item>
-          <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Chọn role' }]}> <Select>
-            <Option value="Coach">Coach</Option>
-            <Option value="Member">Member</Option>
-            <Option value="Admin">Admin</Option>
-          </Select></Form.Item>
-          <Form.Item name="bio" label="Bio"><Input.TextArea rows={3} /></Form.Item>
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[
+              { required: true, message: 'Nhập username' }
+            ]}
+          >
+            <Input placeholder="Nhập username" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' }
+            ]}
+          >
+            <Input placeholder="Nhập email" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: 'Chọn role' }]}
+          >
+            <Select placeholder="Chọn role">
+              <Option value="Coach">Coach</Option>
+              <Option value="Member">Member</Option>
+              <Option value="Admin">Admin</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="avatar"
+            label="Avatar (URL)"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  if (/^(https?:\/\/)[^\s]+$/.test(value)) return Promise.resolve();
+                  return Promise.reject('URL không hợp lệ');
+                }
+              }
+            ]}
+          >
+            <Input placeholder="Nhập URL ảnh đại diện (tùy chọn)" />
+          </Form.Item>
+          <Form.Item name="bio" label="Bio"><Input.TextArea rows={2} /></Form.Item>
+          <Form.Item name="years_of_exp" label="Years of Experience"><Input type="number" min={0} /></Form.Item>
+          <Form.Item name="detailed_bio" label="Detailed Bio"><Input.TextArea rows={3} /></Form.Item>
+          <Form.Item name="motto" label="Motto"><Input /></Form.Item>
         </Form>
       </Modal>
     </div>

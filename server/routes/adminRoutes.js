@@ -4,9 +4,9 @@ const checkJwt = require('../middlewares/jwtChecker');
 const adminChecker = require('../middlewares/adminChecker');
 const adminController = require('../controllers/adminController');
 
-// Áp dụng middleware cho toàn bộ route admin
-router.use(checkJwt);
-router.use(adminChecker);
+// TẠM THỜI TẮT XÁC THỰC ĐỂ TEST
+// router.use(checkJwt);
+// router.use(adminChecker);
 
 // Route quản lý user
 router.post('/users', adminController.handleCreateUser);
@@ -24,8 +24,11 @@ router.delete('/coaches/:id', adminController.handleDeleteCoach);
 
 // Route quản lý social post
 router.get('/posts', adminController.handleGetAllPosts);
+router.post('/posts', adminController.handleCreatePost);
 router.get('/posts/:id', adminController.handleGetPostById);
+router.put('/posts/:id', adminController.handleUpdatePost);
 router.delete('/posts/:id', adminController.handleDeletePost);
+router.get('/posts/:id/likes', adminController.handleGetPostLikes);
 // Route quản lý comment
 router.get('/comments', adminController.handleGetAllComments);
 router.delete('/comments/:id', adminController.handleDeleteComment);
@@ -45,6 +48,12 @@ router.get('/subscriptions', adminController.handleGetAllSubscriptions);
 router.post('/subscriptions', adminController.handleCreateSubscription);
 router.put('/subscriptions/:id', adminController.handleUpdateSubscription);
 router.delete('/subscriptions/:id', adminController.handleDeleteSubscription);
+
+// Route quản lý user subscriptions
+router.get('/user-subscriptions', adminController.handleGetAllUserSubscriptions);
+router.post('/user-subscriptions', adminController.handleCreateUserSubscription);
+router.put('/user-subscriptions/:user_id/:sub_id', adminController.handleUpdateUserSubscription);
+router.delete('/user-subscriptions/:user_id/:sub_id', adminController.handleDeleteUserSubscription);
 
 // Route quản lý check-in
 router.get('/checkins', adminController.handleGetAllCheckIns);

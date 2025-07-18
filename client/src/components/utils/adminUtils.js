@@ -112,6 +112,31 @@ export async function deletePost(id, token) {
   return await res.json();
 }
 
+export async function createPost(data, token) {
+  const res = await fetch('http://localhost:3000/admin/posts', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Lỗi tạo post');
+  return await res.json();
+}
+export async function updatePost(id, data, token) {
+  const res = await fetch(`http://localhost:3000/admin/posts/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Lỗi cập nhật post');
+  return await res.json();
+}
+
 export async function getAllComments(token) {
   const res = await fetch('http://localhost:3000/admin/comments', {
     headers: { Authorization: `Bearer ${token}` }
@@ -169,7 +194,11 @@ export async function createTopic(data, token) {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      topic_id: data.topic_id,
+      topic_name: data.topic_name,
+      topic_content: data.topic_content
+    })
   });
   if (!res.ok) throw new Error('Lỗi tạo topic');
   return await res.json();
@@ -283,5 +312,47 @@ export async function createUser(data, token) {
     body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error('Lỗi tạo user');
+  return await res.json();
+}
+
+export async function getPostLikes(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/posts/${id}/likes`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách like');
+  return await res.json();
+}
+
+export async function getAllUserSubscriptions(token) {
+  const res = await fetch('http://localhost:3000/admin/user-subscriptions', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách user subscriptions');
+  return await res.json();
+}
+export async function createUserSubscription(data, token) {
+  const res = await fetch('http://localhost:3000/admin/user-subscriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Lỗi tạo user subscription');
+  return await res.json();
+}
+export async function updateUserSubscription(user_id, sub_id, data, token) {
+  const res = await fetch(`http://localhost:3000/admin/user-subscriptions/${user_id}/${sub_id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Lỗi cập nhật user subscription');
+  return await res.json();
+}
+export async function deleteUserSubscription(user_id, sub_id, token) {
+  const res = await fetch(`http://localhost:3000/admin/user-subscriptions/${user_id}/${sub_id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi xóa user subscription');
   return await res.json();
 } 

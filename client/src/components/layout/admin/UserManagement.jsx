@@ -151,9 +151,7 @@ const UserManagement = () => {
             name="username"
             label="Username"
             rules={[
-              { required: true, message: 'Nhập username' },
-              { min: 3, message: 'Username tối thiểu 3 ký tự' },
-              { pattern: /^[a-zA-Z0-9_]+$/, message: 'Username chỉ gồm chữ, số, gạch dưới' }
+              { required: true, message: 'Nhập username' }
             ]}
           >
             <Input placeholder="Nhập username" />
@@ -230,9 +228,7 @@ const UserManagement = () => {
             name="username"
             label="Username"
             rules={[
-              { required: true, message: 'Nhập username' },
-              { min: 3, message: 'Username tối thiểu 3 ký tự' },
-              { pattern: /^[a-zA-Z0-9_]+$/, message: 'Username chỉ gồm chữ, số, gạch dưới' }
+              { required: true, message: 'Nhập username' }
             ]}
           >
             <Input placeholder="Nhập username" />

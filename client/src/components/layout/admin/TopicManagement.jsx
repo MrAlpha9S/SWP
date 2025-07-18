@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, notification, Popconfirm } from 'antd';
+import { Table, Button, Modal, Form, Input, notification, Popconfirm, Card, Tag, Divider } from 'antd';
+import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllTopics, createTopic, updateTopic, deleteTopic } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -12,6 +13,8 @@ const TopicManagement = () => {
   const [editingTopic, setEditingTopic] = useState(null);
   const [form] = Form.useForm();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const [viewingTopic, setViewingTopic] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   // Fetch topics
   const fetchTopics = async () => {
@@ -37,13 +40,21 @@ const TopicManagement = () => {
     try {
       const values = await form.validateFields();
       const token = await getAccessTokenSilently();
+      let payload;
       if (editingTopic) {
-        // Update
-        await updateTopic(editingTopic.id, values, token);
+        payload = {
+          topic_name: values.name,
+          topic_content: values.description
+        };
+        await updateTopic(editingTopic.topic_id, payload, token);
         notification.success({ message: 'Cập nhật chủ đề thành công' });
       } else {
-        // Create
-        await createTopic(values, token);
+        payload = {
+          topic_id: values.topic_id,
+          topic_name: values.name,
+          topic_content: values.description
+        };
+        await createTopic(payload, token);
         notification.success({ message: 'Thêm chủ đề thành công' });
       }
       setModalVisible(false);
@@ -84,22 +95,27 @@ const TopicManagement = () => {
     form.resetFields();
   };
 
+  const handleViewTopic = (topic) => {
+    setViewingTopic(topic);
+    setIsViewModalOpen(true);
+  };
+
   const columns = [
     {
       title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'topic_id',
+      key: 'topic_id',
       width: 80,
     },
     {
       title: 'Tên chủ đề',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'topic_name',
+      key: 'topic_name',
     },
     {
       title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'topic_content',
+      key: 'topic_content',
       ellipsis: true,
     },
     {
@@ -110,30 +126,20 @@ const TopicManagement = () => {
       render: (text, record) => record.postCount || 0,
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: 160,
-      render: (text) => new Date(text).toLocaleString(),
-    },
-    {
       title: 'Hành động',
       key: 'action',
-      width: 180,
+      width: 120,
       render: (_, record) => (
-        <div className="flex gap-2">
-          <Button size="small" onClick={() => openEditModal(record)}>
-            Sửa
-          </Button>
+        <div style={{display:'flex', gap:8}}>
+          <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewTopic(record)} />
+          <Button icon={<EditOutlined />} size="small" onClick={() => openEditModal(record)} />
           <Popconfirm
             title="Bạn có chắc muốn xóa chủ đề này?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record.topic_id)}
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button size="small" danger>
-              Xóa
-            </Button>
+            <Button icon={<DeleteOutlined />} size="small" danger />
           </Popconfirm>
         </div>
       ),
@@ -157,6 +163,27 @@ const TopicManagement = () => {
         bordered
       />
       <Modal
+        title={null}
+        open={isViewModalOpen}
+        onCancel={() => setIsViewModalOpen(false)}
+        footer={null}
+        bodyStyle={{padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002'}}
+        style={{borderRadius: 24, overflow: 'hidden', backdropFilter: 'blur(2px)'}}
+      >
+        {viewingTopic && (
+          <Card bordered={false} style={{margin:0, borderRadius:20, boxShadow:'none', background:'#f7f9fa', minWidth:340}}>
+            <div style={{marginBottom: 18}}>
+              <Tag color="blue" style={{fontSize:15, marginBottom:8, padding:'2px 12px', borderRadius:8}}>Chủ đề</Tag>
+              <div style={{fontWeight:700, fontSize:22, marginBottom:8}}>{viewingTopic.topic_name}</div>
+              <div style={{color:'#888', fontSize:13, marginBottom:8}}>ID: {viewingTopic.topic_id}</div>
+              <Divider style={{margin:'16px 0'}}/>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Mô tả:</b> {viewingTopic.topic_content}</div>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Số bài viết:</b> {viewingTopic.postCount}</div>
+            </div>
+          </Card>
+        )}
+      </Modal>
+      <Modal
         title={editingTopic ? 'Sửa chủ đề' : 'Thêm chủ đề'}
         open={modalVisible}
         onOk={handleOk}
@@ -169,6 +196,15 @@ const TopicManagement = () => {
         cancelText="Hủy"
       >
         <Form form={form} layout="vertical">
+          {!editingTopic && (
+            <Form.Item
+              label="ID chủ đề"
+              name="topic_id"
+              rules={[{ required: true, message: 'Vui lòng nhập ID chủ đề' }]}
+            >
+              <Input />
+            </Form.Item>
+          )}
           <Form.Item
             label="Tên chủ đề"
             name="name"

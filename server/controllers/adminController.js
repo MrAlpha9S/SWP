@@ -127,6 +127,16 @@ const handleGetAllPosts = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to fetch posts' });
   }
 };
+const handleCreatePost = async (req, res) => {
+  try {
+    const created = await adminService.createPost(req.body);
+    if (!created) return res.status(400).json({ success: false, message: 'Failed to create post' });
+    return res.status(201).json({ success: true, message: 'Post created successfully' });
+  } catch (error) {
+    console.error('Error in handleCreatePost:', error);
+    return res.status(500).json({ success: false, message: 'Failed to create post' });
+  }
+};
 const handleGetPostById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -136,6 +146,17 @@ const handleGetPostById = async (req, res) => {
   } catch (error) {
     console.error('Error in handleGetPostById:', error);
     return res.status(500).json({ success: false, message: 'Failed to fetch post' });
+  }
+};
+const handleUpdatePost = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await adminService.updatePost(Number(id), req.body);
+    if (!updated) return res.status(404).json({ success: false, message: 'Post not found or nothing to update' });
+    return res.status(200).json({ success: true, message: 'Post updated successfully' });
+  } catch (error) {
+    console.error('Error in handleUpdatePost:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update post' });
   }
 };
 const handleDeletePost = async (req, res) => {
@@ -167,6 +188,16 @@ const handleDeleteComment = async (req, res) => {
   } catch (error) {
     console.error('Error in handleDeleteComment:', error);
     return res.status(500).json({ success: false, message: 'Failed to delete comment' });
+  }
+};
+const handleGetPostLikes = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const likes = await adminService.getPostLikes(Number(id));
+    return res.status(200).json({ success: true, data: likes });
+  } catch (error) {
+    console.error('Error in handleGetPostLikes:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch post likes' });
   }
 };
 
@@ -212,9 +243,9 @@ const handleGetAllTopics = async (req, res) => {
   }
 };
 const handleCreateTopic = async (req, res) => {
-  const { topic_name, topic_content } = req.body;
+  const { topic_id, topic_name, topic_content } = req.body;
   try {
-    const created = await adminService.createTopic(topic_name, topic_content);
+    const created = await adminService.createTopic(topic_id, topic_name, topic_content);
     if (!created) return res.status(400).json({ success: false, message: 'Failed to create topic' });
     return res.status(201).json({ success: true, message: 'Topic created successfully' });
   } catch (error) {
@@ -335,6 +366,48 @@ const handleGetStatistics = async (req, res) => {
   }
 };
 
+const handleGetAllUserSubscriptions = async (req, res) => {
+  try {
+    const subs = await adminService.getAllUserSubscriptions();
+    return res.status(200).json({ success: true, data: subs });
+  } catch (error) {
+    console.error('Error in handleGetAllUserSubscriptions:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch user subscriptions' });
+  }
+};
+const handleCreateUserSubscription = async (req, res) => {
+  try {
+    const created = await adminService.createUserSubscription(req.body);
+    if (!created) return res.status(400).json({ success: false, message: 'Failed to create user subscription' });
+    return res.status(201).json({ success: true, message: 'User subscription created successfully' });
+  } catch (error) {
+    console.error('Error in handleCreateUserSubscription:', error);
+    return res.status(500).json({ success: false, message: 'Failed to create user subscription' });
+  }
+};
+const handleUpdateUserSubscription = async (req, res) => {
+  const { user_id, sub_id } = req.params;
+  try {
+    const updated = await adminService.updateUserSubscription(Number(user_id), Number(sub_id), req.body);
+    if (!updated) return res.status(404).json({ success: false, message: 'User subscription not found or nothing to update' });
+    return res.status(200).json({ success: true, message: 'User subscription updated successfully' });
+  } catch (error) {
+    console.error('Error in handleUpdateUserSubscription:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update user subscription' });
+  }
+};
+const handleDeleteUserSubscription = async (req, res) => {
+  const { user_id, sub_id } = req.params;
+  try {
+    const deleted = await adminService.deleteUserSubscription(Number(user_id), Number(sub_id));
+    if (!deleted) return res.status(404).json({ success: false, message: 'User subscription not found' });
+    return res.status(200).json({ success: true, message: 'User subscription deleted successfully' });
+  } catch (error) {
+    console.error('Error in handleDeleteUserSubscription:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete user subscription' });
+  }
+};
+
 module.exports = {
   // User
   handleGetAllUsers,
@@ -350,10 +423,13 @@ module.exports = {
   handleDeleteCoach,
   // Social Post & Comment
   handleGetAllPosts,
+  handleCreatePost,
   handleGetPostById,
+  handleUpdatePost,
   handleDeletePost,
   handleGetAllComments,
   handleDeleteComment,
+  handleGetPostLikes,
   // Blog & Topic
   handleGetAllBlogs,
   handleGetBlogById,
@@ -372,5 +448,9 @@ module.exports = {
   handleGetCheckInById,
   handleDeleteCheckIn,
   // Statistics
-  handleGetStatistics
+  handleGetStatistics,
+  handleGetAllUserSubscriptions,
+  handleCreateUserSubscription,
+  handleUpdateUserSubscription,
+  handleDeleteUserSubscription
 };

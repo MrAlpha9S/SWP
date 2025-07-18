@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, notification, Popconfirm } from 'antd';
+import { Table, Button, Modal, notification, Popconfirm, Card, Divider, Avatar, Tag } from 'antd';
 import { getAllCheckIns, getCheckInById, deleteCheckIn } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
+import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const CheckinManagement = () => {
   const [checkins, setCheckins] = useState([]);
@@ -55,32 +56,11 @@ const CheckinManagement = () => {
   };
 
   const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: 'User',
-      dataIndex: 'user',
-      key: 'user',
-      render: (text, record) => record.userName || record.userId,
-    },
-    {
-      title: 'Ngày check-in',
-      dataIndex: 'date',
-      key: 'date',
-      render: (text) => text ? new Date(text).toLocaleString() : '',
-      width: 160,
-    },
-    {
-      title: 'Nội dung',
-      dataIndex: 'content',
-      key: 'content',
-      ellipsis: true,
-      render: (text) => text && text.length > 40 ? text.slice(0, 40) + '...' : text,
-    },
+    { title: 'ID', dataIndex: 'log_id', key: 'log_id', width: 80 },
+    { title: 'User', dataIndex: 'username', key: 'username', render: (text, record) => record.username || record.user_id },
+    { title: 'Ngày check-in', dataIndex: 'logged_at', key: 'logged_at', render: (text) => text ? new Date(text).toLocaleString() : '', width: 160 },
+    { title: 'Cảm xúc', dataIndex: 'feeling', key: 'feeling' },
+    { title: 'Số điếu', dataIndex: 'cigs_smoked', key: 'cigs_smoked' },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
@@ -91,21 +71,17 @@ const CheckinManagement = () => {
     {
       title: 'Hành động',
       key: 'action',
-      width: 180,
+      width: 120,
       render: (_, record) => (
-        <div className="flex gap-2">
-          <Button size="small" onClick={() => openDetailModal(record)}>
-            Xem chi tiết
-          </Button>
+        <div style={{display:'flex', gap:8}}>
+          <Button icon={<EyeOutlined />} size="small" onClick={() => openDetailModal(record)} />
           <Popconfirm
             title="Bạn có chắc muốn xóa check-in này?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record.log_id)}
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button size="small" danger>
-              Xóa
-            </Button>
+            <Button icon={<DeleteOutlined />} size="small" danger />
           </Popconfirm>
         </div>
       ),
@@ -132,14 +108,31 @@ const CheckinManagement = () => {
         footer={null}
       >
         {selectedCheckin && (
-          <div className="space-y-2">
-            <div><b>ID:</b> {selectedCheckin.id}</div>
-            <div><b>User:</b> {selectedCheckin.userName || selectedCheckin.userId}</div>
-            <div><b>Ngày check-in:</b> {selectedCheckin.date ? new Date(selectedCheckin.date).toLocaleString() : ''}</div>
-            <div><b>Trạng thái:</b> {selectedCheckin.status === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành'}</div>
-            <div><b>Nội dung:</b></div>
-            <div className="whitespace-pre-line bg-gray-50 p-2 rounded border">{selectedCheckin.content}</div>
-          </div>
+          <Card bordered={false}>
+            <div className="flex items-center gap-3 mb-2">
+              <Avatar style={{ backgroundColor: '#87d068' }}>
+                {selectedCheckin.username ? selectedCheckin.username[0]?.toUpperCase() : (selectedCheckin.user_id ? selectedCheckin.user_id[0]?.toUpperCase() : '?')}
+              </Avatar>
+              <div>
+                <div className="font-semibold text-base">{selectedCheckin.username || selectedCheckin.user_id}</div>
+                <div className="text-xs text-gray-500">User</div>
+              </div>
+            </div>
+            <Divider className="my-2" />
+            <div className="mb-1"><b>ID:</b> {selectedCheckin.log_id}</div>
+            <div className="mb-1"><b>Ngày check-in:</b> {selectedCheckin.logged_at ? new Date(selectedCheckin.logged_at).toLocaleString() : ''}</div>
+            <div className="mb-1 flex items-center gap-2">
+              <b>Trạng thái:</b>
+              <Tag color={selectedCheckin.status === 'completed' ? 'green' : 'orange'}>
+                {selectedCheckin.status === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành'}
+              </Tag>
+            </div>
+            <div className="mb-1"><b>Cảm xúc:</b> {selectedCheckin.feeling || '-'}</div>
+            <div className="mb-1"><b>Số điếu:</b> {selectedCheckin.cigs_smoked ?? '-'}</div>
+            <Divider className="my-2" />
+            <div className="mb-1"><b>Nội dung:</b></div>
+            <div className="whitespace-pre-line bg-gray-50 p-2 rounded border min-h-[40px]">{selectedCheckin.content || '-'}</div>
+          </Card>
         )}
       </Modal>
     </div>
