@@ -123,6 +123,45 @@ export async function PostSocialPosts(user, getAccessTokenSilently, isAuthentica
     return await res.json();
 }
 
+export async function UpdateSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id, category_id, title, content, created_at) {
+    console.log('UpdateSocialPosts: ', post_id, category_id, title, content, created_at)
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/update`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: post_id, category_id: category_id, title: title, content: content, created_at: created_at })
+    });
+
+
+    return await res.json();
+}
+
+export async function DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id) {
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/delete`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: post_id})
+    });
+
+
+    return await res.json();
+}
+
 export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, parent_comment_id, post_id, content, created_at, is_reported) => {
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();

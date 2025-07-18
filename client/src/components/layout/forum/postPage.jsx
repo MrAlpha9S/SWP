@@ -63,10 +63,6 @@ export default function PostPage() {
     }, [postData, isPostPending, post])
 
     useEffect(() => {
-        console.log('isLiked: ', comments)
-    }, [comments])
-
-    useEffect(() => {
         if (!isCommentsPending && commentsData?.data) {
             setComments(commentsData.data);
         }
@@ -318,32 +314,38 @@ export default function PostPage() {
     }
 
     return (
-        <PageFadeWrapper>
-            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-                <div className="space-y-6 w-[92%]">
-                    <div>
-                        <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
-                        <p className="text-sm text-gray-600">
-                            Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
-                        </p>
-                    </div>
+        <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+            <div className="space-y-6 w-[92%]">
+                <div>
+                    <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
+                    <p className="text-sm text-gray-600">
+                        Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
+                    </p>
+                </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow space-y-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                                {post.avatar ? (
-                                    <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
-                                ) : (
-                                    <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
-                                        <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex gap-1">
-                                <p>đăng bởi </p>
-                                <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
-                            </div>
+
+                <div className="bg-white p-6 rounded-xl shadow space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                            {post.avatar ? (
+                                <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
+                            ) : (
+                                <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
+                                    <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
+                                </div>
+                            )}
                         </div>
+                        <div className="flex gap-1">
+                            <p>đăng bởi </p>
+                            <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
+                        </div>
+                        {user.sub === post.auth0_id && (
+                            <div 
+                            className="text-primary-600 ml-auto hover:underline cursor-pointer"
+                            onClick={() => navigate(`/forum/edit/${post.post_id}`)}
+                            >Sửa</div>
+                        )}
+                    </div>
 
                         <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
                             <div dangerouslySetInnerHTML={{ __html: post.content }} />

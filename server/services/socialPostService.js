@@ -155,6 +155,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
               sp.post_id, sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
               u.user_id, u.username, u.role, u.avatar, u.auth0_id,
+              sc.category_id,
               COUNT(DISTINCT sl.like_id) AS likes,
               COUNT(DISTINCT scmt.comment_id) AS comments,
               CASE 
@@ -171,7 +172,8 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             GROUP BY 
               sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name, u.auth0_id,
-              u.user_id, u.username, u.role, u.avatar, sp.post_id
+              u.user_id, u.username, u.role, u.avatar, sp.post_id,
+              sc.category_id
             ORDER BY sp.created_at DESC
             OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
         `);
@@ -276,6 +278,46 @@ VALUES (@postId, @user_id, @title, @content, @created_at);
     }
 }
 
+const updateSocialPosts = async (post_id, category_id, title, content, created_at) => {
+    console.log('UpdateSocialPosts backend: ', post_id, category_id, title, content, created_at)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .input('category_id', sql.Int, category_id)
+            .input('title', title)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .query(`UPDATE social_posts 
+SET category_id = @category_id, title = @title, content = @content, created_at = @created_at
+WHERE post_id = @post_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at UpdateSocialPosts', err);
+        return false;
+    }
+}
+
+const DeleteSocialPosts = async (post_id) => {
+    console.log('DeleteSocialPosts backend: ', post_id)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query(`DELETE FROM social_comments WHERE post_id = @post_id;
+DELETE FROM social_posts WHERE post_id = @post_id;
+`);
+        return true;
+    } catch (err) {
+        console.error('SQL error at DeleteSocialPosts', err);
+        return false;
+    }
+}
+
 const PostAddComment = async (parent_comment_id, auth0_id, post_id, content, created_at, is_reported) => {
     try {
         const pool = await poolPromise;
@@ -352,5 +394,4 @@ WHERE sp.is_pending = 1
     }
 }
 
-
-module.exports = { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };
+module.exports = { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };

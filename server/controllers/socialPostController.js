@@ -1,4 +1,4 @@
-const { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike } = require("../services/socialPostService");
+const {DeleteSocialPosts, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
 const { processAchievementsWithNotifications } = require("../services/achievementService");
 
 const handleGetIsPendingPosts = async (req, res) => {
@@ -184,10 +184,48 @@ const handlePostSocialPosts = async (req, res) => {
         await processAchievementsWithNotifications(auth0_id);
         return res.status(200).json({ success: true, message: 'handlePostSocialPosts successfully', data: socialPosts });
     } catch (error) {
-        console.error('Error in handleGetBlog:', error);
+        console.error('Error in handlePostSocialPosts:', error);
         return res.status(500).json({ success: false, message: 'Internal server error', data: null });
     }
 
+}
+
+const handleUpdateSocialPosts = async (req, res) => {
+    const {post_id, category_id, title, content, created_at}  = req.body;
+
+    if (!category_id || !post_id || !title || !content || !created_at) {
+        return res.status(400).json({ success: false, message: 'error in handleUpdateSocialPosts: params is required', data: null });
+    }
+
+    try {
+        const update = await updateSocialPosts(post_id, category_id, title, content, created_at);
+        if (!update) {
+            return res.status(404).json({ success: false, message: 'Cant handleUpdateSocialPosts', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'handleUpdateSocialPosts successfully', data: update });
+    } catch (error) {
+        console.error('Error in handleUpdateSocialPosts:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+}
+
+const handleDeleteSocialPosts = async (req, res) => {
+    const {post_id}  = req.body;
+
+    if (!post_id) {
+        return res.status(400).json({ success: false, message: 'error in handleDeleteSocialPosts: params is required', data: null });
+    }
+
+    try {
+        const deleteSP = await DeleteSocialPosts(post_id);
+        if (!deleteSP) {
+            return res.status(404).json({ success: false, message: 'Cant handleDeleteSocialPosts', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'handleDeleteSocialPosts successfully', data: deleteSP });
+    } catch (error) {
+        console.error('Error in handleDeleteSocialPosts:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
 }
 
 const handleAddComment = async (req, res) => {
@@ -234,4 +272,5 @@ const handleAddLike = async (req, res) => {
 
 
 
+module.exports = {handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
 module.exports = { handleGetIsPendingPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike };
