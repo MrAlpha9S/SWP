@@ -489,7 +489,7 @@ const SetPlan = ({
                             </li>
                             <li>Chat 1-1 với Huấn luyện viên 24/24, nhận sự giúp đỡ bất cứ lúc nào.</li>
                         </ul>
-                        <CustomButton onClick={() => navigate('/subscription')}
+                        <CustomButton onClick={() => navigate('/subscription/onboarding-step-5')}
                                       className="mt-5 inline-flex items-center gap-2">
                             Tìm hiểu thêm <FaArrowRight/>
                         </CustomButton>

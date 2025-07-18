@@ -38,6 +38,13 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
 export async function postGoal(goalId = null, goalName, goalAmount, user, getAccessTokenSilently, isAuthenticated, completedDate = null, isCompleted = false) {
 
     if (!isAuthenticated || !user) return;
+    console.log('in utils')
+    console.log(goalId);
+    console.log(goalName);
+    console.log(goalName);
+    console.log(goalAmount);
+    console.log(completedDate)
+    console.log(isCompleted);
 
     try {
         const token = await getAccessTokenSilently();

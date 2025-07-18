@@ -1,13 +1,17 @@
 import {useState, useMemo, useEffect} from 'react';
 import SearchFilter from '../../components/layout/coachboard/searchFilter.jsx';
 import CoachCard from '../../components/layout/coachboard/CoachCard';
-import {getCoaches} from "../../components/utils/userUtils.js";
+import {getCoachByIdOrAuth0Id, getCoaches} from "../../components/utils/userUtils.js";
 import {useQuery} from "@tanstack/react-query";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
+import {useUserInfoStore} from "../../stores/store.js";
+import {useParams} from "react-router-dom";
 
 function CoachSelectPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [coaches, setCoaches] = useState([]);
+    const {userInfo} = useUserInfoStore()
+    const {from} = useParams()
 
 
     const {isPending, data} = useQuery({
@@ -94,7 +98,7 @@ function CoachSelectPage() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {filteredCoaches.map((coach) => (
-                                <CoachCard key={coach.user_id} coach={coach}/>
+                                <CoachCard key={coach.user_id} coach={coach} from={from}/>
                             ))}
                         </div>
                     )}

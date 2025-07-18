@@ -240,9 +240,9 @@ function AppContent() {
                         <Route path="/forum/reasons-to-quit" element={<ReasonsToQuit/>}/>
                         <Route path="/forum/all-posts" element={<AllPosts/>}/>
                         <Route path="/forum/:category/:postId" element={<PostPage/>}/>
-                        <Route path="/subscription" element={<SubscriptionPage/>}/>
+                        <Route path="/subscription/:from?" element={<SubscriptionPage/>}/>
                         <Route path="/congratulationPage" element={<CongratulationPage/>}/>
-                        <Route path="/coach-selection" element={<CoachSelectPage/>}/>
+                        <Route path="/coach-selection/:from?" element={<CoachSelectPage/>}/>
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                         <Route path="/coach-register" element={<CoachRegistration/>}></Route>

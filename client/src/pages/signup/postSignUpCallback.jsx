@@ -29,6 +29,9 @@ export default function PostSignUpCallback() {
                         if (localReferrer.referrer === 'subscriptionPagePayment') {
                             localStorage.removeItem('referrerPayment');
                             return navigate('/subscription');
+                        } else if (localReferrer.referrer === 'subscriptionPagePaymentStep5') {
+                            localStorage.removeItem('referrerPayment');
+                            return navigate('/subscription/onboarding-step-5-payment');
                         }
                     } catch (e) {
                         console.error('Failed to redirect on payment referrer:', e);
@@ -40,11 +43,21 @@ export default function PostSignUpCallback() {
                 if (stored) {
                     try {
                         const localProfile = JSON.parse(stored);
+                        if (localProfile.referrer === 'onboarding-step-5-payment') {
+                            await syncProfileToStores(localProfile);
+                            localStorage.removeItem('onboarding_profile');
+                            useProfileExists.getState().setIsProfileExist(false);
+                            return navigate('/subscription/onboarding-step-5-payment')
+                        }
                         await syncProfileToStores(localProfile);
                         localStorage.removeItem('onboarding_profile');
                         useCurrentStepStore.getState().setCurrentStep(6);
                         useProfileExists.getState().setIsProfileExist(false);
                         if (localProfile.referrer.length > 0) {
+                            if (localProfile.referrer === 'subscriptionPagePaidStep5') {
+                                useCurrentStepStore.getState().setCurrentStep(5);
+                                return navigate('/onboarding')
+                            }
                             return navigate(`/onboarding/${localProfile.referrer}`);
                         }
                     } catch (e) {

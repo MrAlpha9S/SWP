@@ -50,7 +50,7 @@ const CoachDashboard = () => {
                     </li>
                     <li>Chat 1-1 với Huấn luyện viên 24/24, nhận sự giúp đỡ bất cứ lúc nào.</li>
                 </ul>
-                <CustomButton onClick={() => navigate('/subscription')}>Tìm hiểu ngay</CustomButton>
+                <CustomButton onClick={() => navigate('/subscription/coach-dashboard')}>Tìm hiểu ngay</CustomButton>
                 <div className='flex gap-5'>
                     <Card
                         hoverable

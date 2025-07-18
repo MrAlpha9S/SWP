@@ -5,19 +5,20 @@ import CoachDetailsPage from "../../../pages/subscriptionPage/coachDetailsPage.j
 import {useMutation} from "@tanstack/react-query";
 import {assignCoachToUser} from "../../utils/userUtils.js";
 import {useNavigate} from "react-router-dom";
-import {useCurrentStepDashboard, useUserInfoStore} from "../../../stores/store.js";
+import {useCurrentStepDashboard, useCurrentStepStore, useUserInfoStore} from "../../../stores/store.js";
 import {useAuth0} from "@auth0/auth0-react";
 import {useSocketStore} from "../../../stores/useSocketStore.js";
 import {getCurrentUTCDateTime} from "../../utils/dateUtils.js";
 import {CreateConversation} from "../../utils/messagerUtils.js";
 
-const CoachCard = ({coach}) => {
+const CoachCard = ({coach, from}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
     const {userInfo} = useUserInfoStore()
     const {setCurrentStepDashboard} = useCurrentStepDashboard()
     const {isAuthenticated, getAccessTokenSilently, user} = useAuth0()
     const { socket } = useSocketStore()
+    const {setCurrentStep} = useCurrentStepStore()
 
 
     const assignMutation = useMutation({
@@ -59,8 +60,13 @@ const CoachCard = ({coach}) => {
                         timestamp: new Date().toISOString()
                     });
                 } finally {
-                    setCurrentStepDashboard('coach')
-                    navigate('/dashboard')
+                    if (from === 'onboarding-step-5-payment') {
+                        setCurrentStep(5)
+                        navigate('/onboarding')
+                    } else {
+                        setCurrentStepDashboard('coach')
+                        navigate('/dashboard')
+                    }
                 }
             }
         },

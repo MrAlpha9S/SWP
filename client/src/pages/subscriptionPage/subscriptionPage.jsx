@@ -2,13 +2,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Check, Crown, Zap, Users, BarChart3} from 'lucide-react';
 import {useAuth0} from "@auth0/auth0-react";
 import {
+    useQuitReadinessStore,
     useUserInfoStore
 } from "../../stores/store.js";
 import {saveProfileToLocalStorage} from "../../components/utils/profileUtils.js";
 import {useMutation} from "@tanstack/react-query";
 import {updateUserSubscription} from "../../components/utils/userUtils.js";
 import {Modal} from "antd";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import CongratulationPage from "./CongratulationPage.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import {usePayOS} from "@payos/payos-checkout";
@@ -29,6 +30,8 @@ function SubscriptionPage() {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [paymentLink, setPaymentLink] = useState(null);
     const hasPaidRef = useRef(false);
+
+    const {from} = useParams();
 
     const {
         data: paymentData,
@@ -104,9 +107,16 @@ function SubscriptionPage() {
     });
 
     const handleSignUpButton = () => {
-        const state = saveProfileToLocalStorage({currentStep : 6, referrer : 'subscriptionPage', userInfo : userInfo})
-        localStorage.setItem('onboarding_profile', JSON.stringify(state));
-
+        if (from) {
+            if (from === 'onboarding-step-5') {
+                const state = saveProfileToLocalStorage({
+                    currentStep: 6,
+                    referrer: 'subscriptionPage',
+                    userInfo: userInfo
+                })
+                localStorage.setItem('onboarding_profile', JSON.stringify(state));
+            }
+        }
         loginWithRedirect({authorizationParams: {screen_hint: 'signup'}})
     }
 
@@ -114,13 +124,28 @@ function SubscriptionPage() {
         const amount = isYearly ? premiumYearlyPrice : premiumMonthlyPrice;
         const description = isYearly ? 'Premium - 1 Nam' : 'Premium - 1 Thang';
         const returnUrl = `http://localhost:5173/payment-success`;
-        const paymentInfo = { amount, description, returnUrl };
+        const paymentInfo = {amount, description, returnUrl};
 
         if (!isAuthenticated) {
-            loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
-            localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscription                                                                                                                                                                                                                                                                                                                                                 PagePayment'}));
+            if (from === 'onboarding-step-5') {
+                const state = saveProfileToLocalStorage({
+                    currentStep: 5,
+                    referrer: 'onboarding-step-5-payment',
+                    userInfo: userInfo
+                })
+                localStorage.setItem('onboarding_profile', JSON.stringify(state));
+                loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
+            } else {
+                localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscriptionPagePayment'}));
+            }
+
         } else {
-            paymentMutation.mutate(paymentInfo);
+            if (from === 'coach-dashboard') {
+                paymentMutation.mutate(paymentInfo);
+            } else if (from === 'onboarding-step-5-payment') {
+                paymentMutation.mutate(paymentInfo);
+            }
+
         }
     };
 
@@ -136,7 +161,8 @@ function SubscriptionPage() {
                             Chọn gói
                         </h1>
                         <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-                            Bắt đầu miễn phí để trải nghiệm nền tảng của chúng tôi. Nâng cấp khi bạn sẵn sàng nghiêm túc với hành trình cai thuốc của mình.
+                            Bắt đầu miễn phí để trải nghiệm nền tảng của chúng tôi. Nâng cấp khi bạn sẵn sàng nghiêm túc
+                            với hành trình cai thuốc của mình.
                         </p>
 
                         {/* Billing Toggle */}
@@ -225,7 +251,8 @@ function SubscriptionPage() {
                                     <Crown className="h-6 w-6 text-white"/>
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Premium</h3>
-                                <p className="text-gray-600 mb-6">Dành cho người dùng cần một kế hoạch rõ ràng, sự theo dõi và giúp đỡ của các Chuyên gia</p>
+                                <p className="text-gray-600 mb-6">Dành cho người dùng cần một kế hoạch rõ ràng, sự theo
+                                    dõi và giúp đỡ của các Chuyên gia</p>
 
                                 <div className="mb-8">
                 <span
@@ -237,7 +264,8 @@ function SubscriptionPage() {
                 </span>
                                     {isYearly && (
                                         <div className="text-sm text-green-600 font-medium mt-2">
-                                            Thanh toán hàng năm {premiumYearlyPrice.toLocaleString('vi-VN')} <br/> Tiết kiệm {(premiumMonthlyPrice * 12 - premiumYearlyPrice).toLocaleString('vi-VN')}
+                                            Thanh toán hàng năm {premiumYearlyPrice.toLocaleString('vi-VN')} <br/> Tiết
+                                            kiệm {(premiumMonthlyPrice * 12 - premiumYearlyPrice).toLocaleString('vi-VN')}
 
                                         </div>
                                     )}
@@ -288,25 +316,32 @@ function SubscriptionPage() {
                     <div className="mt-20 text-center">
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">Tại sao chọn Gói Premium?</h2>
                         <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-                            Mở khóa tính năng tạo kế hoạch và kết nối với Huấn luyện viên để nâng cao khả năng bỏ thuốc của bạn.
+                            Mở khóa tính năng tạo kế hoạch và kết nối với Huấn luyện viên để nâng cao khả năng bỏ thuốc
+                            của bạn.
                         </p>
 
                         <div className="flex justify-center max-w-4xl mx-auto">
 
                             <div className="text-center w-[50%] p-6">
-                                <div className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-full mb-4">
+                                <div
+                                    className="inline-flex items-center justify-center p-4 bg-purple-100 rounded-full mb-4">
                                     <Users className="h-8 w-8 text-purple-600"/>
                                 </div>
-                                <h3 className="text-xl  font-semibold text-gray-900 mb-2">Tương tác với Huấn luyện viên</h3>
-                                <p className="text-gray-600">Nhận sự theo sát và giúp đỡ từ Huấn luyện viên thông qua chức năng Chat. Huấn luyện viên cũng có thể tạo và chỉnh sửa kế hoạch cho bạn.</p>
+                                <h3 className="text-xl  font-semibold text-gray-900 mb-2">Tương tác với Huấn luyện
+                                    viên</h3>
+                                <p className="text-gray-600">Nhận sự theo sát và giúp đỡ từ Huấn luyện viên thông qua
+                                    chức năng Chat. Huấn luyện viên cũng có thể tạo và chỉnh sửa kế hoạch cho bạn.</p>
                             </div>
 
                             <div className="text-center p-6 w-[50%] ">
-                                <div className="inline-flex items-center justify-center p-4 bg-green-100 rounded-full mb-4">
+                                <div
+                                    className="inline-flex items-center justify-center p-4 bg-green-100 rounded-full mb-4">
                                     <BarChart3 className="h-8 w-8 text-green-600"/>
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">Tạo và theo dõi kế hoạch cai thuốc</h3>
-                                <p className="text-gray-600">Lên kế hoạch giảm thuốc theo ngày, tuần, theo nhiều giai đoạn. Dễ dàng theo dõi kế hoạch với biểu đồ trong Bảng điều khiển.</p>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">Tạo và theo dõi kế hoạch cai
+                                    thuốc</h3>
+                                <p className="text-gray-600">Lên kế hoạch giảm thuốc theo ngày, tuần, theo nhiều giai
+                                    đoạn. Dễ dàng theo dõi kế hoạch với biểu đồ trong Bảng điều khiển.</p>
                             </div>
                         </div>
                     </div>
@@ -316,20 +351,26 @@ function SubscriptionPage() {
                         <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Câu hỏi Thường gặp</h2>
                         <div className="grid md:grid-cols-2 gap-8">
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể hủy bất cứ lúc nào không?</h3>
-                                <p className="text-gray-600">Có, bạn có thể hủy gói đăng ký bất cứ lúc nào mà không cần lý do.</p>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể hủy bất cứ lúc nào
+                                    không?</h3>
+                                <p className="text-gray-600">Có, bạn có thể hủy gói đăng ký bất cứ lúc nào mà không cần
+                                    lý do.</p>
                             </div>
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Bạn có hoàn tiền không?</h3>
-                                <p className="text-gray-600">Chúng tôi cung cấp chính sách hoàn tiền trong vòng 30 ngày cho tất cả các gói Premium.</p>
+                                <p className="text-gray-600">Chúng tôi cung cấp chính sách hoàn tiền trong vòng 30 ngày
+                                    cho tất cả các gói Premium.</p>
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Bạn chấp nhận những phương thức thanh toán nào?</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Bạn chấp nhận những phương thức
+                                    thanh toán nào?</h3>
                                 <p className="text-gray-600">Chúng tôi chấp nhận chuyển khoản ngân hàng bằng mã QR.</p>
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể nâng cấp hoặc hạ cấp gói không?</h3>
-                                <p className="text-gray-600">Có, bạn có thể thay đổi gói bất cứ lúc nào trong phần cài đặt tài khoản của bạn.</p>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể nâng cấp hoặc hạ cấp
+                                    gói không?</h3>
+                                <p className="text-gray-600">Có, bạn có thể thay đổi gói bất cứ lúc nào trong phần cài
+                                    đặt tài khoản của bạn.</p>
                             </div>
                         </div>
                     </div>
@@ -347,9 +388,14 @@ function SubscriptionPage() {
                     centered
                     footer={null}
                     maskClosable={false}
-                    bodyStyle={{ height: '550px' }}
+                    bodyStyle={{height: '550px'}}
                 >
-                    <div id="payos-container" style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}></div>
+                    <div id="payos-container" style={{
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}></div>
                 </Modal>
 
                 <Modal
@@ -361,7 +407,7 @@ function SubscriptionPage() {
                     footer={null}
                     maskClosable={false}
                 >
-                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} />}
+                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from}/>}
                 </Modal>
 
                 <button
