@@ -10,6 +10,7 @@ import {usePostGoalMutation} from "../../hooks/usePostGoalMutation.jsx";
 import {notification} from "antd";
 import {getCurrentUTCDateTime} from "../../utils/dateUtils.js";
 import UseAntdNotification from "../../hooks/useAntdNotification.jsx";
+import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 
 const Context = React.createContext({name: 'Default'});
 
@@ -26,6 +27,7 @@ const CurrentGoal = ({type = "onGoing"}) => {
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const [goalNameError, setGoalNameError] = useState('');
     const [goalAmountError, setGoalAmountError] = useState('');
+    const {openNotification} = useNotificationManager()
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
@@ -56,10 +58,6 @@ const CurrentGoal = ({type = "onGoing"}) => {
         return type === "onGoing" ? percent < 100 : percent >= 100;
     });
 
-    const [api, contextHolder] = notification.useNotification();
-    const openNotification = UseAntdNotification(api)
-    const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
-
     const {mutate: postGoalMutation} = usePostGoalMutation(openNotification, setIsModalOpen)
 
     const handleOk = async () => {
@@ -81,6 +79,10 @@ const CurrentGoal = ({type = "onGoing"}) => {
             const completedStatus = shouldComplete;
             const completionDate = shouldComplete ? getCurrentUTCDateTime().toISOString() : null;
 
+            console.log('completedStatus', completedStatus);
+            console.log('completionDate', completionDate);
+            console.log('percent', percent);
+
             addGoal({
                 goalName: editableGoalName,
                 goalAmount: editableGoalAmount,
@@ -90,11 +92,13 @@ const CurrentGoal = ({type = "onGoing"}) => {
             });
 
             postGoalMutation({
-                editableGoalName: editableGoalName,
-                editableGoalAmount: editableGoalAmount,
+                editableGoalName,
+                editableGoalAmount,
                 user,
                 getAccessTokenSilently,
                 isAuthenticated,
+                completedDate: completionDate,
+                isCompleted: completedStatus,
             });
         } catch (err) {
             console.error("Error saving goal:", err);
@@ -148,9 +152,6 @@ const CurrentGoal = ({type = "onGoing"}) => {
                     <div className='w-[25%]'><CustomButton onClick={() => showModal()}>Tạo mục tiêu mới</CustomButton>
                     </div>}
             </div>
-            <Context.Provider value={contextValue}>
-                {contextHolder}
-            </Context.Provider>
         </div>
     );
 };

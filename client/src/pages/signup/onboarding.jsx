@@ -95,6 +95,9 @@ const Onboarding = () => {
         if (from === 'newUser' || from === 'newSubscriptionPage') {
             setCurrentStep(6);
         }
+        if (from === 'onboarding-step-5-payment') {
+            setCurrentStep(5);
+        }
     }, [])
 
     const stepsItems = React.useMemo(() => [

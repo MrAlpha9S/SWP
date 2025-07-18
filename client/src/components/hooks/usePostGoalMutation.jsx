@@ -25,11 +25,13 @@ export const usePostGoalMutation = (openNotification, setIsModalOpen, action = n
             );
         },
         onSuccess: () => {
-            openNotification('post-success');
+            openNotification('success', {
+                message: 'Lưu mục tiêu thành công',
+            });
             setIsModalOpen(false);
         },
         onError: () => {
-            openNotification('post-failed');
+            openNotification('failed', 'Lưu mục tiêu thất bại');
             setIsModalOpen(false);
         },
     });

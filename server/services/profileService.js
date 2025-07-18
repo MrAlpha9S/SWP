@@ -346,7 +346,9 @@ const postGoal = async (userAuth0Id, goalName, goalAmount, goalId = null, isComp
                 .input('goal_amount', sql.Float, goalAmount)
                 .input('profile_id', sql.Int, userProfileId)
                 .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
-                .query('INSERT INTO goals (goal_name, goal_amount, profile_id, created_at) VALUES (@goal_name, @goal_amount, @profile_id, @created_at)');
+                .input('is_completed', sql.Bit, isCompleted)
+                .input('completed_date', sql.DATETIME, completedDate)
+                .query('INSERT INTO goals (goal_name, goal_amount, profile_id, created_at, is_completed, completed_date) VALUES (@goal_name, @goal_amount, @profile_id, @created_at, @is_completed, @completed_date)');
         }
 
         // Throw if the insert/update did not affect any rows

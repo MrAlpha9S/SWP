@@ -9,6 +9,7 @@ const {
 const {getUserWithSubscription, getUserByAuth0Id, getCoachDetailsById} = require("../services/userService");
 const socket = require('../utils/socket');
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
+const {processAchievementsWithNotifications} = require("../services/achievementService");
 
 const handlePostOnboarding = async (req, res) => {
     const {
@@ -169,6 +170,9 @@ const handleGoalPost = async (req, res) => {
         if (postResult === false) {
             return res.status(404).json({success: false, message: 'Post goal failed', data: false});
         } else {
+            if (isCompleted) {
+                await processAchievementsWithNotifications(userAuth0Id)
+            }
             return res.status(200).json({success: true, message: 'Goal posted', data: postResult});
         }
     } catch (err) {
