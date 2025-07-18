@@ -1,6 +1,7 @@
 import React from 'react';
 import {Tabs} from 'antd';
 import PostBlog from "./postblog.jsx";
+import PostedBlog from './postedblog.jsx'
 
 const onChange = key => {
     console.log(key);
@@ -14,7 +15,7 @@ const items = [
     {
         key: '2',
         label: 'Bài viết đã đăng',
-        children: 'Bài viết đã đăng',
+        children: <PostedBlog/>,
     },
     {
         key: '3',

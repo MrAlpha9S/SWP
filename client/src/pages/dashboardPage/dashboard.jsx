@@ -31,6 +31,7 @@ import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
 import {getStats} from "../../components/utils/coachUtils.js";
 import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
+import ManageForum from "../../components/layout/coachboard/manageforum/manageforum.jsx";
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
 import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
 import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
@@ -237,6 +238,8 @@ function Dashboard() {
                 case 'post-blog':
                     return <ManageBlog/>
 
+                case 'forum-manage':
+                    return <ManageForum />
                 case 'overview':
                     return <CoachOverview stats={coachStats}/>
 
@@ -310,7 +313,10 @@ function Dashboard() {
                 </div>
             </div>
         </PageFadeWrapper>
+
     )
+
 }
+
 
 export default (Dashboard);

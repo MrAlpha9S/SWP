@@ -8,11 +8,16 @@ const getTotalPostCount = async () => {
         const postCountResult = await pool
             .request()
             .query(`
-                SELECT sc.category_id, sc.category_name, sc.description, sc.img_path, sc.category_tag, COUNT(sc.category_id) AS post_count
-                FROM social_category sc,
-                     social_posts sp
-                WHERE sc.category_id = sp.category_id
-                GROUP BY sc.category_id, sc.category_name, sc.description, sc.img_path, sc.category_tag
+                SELECT sc.category_id, 
+       sc.category_name, 
+       sc.description, 
+       sc.img_path, 
+       sc.category_tag, 
+       COUNT(sp.post_id) AS post_count
+FROM social_category sc
+         LEFT JOIN social_posts sp ON sc.category_id = sp.category_id AND sp.is_pending = 0
+GROUP BY sc.category_id, sc.category_name, sc.description, sc.img_path, sc.category_tag
+ORDER BY sc.category_id
             `);
 
         return postCountResult.recordset;
@@ -31,12 +36,16 @@ const getTotalCommentCount = async () => {
             .request()
             .query(`
                 SELECT sc.category_id,
-                       sc.category_name, sc.description, sc.img_path, sc.category_tag, COUNT(scmt.comment_id) AS comment_count
-                FROM social_category sc
-                         JOIN social_posts sp ON sc.category_id = sp.category_id
-                         JOIN social_comments scmt ON sp.post_id = scmt.post_id
-                GROUP BY sc.category_id, sc.category_name, sc.description, sc.img_path, sc.category_tag
-                ORDER BY sc.category_id
+       sc.category_name, 
+       sc.description, 
+       sc.img_path, 
+       sc.category_tag, 
+       COUNT(scmt.comment_id) AS comment_count
+FROM social_category sc
+         LEFT JOIN social_posts sp ON sc.category_id = sp.category_id AND sp.is_pending = 0
+         LEFT JOIN social_comments scmt ON sp.post_id = scmt.post_id
+GROUP BY sc.category_id, sc.category_name, sc.description, sc.img_path, sc.category_tag
+ORDER BY sc.category_id
             `);
 
         return commentCountResult.recordset;
@@ -72,7 +81,7 @@ async function getPostsByCategoryTag(categoryTag) {
                 LEFT JOIN social_likes sl ON sp.post_id = sl.post_id
                 LEFT JOIN social_comments scmt ON sp.post_id = scmt.post_id
                 JOIN users u ON sp.user_id = u.user_id
-                WHERE sc.category_tag = @categoryTag
+                WHERE sc.category_tag = @categoryTag AND sp.is_pending = 0
                 GROUP BY 
                   sp.title, sp.content, sp.created_at, 
                   sc.category_tag, sc.category_name, 
@@ -134,7 +143,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             filters.push(`sp.post_id = @postId`);
             request.input('postId', sql.Int, postId);
         }
-
+        filters.push(`sp.is_pending = 0`);
         const whereClause = filters.length ? 'WHERE ' + filters.join(' AND ') : '';
 
         const countResult = await request.query(`
@@ -155,6 +164,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
               sp.post_id, sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name,
               u.user_id, u.username, u.role, u.avatar, u.auth0_id,
+              sc.category_id,
               COUNT(DISTINCT sl.like_id) AS likes,
               COUNT(DISTINCT scmt.comment_id) AS comments,
               CASE 
@@ -171,7 +181,8 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             GROUP BY 
               sp.title, sp.content, sp.created_at, sp.is_pinned,
               sc.category_tag, sc.category_name, u.auth0_id,
-              u.user_id, u.username, u.role, u.avatar, sp.post_id
+              u.user_id, u.username, u.role, u.avatar, sp.post_id,
+              sc.category_id
             ORDER BY sp.created_at DESC
             OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY
         `);
@@ -189,7 +200,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
     }
 }
 
-const getPostComments = async ({postId, currentUserId = null}) => {
+const getPostComments = async ({ postId, currentUserId = null }) => {
     try {
         const pool = await poolPromise;
         const request = pool.request()
@@ -272,6 +283,61 @@ VALUES (@postId, @user_id, @title, @content, @created_at);
         return true;
     } catch (err) {
         console.error('SQL error at PostSocialPosts', err);
+        return false;
+    }
+}
+
+const updateSocialPosts = async (post_id, category_id, title, content, created_at) => {
+    console.log('UpdateSocialPosts backend: ', post_id, category_id, title, content, created_at)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .input('category_id', sql.Int, category_id)
+            .input('title', title)
+            .input('content', content)
+            .input('created_at', sql.DateTime, created_at)
+            .query(`UPDATE social_posts 
+SET category_id = @category_id, title = @title, content = @content, created_at = @created_at, is_pending = 1
+WHERE post_id = @post_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in insert');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at UpdateSocialPosts', err);
+        return false;
+    }
+}
+
+const DeleteSocialPosts = async (post_id) => {
+    console.log('DeleteSocialPosts backend: ', post_id)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query(`
+DELETE FROM social_likes WHERE comment_id IN (
+    SELECT comment_id FROM social_comments WHERE post_id = @post_id
+);
+
+DELETE FROM social_likes WHERE post_id = @post_id;
+
+DELETE FROM social_reports
+WHERE comment_id IN (
+    SELECT comment_id
+    FROM social_comments
+    WHERE post_id = @post_id
+);
+
+DELETE FROM social_comments WHERE post_id = @post_id;
+
+DELETE FROM social_posts WHERE post_id = @post_id;
+`);
+        return true;
+    } catch (err) {
+        console.error('SQL error at DeleteSocialPosts', err);
         return false;
     }
 }
@@ -373,5 +439,68 @@ const deleteCommentById = async (comment_id) => {
     }
 };
 
+const GetIsPendingPosts = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`SELECT sp.post_id, sc.category_name, u.user_id, u.username, sp.title, sp.content, sp.created_at, sp.is_pinned, sp.is_reported, sp.is_pending FROM social_posts sp
+Join social_category sc ON sc.category_id = sp.category_id
+Join users u ON u.user_id = sp.user_id
+WHERE sp.is_pending = 1
+`);
+        return result;
+    } catch (err) {
+        console.error('SQL error at GetIsPendingPosts', err);
+        return [];
+    }
+}
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, deletePostById, getAllComments, deleteCommentById, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };
+const ApprovePost = async (post_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query(`UPDATE social_posts
+SET is_pending = 0
+WHERE post_id = @post_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in ApprovePost');
+        }
+        return result;
+    } catch (err) {
+        console.error('SQL error at ApprovePost', err);
+        return [];
+    }
+}
+
+const DeleteComment = async (comment_id) => {
+    console.log('DeleteComment:', comment_id)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('comment_id', sql.Int, comment_id)
+            .query(`DELETE FROM social_comments
+WHERE parent_comment_id = @comment_id;
+
+DELETE FROM social_likes 
+WHERE comment_id = @comment_id;
+
+DELETE FROM social_comments 
+WHERE comment_id = @comment_id;
+
+DELETE FROM social_reports
+WHERE comment_id = @comment_id;
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in DeleteComment');
+        }
+        return true;
+    } catch (err) {
+        console.error('SQL error at DeleteComment', err);
+        return false;
+    }
+}
+
+
+module.exports = { DeleteComment, ApprovePost, DeleteSocialPosts, getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, deletePostById, getAllComments, deleteCommentById, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };

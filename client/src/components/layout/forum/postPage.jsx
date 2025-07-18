@@ -8,10 +8,10 @@ import React, { useEffect, useState } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
 import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
 import { AddComment, AddLike } from '../../utils/forumUtils.js'; // Added AddReport import
-import {AddReport} from '../../utils/reportUtils.js'
+import { AddReport } from '../../utils/reportUtils.js'
 import { ReportModal } from './postpagecomponents/reportModal.jsx';
 //import {Comment} from './postpagecomponents/comment.jsx'
-import {ReplyForm} from './postpagecomponents/replyform.jsx'
+import { ReplyForm } from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
 import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
@@ -61,10 +61,6 @@ export default function PostPage() {
             setPost(postData.data.records[0])
         }
     }, [postData, isPostPending, post])
-
-    useEffect(() => {
-        console.log('isLiked: ', comments)
-    }, [comments])
 
     useEffect(() => {
         if (!isCommentsPending && commentsData?.data) {
@@ -328,6 +324,7 @@ export default function PostPage() {
                         </p>
                     </div>
 
+
                     <div className="bg-white p-6 rounded-xl shadow space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
@@ -343,6 +340,12 @@ export default function PostPage() {
                                 <p>đăng bởi </p>
                                 <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
                             </div>
+                            {user.sub === post.auth0_id && (
+                                <div
+                                    className="text-primary-600 ml-auto hover:underline cursor-pointer"
+                                    onClick={() => navigate(`/forum/edit/${post.post_id}`)}
+                                >Sửa</div>
+                            )}
                         </div>
 
                         <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
@@ -487,7 +490,7 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
                     )}
                     {likes || 0} Likes
                 </button>
-                <button 
+                <button
                     className='flex items-center gap-2 hover:text-red-500 transition-colors'
                     onClick={() => onReportClick('comment', commentId, author)}
                 >
