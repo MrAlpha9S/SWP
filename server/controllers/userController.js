@@ -42,9 +42,12 @@ const handlePostSignup = async (req, res) => {
 
         const userData = await getUserFromAuth0(userAuth0Id);
 
-        await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at, userData.picture, userData.identities[0].isSocial);
+        const result = await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at, userData.picture, userData.identities[0].isSocial);
+        if (result) {
+            await processAchievementsWithNotifications(userAuth0Id)
+            return res.status(201).json({success: true, message: 'User info inserted'});
+        }
 
-        return res.status(201).json({success: true, message: 'User info inserted'});
     } catch (err) {
         console.error('post signup error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
@@ -438,6 +441,7 @@ const sendPushNotificationTo = async (req, res) => {
 }
 
 const { schedulePushForUser } = require('../utils/pushScheduler');
+const {processAchievementsWithNotifications} = require("../services/achievementService");
 
 const handleUpdateUserTimesForPush = async (req, res) => {
     const { userAuth0Id, times } = req.body;

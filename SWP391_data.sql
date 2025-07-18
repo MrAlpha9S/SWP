@@ -278,42 +278,42 @@ INSERT INTO social_category(category_tag, category_name, img_path, [description]
 INSERT INTO social_category(category_tag, category_name, img_path, [description]) VALUES ('reasons-to-quit', N'Lý do bỏ thuốc', '/reasons-to-quit-2.svg', N'Tác động tích cực đến sức khỏe, tài chính và gia đình bạn khi bỏ thuốc.')
 
 --social posts
-INSERT INTO [social_posts] ([category_id], [user_id], [title], [content], [created_at])
+INSERT INTO [social_posts] ([category_id], [user_id], [title], [content], [created_at], [is_pending])
 VALUES 
 -- User 4
-(1, 4, N'Chia sẻ đầu tiên', N'Hành trình bắt đầu với nhiều thử thách nhưng tôi đã vượt qua từng ngày.', '2025-05-14 00:00:00.000'),
-(2, 4, N'Kế hoạch hành động', N'Tôi đã chuẩn bị tâm lý và thiết lập kế hoạch cụ thể để cai thuốc.', '2025-05-13 00:00:00.000'),
-(3, 4, N'Giữ vững quyết tâm', N'Mỗi ngày là một chiến thắng nhỏ, tôi luôn tự nhắc nhở bản thân lý do mình bắt đầu.', '2025-05-15 00:00:00.000'),
-(4, 4, N'Mẹo nhỏ mỗi ngày', N'Tôi thường uống nước mỗi khi thèm thuốc và điều đó giúp ích rất nhiều.', '2025-05-12 00:00:00.000'),
-(5, 4, N'Tác động tích cực', N'Tôi cảm thấy sức khỏe tốt hơn rõ rệt và tiết kiệm được nhiều tiền.', '2025-05-14 00:00:00.000'),
+(1, 4, N'Chia sẻ đầu tiên', N'Hành trình bắt đầu với nhiều thử thách nhưng tôi đã vượt qua từng ngày.', '2025-05-14 00:00:00.000', 0),
+(2, 4, N'Kế hoạch hành động', N'Tôi đã chuẩn bị tâm lý và thiết lập kế hoạch cụ thể để cai thuốc.', '2025-05-13 00:00:00.000', 0),
+(3, 4, N'Giữ vững quyết tâm', N'Mỗi ngày là một chiến thắng nhỏ, tôi luôn tự nhắc nhở bản thân lý do mình bắt đầu.', '2025-05-15 00:00:00.000', 0),
+(4, 4, N'Mẹo nhỏ mỗi ngày', N'Tôi thường uống nước mỗi khi thèm thuốc và điều đó giúp ích rất nhiều.', '2025-05-12 00:00:00.000', 0),
+(5, 4, N'Tác động tích cực', N'Tôi cảm thấy sức khỏe tốt hơn rõ rệt và tiết kiệm được nhiều tiền.', '2025-05-14 00:00:00.000', 0),
 
 -- User 5
-(1, 5, N'Hành trình của tôi', N'Tôi đã từng bỏ cuộc nhưng lần này tôi quyết tâm làm được.', '2025-06-15 00:00:00.000'),
-(2, 5, N'Sẵn sàng bắt đầu', N'Tôi đã lập danh sách các lý do và điều đó giúp tôi bắt đầu dễ dàng hơn.', '2025-06-15 00:00:00.000'),
-(3, 5, N'Không bỏ cuộc', N'Mỗi sáng thức dậy tôi lại chọn không hút thuốc – và tôi tự hào về điều đó.', '2025-06-14 00:00:00.000'),
-(4, 5, N'Mẹo vượt cơn thèm', N'Tôi thường đi bộ nhanh khi cảm thấy thèm thuốc.', '2025-06-07 00:00:00.000'),
-(5, 5, N'Tài chính thay đổi', N'Sau 1 tháng, tôi đã để dành được đủ tiền để mua thứ mình thích.', '2025-06-05 00:00:00.000'),
+(1, 5, N'Hành trình của tôi', N'Tôi đã từng bỏ cuộc nhưng lần này tôi quyết tâm làm được.', '2025-06-15 00:00:00.000', 0),
+(2, 5, N'Sẵn sàng bắt đầu', N'Tôi đã lập danh sách các lý do và điều đó giúp tôi bắt đầu dễ dàng hơn.', '2025-06-15 00:00:00.000', 0),
+(3, 5, N'Không bỏ cuộc', N'Mỗi sáng thức dậy tôi lại chọn không hút thuốc – và tôi tự hào về điều đó.', '2025-06-14 00:00:00.000', 0),
+(4, 5, N'Mẹo vượt cơn thèm', N'Tôi thường đi bộ nhanh khi cảm thấy thèm thuốc.', '2025-06-07 00:00:00.000', 0),
+(5, 5, N'Tài chính thay đổi', N'Sau 1 tháng, tôi đã để dành được đủ tiền để mua thứ mình thích.', '2025-06-05 00:00:00.000', 0),
 
 -- User 6
-(1, 6, N'Giai đoạn đầu khó khăn', N'Tôi từng nghĩ mình không thể nhưng tôi đã sai.', '2025-06-15 00:00:00.000'),
-(2, 6, N'Chuẩn bị thật kỹ', N'Khi đã có mục tiêu rõ ràng, mọi thứ trở nên dễ kiểm soát hơn.', '2025-06-02 00:00:00.000'),
-(3, 6, N'Tránh cám dỗ', N'Tôi tránh những nơi có người hút thuốc để bảo vệ quyết tâm của mình.','2025-06-07 00:00:00.000'),
-(4, 6, N'Ứng phó thông minh', N'Tôi dùng kẹo cao su không đường mỗi khi thấy thèm.', '2025-06-10 00:00:00.000'),
-(5, 6, N'Gia đình hạnh phúc hơn', N'Tôi không còn bị con cái phàn nàn về mùi khói thuốc nữa.', '2025-06-15 00:00:00.000'),
+(1, 6, N'Giai đoạn đầu khó khăn', N'Tôi từng nghĩ mình không thể nhưng tôi đã sai.', '2025-06-15 00:00:00.000', 0),
+(2, 6, N'Chuẩn bị thật kỹ', N'Khi đã có mục tiêu rõ ràng, mọi thứ trở nên dễ kiểm soát hơn.', '2025-06-02 00:00:00.000', 0),
+(3, 6, N'Tránh cám dỗ', N'Tôi tránh những nơi có người hút thuốc để bảo vệ quyết tâm của mình.','2025-06-07 00:00:00.000', 0),
+(4, 6, N'Ứng phó thông minh', N'Tôi dùng kẹo cao su không đường mỗi khi thấy thèm.', '2025-06-10 00:00:00.000', 0),
+(5, 6, N'Gia đình hạnh phúc hơn', N'Tôi không còn bị con cái phàn nàn về mùi khói thuốc nữa.', '2025-06-15 00:00:00.000', 0),
 
 -- User 7
-(1, 7, N'Câu chuyện thật', N'Bạn bè và gia đình chính là nguồn động viên lớn nhất của tôi.', '2025-06-15 00:00:00.000'),
-(2, 7, N'Kế hoạch chi tiết', N'Tôi viết nhật ký để theo dõi tiến trình cai thuốc mỗi ngày.', '2025-06-01 00:00:00.000'),
-(3, 7, N'Gắn bó với mục tiêu', N'Mỗi lần thèm thuốc tôi mở lại những lý do mình viết ra.', '2025-06-03 00:00:00.000'),
-(4, 7, N'Chiến lược hiệu quả', N'Dùng ứng dụng theo dõi ngày không hút thuốc rất hữu ích.', '2025-06-04 00:00:00.000'),
-(5, 7, N'Tự tin hơn', N'Tôi cảm thấy mình làm chủ được cuộc sống nhiều hơn.', '2025-06-06 00:00:00.000'),
+(1, 7, N'Câu chuyện thật', N'Bạn bè và gia đình chính là nguồn động viên lớn nhất của tôi.', '2025-06-15 00:00:00.000', 0),
+(2, 7, N'Kế hoạch chi tiết', N'Tôi viết nhật ký để theo dõi tiến trình cai thuốc mỗi ngày.', '2025-06-01 00:00:00.000', 0),
+(3, 7, N'Gắn bó với mục tiêu', N'Mỗi lần thèm thuốc tôi mở lại những lý do mình viết ra.', '2025-06-03 00:00:00.000', 0),
+(4, 7, N'Chiến lược hiệu quả', N'Dùng ứng dụng theo dõi ngày không hút thuốc rất hữu ích.', '2025-06-04 00:00:00.000', 0),
+(5, 7, N'Tự tin hơn', N'Tôi cảm thấy mình làm chủ được cuộc sống nhiều hơn.', '2025-06-06 00:00:00.000', 0),
 
 -- User 8
-(1, 8, N'Hành trình cá nhân', N'Lúc đầu rất khó nhưng mỗi ngày tôi thấy mình mạnh mẽ hơn.', '2025-06-15 00:00:00.000'),
-(2, 8, N'Chuẩn bị tâm lý', N'Đọc câu chuyện của người khác giúp tôi tin vào bản thân.', '2025-06-12 00:00:00.000'),
-(3, 8, N'Biến đổi tích cực', N'Tôi thấy mình ít căng thẳng hơn, ngủ ngon hơn.', '2025-06-11 00:00:00.000'),
-(4, 8, N'Mẹo tự giúp mình', N'Ghi chú lý do bỏ thuốc vào điện thoại và xem lại thường xuyên.', '2025-06-12 00:00:00.000'),
-(5, 8, N'Vì tương lai', N'Tôi muốn sống khỏe mạnh để đồng hành lâu dài cùng gia đình.', '2025-06-15 00:00:00.000');
+(1, 8, N'Hành trình cá nhân', N'Lúc đầu rất khó nhưng mỗi ngày tôi thấy mình mạnh mẽ hơn.', '2025-06-15 00:00:00.000', 0),
+(2, 8, N'Chuẩn bị tâm lý', N'Đọc câu chuyện của người khác giúp tôi tin vào bản thân.', '2025-06-12 00:00:00.000', 0),
+(3, 8, N'Biến đổi tích cực', N'Tôi thấy mình ít căng thẳng hơn, ngủ ngon hơn.', '2025-06-11 00:00:00.000', 0),
+(4, 8, N'Mẹo tự giúp mình', N'Ghi chú lý do bỏ thuốc vào điện thoại và xem lại thường xuyên.', '2025-06-12 00:00:00.000', 0),
+(5, 8, N'Vì tương lai', N'Tôi muốn sống khỏe mạnh để đồng hành lâu dài cùng gia đình.', '2025-06-15 00:00:00.000', 0);
 
 -- Comments for user_id = 4
 -- 7 parent comments + 3 child comments = 10 total comments
