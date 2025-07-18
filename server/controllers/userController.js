@@ -118,7 +118,7 @@ const getCoachByIdController = async (req, res) => {
     const {coachId} = req.params;
 
     let id = coachId
-    if (coachId.length === 1) {
+    if (coachId.length <= 3) {
         id = parseInt(coachId);
         if (isNaN(id)) {
             return res.status(400).json({message: 'Invalid ID'});

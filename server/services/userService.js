@@ -171,6 +171,7 @@ const getCoaches = async () => {
 }
 
 const getCoachDetailsById = async (coachId = null, userId = null) => {
+    console.log('getCoachDetailsById: ', coachId, userId)
     try {
         if (coachId && coachId.length > 1) {
             coachId = await getUserIdFromAuth0Id(coachId);

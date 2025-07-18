@@ -9,8 +9,10 @@ import { GetUserConversations, GetMessageConversations, CreateConversation } fro
 import { GetAllMembers } from '../../../utils/userUtils';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils';
 import {useOnlineUsersStore, useSocketStore} from "../../../../stores/useSocketStore.js";
+import { useSelectedUserAuth0IdStore } from "../../../../stores/store.js";
 
 export default function Messenger({ role }) {
+  const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore();
   const queryClient = useQueryClient();
   const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
   const [messagesBoxSwitch, setMessagesBoxSwitch] = useState(1);
@@ -41,10 +43,11 @@ export default function Messenger({ role }) {
   const [contacts, setContacts] = useState();
   useEffect(() => {
     if (userConversations) {
+      setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id)
       setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
     }
-  }, [userConversations]);
+  }, [setSelectedUserAuth0Id, userConversations]);
 
   useEffect(() => {
     if (members.length && contacts) {

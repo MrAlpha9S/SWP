@@ -68,18 +68,6 @@ function Dashboard() {
 
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
-    // const {
-    //     data: userIn4,
-    //     isPending: isUserIn4Pending,
-    // } = useQuery({
-    //     queryKey: ['userIn4'],
-    //     queryFn: async () => {
-    //         if (!isAuthenticated || !user) return;
-    //         return await getUser(user, getAccessTokenSilently, isAuthenticated);
-    //     },
-    //     enabled: isAuthenticated && !!user,
-    // })
-
     const {
         isPending: isUserProfilePending,
         data: userProfile,
