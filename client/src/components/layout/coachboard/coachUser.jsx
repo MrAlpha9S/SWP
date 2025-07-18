@@ -46,6 +46,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
 
     useEffect(() => {
         if (userAuth0Id) {
+            console.log('user in coachuser', userAuth0Id)
             setSelectedUserAuth0Id(userAuth0Id);
         }
     }, [setSelectedUserAuth0Id, userAuth0Id])
@@ -75,10 +76,6 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         retry: 1,
     })
 
-    // useEffect(() => {
-    //     if (!isProfilePending) console.log('profile data', profileData)
-    // }, [isProfilePending, profileData])
-
     // Memoized computed values
     const planLogCloneDDMMYY = useMemo(() => {
         if (!profileData?.userProfile?.planLog) return [];
@@ -96,7 +93,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     const isLoading = isProfilePending || isDatasetPending;
     const hasProfileData = profileData?.userProfile;
 
-    const items = [
+    const userInfoTabs = [
         {
             key: '1',
             label: 'Tổng quan',
@@ -181,7 +178,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     ];
 
     if (!userAuth0Id) {
-        items.splice(2, 0, {
+        userInfoTabs.splice(2, 0, {
             key: '3',
             label: 'Dữ liệu Checkin',
             children: (
@@ -192,7 +189,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         });
     }
     if (userAuth0Id) {
-        items.push(
+        userInfoTabs.push(
             {
                 key: '5',
                 label: 'Đánh giá huấn luyện viên',
@@ -203,38 +200,103 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         )
     }
 
+    // Responsive tabs that include Messages on smaller screens
+    const responsiveTabs = [
+        {
+            key: 'messages',
+            label: 'Tin nhắn',
+            children: (
+                <div className="h-full">
+                    <Messager role={userInfo?.role}/>
+                </div>
+            )
+        },
+        ...userInfoTabs
+    ];
+
+    const renderUserInfoSection = () => {
+        if (!profileData?.userProfile?.readiness_value || profileData?.userProfile?.readiness_value.length === 0) {
+            return (
+                <>
+                    {!coach ? <NotFoundBanner title="Không tìm thấy thông tin của người dùng"/> :
+                        <NotFoundBanner title="Không tìm thấy thông tin kế hoạch của bạn" type='progressNCoach'/>}
+                </>
+            );
+        }
+
+        return (
+            <div className="w-full flex-1 flex justify-center">
+                <Tabs
+                    centered
+                    destroyOnHidden
+                    defaultActiveKey="1"
+                    items={userInfoTabs}
+                    className="w-full"
+                    tabBarStyle={{marginBottom: 16}}
+                />
+            </div>
+        );
+    };
+
     return (
-        <div className='w-full h-full flex overflow-y-auto'>
-            <div className='w-[650px] h-full'>
-                <Messager role={userInfo?.role}/>
+        <div className='w-full h-full flex flex-col overflow-hidden'>
+            {/* Desktop Layout - Side by side */}
+            <div className='hidden xl:flex w-full h-full overflow-y-auto'>
+                <div className='w-[650px] h-full'>
+                    <Messager role={userInfo?.role}/>
+                </div>
+
+                <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
+                    <div className='flex gap-4 items-center py-4'>
+                        <p className='font-bold text-4xl text-center'>
+                            {coach ? 'Thông tin của bạn' : 'Thông tin người dùng'}
+                        </p>
+                        <div
+                            className={`hover:bg-primary-500 rounded-md cursor-pointer ${isCooldown ? 'opacity-50 pointer-events-none' : ''}`}
+                            onClick={handleReload}
+                            title={isCooldown ? 'Vui lòng chờ 1 phút trước khi làm mới lại' : 'Làm mới dữ liệu'}
+                        >
+                            <IoReload className='size-7'/>
+                        </div>
+                    </div>
+
+                    {renderUserInfoSection()}
+                </div>
             </div>
 
-            <div className='w-[650px] h-full flex flex-col items-center min-w-0'>
-                <div className='flex gap-4 items-center'><p
-                    className='font-bold text-4xl text-center'>{coach ? 'Thông tin của bạn' : 'Thông tin người dùng'}</p>
+            {/* Mobile/Tablet Layout - Tabbed */}
+            <div className='xl:hidden w-full h-full flex flex-col'>
+                <div className='flex gap-4 items-center justify-center py-4 px-4'>
+                    <p className='font-bold text-2xl sm:text-3xl lg:text-4xl text-center'>
+                        {coach ? 'Thông tin của bạn' : 'Thông tin người dùng'}
+                    </p>
                     <div
                         className={`hover:bg-primary-500 rounded-md cursor-pointer ${isCooldown ? 'opacity-50 pointer-events-none' : ''}`}
                         onClick={handleReload}
                         title={isCooldown ? 'Vui lòng chờ 1 phút trước khi làm mới lại' : 'Làm mới dữ liệu'}
                     >
-                        <IoReload className='size-7'/>
+                        <IoReload className='size-6 sm:size-7'/>
                     </div>
                 </div>
 
-                {!profileData?.userProfile?.readiness_value || profileData?.userProfile?.readiness_value.length === 0 ? <>
+                {!profileData?.userProfile?.readiness_value || profileData?.userProfile?.readiness_value.length === 0 ? (
+                    <>
                         {!coach ? <NotFoundBanner title="Không tìm thấy thông tin của người dùng"/> :
                             <NotFoundBanner title="Không tìm thấy thông tin kế hoạch của bạn" type='progressNCoach'/>}
-                    </> :
-                    <div className="w-full flex-1 flex justify-center">
+                    </>
+                ) : (
+                    <div className="w-full flex-1 flex justify-center px-2 sm:px-4">
                         <Tabs
                             centered
                             destroyOnHidden
-                            defaultActiveKey="1"
-                            items={items}
+                            defaultActiveKey="messages"
+                            items={responsiveTabs}
                             className="w-full"
                             tabBarStyle={{marginBottom: 16}}
+                            size="small"
                         />
-                    </div>}
+                    </div>
+                )}
             </div>
         </div>
     );

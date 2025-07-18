@@ -9,6 +9,7 @@ import { GetUserConversations, GetMessageConversations, CreateConversation } fro
 import { GetAllMembers } from '../../../utils/userUtils';
 import { getCurrentUTCDateTime } from '../../../utils/dateUtils';
 import {useOnlineUsersStore, useSocketStore} from "../../../../stores/useSocketStore.js";
+import {useCoachInfoStore, useSelectedUserAuth0IdStore} from "../../../../stores/store.js";
 
 export default function Messenger({ role }) {
   const queryClient = useQueryClient();
@@ -18,6 +19,8 @@ export default function Messenger({ role }) {
   const {onlineUsers, updateOnlineUser} = useOnlineUsersStore()
   const [typingUsers, setTypingUsers] = useState(new Map());
   const [typingUser, setTypingUser] = useState();
+  const {setSelectedUserAuth0Id, selectedUserAuth0Id} = useSelectedUserAuth0IdStore();
+  const {coachInfo} = useCoachInfoStore()
 
   const { data: allMembers } = useQuery({
     queryKey: ['allMembers'],
@@ -41,10 +44,19 @@ export default function Messenger({ role }) {
   const [contacts, setContacts] = useState();
   useEffect(() => {
     if (userConversations) {
+      if (role === 'Member' && user?.user_sub) {
+        setSelectedUserAuth0Id(user?.user_sub);
+      } else if (role !== 'Member') {
+        setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id);
+      }
       setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
     }
   }, [userConversations]);
+
+  useEffect(() => {
+    console.log('user auth0', selectedUserAuth0Id);
+  }, [ selectedUserAuth0Id ]);
 
   useEffect(() => {
     if (members.length && contacts) {

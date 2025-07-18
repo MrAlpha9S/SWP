@@ -41,7 +41,11 @@ export default function ChatList({
   }, [contacts, searchTerm, showOnlineOnly, getUserOnlineStatus]);
 
   const handleSelectConversation = useCallback((contact) => {
-    setSelectedUserAuth0Id(contact.other_participant_id);
+    if (role === 'Member' && user?.user_sub) {
+        setSelectedUserAuth0Id(user?.user_sub);
+    } else if (role !== 'Member'){
+        setSelectedUserAuth0Id(contact.other_participant_id);
+    }
     const conversationId = contact.conversation_id;
     if (onEmitConversationUpdate) {
       onEmitConversationUpdate({
@@ -176,7 +180,10 @@ export default function ChatList({
                 return (
                     <div
                         key={contact.conversation_id}
-                        onClick={() => handleSelectConversation(contact)}
+                        onClick={() => {
+                            if (role === 'Member') return
+                            handleSelectConversation(contact)
+                        }}
                         className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                             isSelected ? 'bg-primary-600 shadow-lg' : 'hover:bg-gray-700'
                         }`}
