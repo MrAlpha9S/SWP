@@ -212,3 +212,23 @@ export async function GetIsPendingSocialPosts(user, getAccessTokenSilently, isAu
 
     return await res.json();
 }
+
+export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id) {
+    console.log('ApproveSocialPosts: ', post_id)
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/approvepost`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: post_id})
+    });
+
+
+    return await res.json();
+}

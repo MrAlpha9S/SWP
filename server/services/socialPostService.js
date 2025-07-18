@@ -308,7 +308,14 @@ const DeleteSocialPosts = async (post_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('post_id', sql.Int, post_id)
-            .query(`DELETE FROM social_comments WHERE post_id = @post_id;
+            .query(`
+DELETE FROM social_likes WHERE comment_id IN (
+    SELECT comment_id FROM social_comments WHERE post_id = @post_id
+);
+DELETE FROM social_likes WHERE post_id = @post_id;
+
+DELETE FROM social_comments WHERE post_id = @post_id;
+
 DELETE FROM social_posts WHERE post_id = @post_id;
 `);
         return true;
@@ -394,4 +401,24 @@ WHERE sp.is_pending = 1
     }
 }
 
-module.exports = { getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };
+const ApprovePost = async (post_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query(`UPDATE social_posts
+SET is_pending = 0
+WHERE post_id = @post_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in ApprovePost');
+        }
+        return result;
+    } catch (err) {
+        console.error('SQL error at ApprovePost', err);
+        return [];
+    }
+}
+
+
+module.exports = { ApprovePost, DeleteSocialPosts, getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };

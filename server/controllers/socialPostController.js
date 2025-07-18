@@ -1,5 +1,24 @@
-const {DeleteSocialPosts, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
+const {DeleteSocialPosts, ApprovePost, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
 const { processAchievementsWithNotifications } = require("../services/achievementService");
+
+const handleApprovePost = async (req, res) => {
+    const {post_id}  = req.body;
+
+    if (!post_id) {
+        return res.status(400).json({ success: false, message: 'error in handleApprovePost: params is required', data: null });
+    }
+
+    try {
+        const update = await ApprovePost(post_id);
+        if (!update) {
+            return res.status(404).json({ success: false, message: 'Cant handleApprovePost', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'handleApprovePost successfully', data: update });
+    } catch (error) {
+        console.error('Error in handleApprovePost:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+}
 
 const handleGetIsPendingPosts = async (req, res) => {
     try {
@@ -272,4 +291,4 @@ const handleAddLike = async (req, res) => {
 
 
 
-module.exports = {handleGetIsPendingPosts, handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
+module.exports = {handleApprovePost, handleGetIsPendingPosts, handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
