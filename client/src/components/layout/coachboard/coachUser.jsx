@@ -279,25 +279,36 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                     </div>
                 </div>
 
-                {!profileData?.userProfile?.readiness_value || profileData?.userProfile?.readiness_value.length === 0 ? (
-                    <>
-                        {!coach ? <NotFoundBanner title="Không tìm thấy thông tin của người dùng"/> :
-                            <NotFoundBanner title="Không tìm thấy thông tin kế hoạch của bạn" type='progressNCoach'/>}
-                    </>
-                ) : (
-                    <div className="w-full flex-1 flex justify-center px-2 sm:px-4">
-                        <Tabs
-                            centered
-                            destroyOnHidden
-                            defaultActiveKey="messages"
-                            items={responsiveTabs}
-                            className="w-full"
-                            tabBarStyle={{marginBottom: 16}}
-                            size="small"
-                        />
-                    </div>
-                )}
+                <div className="w-full h-full flex-1 flex justify-center px-2 sm:px-4">
+                    <Tabs
+                        centered
+                        destroyOnHidden
+                        defaultActiveKey="messages"
+                        items={[
+                            {
+                                key: 'messages',
+                                label: 'Tin nhắn',
+                                children: <Messager role={userInfo?.role}/>
+                            },
+                            ...(profileData?.userProfile?.readiness_value?.length > 0 ? userInfoTabs : [
+                                {
+                                    key: 'notfound',
+                                    label: 'Thông tin',
+                                    children: (
+                                        !coach
+                                            ? <NotFoundBanner title="Không tìm thấy thông tin của người dùng"/>
+                                            : <NotFoundBanner title="Không tìm thấy thông tin kế hoạch của bạn" type='progressNCoach'/>
+                                    )
+                                }
+                            ])
+                        ]}
+                        className="w-full"
+                        tabBarStyle={{marginBottom: 16}}
+                        size="small"
+                    />
+                </div>
             </div>
+
         </div>
     );
 };

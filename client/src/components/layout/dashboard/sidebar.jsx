@@ -20,13 +20,13 @@ const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = fals
         {
             key: 'coach',
             label: 'Huấn luyện viên',
-            icon: <div className='relative mr-4 '>{userInfo.sub_id === 1 ? <><BsFillPeopleFill className="size-5"/><PremiumBadge className='absolute top-[-15px] left-[140px]'/></> : <BsFillPeopleFill className="mr-4 size-5"/>}</div>,
+            icon: <div className='relative mr-1 '>{userInfo.sub_id === 1 ? <><BsFillPeopleFill className="size-5"/><PremiumBadge className='absolute top-[-15px] left-[140px]'/></> : <BsFillPeopleFill className="mr-4 size-5"/>}</div>,
         },
-        {
-            key: 'notifications',
-            label: 'Thông báo',
-            icon: <NotificationOutlined className="mr-4"/>,
-        },
+        // {
+        //     key: 'notifications',
+        //     label: 'Thông báo',
+        //     icon: <NotificationOutlined className="mr-4"/>,
+        // },
         {
             key: 'check-in',
             label: 'Check-in hàng ngày',

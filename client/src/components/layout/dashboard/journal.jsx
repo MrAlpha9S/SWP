@@ -12,7 +12,6 @@ import dayjs from "dayjs";
 import {getUserCreationDate} from "../../utils/userUtils.js";
 
 const Journal = ({userAuth0Id = null}) => {
-    console.log('Journal received userAuth0Id:', userAuth0Id)
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const {allCheckInData, setAllCheckInData} = useCheckInDataStore();
     const [searchDate, setSearchDate] = useState('')

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 
-import { Select, Skeleton} from "antd";
+import {Select, Skeleton} from "antd";
 import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
@@ -66,10 +66,6 @@ const ProgressBoard = ({
         ? ['dataset-coach', userInfo?.auth0_id]
         : ['dataset', userInfo?.auth0_id];
 
-    useEffect(() => {
-        console.log(userInfo)
-    }, [userInfo])
-
     const {
         isPending: isDatasetPending,
         error: datasetError,
@@ -114,7 +110,6 @@ const ProgressBoard = ({
 
     useEffect(() => {
         if (!isAchievedPending && achieved && achieved.success) {
-            console.log(achieved.data)
             setLocalAchieved(achieved?.data)
         }
     }, [isAchievedPending])
@@ -395,7 +390,7 @@ const ProgressBoard = ({
         setRange(e);
     }
 
-    const CustomTooltip = ({ active, payload, label }) => {
+    const CustomTooltip = ({active, payload, label}) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
 
@@ -403,7 +398,8 @@ const ProgressBoard = ({
                 <div className="bg-white border rounded shadow p-2 text-sm">
                     <div className="font-semibold">{label}</div>
                     <div>
-                        <div className={`${data.checkinMissed ? 'text-red-500' : 'text-green-600'}`}>{data.checkinMissed ? 'Chưa check-in (ước lượng)' : 'Đã check-in'}</div>
+                        <div
+                            className={`${data.checkinMissed ? 'text-red-500' : 'text-green-600'}`}>{data.checkinMissed ? 'Chưa check-in (ước lượng)' : 'Đã check-in'}</div>
                         <div>Đã hút: {data.actual}</div>
                         {data.plan != null && <div>Kế hoạch: {data.plan}</div>}
                     </div>
@@ -442,23 +438,24 @@ const ProgressBoard = ({
     };
 
     return (
-        <div className='bg-white p-2 sm:p-4 md:p-6 rounded-xl shadow-xl w-full max-w-4xl mx-auto space-y-3 sm:space-y-4'>
-            {!from && (isPending ? ( <Skeleton active paragraph={{ rows: 2 }} /> ) : <div><QuoteCarousel/></div>)}
+        <div
+            className='bg-white p-2 sm:p-4 md:p-6 rounded-xl shadow-xl w-full max-w-4xl mx-auto space-y-3 sm:space-y-4'>
 
-            {!from && <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                {isPending ? (
-                    <Skeleton.Button active/>
-                ) : (
-                    <CustomButton onClick={handleCheckIn}>Check-in hàng ngày →</CustomButton>
-                )}
-                {isPending ? (
-                    <Skeleton.Input style={{width: 180}} active size="small"/>
-                ) : (
-                    <a href="#" className="text-xs sm:text-sm text-primary-700 hover:underline">
-                        What's a check-in and why are they important?
-                    </a>
-                )}
-            </div>}
+            {!from &&
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                    {isPending ? (
+                        <Skeleton.Button active/>
+                    ) : (
+                        <CustomButton onClick={handleCheckIn}>Check-in hàng ngày →</CustomButton>
+                    )}
+                    {isPending ? (
+                        <Skeleton.Input style={{width: 180}} active size="small"/>
+                    ) : (
+                        !localCheckInDataSet?.some((checkin) => checkin.date.split('T')[0] === getCurrentUTCDateTime().toISOString().split('T')[0]) ? <strong>Hôm nay bạn chưa check-in.</strong> : <strong>Hôm nay bạn đã check-in.</strong>
+                    )}
+                </div>}
+
+            {!from && (isPending ? (<Skeleton active paragraph={{rows: 2}}/>) : <div><QuoteCarousel/></div>)}
 
             <div ref={progressBoardRef} className='space-y-3 sm:space-y-4'>
                 <div className="bg-primary-100 rounded-lg p-4 sm:p-6 text-center">
@@ -470,11 +467,14 @@ const ProgressBoard = ({
                             <Skeleton.Input style={{width: 250}} active/>
                         ) : (
                             <>
-                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.days}</span>
+                                <span
+                                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.days}</span>
                                 <span className="text-xs sm:text-sm text-gray-500">ngày</span>
-                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
+                                <span
+                                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
                                 <span className="text-xs sm:text-sm text-gray-500">giờ</span>
-                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
+                                <span
+                                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
                                 <span className="text-xs sm:text-sm text-gray-500">phút</span>
                             </>
                         )}
@@ -483,17 +483,18 @@ const ProgressBoard = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                     {[0, 1, 2].map((i) => (
-                        <div key={i} className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col items-center space-y-2">
+                        <div key={i}
+                             className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col items-center space-y-2">
                             {isCalculating ? (
-                                <Skeleton active paragraph={{ rows: 2 }} />
+                                <Skeleton active paragraph={{rows: 2}}/>
                             ) : (
                                 <>
                                     <div className="text-2xl">
                                         {
                                             [
-                                                <PiPiggyBankLight className="size-8 sm:size-10 text-primary-800" />,
-                                                <IoLogoNoSmoking className="size-8 sm:size-10 text-primary-800" />,
-                                                <FaTrophy className="size-7 sm:size-9 text-primary-800" />
+                                                <PiPiggyBankLight className="size-8 sm:size-10 text-primary-800"/>,
+                                                <IoLogoNoSmoking className="size-8 sm:size-10 text-primary-800"/>,
+                                                <FaTrophy className="size-7 sm:size-9 text-primary-800"/>
                                             ][i]
                                         }
                                     </div>
@@ -567,12 +568,12 @@ const ProgressBoard = ({
                         <Select
                             defaultValue="overview"
                             variant="borderless"
-                            style={{ width: 120 }}
+                            style={{width: 120}}
                             onChange={handleSelectChange}
                             size="small"
                             options={[
-                                { value: 'plan', label: 'Kế hoạch' },
-                                { value: 'overview', label: 'Tổng quan' },
+                                {value: 'plan', label: 'Kế hoạch'},
+                                {value: 'overview', label: 'Tổng quan'},
                             ]}
                         />
                     </div>
@@ -603,19 +604,19 @@ const ProgressBoard = ({
                     }
 
                     {isPending ? (
-                        <Skeleton.Input style={{ width: '100%', height: 300 }} active />
+                        <Skeleton.Input style={{width: '100%', height: 300}} active/>
                     ) : mergedDataSet?.length > 0 ? (
                         <div className="w-full overflow-x-auto">
                             <ResponsiveContainer width="100%" height={300} minWidth={300}>
                                 <LineChart
                                     data={mergedDataSet}
-                                    margin={{ top: 20, right: 10, left: 10, bottom: 25 }}
+                                    margin={{top: 20, right: 10, left: 10, bottom: 25}}
                                 >
                                     <Line
                                         type="monotone"
                                         dataKey="actual"
                                         stroke="#ef4444"
-                                        dot={{ r: 2 }}
+                                        dot={{r: 2}}
                                         strokeWidth={2}
                                         name="Đã hút"
                                         connectNulls={true}
@@ -630,7 +631,7 @@ const ProgressBoard = ({
                                         name="Kế hoạch"
                                         connectNulls={true}
                                     />
-                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     {quittingMethod === 'gradual-weekly' && getReferenceArea()}
                                     <ReferenceLine
                                         x={
@@ -643,12 +644,12 @@ const ProgressBoard = ({
                                     />
                                     <XAxis
                                         dataKey="date"
-                                        tick={<CustomizedAxisTick />}
+                                        tick={<CustomizedAxisTick/>}
                                         interval={1}
                                         fontSize={12}
                                     />
-                                    <YAxis fontSize={12} />
-                                    <Tooltip content={<CustomTooltip />} />
+                                    <YAxis fontSize={12}/>
+                                    <Tooltip content={<CustomTooltip/>}/>
                                     <Legend
                                         verticalAlign="top"
                                         wrapperStyle={{fontSize: '12px'}}

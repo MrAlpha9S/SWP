@@ -5,8 +5,6 @@ import {MdExpandMore, MdExpandLess} from "react-icons/md";
 import {useNavigate} from "react-router-dom";
 
 const TimelineEntry = ({entry, userAuth0Id}) => {
-    console.log('TimelineEntry userAuth0Id:', userAuth0Id)
-    console.log(userAuth0Id ? 'người dùng' : 'bạn')
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
     const isMissed = entry.isMissed;
