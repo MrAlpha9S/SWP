@@ -192,7 +192,7 @@ function AppContent() {
             })
 
             socket.on('new-achievement', (data) => {
-
+                queryClient.invalidateQueries(['achieved'])
                 const onClick = () => {
                     setCurrentStepDashboard('badges')
                     navigate('/dashboard')
