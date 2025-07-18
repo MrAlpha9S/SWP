@@ -23,7 +23,7 @@ const getSubscribedUsers = async (userAuth0Id) => {
 
 const getCoachCommissionRate = async (userId) => {
     let userIdForFetch = userId
-    if (userId.length > 1) {
+    if (userId.length > 5) {
         userIdForFetch = await getUserIdFromAuth0Id(userId);
     }
 

@@ -172,10 +172,10 @@ const getCoaches = async () => {
 
 const getCoachDetailsById = async (coachId = null, userId = null) => {
     try {
-        if (coachId && coachId.length > 1) {
+        if (coachId && coachId.length > 5) {
             coachId = await getUserIdFromAuth0Id(coachId);
         }
-        if (userId && userId.length > 1) {
+        if (userId && userId.length > 5) {
             userId = await getUserIdFromAuth0Id(userId);
         }
         console.log('coachId', coachId);
