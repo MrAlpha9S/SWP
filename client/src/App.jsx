@@ -84,7 +84,7 @@ function AppContent() {
 
         if (!user && !isAuthenticated) return
         setupFCM();
-    }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed]);
+    }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed, updateFCMMutation, openNotification]);
 
 
     const {isPending, data: userData} = useQuery({
@@ -209,7 +209,7 @@ function AppContent() {
         };
 
         connectSocket();
-    }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData]);
+    }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData, openNotification, navigate, setCurrentStepDashboard, setSelectedUserAuth0Id]);
 
 
     const contextValue = useMemo(() => ({name: 'Ant Design'}), []);

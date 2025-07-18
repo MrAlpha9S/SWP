@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {useAuth0} from "@auth0/auth0-react";
-import {getUserProfile, syncProfileToStores} from "../../components/utils/profileUtils.js";
+import React, { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
 import {
     useCigsPerPackStore, useCoachInfoStore, useCoachStatsStore, useCurrentStepDashboard,
     useErrorStore, useGoalsStore, usePlanStore,
@@ -8,16 +8,16 @@ import {
     useQuitReadinessStore,
     useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useUserInfoStore
 } from "../../stores/store.js";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Hero from "../../components/layout/dashboard/hero.jsx"
 import ProgressBoard from "../../components/layout/dashboard/progressBoard.jsx";
-import {useQuery} from '@tanstack/react-query'
-import {useCheckInDataStore} from "../../stores/checkInStore.js";
+import { useQuery } from '@tanstack/react-query'
+import { useCheckInDataStore } from "../../stores/checkInStore.js";
 import NotFoundBanner from "../../components/layout/notFoundBanner.jsx";
 import Sidebar from "../../components/layout/dashboard/sidebar.jsx";
 import CoachSideBar from "../../components/layout/dashboard/coachsidebar.jsx"
 import CheckinMenu from "../../components/layout/dashboard/checkinMenu.jsx";
-import {queryClient} from "../../main.jsx";
+import { queryClient } from "../../main.jsx";
 import GoalsMenu from "../../components/layout/dashboard/goalsMenu.jsx";
 import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
@@ -29,21 +29,22 @@ import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
 import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
-import {getStats} from "../../components/utils/coachUtils.js";
+import { getStats } from "../../components/utils/coachUtils.js";
 import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
+import ManageForum from "../../components/layout/coachboard/manageforum/manageforum.jsx";
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
-import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
+import { getCoachByIdOrAuth0Id } from "../../components/utils/userUtils.js";
 import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
 
 function Dashboard() {
-    const {readinessValue} = useQuitReadinessStore();
-    const {addError, removeError} = useErrorStore();
-    const {reasonList} = useReasonStore();
-    const {pricePerPack} = usePricePerPackStore();
-    const {cigsPerPack} = useCigsPerPackStore();
-    const {timeAfterWaking} = useTimeAfterWakingStore();
-    const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
-    const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
+    const { readinessValue } = useQuitReadinessStore();
+    const { addError, removeError } = useErrorStore();
+    const { reasonList } = useReasonStore();
+    const { pricePerPack } = usePricePerPackStore();
+    const { cigsPerPack } = useCigsPerPackStore();
+    const { timeAfterWaking } = useTimeAfterWakingStore();
+    const { timeOfDayList, customTimeOfDay, customTimeOfDayChecked } = useTimeOfDayStore();
+    const { triggers, customTrigger, customTriggerChecked } = useTriggersStore();
     const {
         startDate,
         cigsPerDay,
@@ -54,18 +55,18 @@ function Dashboard() {
         planLog,
         planLogCloneDDMMYY,
     } = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
+    const { createGoalChecked, goalAmount, goalList, setMoneySaved } = useGoalsStore()
     const navigate = useNavigate();
-    const {isProfileExist} = useProfileExists();
-    const {setCheckInDataSet} = useCheckInDataStore()
+    const { isProfileExist } = useProfileExists();
+    const { setCheckInDataSet } = useCheckInDataStore()
     const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
-    const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
-    const {userInfo} = useUserInfoStore()
-    const {coachStats, setCoachStats} = useCoachStatsStore()
-    const {coachInfo, setCoachInfo} = useCoachInfoStore()
+    const { currentStepDashboard, setCurrentStepDashboard } = useCurrentStepDashboard();
+    const { userInfo } = useUserInfoStore()
+    const { coachStats, setCoachStats } = useCoachStatsStore()
+    const { coachInfo, setCoachInfo } = useCoachInfoStore()
 
-    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
+    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     // const {
     //     data: userIn4,
@@ -126,7 +127,7 @@ function Dashboard() {
     }, [coachInfoFetched, isCoachInfoPending, setCoachInfo, userInfo]);
 
     useEffect(() => {
-        queryClient.invalidateQueries({queryKey: ['checkin-status']});
+        queryClient.invalidateQueries({ queryKey: ['checkin-status'] });
     }, []);
 
     useEffect(() => {
@@ -196,11 +197,11 @@ function Dashboard() {
 
     const renderBoard = () => {
         if ((!isAuthenticated || isUserProfilePending) && userInfo?.role === 'Member') {
-            return <ProgressBoard isPending={true}/>;
+            return <ProgressBoard isPending={true} />;
         }
 
         if ((!isAuthenticated || isCoachInfoPending || isCoachStatsPending) && userInfo?.role === 'Coach') {
-            return <CoachOverview isDataPending={true}/>;
+            return <CoachOverview isDataPending={true} />;
         }
 
         if (currentStepDashboard?.length > 0) {
@@ -232,38 +233,40 @@ function Dashboard() {
                     );
 
                 case 'check-in':
-                    return <CheckinMenu/>;
+                    return <CheckinMenu />;
 
                 case 'goals':
-                    return <GoalsMenu/>;
+                    return <GoalsMenu />;
 
                 case 'savings':
-                    return <SavingsMenu/>
+                    return <SavingsMenu />
 
                 case 'distraction-tools':
-                    return <DistractionTools/>
+                    return <DistractionTools />
 
                 case 'badges':
-                    return <BadgesMenu/>;
+                    return <BadgesMenu />;
                 case 'messager':
-                    return <div className='w-full h-screen'><Messager role={userInfo?.role}/></div>
+                    return <div className='w-full h-screen'><Messager role={userInfo?.role} /></div>
                 case 'post-blog':
-                    return <ManageBlog/>
+                    return <ManageBlog />
 
+                case 'forum-manage':
+                    return <ManageForum />
                 case 'overview':
-                    return <CoachOverview stats={coachStats}/>
+                    return <CoachOverview stats={coachStats} />
 
                 case 'coach-user':
-                    return <CoachUser/>
+                    return <CoachUser />
 
                 case 'coach':
-                    return <CoachDashboard/>;
+                    return <CoachDashboard />;
 
-                    case 'user-review':
-                        return <UserReviews/>
+                case 'user-review':
+                    return <UserReviews />
 
                 default:
-                    return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
+                    return <NotFoundBanner title="Không tìm thấy mục tương ứng" />;
             }
         }
     };
@@ -310,7 +313,7 @@ function Dashboard() {
     return (
         <PageFadeWrapper>
             <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
-                <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
+                <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username} />
                 <div className="w-[1680px] flex flex-col max-h-[1500px] md:flex-row gap-4 px-1 py-4 md:px-4">
                     {dashboardHandle(userRole)}
 

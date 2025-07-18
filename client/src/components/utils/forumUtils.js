@@ -155,3 +155,21 @@ export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, pos
 
     return await res.json();
 };
+
+export async function GetIsPendingSocialPosts(user, getAccessTokenSilently, isAuthenticated) {
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/getIsPendingPosts`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+    });
+
+
+    return await res.json();
+}

@@ -189,7 +189,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
     }
 }
 
-const getPostComments = async ({postId, currentUserId = null}) => {
+const getPostComments = async ({ postId, currentUserId = null }) => {
     try {
         const pool = await poolPromise;
         const request = pool.request()
@@ -311,7 +311,7 @@ const getAllSocialPosts = async () => {
     }
 }
 
-const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at ) => {
+const AddLike = async (auth0_id, post_id = null, comment_id = null, created_at) => {
     try {
         const pool = await poolPromise;
         const user_id = await getUserIdFromAuth0Id(auth0_id);
@@ -333,6 +333,24 @@ const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at 
     }
 }
 
+const GetIsPendingPosts = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`SELECT sp.post_id, sc.category_name, u.user_id, u.username, sp.title, sp.content, sp.created_at, sp.is_pinned, sp.is_reported, sp.is_pending FROM social_posts sp
+Join social_category sc ON sc.category_id = sp.category_id
+Join users u ON u.user_id = sp.user_id
+WHERE sp.is_pending = 1
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in GetIsPendingPosts');
+        }
+        return result;
+    } catch (err) {
+        console.error('SQL error at GetIsPendingPosts', err);
+        return [];
+    }
+}
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };
+module.exports = { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };

@@ -1,5 +1,33 @@
-const {getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
-const {processAchievementsWithNotifications} = require("../services/achievementService");
+const { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike } = require("../services/socialPostService");
+const { processAchievementsWithNotifications } = require("../services/achievementService");
+
+const handleGetIsPendingPosts = async (req, res) => {
+    try {
+        const result = await GetIsPendingPosts();
+
+        if (!result || result.length === 0) {
+            return res.status(404).json({
+                success: success,
+                message: 'No posts found',
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Successfully fetched posts',
+            data: result
+        });
+
+    } catch (err) {
+        console.error('handleGetPosts error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error: ' + err.message,
+            data: null
+        });
+    }
+}
 
 const getPostAndCommentCount = async (req, res) => {
 
@@ -8,9 +36,9 @@ const getPostAndCommentCount = async (req, res) => {
         const resultCommentCount = await getTotalCommentCount();
 
         if (!resultPostCount) {
-            return res.status(404).json({success: false, message: 'Failed to fetch posts count data', data: null});
+            return res.status(404).json({ success: false, message: 'Failed to fetch posts count data', data: null });
         } else if (!resultCommentCount) {
-            return res.status(404).json({success: false, message: 'Failed to fetch comments count data', data: null});
+            return res.status(404).json({ success: false, message: 'Failed to fetch comments count data', data: null });
         } else if (!resultCommentCount && !resultPostCount) {
             return res.status(404).json({
                 success: false,
@@ -39,7 +67,7 @@ const getPostAndCommentCount = async (req, res) => {
         }
     } catch (err) {
         console.error('getPostAndCommmentCount error:', err);
-        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
+        return res.status(500).json({ success: false, message: 'Internal server error: ' + err.message, data: null });
     }
 }
 
@@ -82,10 +110,10 @@ const handleGetPostByCategory = async (req, res) => {
 };
 
 const handleGetPosts = async (req, res) => {
-    const { categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId} = req.query;
+    const { categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId } = req.query;
 
     try {
-        const result = await getPosts({categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId});
+        const result = await getPosts({ categoryTag, keyword, page, fromDate, toDate, postId, auth0_id, currentUserId });
 
         if (!result || result.length === 0) {
             return res.status(404).json({
@@ -115,7 +143,7 @@ const handleGetPostComments = async (req, res) => {
     const { postId, currentUserId } = req.params;
 
     try {
-        const result = await getPostComments({postId, currentUserId});
+        const result = await getPostComments({ postId, currentUserId });
 
         if (!result || result.length === 0) {
             return res.status(200).json({
@@ -142,7 +170,7 @@ const handleGetPostComments = async (req, res) => {
 };
 
 const handlePostSocialPosts = async (req, res) => {
-    const {category_id, auth0_id, title, content, created_at}  = req.body;
+    const { category_id, auth0_id, title, content, created_at } = req.body;
 
     if (!category_id || !auth0_id || !title || !content || !created_at) {
         return res.status(400).json({ success: false, message: 'error in handlePostSocialPosts: params is required', data: null });
@@ -163,7 +191,7 @@ const handlePostSocialPosts = async (req, res) => {
 }
 
 const handleAddComment = async (req, res) => {
-    const {parent_comment_id, auth0_id, post_id, content, created_at, is_reported}  = req.body;
+    const { parent_comment_id, auth0_id, post_id, content, created_at, is_reported } = req.body;
 
     if (!auth0_id || !post_id || !content || !created_at || is_reported === undefined) {
         return res.status(400).json({ success: false, message: 'error in handleAddComment: params is required', data: null });
@@ -184,7 +212,7 @@ const handleAddComment = async (req, res) => {
 }
 
 const handleAddLike = async (req, res) => {
-    const {auth0_id, post_id, comment_id, created_at}  = req.body;
+    const { auth0_id, post_id, comment_id, created_at } = req.body;
     console.log('handleAddLike: ', auth0_id, post_id, comment_id, created_at)
 
     if (!auth0_id || !created_at === undefined) {
@@ -206,4 +234,4 @@ const handleAddLike = async (req, res) => {
 
 
 
-module.exports = {getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
+module.exports = { handleGetIsPendingPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike };
