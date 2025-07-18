@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import {convertUTCStringToLocalDate} from "../../utils/dateUtils.js";
 import dayjs from "dayjs";
+import {useAuth0} from "@auth0/auth0-react";
 
 const {RangePicker} = DatePicker;
 
@@ -43,6 +44,7 @@ const SideBar = ({
                      isInPost = false
                  }) => {
     const navigate = useNavigate();
+    const {isAuthenticated} = useAuth0()
 
     const filters = [
         {
@@ -110,7 +112,7 @@ const SideBar = ({
                 <Collapse items={filters} defaultActiveKey={['1', '2']}/></> : null}
 
             <div className="space-y-6">
-                {!isInPost && <button
+                {!isInPost && isAuthenticated && <button onClick={() => navigate('/forum/editor')}
                     className="w-full bg-primary-700 hover:bg-primary-800 text-white font-semibold py-2 px-4 rounded-md">
                     Đăng bài
                 </button>}
@@ -118,18 +120,22 @@ const SideBar = ({
                 <div>
                     <h4 className="font-semibold text-gray-800 mb-2">Đi đến mục</h4>
                     <ul className="space-y-2">
-                        {SidebarLinks.map((item, idx) => (
-                            <React.Fragment key={idx}>
-                                <li
-                                    onClick={() => navigate(item.dest)}
-                                    className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer"
-                                >
-                                    {item.icon}
-                                    <span>{item.label}</span>
-                                </li>
-                                <Divider/>
-                            </React.Fragment>
-                        ))}
+                        {SidebarLinks.map((item, idx) => {
+                                if (item.label === 'Tạo bài viết') {
+                                    if (!isAuthenticated) return
+                                }
+                                return <React.Fragment key={idx}>
+                                    <li
+                                        onClick={() => navigate(item.dest)}
+                                        className="flex items-center gap-2 text-gray-700 hover:text-primary-700 cursor-pointer"
+                                    >
+                                        {item.icon}
+                                        <span>{item.label}</span>
+                                    </li>
+                                    <Divider/>
+                                </React.Fragment>
+                            }
+                        )}
                     </ul>
                 </div>
             </div>
