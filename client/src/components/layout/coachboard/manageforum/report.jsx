@@ -118,6 +118,9 @@ export default function Report() {
                                 <p className="text-sm text-gray-500 mb-1">
                                     Người báo cáo: <span className="font-medium">{report.reporter}</span>
                                 </p>
+                                <p className="text-sm text-gray-500 mb-1">
+                                    Lý do báo cáo: <span className="font-medium">{report.reason}</span>
+                                </p>
                                 {report.post_content && (
                                     <>
                                         <h3 className="text-lg font-semibold text-blue-700">{report.post_title}</h3>

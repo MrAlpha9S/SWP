@@ -29,7 +29,7 @@ const GetReports = async () => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .query(`SELECT sr.report_id, sp.post_id, sc.comment_id, u_reporter.username AS reporter, sr.created_at AS report_time, u_post_author.username AS post_author, u_comment_author.username AS comment_author,
+            .query(`SELECT sr.report_id, sr.reason, sp.post_id, sc.comment_id, u_reporter.username AS reporter, sr.created_at AS report_time, u_post_author.username AS post_author, u_comment_author.username AS comment_author,
 sp.title AS post_title, sp.content AS post_content, sp.created_at AS post_created_at,
 sc.content AS comment_content, sc.created_at AS comment_created_at
 FROM social_reports sr
