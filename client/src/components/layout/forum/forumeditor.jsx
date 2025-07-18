@@ -30,7 +30,7 @@ export default function ForumEditor() {
             Underline,
             Image.configure({
                 inline: false,
-                allowBase64: true, // ✅ this is crucial
+                allowBase64: true,
             }),
             TextAlign.configure({
                 types: ['heading', 'paragraph'],

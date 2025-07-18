@@ -20,7 +20,7 @@ const items = [
 ];
 const ManageForum = () => {
     return (
-        <div className='w-[1280px] h-full'>
+        <div className='w-full h-full'>
             <Tabs defaultActiveKey="1" items={items}/>
         </div>
     )

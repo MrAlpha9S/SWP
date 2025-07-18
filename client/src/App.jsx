@@ -21,7 +21,7 @@ import HintsAndTips from "./pages/forumPage/hintsAndTips.jsx";
 import ReasonsToQuit from "./pages/forumPage/reasonsToQuit.jsx";
 import AllPosts from "./pages/forumPage/allPosts.jsx";
 import PostPage from "./components/layout/forum/postPage.jsx";
-import ForumEditor from './components/layout/forum/editor/forumeditor.jsx'
+import ForumEditor from './components/layout/forum/forumeditor.jsx'
 import ForumProfile from './pages/forumPage/forumprofile.jsx'
 import UpdateForumEditor from './components/layout/forum/editor/updateforumeditor.jsx'
 

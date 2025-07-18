@@ -50,7 +50,10 @@ export default function UpdateForumEditor() {
         extensions: [
             StarterKit,
             Underline,
-            Image,
+            Image.configure({
+                inline: false,
+                allowBase64: true,
+            }),
             TextAlign.configure({
                 types: ['heading', 'paragraph'],
             }),

@@ -115,7 +115,7 @@ export default function IsPendingPost() {
                                     Người đăng: <span className="font-medium">{post.username}</span> | Chuyên mục:{' '}
                                     <span className="italic">{post.category_name}</span>
                                 </p>
-                                <p className="text-gray-700">{post.content}</p>
+                                <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                                 <p className="text-xs text-gray-400 mt-2">
                                     Ngày đăng: {new Date(post.created_at).toLocaleDateString()}
                                 </p>
