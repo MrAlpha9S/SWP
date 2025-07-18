@@ -82,7 +82,7 @@ export default function UpdateForumEditor() {
         onSuccess: () => {
             Swal.fire({
                 icon: 'success',
-                title: 'Sửa bài thành công',
+                title: 'Sửa bài thành công, đang chờ duyệt',
             })
             navigate(`/forum/${currentTag}`)
         },

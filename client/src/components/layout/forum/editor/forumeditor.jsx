@@ -51,7 +51,7 @@ export default function ForumEditor() {
         onSuccess: () => {
             Swal.fire({
                 icon: 'success',
-                title: 'Đăng bài thành công',
+                title: 'Bài viết của bạn đang được chờ duyệt',
             })
             navigate(`/forum/${currentTag}`)
         },

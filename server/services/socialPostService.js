@@ -298,7 +298,7 @@ const updateSocialPosts = async (post_id, category_id, title, content, created_a
             .input('content', content)
             .input('created_at', sql.DateTime, created_at)
             .query(`UPDATE social_posts 
-SET category_id = @category_id, title = @title, content = @content, created_at = @created_at
+SET category_id = @category_id, title = @title, content = @content, created_at = @created_at, is_pending = 1
 WHERE post_id = @post_id
 `);
         if (result.rowsAffected[0] === 0) {
