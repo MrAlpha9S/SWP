@@ -67,18 +67,6 @@ function Dashboard() {
 
     const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
 
-    // const {
-    //     data: userIn4,
-    //     isPending: isUserIn4Pending,
-    // } = useQuery({
-    //     queryKey: ['userIn4'],
-    //     queryFn: async () => {
-    //         if (!isAuthenticated || !user) return;
-    //         return await getUser(user, getAccessTokenSilently, isAuthenticated);
-    //     },
-    //     enabled: isAuthenticated && !!user,
-    // })
-
     const {
         isPending: isUserProfilePending,
         data: userProfile,
@@ -208,7 +196,6 @@ function Dashboard() {
                 case 'dashboard':
                     return userProfile?.data?.userProfile ? (
                         <ProgressBoard
-
                             startDate={startDate}
                             pricePerPack={pricePerPack}
                             cigsPerPack={cigsPerPack}
@@ -259,8 +246,8 @@ function Dashboard() {
                 case 'coach':
                     return <CoachDashboard/>;
 
-                    case 'user-review':
-                        return <UserReviews/>
+                case 'user-review':
+                    return <UserReviews/>
 
                 default:
                     return <NotFoundBanner title="Không tìm thấy mục tương ứng"/>;
@@ -276,20 +263,20 @@ function Dashboard() {
 
         return (
             <>
-                {/* Desktop Sidebar */}
-                <div className='sticky top-[155px] self-start h-fit hidden md:block'>
+                {/* Desktop Sidebar - Only shows on large screens (1024px+) */}
+                <div className='sticky top-[155px] self-start h-fit hidden lg:block min-w-[280px] w-[280px]'>
                     <SidebarComponent
                         {...commonProps}
                         mode="inline"
                     />
                 </div>
 
-                {/* Mobile Sidebar */}
-                <div className='max-w-[30%] sticky top-[155px] self-start h-fit md:hidden'>
+                {/* Mobile/Tablet Sidebar - Horizontal at top for screens below 1024px */}
+                <div className='w-full sticky top-[0px] z-10 lg:hidden mb-4 bg-white shadow-sm rounded-lg p-3'>
                     <SidebarComponent
                         {...commonProps}
-                        collapse={true}
                         mode="horizontal"
+                        collapse={true}
                     />
                 </div>
             </>
@@ -311,19 +298,19 @@ function Dashboard() {
         <PageFadeWrapper>
             <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
                 <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
-                <div className="w-[1680px] flex flex-col max-h-[1500px] md:flex-row gap-4 px-1 py-4 md:px-4">
+
+                {/* Responsive Container */}
+                <div className="w-full max-w-[1680px] flex flex-col lg:flex-row gap-2 sm:gap-4 px-2 py-2 sm:px-4 sm:py-4 overflow-hidden">
                     {dashboardHandle(userRole)}
 
-                    <div className="w-full h-screen flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+                    {/* Main Content Area */}
+                    <div className="flex-1 min-h-full flex flex-col items-center gap-2 sm:gap-4 px-1 pb-4 sm:px-4 pt-2 lg:pt-0 overflow-y-auto min-w-0">
                         {renderBoard()}
                     </div>
                 </div>
             </div>
         </PageFadeWrapper>
-
     )
-
 }
-
 
 export default (Dashboard);

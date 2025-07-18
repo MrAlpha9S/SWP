@@ -66,6 +66,10 @@ const ProgressBoard = ({
         ? ['dataset-coach', userInfo?.auth0_id]
         : ['dataset', userInfo?.auth0_id];
 
+    useEffect(() => {
+        console.log(userInfo)
+    }, [userInfo])
+
     const {
         isPending: isDatasetPending,
         error: datasetError,
@@ -78,7 +82,7 @@ const ProgressBoard = ({
         },
         enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
         retry: 1,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        //staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
     const {isPending: isAchievedPending, data: achieved} = useQuery({
@@ -105,7 +109,7 @@ const ProgressBoard = ({
         },
         enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
         retry: 1,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        //staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
     useEffect(() => {
@@ -230,19 +234,6 @@ const ProgressBoard = ({
 
     // Check if all required data is available for calculation
     const isDataReady = useMemo(() => {
-        // console.log('Data ready check:', {
-        //     localUserCreationDate,
-        //     currentDate: !!currentDate,
-        //     localCheckInDataSet: Array.isArray(localCheckInDataSet),
-        //     cigsPerDay,
-        //     readinessValue,
-        //     stoppedDate,
-        //     isUserCreationDatePending,
-        //     isDatasetPending,
-        //     isAuthenticated,
-        //     userInfo: !!userInfo?.auth0_id
-        // });
-
         return !!(
             localUserCreationDate &&
             currentDate &&
@@ -270,11 +261,9 @@ const ProgressBoard = ({
     const cigsQuit = useMemo(() => {
         // Return null instead of 0 when data isn't ready
         if (!isDataReady) {
-            //console.log('cigsQuit: Data not ready, returning null');
             return null;
         }
 
-        //console.log('cigsQuit: Calculating with data ready');
         const startDay = new Date(readinessValue === 'relapse-support' ? stoppedDate : localUserCreationDate);
         const endDate = new Date(currentDate);
         let total = 0;
@@ -299,14 +288,12 @@ const ProgressBoard = ({
         }
 
         const result = Math.max(0, total);
-        //console.log('cigsQuit calculated:', result);
         return result;
     }, [isDataReady, localUserCreationDate, currentDate, localCheckInDataSet, cigsPerDay, readinessValue, stoppedDate]);
 
     const moneySaved = useMemo(() => {
         // Return null instead of 0 when cigsQuit isn't calculated yet
         if (cigsQuit === null || !pricePerCig) {
-            //console.log('moneySaved: Not ready, returning null');
             return null;
         }
         const result = Math.round(cigsQuit * pricePerCig);
@@ -455,9 +442,10 @@ const ProgressBoard = ({
     };
 
     return (
-        <div className='bg-white p-1 md:p-6 rounded-xl shadow-xl w-full max-w-4/5 space-y-4'>
-            {isPending ? ( <Skeleton active paragraph={{ rows: 2 }} /> ) : <div><QuoteCarousel/></div>}
-            {!from && <div className="flex items-center justify-between">
+        <div className='bg-white p-2 sm:p-4 md:p-6 rounded-xl shadow-xl w-full max-w-4xl mx-auto space-y-3 sm:space-y-4'>
+            {!from && (isPending ? ( <Skeleton active paragraph={{ rows: 2 }} /> ) : <div><QuoteCarousel/></div>)}
+
+            {!from && <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 {isPending ? (
                     <Skeleton.Button active/>
                 ) : (
@@ -466,36 +454,36 @@ const ProgressBoard = ({
                 {isPending ? (
                     <Skeleton.Input style={{width: 180}} active size="small"/>
                 ) : (
-                    <a href="#" className="text-sm text-primary-700 hover:underline">
+                    <a href="#" className="text-xs sm:text-sm text-primary-700 hover:underline">
                         What's a check-in and why are they important?
                     </a>
                 )}
             </div>}
 
-            <div ref={progressBoardRef} className='space-y-3'>
-                <div className="bg-primary-100 rounded-lg p-6 text-center">
-                    <h2 className="text-gray-600 text-sm font-medium">
+            <div ref={progressBoardRef} className='space-y-3 sm:space-y-4'>
+                <div className="bg-primary-100 rounded-lg p-4 sm:p-6 text-center">
+                    <h2 className="text-gray-600 text-xs sm:text-sm font-medium leading-relaxed">
                         {totalDaysPhrase}
                     </h2>
-                    <div className="flex justify-center items-baseline space-x-2 mt-2">
+                    <div className="flex justify-center items-baseline space-x-1 sm:space-x-2 mt-2 flex-wrap">
                         {isPending ? (
                             <Skeleton.Input style={{width: 250}} active/>
                         ) : (
                             <>
-                                <span className="text-4xl font-bold text-primary-800">{timeDifference.days}</span>
-                                <span className="text-sm text-gray-500">ngày</span>
-                                <span className="text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
-                                <span className="text-sm text-gray-500">giờ</span>
-                                <span className="text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
-                                <span className="text-sm text-gray-500">phút</span>
+                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.days}</span>
+                                <span className="text-xs sm:text-sm text-gray-500">ngày</span>
+                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.hours}</span>
+                                <span className="text-xs sm:text-sm text-gray-500">giờ</span>
+                                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-800">{timeDifference.minutes}</span>
+                                <span className="text-xs sm:text-sm text-gray-500">phút</span>
                             </>
                         )}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                     {[0, 1, 2].map((i) => (
-                        <div key={i} className="bg-primary-100 p-4 rounded-lg flex flex-col items-center">
+                        <div key={i} className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col items-center space-y-2">
                             {isCalculating ? (
                                 <Skeleton active paragraph={{ rows: 2 }} />
                             ) : (
@@ -503,20 +491,20 @@ const ProgressBoard = ({
                                     <div className="text-2xl">
                                         {
                                             [
-                                                <PiPiggyBankLight className="size-10 text-primary-800" />,
-                                                <IoLogoNoSmoking className="size-10 text-primary-800" />,
-                                                <FaTrophy className="size-9 text-primary-800" />
+                                                <PiPiggyBankLight className="size-8 sm:size-10 text-primary-800" />,
+                                                <IoLogoNoSmoking className="size-8 sm:size-10 text-primary-800" />,
+                                                <FaTrophy className="size-7 sm:size-9 text-primary-800" />
                                             ][i]
                                         }
                                     </div>
-                                    <div className="text-xl font-semibold text-primary-800">
+                                    <div className="text-lg sm:text-xl font-semibold text-primary-800 text-center">
                                         {i === 0
                                             ? moneySaved !== null ? `${moneySaved} VNĐ` : 'Đang tính...'
                                             : i === 1
                                                 ? cigsQuit !== null ? cigsQuit : 'Đang tính...'
                                                 : localAchieved?.length ?? 'Đang tính...'}
                                     </div>
-                                    <div className="text-sm text-gray-600">
+                                    <div className="text-xs sm:text-sm text-gray-600 text-center leading-relaxed">
                                         {from === 'coach-user'
                                             ? ['Số tiền người dùng tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]
                                             : ['Số tiền đã tiết kiệm', 'Số điếu đã bỏ', 'Huy hiệu đạt được'][i]}
@@ -527,24 +515,25 @@ const ProgressBoard = ({
                     ))}
                 </div>
 
-                <div className="bg-primary-100 p-4 rounded-lg flex flex-col text-center relative">
-                    {!from && <div className="absolute right-3 top-3">
+                <div className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col text-center relative">
+                    {!from && <div className="absolute right-2 sm:right-3 top-2 sm:top-3">
                         {!isPending && (
                             <a onClick={() => navigate('/onboarding/progress-board-startdate')}
-                               className="text-sm text-primary-700 hover:underline">
+                               className="text-xs sm:text-sm text-primary-700 hover:underline">
                                 Chỉnh sửa?
                             </a>
                         )}
                     </div>}
-                    <div className="text-2xl flex justify-center"><FaRegCalendarCheck
-                        className='size-9 text-primary-800 mb-1'/></div>
-                    <h3 className="text-lg font-semibold text-primary-800">
+                    <div className="text-2xl flex justify-center mb-2">
+                        <FaRegCalendarCheck className='size-7 sm:size-9 text-primary-800'/>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-primary-800 mb-2 leading-relaxed">
                         {from === 'coach-user'
                             ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
                             : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
                     </h3>
 
-                    <div className="text-sm text-gray-600">
+                    <div className="text-xs sm:text-sm text-gray-600">
                         {isPending ?
                             <Skeleton.Input style={{width: 160}} active/> :
                             readinessValue === 'ready' ?
@@ -556,36 +545,41 @@ const ProgressBoard = ({
             </div>
 
             {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (
-                <div className="bg-primary-100 p-4 rounded-lg flex flex-col items-center text-center relative">
-                    {!from && <div className="absolute right-3 top-3">
+                <div className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col items-center text-center relative">
+                    {!from && <div className="absolute right-2 sm:right-3 top-2 sm:top-3">
                         {!isPending && (
                             <a onClick={() => navigate('/onboarding/progress-board-plan')}
-                               className="text-sm text-primary-700 hover:underline">
+                               className="text-xs sm:text-sm text-primary-700 hover:underline">
                                 Chỉnh sửa?
                             </a>
                         )}
                     </div>}
-                    <div className="text-2xl flex justify-center"><BsGraphDown
-                        className='size-7 text-primary-800 mb-1'/></div>
-                    <h3 className="text-lg font-semibold text-primary-800">
+                    <div className="text-2xl flex justify-center mb-2">
+                        <BsGraphDown className='size-6 sm:size-7 text-primary-800'/>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-primary-800 mb-3 leading-relaxed">
                         {from === 'coach-user'
                             ? 'Số điếu thuốc theo kế hoạch và thực tế của người dùng'
                             : 'Số điếu thuốc theo kế hoạch và thực tế'}
                     </h3>
-                    <Select
-                        defaultValue="overview"
-                        variant="borderless"
-                        style={{ width: 120 }}
-                        onChange={handleSelectChange}
-                        options={[
-                            { value: 'plan', label: 'Kế hoạch' },
-                            { value: 'overview', label: 'Tổng quan' },
-                        ]}
-                    />
+
+                    <div className="mb-4">
+                        <Select
+                            defaultValue="overview"
+                            variant="borderless"
+                            style={{ width: 120 }}
+                            onChange={handleSelectChange}
+                            size="small"
+                            options={[
+                                { value: 'plan', label: 'Kế hoạch' },
+                                { value: 'overview', label: 'Tổng quan' },
+                            ]}
+                        />
+                    </div>
 
                     {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
-                        <div className='flex flex-col items-center justify-center'>
-                            <p>
+                        <div className='flex flex-col items-center justify-center space-y-3'>
+                            <p className="text-sm text-center">
                                 {from === 'coach-user'
                                     ? 'Người dùng chưa tạo kế hoạch cai thuốc.'
                                     : 'Bạn chưa tạo kế hoạch'}
@@ -596,61 +590,75 @@ const ProgressBoard = ({
                                 </CustomButton>
                             )}
                         </div>
-
                     }
+
                     {showWarning &&
-                        <p><p>
-                            {from === 'coach-user'
-                                ? 'Người dùng dường như vẫn hút thuốc sau khi kết thúc kế hoạch. Bạn có thể đề xuất họ bắt đầu lại.'
-                                : 'Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!'}
-                        </p>
-                        </p>}
+                        <div className="mb-4">
+                            <p className="text-sm text-center leading-relaxed text-amber-700">
+                                {from === 'coach-user'
+                                    ? 'Người dùng dường như vẫn hút thuốc sau khi kết thúc kế hoạch. Bạn có thể đề xuất họ bắt đầu lại.'
+                                    : 'Có vẻ bạn vẫn đang hút thuốc sau khi kết thúc kế hoạch. Đừng lo — bạn luôn có thể bắt đầu lại!'}
+                            </p>
+                        </div>
+                    }
+
                     {isPending ? (
                         <Skeleton.Input style={{ width: '100%', height: 300 }} active />
                     ) : mergedDataSet?.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={350}>
-                            <LineChart
-                                data={mergedDataSet}
-                                margin={{ top: 20, right: 30, left: 20, bottom: 25 }}
-                            >
-                                <Line
-                                    type="monotone"
-                                    dataKey="actual"
-                                    stroke="#ef4444"
-                                    dot={{ r: 3 }}
-                                    name="Đã hút"
-                                    connectNulls={true}
-                                />
-                                <Line
-                                    type="monotone"
-                                    dataKey="plan"
-                                    stroke="#14b8a6"
-                                    strokeDasharray="5 5"
-                                    dot={false}
-                                    name="Kế hoạch"
-                                    connectNulls={true}
-                                />
-                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                {quittingMethod === 'gradual-weekly' && getReferenceArea()}
-                                <ReferenceLine
-                                    x={
-                                        currentDate < new Date(expectedQuitDate)
-                                            ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
-                                            : ''
-                                    }
-                                    stroke="#115e59"
-                                    label="Hôm nay"
-                                />
-                                <XAxis dataKey="date" tick={<CustomizedAxisTick />} interval={1} />
-                                <YAxis />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend verticalAlign="top" />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        <div className="w-full overflow-x-auto">
+                            <ResponsiveContainer width="100%" height={300} minWidth={300}>
+                                <LineChart
+                                    data={mergedDataSet}
+                                    margin={{ top: 20, right: 10, left: 10, bottom: 25 }}
+                                >
+                                    <Line
+                                        type="monotone"
+                                        dataKey="actual"
+                                        stroke="#ef4444"
+                                        dot={{ r: 2 }}
+                                        strokeWidth={2}
+                                        name="Đã hút"
+                                        connectNulls={true}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="plan"
+                                        stroke="#14b8a6"
+                                        strokeDasharray="5 5"
+                                        strokeWidth={2}
+                                        dot={false}
+                                        name="Kế hoạch"
+                                        connectNulls={true}
+                                    />
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                    {quittingMethod === 'gradual-weekly' && getReferenceArea()}
+                                    <ReferenceLine
+                                        x={
+                                            currentDate < new Date(expectedQuitDate)
+                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
+                                                : ''
+                                        }
+                                        stroke="#115e59"
+                                        label="Hôm nay"
+                                    />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={<CustomizedAxisTick />}
+                                        interval={1}
+                                        fontSize={12}
+                                    />
+                                    <YAxis fontSize={12} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        verticalAlign="top"
+                                        wrapperStyle={{fontSize: '12px'}}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
                     ) : (
-                        <div className="text-center text-gray-500">Không có dữ liệu để hiển thị.</div>
+                        <div className="text-center text-gray-500 text-sm">Không có dữ liệu để hiển thị.</div>
                     )}
-
                 </div>
             )}
 
@@ -658,7 +666,7 @@ const ProgressBoard = ({
                 {isPending ? (
                     <Skeleton.Input style={{width: 160}} active/>
                 ) : (
-                    <CustomButton type='secondary' onClick={() => exportAsBase64()} href="#" className="text-sm text-primary-700 hover:underline">
+                    <CustomButton type='secondary' onClick={() => exportAsBase64()} className="w-full sm:w-auto">
                         🔗 Chia sẻ tiến trình
                     </CustomButton>
                 )}

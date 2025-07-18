@@ -167,7 +167,6 @@ const Settings = () => {
                     </div>
                 </div>
             </div>
-            <QuoteCarousel/>
         </PageFadeWrapper>
     );
 };
