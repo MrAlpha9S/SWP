@@ -311,6 +311,32 @@ const getAllSocialPosts = async () => {
     }
 }
 
+// Xóa bài viết theo post_id
+const deletePostById = async (post_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query('DELETE FROM social_posts WHERE post_id = @post_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deletePostById', error);
+        return false;
+    }
+};
+
+// Lấy tất cả bình luận
+const getAllComments = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query('SELECT * FROM social_comments');
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getAllComments', error);
+        return [];
+    }
+};
 const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at ) => {
     try {
         const pool = await poolPromise;
@@ -333,6 +359,19 @@ const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at 
     }
 }
 
+// Xóa bình luận theo comment_id
+const deleteCommentById = async (comment_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('comment_id', sql.Int, comment_id)
+            .query('DELETE FROM social_comments WHERE comment_id = @comment_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deleteCommentById', error);
+        return false;
+    }
+};
 
 
-module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };
+module.exports = { getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, deletePostById, getAllComments, deleteCommentById, PostSocialPosts, PostAddComment, AddLike, getAllSocialPosts };

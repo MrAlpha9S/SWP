@@ -44,8 +44,10 @@ import {onMessage} from 'firebase/messaging'
 import {messaging} from '../notifications/firebase.js'
 import {updateUserToken} from "./components/utils/userUtils.js";
 import Settings from "./pages/profilePage/settings.jsx";
+import AdminDashboard from './pages/adminPage/adminDashboard.jsx';
 
 const Context = createContext({name: 'Default'});
+
 
 
 function AppContent() {
@@ -246,6 +248,7 @@ function AppContent() {
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                         <Route path="/coach-register" element={<CoachRegistration/>}></Route>
+                        <Route path="/admin" element={<AdminDashboard />} />
                     </Routes>
                 </AnimatePresence>
             </div>

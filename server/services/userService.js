@@ -662,6 +662,75 @@ const getUserReasonsCSVByAuth0Id = async (auth0Id) => {
 };
 
 
+// Lấy user theo user_id
+const getUserById = async (user_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .query('SELECT * FROM users WHERE user_id = @user_id');
+        return result.recordset[0];
+    } catch (error) {
+        console.error('error in getUserById', error);
+        return null;
+    }
+};
+
+// Cập nhật user theo user_id
+const updateUserById = async (user_id, data) => {
+    try {
+        const pool = await poolPromise;
+        const fields = [];
+        if (data.username !== undefined) fields.push('username = @username');
+        if (data.email !== undefined) fields.push('email = @email');
+        if (data.avatar !== undefined) fields.push('avatar = @avatar');
+        if (data.role !== undefined) fields.push('role = @role');
+        if (data.isBanned !== undefined) fields.push('isBanned = @isBanned');
+        if (fields.length === 0) return false;
+        const query = `UPDATE users SET ${fields.join(', ')} WHERE user_id = @user_id`;
+        const request = pool.request().input('user_id', sql.Int, user_id);
+        if (data.username !== undefined) request.input('username', sql.NVarChar, data.username);
+        if (data.email !== undefined) request.input('email', sql.NVarChar, data.email);
+        if (data.avatar !== undefined) request.input('avatar', sql.NVarChar(sql.MAX), data.avatar);
+        if (data.role !== undefined) request.input('role', sql.NVarChar, data.role);
+        if (data.isBanned !== undefined) request.input('isBanned', sql.Bit, data.isBanned);
+        const result = await request.query(query);
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in updateUserById', error);
+        return false;
+    }
+};
+
+// Xóa user theo user_id
+const deleteUserById = async (user_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .query('DELETE FROM users WHERE user_id = @user_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deleteUserById', error);
+        return false;
+    }
+};
+
+// Khóa/mở khóa user theo user_id
+const toggleBanUserById = async (user_id, isBanned) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .input('isBanned', sql.Bit, isBanned)
+            .query('UPDATE users SET isBanned = @isBanned WHERE user_id = @user_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in toggleBanUserById', error);
+        return false;
+    }
+};
+
 module.exports = {
     userExists,
     createUser,
@@ -689,5 +758,9 @@ module.exports = {
     updateUserFCMToken,
     getUserFcmTokenFromAuth0Id,
     updateUserTimesForPush,
-    getUserReasonsCSVByAuth0Id
+    getUserReasonsCSVByAuth0Id,
+    getUserById,
+    updateUserById,
+    deleteUserById,
+    toggleBanUserById
 };

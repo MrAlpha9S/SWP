@@ -172,5 +172,41 @@ const fillMissingCheckInData = async (userAuth0Id, checkInResult) => {
     return result.sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
 }
 
+// Lấy tất cả check-in
+const getAllCheckIns = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT * FROM checkin_log');
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getAllCheckIns', error);
+        return [];
+    }
+};
 
-module.exports = {postCheckIn, getCheckInLogDataset, getCheckInDataService, fillMissingCheckInData};
+// Lấy chi tiết check-in theo log_id
+const getCheckInById = async (log_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('log_id', sql.Int, log_id).query('SELECT * FROM checkin_log WHERE log_id = @log_id');
+        return result.recordset[0];
+    } catch (error) {
+        console.error('error in getCheckInById', error);
+        return null;
+    }
+};
+
+// Xóa check-in theo log_id
+const deleteCheckInById = async (log_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('log_id', sql.Int, log_id).query('DELETE FROM checkin_log WHERE log_id = @log_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in deleteCheckInById', error);
+        return false;
+    }
+};
+
+
+module.exports = {postCheckIn, getCheckInLogDataset, getCheckInDataService, fillMissingCheckInData, getAllCheckIns, getCheckInById, deleteCheckInById};

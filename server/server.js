@@ -30,6 +30,7 @@ const coachRouter = require("./routes/coachRoute");
 const achievementRouter = require("./routes/achievementRoute");
 const reportRouter = require("./routes/reportRoute")
 const {scheduleUserPushes} = require("./utils/pushScheduler");
+const adminRouter = require("./routes/adminRoutes");
 
 
 const server = http.createServer(app);
@@ -251,6 +252,7 @@ io.on('connection', (socket) => {
                 });
                 break;
 
+
             case 'conversation_created_successfully':
                 // Broadcast successful conversation creation
                 io.emit('member_interaction', {
@@ -340,6 +342,7 @@ app.use('/social-posts', socialPostRouter)
 app.use('/messager', messageRouter)
 app.use('/subscription', subscriptionRouter)
 app.use('/payment', paymentRouter)
+app.use('/admin', adminRouter)
 app.use('/coaches', coachRouter)
 app.use('/achievements', achievementRouter)
 app.use('/reports', reportRouter)
