@@ -272,5 +272,4 @@ const handleAddLike = async (req, res) => {
 
 
 
-module.exports = {handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
-module.exports = { handleGetIsPendingPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike };
+module.exports = {handleGetIsPendingPosts, handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};

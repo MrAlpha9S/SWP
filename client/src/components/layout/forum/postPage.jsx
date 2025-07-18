@@ -8,10 +8,10 @@ import React, { useEffect, useState } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
 import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
 import { AddComment, AddLike } from '../../utils/forumUtils.js'; // Added AddReport import
-import {AddReport} from '../../utils/reportUtils.js'
+import { AddReport } from '../../utils/reportUtils.js'
 import { ReportModal } from './postpagecomponents/reportModal.jsx';
 //import {Comment} from './postpagecomponents/comment.jsx'
-import {ReplyForm} from './postpagecomponents/replyform.jsx'
+import { ReplyForm } from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
 import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
@@ -314,38 +314,39 @@ export default function PostPage() {
     }
 
     return (
-        <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
-            <div className="space-y-6 w-[92%]">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
-                    <p className="text-sm text-gray-600">
-                        Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
-                    </p>
-                </div>
+        <PageFadeWrapper>
+            <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
+                <div className="space-y-6 w-[92%]">
+                    <div>
+                        <h1 className="text-3xl font-bold text-primary-800 mb-2">{post.title}</h1>
+                        <p className="text-sm text-gray-600">
+                            Đăng tại <span className="text-primary-600 font-medium">{post.category_name}</span>
+                        </p>
+                    </div>
 
 
-                <div className="bg-white p-6 rounded-xl shadow space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                            {post.avatar ? (
-                                <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
-                            ) : (
-                                <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
-                                </div>
+                    <div className="bg-white p-6 rounded-xl shadow space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                                {post.avatar ? (
+                                    <img className='w-full h-full object-cover rounded-full' src={post.avatar} alt={post.username} />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
+                                        <span className="text-gray-600 text-sm">{post.username?.[0]?.toUpperCase()}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex gap-1">
+                                <p>đăng bởi </p>
+                                <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
+                            </div>
+                            {user.sub === post.auth0_id && (
+                                <div
+                                    className="text-primary-600 ml-auto hover:underline cursor-pointer"
+                                    onClick={() => navigate(`/forum/edit/${post.post_id}`)}
+                                >Sửa</div>
                             )}
                         </div>
-                        <div className="flex gap-1">
-                            <p>đăng bởi </p>
-                            <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
-                        </div>
-                        {user.sub === post.auth0_id && (
-                            <div 
-                            className="text-primary-600 ml-auto hover:underline cursor-pointer"
-                            onClick={() => navigate(`/forum/edit/${post.post_id}`)}
-                            >Sửa</div>
-                        )}
-                    </div>
 
                         <div className="text-gray-800 space-y-3 text-[15px] leading-relaxed">
                             <div dangerouslySetInnerHTML={{ __html: post.content }} />
@@ -489,7 +490,7 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
                     )}
                     {likes || 0} Likes
                 </button>
-                <button 
+                <button
                     className='flex items-center gap-2 hover:text-red-500 transition-colors'
                     onClick={() => onReportClick('comment', commentId, author)}
                 >

@@ -394,4 +394,4 @@ WHERE sp.is_pending = 1
     }
 }
 
-module.exports = { GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };
+module.exports = { getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };
