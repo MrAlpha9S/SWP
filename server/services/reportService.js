@@ -25,5 +25,46 @@ VALUES (@user_id, @post_id, @comment_id, @reason, @description, @created_at);
     }
 }
 
+const GetReports = async () => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`SELECT sr.report_id, sp.post_id, sc.comment_id, u_reporter.username AS reporter, sr.created_at AS report_time, u_post_author.username AS post_author, u_comment_author.username AS comment_author,
+sp.title AS post_title, sp.content AS post_content, sp.created_at AS post_created_at,
+sc.content AS comment_content, sc.created_at AS comment_created_at
+FROM social_reports sr
+LEFT JOIN social_posts sp ON sr.post_id = sp.post_id
+LEFT JOIN social_comments sc ON sr.comment_id = sc.comment_id
+LEFT JOIN users u_reporter ON u_reporter.user_id = sr.user_id
+LEFT JOIN users u_post_author ON u_post_author.user_id = sp.user_id
+LEFT JOIN users u_comment_author ON u_comment_author.user_id = sc.user_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in GetReports');
+        }
+        return result.recordsets;
+    } catch (err) {
+        console.error('SQL error at GetReports', err);
+        return [];
+    }
+}
 
-module.exports = {AddReport}
+const DeleteReport = async (report_id) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('report_id', sql.Int, report_id)
+            .query(`DELETE social_reports
+WHERE report_id = @report_id
+`);
+        if (result.rowsAffected[0] === 0) {
+            throw new Error('error in GetReports');
+        }
+        return result.recordsets;
+    } catch (err) {
+        console.error('SQL error at GetReports', err);
+        return [];
+    }
+}
+
+module.exports = { DeleteReport, GetReports, AddReport }

@@ -232,3 +232,22 @@ export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthent
 
     return await res.json();
 }
+
+export async function DeleteComment(user, getAccessTokenSilently, isAuthenticated, comment_id) {
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(`http://localhost:3000/social-posts/deletecomment`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ comment_id: comment_id})
+    });
+
+
+    return await res.json();
+}

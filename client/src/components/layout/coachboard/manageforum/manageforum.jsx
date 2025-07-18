@@ -1,6 +1,7 @@
 import React from 'react';
 import {Tabs} from 'antd';
 import IsPendingPost from './ispendingpost'
+import Report from './report'
 
 const onChange = key => {
     console.log(key);
@@ -14,7 +15,7 @@ const items = [
     {
         key: '2',
         label: 'Báo cáo',
-        children: '',
+        children: <Report/>,
     },
 ];
 const ManageForum = () => {

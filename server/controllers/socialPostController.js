@@ -1,5 +1,25 @@
-const {DeleteSocialPosts, ApprovePost, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
+const {DeleteComment, DeleteSocialPosts, ApprovePost, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
 const { processAchievementsWithNotifications } = require("../services/achievementService");
+
+const handleDeleteComment = async (req, res) => {
+    const {comment_id}  = req.body;
+    console.log('handleDeleteComment:', comment_id)
+
+    if (!comment_id) {
+        return res.status(400).json({ success: false, message: 'error in handleDeleteComment: params is required', data: null });
+    }
+
+    try {
+        const deleteSP = await DeleteComment(comment_id);
+        if (!deleteSP) {
+            return res.status(200).json({ success: true, message: 'Cant handleDeleteComment', data: null });
+        }
+        return res.status(200).json({ success: true, message: 'handleDeleteComment successfully', data: deleteSP });
+    } catch (error) {
+        console.error('Error in handleDeleteComment:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error', data: null });
+    }
+}
 
 const handleApprovePost = async (req, res) => {
     const {post_id}  = req.body;
@@ -25,7 +45,7 @@ const handleGetIsPendingPosts = async (req, res) => {
         const result = await GetIsPendingPosts();
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 success: success,
                 message: 'No posts found',
                 data: []
@@ -291,4 +311,4 @@ const handleAddLike = async (req, res) => {
 
 
 
-module.exports = {handleApprovePost, handleGetIsPendingPosts, handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};
+module.exports = {handleDeleteComment, handleApprovePost, handleGetIsPendingPosts, handleDeleteSocialPosts, handleUpdateSocialPosts, getPostAndCommentCount, handleGetPostByCategory, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike};

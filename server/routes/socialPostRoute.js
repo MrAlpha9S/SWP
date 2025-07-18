@@ -1,7 +1,7 @@
 const express = require('express');
 const socialPostRouter = express.Router();
 
-const {handleApprovePost, handleDeleteSocialPosts, handleUpdateSocialPosts, handleGetIsPendingPosts, getPostAndCommentCount, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike} = require("../controllers/socialPostController");
+const {handleDeleteComment, handleApprovePost, handleDeleteSocialPosts, handleUpdateSocialPosts, handleGetIsPendingPosts, getPostAndCommentCount, handleGetPosts, handleGetPostComments, handlePostSocialPosts, handleAddComment, handleAddLike} = require("../controllers/socialPostController");
 
 socialPostRouter.get('/get-post-comment-count', getPostAndCommentCount)
 socialPostRouter.get('/', handleGetPosts)
@@ -13,6 +13,7 @@ socialPostRouter.post('/update', handleUpdateSocialPosts)
 socialPostRouter.post('/delete', handleDeleteSocialPosts)
 socialPostRouter.get('/getIsPendingPosts', handleGetIsPendingPosts)
 socialPostRouter.post('/approvepost', handleApprovePost)
+socialPostRouter.post('/deletecomment', handleDeleteComment)
 
 
 module.exports = socialPostRouter;
