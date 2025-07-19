@@ -19,6 +19,23 @@ if ('serviceWorker' in navigator) {
         .catch(console.error);
 }
 
+if (import.meta.env.MODE === 'development') {
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+        const message = args.join(' ');
+        if (
+            message.includes('clipboard-write') ||
+            message.includes('third-party') ||
+            message.includes('Cookie') ||
+            message.includes('payos') ||
+            message.includes('pay.payos.vn')
+        ) {
+            return;
+        }
+        originalWarn.apply(console, args);
+    };
+}
+
 
 createRoot(document.getElementById('root')).render(
     <ConfigProvider

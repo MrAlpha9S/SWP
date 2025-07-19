@@ -85,7 +85,7 @@ function AppContent() {
 
         if (!user && !isAuthenticated) return
         setupFCM();
-    }, [getAccessTokenSilently, isAuthenticated, user, notificationAllowed, updateFCMMutation, openNotification]);
+    }, [ isAuthenticated, user, notificationAllowed]);
 
 
     const { isPending, data: userData } = useQuery({
@@ -138,6 +138,7 @@ function AppContent() {
                     setCurrentStepDashboard('coach-user')
                     setSelectedUserAuth0Id(data.userAuth0Id)
                 }
+                queryClient.invalidateQueries(['coach-info'])
                 openNotification('coach_selected', data, onClick);
             });
 
@@ -211,7 +212,6 @@ function AppContent() {
 
         connectSocket();
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData, openNotification, navigate, setCurrentStepDashboard, setSelectedUserAuth0Id]);
-
 
     const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 

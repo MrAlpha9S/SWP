@@ -144,6 +144,8 @@ function SubscriptionPage() {
                 paymentMutation.mutate(paymentInfo);
             } else if (from === 'onboarding-step-5-payment') {
                 paymentMutation.mutate(paymentInfo);
+            } else {
+                paymentMutation.mutate(paymentInfo);
             }
 
         }
@@ -388,7 +390,9 @@ function SubscriptionPage() {
                     centered
                     footer={null}
                     maskClosable={false}
-                    bodyStyle={{height: '550px'}}
+                    styles={{
+                        body: { height: '550px' }
+                    }}
                 >
                     <div id="payos-container" style={{
                         height: '100%',

@@ -326,7 +326,7 @@ const SetPlan = ({
                                                 mà {from === 'coach-user' ? 'người dùng' : 'bạn'} quyết định ngừng hút</h3>
                                         </div>
 
-                                        <DatePicker className='h-[42px]' onChange={(date, dateString) => {
+                                        <DatePicker minDate={dayjs().add(1, 'day')} className='h-[42px]' onChange={(date, dateString) => {
                                             setExpectedQuitDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                                         }} format={'DD-MM-YYYY'} value={expectedQuitDate ? dayjs(expectedQuitDate) : ''}
                                                     allowClear={false}/>
@@ -469,7 +469,7 @@ const SetPlan = ({
                             }}>Lưu</CustomButton>}
                         </>
                     )}</> :
-                <>
+                readinessValue === 'ready' ? <>
                     <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
                         6. Lên kế hoạch
                     </h2>
@@ -494,7 +494,7 @@ const SetPlan = ({
                             Tìm hiểu thêm <FaArrowRight/>
                         </CustomButton>
                     </div>
-                </>
+                </> : readinessValue === 'relapse-support' && <p>Bạn đã bỏ thuốc, bạn có thể bỏ qua bước này</p>
             }
         </div>
     );

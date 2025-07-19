@@ -67,7 +67,7 @@ const Readiness = () => {
                     })}
                 </div>
 
-                <DatePicker className='h-[42px]' onChange={(date, dateString) => {
+                <DatePicker minDate={dayjs()} className='h-[42px]' onChange={(date, dateString) => {
                     setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
                 }} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>
             </>}
