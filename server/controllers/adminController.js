@@ -1,6 +1,5 @@
 // USER CONTROLLER
 const adminService = require('../services/adminService');
-const { poolPromise, sql } = require('../configs/sqlConfig');
 
 // --- USER ---
 const handleGetAllUsers = async (req, res) => {
