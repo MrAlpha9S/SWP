@@ -240,58 +240,82 @@ const SetPlan = ({
 
     return (
         <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'} space-y-4`}>
-            {userInfo && userInfo.sub_id !== 1 ? <>
-                    {from !== 'coach-user' && <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                        6. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}
-                    </h2>}
+            {/* Header for paid users and coach users */}
+            {(userInfo?.sub_id === 2 || from === 'coach-user') && from !== 'coach-user' && (
+                <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
+                    6. {readinessValue === 'ready' ? ' Lên kế hoạch' : ' Kết quả & theo dõi'}
+                </h2>
+            )}
 
-                    {readinessValue === "ready" &&
+            {/* Handle relapse-support case for both free and paid users */}
+            {readinessValue === 'relapse-support' && (
+                <p>Bạn đã bỏ thuốc, bạn có thể bỏ qua bước này</p>
+            )}
+
+            {/* Handle ready case */}
+            {readinessValue === 'ready' && (
+                <>
+                    {/* Free user - show promotional content */}
+                    {userInfo?.sub_id === 1 && (
                         <>
-                            {from !== 'coach-user' && <div className="text-left text-sm md:text-base space-y-4 my-4">
+                            <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
+                                6. Lên kế hoạch
+                            </h2>
+                            <div className="text-left text-sm md:text-base">
                                 <p>
-                                    Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ
-                                    thuốc.
-                                    Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng
-                                    bước
+                                    Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ thuốc.
+                                    Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng bước
                                     tiến bộ ra sao.
-                                    Bạn hãy chọn ngày bắt đầu, số lượng thuốc bạn hút mỗi ngày và tốc độ bạn muốn giảm dần.
-                                    Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần hoặc đặt
-                                    ra
-                                    ngày muốn bỏ hoàn toàn.
-                                    Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi, duy trì
-                                    và
-                                    đạt được mục tiêu bỏ thuốc.
                                 </p>
-                                <div><strong>Lưu ý:</strong> Bạn có thể tự tạo kế hoạch hoặc nhờ Huấn luyện viên hỗ trợ.
-                                    Nếu muốn tự tạo, hãy điền thông tin phía dưới.
-                                    Nếu muốn Huấn luyện viên hỗ trợ, nhấn nút <strong>“Nhờ Huấn luyện viên”</strong> bên dưới – thông tin hiện tại <strong>sẽ được lưu</strong> và bạn sẽ được đưa đến khung trò chuyện.
+                                <p className="mt-2">
+                                    Chức năng này dành riêng cho người dùng <strong>Premium</strong>. Bạn sẽ có thể:
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 mt-2">
+                                    <li>Tự lên kế hoạch bỏ thuốc với lộ trình rõ ràng và dễ dàng theo dõi</li>
+                                    <li><strong>Hoặc</strong>, nếu cần, <strong>làm việc trực tiếp với Huấn luyện
+                                        viên</strong> của chúng tôi để lên một kế hoạch phù hợp cho bạn.
+                                    </li>
+                                    <li>Chat 1-1 với Huấn luyện viên 24/24, nhận sự giúp đỡ bất cứ lúc nào.</li>
+                                </ul>
+                                <CustomButton onClick={() => navigate('/subscription/onboarding-step-5')}
+                                              className="mt-5 inline-flex items-center gap-2">
+                                    Tìm hiểu thêm <FaArrowRight/>
+                                </CustomButton>
+                            </div>
+                        </>
+                    )}
+
+                    {/* Paid user or coach user - show plan creation functionality */}
+                    {(userInfo?.sub_id === 2 || from === 'coach-user') && (
+                        <>
+                            {from !== 'coach-user' && (
+                                <div className="text-left text-sm md:text-base space-y-4 my-4">
+                                    <p>
+                                        Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ
+                                        thuốc.
+                                        Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng
+                                        bước
+                                        tiến bộ ra sao.
+                                        Bạn hãy chọn ngày bắt đầu, số lượng thuốc bạn hút mỗi ngày và tốc độ bạn muốn giảm dần.
+                                        Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần hoặc đặt
+                                        ra
+                                        ngày muốn bỏ hoàn toàn.
+                                        Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi, duy trì
+                                        và
+                                        đạt được mục tiêu bỏ thuốc.
+                                    </p>
+                                    <div><strong>Lưu ý:</strong> Bạn có thể tự tạo kế hoạch hoặc nhờ Huấn luyện viên hỗ trợ.
+                                        Nếu muốn tự tạo, hãy điền thông tin phía dưới.
+                                        Nếu muốn Huấn luyện viên hỗ trợ, nhấn nút <strong>"Nhờ Huấn luyện viên"</strong> bên dưới – thông tin hiện tại <strong>sẽ được lưu</strong> và bạn sẽ được đưa đến khung trò chuyện.
+                                    </div>
+                                    <CustomButton onClick={() => {
+                                        setCurrentStepDashboard('coach')
+                                        navigate('/post-onboarding')
+                                    }}>Nhờ huấn luyện viên</CustomButton>
                                 </div>
-                                <CustomButton onClick={() => {
-                                    setCurrentStepDashboard('coach')
-                                    navigate('/post-onboarding')
-                                }}>Nhờ huấn luyện viên</CustomButton>
-                            </div>}
+                            )}
 
                             <form className="w-[60%] flex flex-col gap-3">
-
-                                {/*<label htmlFor="startDate" className="block text-sm md:text-base text-gray-700">*/}
-                                {/*    Hãy chọn ngày mà bạn quyết định bắt đầu hành trình cai thuốc:*/}
-                                {/*</label>*/}
-
-                                {/*<div className='my-[-30]'>*/}
-                                {/*    {errors.map((error, index) => {*/}
-                                {/*        if (error.location === "startDate") {*/}
-                                {/*            return (*/}
-                                {/*                <ErrorText key={index}>{error.message}</ErrorText>*/}
-                                {/*            )*/}
-                                {/*        }*/}
-                                {/*    })}*/}
-                                {/*</div>*/}
-
-                                {/*<DatePicker className='h-[42px]' onChange={(date, dateString) => {*/}
-                                {/*    setStartDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);*/}
-                                {/*}} format={'DD-MM-YYYY'} value={startDate ? dayjs(startDate) : ''} allowClear={false}/>*/}
-
                                 <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
                                 <div className=''>
                                     {errors.map((error, index) => {
@@ -317,7 +341,6 @@ const SetPlan = ({
                                 >
                                     Tuỳ chỉnh từng giai đoạn cai thuốc
                                 </Checkbox>
-
 
                                 {(quittingMethod === "target-date") ? (
                                     <>
@@ -365,26 +388,21 @@ const SetPlan = ({
                                             onChange={(e) => setCigsReduced(Number(e.target.value))}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
-
                                     </>
                                 )}
-
                             </form>
 
-                        </>}
+                            {useCustomStages && (
+                                <CustomStageEditor
+                                    startDate={startDate}
+                                    cigsPerDay={cigsPerDay}
+                                    customStages={customStages}
+                                    setCustomStages={setCustomStages}
+                                    from={from}
+                                    planLog={planLog}
+                                />
+                            )}
 
-                    {useCustomStages && (
-                        <CustomStageEditor
-                            startDate={startDate}
-                            cigsPerDay={cigsPerDay}
-                            customStages={customStages}
-                            setCustomStages={setCustomStages}
-                            from={from}
-                            planLog={planLog}
-                        />
-                    )}
-                    {readinessValue === 'ready' && (
-                        <>
                             <CustomButton type="primary" onClick={createPlan}>Tạo kế hoạch</CustomButton>
 
                             {planLog.length > 0 && (
@@ -464,38 +482,16 @@ const SetPlan = ({
                                     </ResponsiveContainer>
                                 </>
                             )}
-                            {from === 'coach-user' && <CustomButton type="primary" onClick={() => {
-                                if (validateCoachPlan()) handleSavePlan()
-                            }}>Lưu</CustomButton>}
+
+                            {from === 'coach-user' && (
+                                <CustomButton type="primary" onClick={() => {
+                                    if (validateCoachPlan()) handleSavePlan()
+                                }}>Lưu</CustomButton>
+                            )}
                         </>
-                    )}</> :
-                readinessValue === 'ready' ? <>
-                    <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
-                        6. Lên kế hoạch
-                    </h2>
-                    <div className="text-left text-sm md:text-base">
-                        <p>
-                            Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ thuốc.
-                            Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng bước
-                            tiến bộ ra sao.
-                        </p>
-                        <p className="mt-2">
-                            Chức năng này dành riêng cho người dùng <strong>Premium</strong>. Bạn sẽ có thể:
-                        </p>
-                        <ul className="list-disc list-inside space-y-1 mt-2">
-                            <li>Tự lên kế hoạch bỏ thuốc với lộ trình rõ ràng và dễ dàng theo dõi</li>
-                            <li><strong>Hoặc</strong>, nếu cần, <strong>làm việc trực tiếp với Huấn luyện
-                                viên</strong> của chúng tôi để lên một kế hoạch phù hợp cho bạn.
-                            </li>
-                            <li>Chat 1-1 với Huấn luyện viên 24/24, nhận sự giúp đỡ bất cứ lúc nào.</li>
-                        </ul>
-                        <CustomButton onClick={() => navigate('/subscription/onboarding-step-5')}
-                                      className="mt-5 inline-flex items-center gap-2">
-                            Tìm hiểu thêm <FaArrowRight/>
-                        </CustomButton>
-                    </div>
-                </> : readinessValue === 'relapse-support' && <p>Bạn đã bỏ thuốc, bạn có thể bỏ qua bước này</p>
-            }
+                    )}
+                </>
+            )}
         </div>
     );
 };
