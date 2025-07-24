@@ -222,6 +222,7 @@ const assignUserToCoachController = async (req, res) => {
                 userAuth0Id,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
+
             return res.status(200).json({success: true, message: "Assign successful"});
         } else {
             return res.status(500).json({success: false, message: "Assign failed"});

@@ -5,8 +5,7 @@ import {
     CalendarOutlined,
     MessageOutlined,
     UserOutlined,
-    CheckOutlined,
-    EyeOutlined
+    CheckOutlined
 } from '@ant-design/icons';
 import { RiUserCommunityFill } from 'react-icons/ri';
 import { useQuery, useMutation, useQueries } from '@tanstack/react-query';
@@ -19,7 +18,7 @@ import {
 import { queryClient } from "../../../main.jsx";
 import { useAuth0 } from "@auth0/auth0-react";
 import { formatUtcToLocalString } from "../../utils/dateUtils.js";
-import {useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
+import { useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore } from "../../../stores/store.js";
 
 const { Title, Text } = Typography;
 
@@ -27,28 +26,37 @@ const iconMap = {
     plan: <CalendarOutlined style={{ color: '#14b8a6' }} />,
     message: <MessageOutlined style={{ color: '#0d9488' }} />,
     coach: <UserOutlined style={{ color: '#0f766e' }} />,
-    community: <RiUserCommunityFill style={{ color: '#0d9488' }} />
+    community: <RiUserCommunityFill style={{ color: '#8b5cf6' }} />,
+    system: <BellOutlined style={{ color: '#f59e0b' }} />
 };
 
 const typeLabelMap = {
     plan: 'Kế hoạch',
     message: 'Tin nhắn',
     coach: 'Huấn luyện viên',
-    community: 'Cộng đồng'
+    community: 'Cộng đồng',
+    system: 'Hệ thống'
 };
 
-const tabTypes = ['all', 'plan', 'message', 'coach', 'community'];
+const tagColorMap = {
+    plan: '#14b8a6',
+    message: '#0d9488',
+    coach: '#0f766e',
+    community: '#8b5cf6',
+    system: '#f59e0b'
+};
+
+const tabTypes = ['all', 'plan', 'message', 'coach', 'community', 'system'];
 
 function Notifications() {
     const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
     const [activeTab, setActiveTab] = useState('all');
     const [page, setPage] = useState(1);
     const pageSize = 10;
-    const {setCurrentStepDashboard} = useCurrentStepDashboard()
-    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
-    const { userInfo } = useUserInfoStore()
+    const { setCurrentStepDashboard } = useCurrentStepDashboard();
+    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore();
+    const { userInfo } = useUserInfoStore();
 
-    // Fetch notifications
     const { data: notificationsData } = useQuery({
         queryKey: ['notifications', user?.sub, activeTab, page],
         queryFn: () => getNotifications(user, getAccessTokenSilently, isAuthenticated, page, pageSize, activeTab),
@@ -58,7 +66,6 @@ function Notifications() {
     const notifications = notificationsData?.data || [];
     const total = notificationsData?.pagination?.total || 0;
 
-    // Fetch unread counts
     const unreadResults = useQueries({
         queries: tabTypes.map(type => ({
             queryKey: ['unread-count', user?.sub, type],
@@ -92,11 +99,11 @@ function Notifications() {
         key: type,
         label: (
             <span>
-        {type === 'all' ? 'Tất cả' : typeLabelMap[type]}
+                {type === 'all' ? 'Tất cả' : typeLabelMap[type]}
                 {unreadCounts[type] > 0 && (
                     <Badge count={unreadCounts[type]} size="small" style={{ backgroundColor: '#14b8a6', marginLeft: 8 }} />
                 )}
-      </span>
+            </span>
         )
     }));
 
@@ -110,13 +117,19 @@ function Notifications() {
         switch (type) {
             case 'message':
                 if (currentUserRole === 'Coach') {
-                    setSelectedUserAuth0Id(noti.from)
-                    setCurrentStepDashboard('coach-user')
+                    setSelectedUserAuth0Id(noti.from);
+                    setCurrentStepDashboard('coach-user');
                 } else {
-                    setCurrentStepDashboard('coach')
+                    setCurrentStepDashboard('coach');
                 }
+                break;
+                case 'system':
+                    setCurrentStepDashboard('badges');
+                    break;
+            default:
+                break;
         }
-    }
+    };
 
     return (
         <div className="notification-container w-full">
@@ -142,7 +155,7 @@ function Notifications() {
                     activeKey={activeTab}
                     onChange={(key) => {
                         setActiveTab(key);
-                        setPage(1); // reset page when tab changes
+                        setPage(1);
                     }}
                     items={tabItems}
                     className="notification-tabs"
@@ -154,7 +167,10 @@ function Notifications() {
                     renderItem={(item) => (
                         <List.Item
                             className={`notification-item ${!item.is_read ? 'unread' : 'read'}`}
-                            onClick={() => !item.is_read && markOneMutation.mutate(item.noti_id)}
+                            onClick={() => {
+                                if (!item.is_read) markOneMutation.mutate(item.noti_id);
+                                handleOnClickNoti(item);
+                            }}
                         >
                             <List.Item.Meta
                                 avatar={
@@ -168,13 +184,7 @@ function Notifications() {
                                         <Text strong={!item.is_read} className="title-text">
                                             {item.noti_title}
                                         </Text>
-                                        <Tag
-                                            color={
-                                                item.type === 'plan' ? '#14b8a6' :
-                                                    item.type === 'message' ? '#0d9488' :
-                                                        item.type === 'coach' ? '#0f766e' : '#0d9488'
-                                            }
-                                        >
+                                        <Tag color={tagColorMap[item.type] || '#0d9488'}>
                                             {typeLabelMap[item.type] || item.type}
                                         </Tag>
                                     </div>
@@ -189,20 +199,7 @@ function Notifications() {
                                         </Text>
                                     </div>
                                 }
-                                onClick={() => handleOnClickNoti(item)}
                             />
-                            {/*{!item.is_read && (*/}
-                            {/*    <Button*/}
-                            {/*        type="text"*/}
-                            {/*        icon={<EyeOutlined />}*/}
-                            {/*        onClick={(e) => {*/}
-                            {/*            e.stopPropagation();*/}
-                            {/*            markOneMutation.mutate(item.noti_id);*/}
-                            {/*        }}*/}
-                            {/*    >*/}
-                            {/*        Đánh dấu đã đọc*/}
-                            {/*    </Button>*/}
-                            {/*)}*/}
                         </List.Item>
                     )}
                 />

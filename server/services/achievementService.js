@@ -3,6 +3,7 @@ const {getUserIdFromAuth0Id, getUserByAuth0Id} = require("./userService");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const socket = require('../utils/socket');
 const NodeCache = require("node-cache");
+const {createNotificationService} = require("./notificationService");
 
 const getAllAchievementsService = async () => {
     try {
@@ -90,7 +91,7 @@ const sendAchievementNotifications = async (userAuth0Id, achievements) => {
         // Send notification for each new achievement
         for (const achievement of achievements) {
             console.log(`🎉 Achievement unlocked for user ${user.user_id}: ${achievement.achievement_name}`);
-
+            await createNotificationService(userAuth0Id, `Bạn vừa đạt thành tựu ${achievement.achievement_name}`, achievement.criteria, 'system')
 
             io.to(userAuth0Id).emit('new-achievement', {
                 achievement_name: achievement.achievement_name,
