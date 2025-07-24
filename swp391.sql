@@ -474,6 +474,22 @@ CREATE TABLE [quotes]
 )
 GO
 
+CREATE TABLE [notifications]
+(
+  [noti_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [noti_title] nvarchar(100),
+  [content] nvarchar(200),
+  [created_at] DATETIME,
+  [is_read] bit DEFAULT(0),
+  [type] nvarchar(50),
+  [from] nvarchar(50)
+)
+GO
+
+ALTER TABLE [notifications] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+GO
+
 ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 

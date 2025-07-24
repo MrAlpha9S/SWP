@@ -44,19 +44,25 @@ export default function Messenger({ role }) {
   const [contacts, setContacts] = useState();
   useEffect(() => {
     if (userConversations) {
-      if (role === 'Member' && user?.user_sub) {
-        setSelectedUserAuth0Id(user?.user_sub);
+      if (role === 'Member') {
+        setSelectedUserAuth0Id(user?.user_sub)
+        setSelectedContactId(userConversations.data[0]?.conversation_id);
       } else if (role !== 'Member') {
-        setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id);
+        if (!selectedUserAuth0Id || selectedUserAuth0Id.length === 0) {
+          setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id);
+          setSelectedContactId(userConversations.data[0]?.conversation_id);
+        } else if (selectedUserAuth0Id?.length > 0) {
+          console.log(selectedUserAuth0Id);
+          const conversation_id = userConversations.data?.find((entry) => entry.other_participant_id === selectedUserAuth0Id).conversation_id;
+          console.log('conversation_id', conversation_id);
+          setSelectedContactId(conversation_id);
+        }
+
       }
-      setSelectedContactId(userConversations.data[0]?.conversation_id);
       setContacts(userConversations.data);
     }
   }, [userConversations]);
 
-  useEffect(() => {
-    console.log('user auth0', selectedUserAuth0Id);
-  }, [ selectedUserAuth0Id ]);
 
   useEffect(() => {
     if (members.length && contacts) {

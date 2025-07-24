@@ -1,6 +1,7 @@
 const { SendMessage, GetUserConversations, GetMessageConversation, CreateConversation } = require('../services/messageService');
 const socket = require('../utils/socket');
 const {sendPushNotification} = require("../utils/sendPushNotification");
+const {createNotificationService} = require("../services/notificationService");
 
 const HandleCreateConversation = async (req, res) => {
     const auth0_id  = req.body.auth0_id;
@@ -89,6 +90,7 @@ const HandleSendMessage = async (req, res) => {
             senderName: senderName,
             senderAuth0Id: senderAuth0Id
         });
+        await createNotificationService(senderAuth0Id, senderName, content, 'message', auth0_id)
         await sendPushNotification(senderAuth0Id, senderName, content, 'message');
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {

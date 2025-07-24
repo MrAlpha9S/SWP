@@ -38,7 +38,12 @@ import {useEffect} from "react";
 import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import {queryClient} from "./main.jsx";
-import {useCurrentStepDashboard, useNotificationAllowedStore, useSelectedUserAuth0IdStore} from "./stores/store.js";
+import {
+    useCurrentStepDashboard,
+    useNotificationAllowedStore,
+    useSelectedUserAuth0IdStore,
+    useUserInfoStore
+} from "./stores/store.js";
 import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
 import { generateToken } from "../notifications/firebase.js";
 import { onMessage } from 'firebase/messaging'
@@ -59,6 +64,7 @@ function AppContent() {
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
     const { notificationAllowed } = useNotificationAllowedStore();
+
 
     const updateFCMMutation = useMutation({
         mutationFn: async ({ token, user, getAccessTokenSilently, isAuthenticated }) => {
@@ -155,8 +161,10 @@ function AppContent() {
                     // User is not focused, let push notification handle it
                     return;
                 }
+                queryClient.invalidateQueries(['notifications'])
                 if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
                     const onClick = () => {
+                        console.log(data)
                         if (userData?.userInfo?.role === 'Coach') {
                             setCurrentStepDashboard('coach-user')
                             setSelectedUserAuth0Id(data.senderAuth0Id)
@@ -202,7 +210,6 @@ function AppContent() {
                     navigate('/dashboard')
                 }
                 openNotification('new-achievement', data, onClick);
-
             })
 
             return () => {
