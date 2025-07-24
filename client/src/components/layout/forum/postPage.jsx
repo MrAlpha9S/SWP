@@ -15,6 +15,7 @@ import { ReplyForm } from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
 import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
+import {useHighlightCommentIdStore, useUserInfoStore} from "../../../stores/store.js";
 
 export default function PostPage() {
     const navigate = useNavigate();
@@ -25,6 +26,8 @@ export default function PostPage() {
     const [replyContent, setReplyContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isReportSubmitting, setIsReportSubmitting] = useState(false); // Added for report submission state
+    const {userInfo} = useUserInfoStore()
+    const {highlightCommentId, setHighlightCommentId} = useHighlightCommentIdStore()
 
     // Report Modal State
     const [reportModal, setReportModal] = useState({
@@ -98,7 +101,7 @@ export default function PostPage() {
     });
 
     const addLikeMutation = useMutation({
-        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId }) => {
+        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId, username }) => {
             console.log('addLikeMutation: ', user.sub, postId, commentId)
             const currentDate = new Date().toISOString();
             return await AddLike(
@@ -108,6 +111,7 @@ export default function PostPage() {
                 postId,
                 commentId,
                 currentDate,
+                username
             );
         },
         onSuccess: (data) => {
@@ -225,12 +229,15 @@ export default function PostPage() {
             return;
         }
 
+        const username = userInfo?.username;
+
         addLikeMutation.mutate({
             user,
             getAccessTokenSilently,
             isAuthenticated,
             postId,
             commentId,
+            username
         });
     };
 

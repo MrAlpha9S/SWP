@@ -318,23 +318,30 @@ const DeleteSocialPosts = async (post_id) => {
         const result = await pool.request()
             .input('post_id', sql.Int, post_id)
             .query(`
-DELETE FROM social_likes WHERE comment_id IN (
-    SELECT comment_id FROM social_comments WHERE post_id = @post_id
-);
+                DELETE
+                FROM social_likes
+                WHERE comment_id IN (SELECT comment_id
+                                     FROM social_comments
+                                     WHERE post_id = @post_id);
 
-DELETE FROM social_likes WHERE post_id = @post_id;
+                DELETE
+                FROM social_likes
+                WHERE post_id = @post_id;
 
-DELETE FROM social_reports
-WHERE comment_id IN (
-    SELECT comment_id
-    FROM social_comments
-    WHERE post_id = @post_id
-);
+                DELETE
+                FROM social_reports
+                WHERE comment_id IN (SELECT comment_id
+                                     FROM social_comments
+                                     WHERE post_id = @post_id);
 
-DELETE FROM social_comments WHERE post_id = @post_id;
+                DELETE
+                FROM social_comments
+                WHERE post_id = @post_id;
 
-DELETE FROM social_posts WHERE post_id = @post_id;
-`);
+                DELETE
+                FROM social_posts
+                WHERE post_id = @post_id;
+            `);
         return true;
     } catch (err) {
         console.error('SQL error at DeleteSocialPosts', err);
@@ -425,6 +432,65 @@ const AddLike = async ( auth0_id, post_id = null, comment_id = null, created_at 
     }
 }
 
+const getPostOwnerInfoByPostId = async (post_id) => {
+    if (!post_id) return null;
+
+    const query = `
+        SELECT u.auth0_id, u.username, sp.title, sc.category_tag
+        FROM users u
+        JOIN social_posts sp ON u.user_id = sp.user_id
+        JOIN social_category sc ON sp.category_id = sc.category_id
+        WHERE sp.post_id = @post_id
+    `;
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('post_id', sql.Int, post_id)
+            .query(query);
+
+        return result.recordset[0];
+    } catch (error) {
+        console.error('getPostOwnerInfoByPostId', error);
+        return null;
+    }
+};
+
+const getPostOwnerInfoByCommentId = async (comment_id) => {
+    if (!comment_id) return null;
+
+    const query = `
+        SELECT 
+          postOwner.auth0_id AS post_owner_auth0_id,
+          postOwner.username AS post_owner_username,
+          commenter.auth0_id AS commenter_auth0_id,
+          commenter.username AS commenter_username,
+          sp.title AS post_title,
+          sc.category_tag,
+          cmt.content,
+          sp.post_id
+        FROM social_comments cmt
+        JOIN social_posts sp ON cmt.post_id = sp.post_id
+        JOIN users postOwner ON sp.user_id = postOwner.user_id
+        JOIN users commenter ON cmt.user_id = commenter.user_id
+        JOIN social_category sc ON sp.category_id = sc.category_id
+        WHERE cmt.comment_id = @comment_id
+    `;
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('comment_id', sql.Int, comment_id)
+            .query(query);
+
+        return result.recordset[0];
+    } catch (error) {
+        console.error('getPostOwnerInfoByCommentId', error);
+        return null;
+    }
+};
+
+
 // Xóa bình luận theo comment_id
 const deleteCommentById = async (comment_id) => {
     try {
@@ -503,4 +569,4 @@ WHERE comment_id = @comment_id;
 }
 
 
-module.exports = { DeleteComment, ApprovePost, DeleteSocialPosts, getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, deletePostById, getAllComments, deleteCommentById, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };
+module.exports = { getPostOwnerInfoByPostId, getPostOwnerInfoByCommentId, DeleteComment, ApprovePost, DeleteSocialPosts, getAllSocialPosts, updateSocialPosts, GetIsPendingPosts, deletePostById, getAllComments, deleteCommentById, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike };

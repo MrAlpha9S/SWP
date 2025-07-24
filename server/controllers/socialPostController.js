@@ -1,5 +1,12 @@
-const {DeleteComment, DeleteSocialPosts, ApprovePost, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike} = require("../services/socialPostService");
+const {DeleteComment, DeleteSocialPosts, ApprovePost, updateSocialPosts, GetIsPendingPosts, getTotalPostCount, getTotalCommentCount, getPostsByCategoryTag, getPosts, getPostComments, PostSocialPosts, PostAddComment, AddLike,
+    getOwnerAuth0IdFromPostId,
+    getPostOwnerInfoByPostId,
+    getPostOwnerInfoByCommentId
+} = require("../services/socialPostService");
 const { processAchievementsWithNotifications } = require("../services/achievementService");
+const {createNotificationService} = require("../services/notificationService");
+const socket = require("../utils/socket");
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const handleDeleteComment = async (req, res) => {
     const {comment_id}  = req.body;
@@ -289,7 +296,7 @@ const handleAddComment = async (req, res) => {
 }
 
 const handleAddLike = async (req, res) => {
-    const { auth0_id, post_id, comment_id, created_at } = req.body;
+    const { auth0_id, post_id, comment_id, created_at, username } = req.body;
     console.log('handleAddLike: ', auth0_id, post_id, comment_id, created_at)
 
     if (!auth0_id || !created_at === undefined) {
@@ -302,6 +309,31 @@ const handleAddLike = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Cant handleAddLike', data: null });
         }
         await processAchievementsWithNotifications(auth0_id);
+        let ownerInfo = null
+        if (post_id) {
+            ownerInfo = await getPostOwnerInfoByPostId(post_id);
+            await createNotificationService(ownerInfo.auth0_id, `Người dùng ${username} vừa thích bài viết của bạn.`, `Bài viết: ${ownerInfo.title}`, 'community', `/forum/${ownerInfo.category_tag}/${post_id}`)
+            const io = socket.getIo()
+            io.to(`${ownerInfo.auth0_id}`).emit('like', {
+                likeOwner: username,
+                postTitle: ownerInfo.title,
+                from: `/forum/${ownerInfo.category_tag}/${post_id}`,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+        } else if (comment_id) {
+            ownerInfo = await getPostOwnerInfoByCommentId(comment_id);
+            await createNotificationService(ownerInfo.commenter_auth0_id, `Người dùng ${username} vừa thích bình luận của bạn.`, `Bình luận: ${ownerInfo.content}`, 'community', `/forum/${ownerInfo.category_tag}/${ownerInfo.post_id}`)
+            const io = socket.getIo()
+            io.to(`${ownerInfo.commenter_auth0_id}`).emit('like', {
+                likeOwner: username,
+                commentContent: ownerInfo.content,
+                from: `/forum/${ownerInfo.category_tag}/${ownerInfo.post_id}`,
+                timestamp: getCurrentUTCDateTime().toISOString(),
+                commentId: comment_id,
+            });
+        }
+
+
         return res.status(200).json({ success: true, message: 'handleAddLike successfully', data: add });
     } catch (error) {
         console.error('Error in handleAddLike:', error);

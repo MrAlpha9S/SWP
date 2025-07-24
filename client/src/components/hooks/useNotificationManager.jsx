@@ -4,6 +4,7 @@ import {BsFillPeopleFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
 import {FaCheck, FaCross, FaMedal, FaRegLightbulb} from "react-icons/fa";
+import {HeartIcon} from "lucide-react";
 
 const NotificationContext = createContext();
 
@@ -123,6 +124,18 @@ export const NotificationProvider = ({ children }) => {
                     </div>,
                     placement: 'topRight',
                     icon: <FaRegLightbulb className="size-5"/>,
+                });
+                break;
+            case 'like':
+                api.open({
+                    key: `like-${payload.likeOwner}`,
+                    message: `${payload.postTitle ? `Người dùng ${payload.likeOwner} vừa thích bài viết của bạn.` : `Người dùng ${payload.likeOwner} vừa thích bình luận của bạn.`}`,
+                    description: <div>
+                        {payload.postTitle ? `Bài viết: ${payload.postTitle}` : `Bình luận: ${payload.commentContent}`}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <HeartIcon className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             default:

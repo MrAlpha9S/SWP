@@ -19,6 +19,7 @@ import {queryClient} from "../../../main.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {formatUtcToLocalString} from "../../utils/dateUtils.js";
 import {useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
+import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
 
@@ -56,6 +57,7 @@ function Notifications() {
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore();
     const {userInfo} = useUserInfoStore();
+    const navigate = useNavigate();
 
     const {data: notificationsData} = useQuery({
         queryKey: ['notifications', user?.sub, activeTab, page],
@@ -142,6 +144,9 @@ function Notifications() {
                 } else {
                     setCurrentStepDashboard('coach');
                 }
+                break;
+                case 'community':
+                    navigate(`${noti.from}`)
                 break;
             default:
                 break;

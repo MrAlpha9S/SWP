@@ -226,6 +226,11 @@ export const useEditorContentStore = create((set) => ({
     setContent: (value) => set({content: value}),
 }))
 
+export const useHighlightCommentIdStore = create((set) => ({
+    highlightCommentId: 0,
+    setHighlightCommentId: (value) => set({highlightCommentId: value}),
+}))
+
 
 
 

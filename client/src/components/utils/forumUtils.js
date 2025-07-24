@@ -178,7 +178,7 @@ export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, 
     return await res.json();
 };
 
-export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at) => {
+export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at, username) => {
 
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
@@ -189,7 +189,7 @@ export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, pos
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({auth0_id: user.sub, post_id: post_id, comment_id: comment_id, created_at: created_at})
+        body: JSON.stringify({auth0_id: user.sub, post_id: post_id, comment_id: comment_id, created_at: created_at, username: username})
     });
 
     return await res.json();

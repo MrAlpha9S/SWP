@@ -60,7 +60,7 @@ function AppContent() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
     const { openNotification } = useNotificationManager();
-    const { setCurrentStepDashboard } = useCurrentStepDashboard();
+    const { setCurrentStepDashboard, currentStepDashboard } = useCurrentStepDashboard();
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
     const { notificationAllowed } = useNotificationAllowedStore();
@@ -140,6 +140,7 @@ function AppContent() {
 
             socket.on('coach_selected', (data) => {
                 queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
                     navigate('/dashboard')
                     setCurrentStepDashboard('coach-user')
@@ -163,7 +164,7 @@ function AppContent() {
                     return;
                 }
                 queryClient.invalidateQueries(['notifications'])
-                if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach')) {
+                if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach' && currentStepDashboard !== 'notifications')) {
                     const onClick = () => {
                         console.log(data)
                         if (userData?.userInfo?.role === 'Coach') {
@@ -181,6 +182,7 @@ function AppContent() {
 
             socket.on('plan-edit-by-coach', (data) => {
                 queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
                     setCurrentStepDashboard('coach')
                     navigate('/dashboard')
@@ -190,6 +192,7 @@ function AppContent() {
 
             socket.on('plan-edit-by-user', (data) => {
                 queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
                     navigate('/dashboard')
                     setCurrentStepDashboard('coach-user')
@@ -200,6 +203,7 @@ function AppContent() {
 
             socket.on('new-coach-review', (data) => {
                 queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
                     setCurrentStepDashboard('user-review')
                     navigate('/dashboard')
@@ -209,12 +213,23 @@ function AppContent() {
 
             socket.on('new-achievement', (data) => {
                 queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
                 queryClient.invalidateQueries(['achieved'])
                 const onClick = () => {
                     setCurrentStepDashboard('badges')
                     navigate('/dashboard')
                 }
                 openNotification('new-achievement', data, onClick);
+            })
+
+            socket.on('like', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                const onClick = () => {
+                    navigate(`${data.from}`)
+                }
+                openNotification('like', data, onClick)
+
             })
 
             return () => {
