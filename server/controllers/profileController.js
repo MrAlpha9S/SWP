@@ -10,6 +10,7 @@ const {getUserWithSubscription, getUserByAuth0Id, getCoachDetailsById} = require
 const socket = require('../utils/socket');
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {processAchievementsWithNotifications} = require("../services/achievementService");
+const {createNotificationService} = require("../services/notificationService");
 
 const handlePostOnboarding = async (req, res) => {
     const {
@@ -65,6 +66,7 @@ const handlePostOnboarding = async (req, res) => {
                     updaterUsername: updater.username,
                     timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                 });
+                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'plan', null)
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
                 if (coach) {
@@ -75,6 +77,7 @@ const handlePostOnboarding = async (req, res) => {
                         updaterUsername: user.username,
                         timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                     });
+                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, ` `, 'plan', updaterUserAuth0Id)
                 }
             }
         } else {
@@ -106,6 +109,7 @@ const handlePostOnboarding = async (req, res) => {
                     updaterUsername: updater.username,
                     timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                 });
+                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'plan', null)
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
                 if (coach) {
@@ -116,6 +120,7 @@ const handlePostOnboarding = async (req, res) => {
                         updaterUsername: user.username,
                         timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                     });
+                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, ` `, 'plan', updaterUserAuth0Id)
                 }
             }
         }

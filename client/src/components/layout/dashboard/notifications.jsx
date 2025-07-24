@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Tabs, List, Badge, Avatar, Typography, Button, Tag, Pagination } from 'antd';
+import React, {useState} from 'react';
+import {Tabs, List, Badge, Avatar, Typography, Button, Tag, Pagination} from 'antd';
 import {
     BellOutlined,
     CalendarOutlined,
@@ -7,27 +7,27 @@ import {
     UserOutlined,
     CheckOutlined
 } from '@ant-design/icons';
-import { RiUserCommunityFill } from 'react-icons/ri';
-import { useQuery, useMutation, useQueries } from '@tanstack/react-query';
+import {RiUserCommunityFill} from 'react-icons/ri';
+import {useQuery, useMutation, useQueries} from '@tanstack/react-query';
 import {
     getNotifications,
     markNotificationAsRead,
     markAllNotificationsAsRead,
     getUnreadCount
 } from '../../utils/notificationUtils.js';
-import { queryClient } from "../../../main.jsx";
-import { useAuth0 } from "@auth0/auth0-react";
-import { formatUtcToLocalString } from "../../utils/dateUtils.js";
-import { useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore } from "../../../stores/store.js";
+import {queryClient} from "../../../main.jsx";
+import {useAuth0} from "@auth0/auth0-react";
+import {formatUtcToLocalString} from "../../utils/dateUtils.js";
+import {useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 
-const { Title, Text } = Typography;
+const {Title, Text} = Typography;
 
 const iconMap = {
-    plan: <CalendarOutlined style={{ color: '#14b8a6' }} />,
-    message: <MessageOutlined style={{ color: '#0d9488' }} />,
-    coach: <UserOutlined style={{ color: '#0f766e' }} />,
-    community: <RiUserCommunityFill style={{ color: '#8b5cf6' }} />,
-    system: <BellOutlined style={{ color: '#f59e0b' }} />
+    plan: <CalendarOutlined style={{color: '#14b8a6'}}/>,
+    message: <MessageOutlined style={{color: '#0d9488'}}/>,
+    coach: <UserOutlined style={{color: '#0f766e'}}/>,
+    community: <RiUserCommunityFill style={{color: '#8b5cf6'}}/>,
+    system: <BellOutlined style={{color: '#f59e0b'}}/>
 };
 
 const typeLabelMap = {
@@ -49,15 +49,15 @@ const tagColorMap = {
 const tabTypes = ['all', 'plan', 'message', 'coach', 'community', 'system'];
 
 function Notifications() {
-    const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [activeTab, setActiveTab] = useState('all');
     const [page, setPage] = useState(1);
     const pageSize = 10;
-    const { setCurrentStepDashboard } = useCurrentStepDashboard();
-    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore();
-    const { userInfo } = useUserInfoStore();
+    const {setCurrentStepDashboard} = useCurrentStepDashboard();
+    const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore();
+    const {userInfo} = useUserInfoStore();
 
-    const { data: notificationsData } = useQuery({
+    const {data: notificationsData} = useQuery({
         queryKey: ['notifications', user?.sub, activeTab, page],
         queryFn: () => getNotifications(user, getAccessTokenSilently, isAuthenticated, page, pageSize, activeTab),
         enabled: !!user?.sub && !!activeTab
@@ -101,7 +101,7 @@ function Notifications() {
             <span>
                 {type === 'all' ? 'Tất cả' : typeLabelMap[type]}
                 {unreadCounts[type] > 0 && (
-                    <Badge count={unreadCounts[type]} size="small" style={{ backgroundColor: '#14b8a6', marginLeft: 8 }} />
+                    <Badge count={unreadCounts[type]} size="small" style={{backgroundColor: '#14b8a6', marginLeft: 8}}/>
                 )}
             </span>
         )
@@ -123,9 +123,26 @@ function Notifications() {
                     setCurrentStepDashboard('coach');
                 }
                 break;
-                case 'system':
-                    setCurrentStepDashboard('badges');
-                    break;
+            case 'system':
+                setCurrentStepDashboard('badges');
+                break;
+            case 'coach':
+                if (noti.noti_title.includes('vừa tạo đánh giá')) {
+                    setCurrentStepDashboard('user-review')
+                } else {
+                    console.log(noti.from)
+                    setSelectedUserAuth0Id(noti.from);
+                    setCurrentStepDashboard('coach-user');
+                }
+                break;
+            case 'plan':
+                if (currentUserRole === 'Coach') {
+                    setSelectedUserAuth0Id(noti.from);
+                    setCurrentStepDashboard('coach-user');
+                } else {
+                    setCurrentStepDashboard('coach');
+                }
+                break;
             default:
                 break;
         }
@@ -136,12 +153,12 @@ function Notifications() {
             <div className="notification-header">
                 <div className="header-content">
                     <div className="header-left">
-                        <BellOutlined className="header-icon" />
+                        <BellOutlined className="header-icon"/>
                         <Title level={2} className="header-title">Thông báo</Title>
                     </div>
                     <Button
                         type="primary"
-                        icon={<CheckOutlined />}
+                        icon={<CheckOutlined/>}
                         onClick={() => markAllMutation.mutate()}
                         className="mark-all-button"
                     >
@@ -175,8 +192,8 @@ function Notifications() {
                             <List.Item.Meta
                                 avatar={
                                     <div className="notification-avatar">
-                                        <Avatar size={48} icon={iconMap[item.type]} />
-                                        {!item.is_read && <div className="unread-indicator" />}
+                                        <Avatar size={48} icon={iconMap[item.type]}/>
+                                        {!item.is_read && <div className="unread-indicator"/>}
                                     </div>
                                 }
                                 title={
@@ -204,7 +221,7 @@ function Notifications() {
                     )}
                 />
 
-                <div className="pagination-wrapper" style={{ textAlign: 'center', marginTop: 24 }}>
+                <div className="pagination-wrapper" style={{textAlign: 'center', marginTop: 24}}>
                     <Pagination
                         current={page}
                         pageSize={pageSize}
@@ -216,7 +233,7 @@ function Notifications() {
 
                 {filteredNotifications.length === 0 && (
                     <div className="empty-state">
-                        <BellOutlined className="empty-icon" />
+                        <BellOutlined className="empty-icon"/>
                         <Text type="secondary" className="empty-text">
                             Không có thông báo nào trong mục này
                         </Text>

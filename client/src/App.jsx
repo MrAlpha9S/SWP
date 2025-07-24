@@ -139,6 +139,7 @@ function AppContent() {
             });
 
             socket.on('coach_selected', (data) => {
+                queryClient.invalidateQueries(['notifications'])
                 const onClick = () => {
                     navigate('/dashboard')
                     setCurrentStepDashboard('coach-user')
@@ -179,6 +180,7 @@ function AppContent() {
             });
 
             socket.on('plan-edit-by-coach', (data) => {
+                queryClient.invalidateQueries(['notifications'])
                 const onClick = () => {
                     setCurrentStepDashboard('coach')
                     navigate('/dashboard')
@@ -187,6 +189,7 @@ function AppContent() {
             })
 
             socket.on('plan-edit-by-user', (data) => {
+                queryClient.invalidateQueries(['notifications'])
                 const onClick = () => {
                     navigate('/dashboard')
                     setCurrentStepDashboard('coach-user')
@@ -196,6 +199,7 @@ function AppContent() {
             })
 
             socket.on('new-coach-review', (data) => {
+                queryClient.invalidateQueries(['notifications'])
                 const onClick = () => {
                     setCurrentStepDashboard('user-review')
                     navigate('/dashboard')
@@ -204,6 +208,7 @@ function AppContent() {
             })
 
             socket.on('new-achievement', (data) => {
+                queryClient.invalidateQueries(['notifications'])
                 queryClient.invalidateQueries(['achieved'])
                 const onClick = () => {
                     setCurrentStepDashboard('badges')
