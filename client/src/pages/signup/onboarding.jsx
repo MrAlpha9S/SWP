@@ -65,7 +65,7 @@ const Onboarding = () => {
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
     const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLogCloneDDMMYY, setPlanLogCloneDDMMYY, setQuittingMethod, setCigsReduced, setExpectedQuitDate, planLog, setPlanLog} = usePlanStore();
-    const {createGoalChecked, goalAmount, goalList} = useGoalsStore()
+    const {createGoalChecked, goalAmount, goalList, goalName} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -297,6 +297,7 @@ const Onboarding = () => {
                     break;
                 }
                 case 4: {
+                    const errorMsgGoalName = errorMap["goalName"];
                     const errorMsgGoalAmount = errorMap["goalAmount"];
                     const errorMsgGoalList = errorMap["goalList"];
                     if (createGoalChecked) {
@@ -305,9 +306,10 @@ const Onboarding = () => {
                             if (goalAmount <= 0) {
                                 addError(errorMsgGoalAmount);
                             }
-                            if (goalList.length > 0 && goalAmount > 0) {
-                                setCurrentStep(currentStep + 1)
-                            } else {
+                            if (goalName.length === 0) {
+                                addError(errorMsgGoalName);
+                            }
+                            if (goalList.length > 0 && goalAmount > 0 && goalName.length > 0) {
                                 setCurrentStep(currentStep + 1)
                             }
                         } else {
@@ -431,6 +433,14 @@ const Onboarding = () => {
             }
         }
     }, [goalAmount]);
+
+    useEffect(() => {
+        if (createGoalChecked) {
+            if (goalName.length > 0) {
+                removeError(errorMap["goalName"]);
+            }
+        }
+    }, [goalName]);
 
     const onChangeSteps = value => {
         if (value === 8)

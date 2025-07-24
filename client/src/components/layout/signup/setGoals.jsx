@@ -3,6 +3,7 @@ import {Checkbox, Collapse, Divider} from "antd";
 import {useErrorStore, useGoalsStore} from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
 import CustomButton from "../../ui/CustomButton.jsx";
+import {onboardingErrorMsg} from "../../../constants/constants.js";
 
 const goalTipsCollapseItems = [
     {
@@ -42,7 +43,15 @@ const SetGoals = () => {
         addGoal,
         removeGoalWithName
     } = useGoalsStore();
-    const {errors} = useErrorStore();
+    const {errors, addError} = useErrorStore();
+
+    const errorMap = React.useMemo(() => {
+        const map = {};
+        onboardingErrorMsg.forEach(err => {
+            map[err.location] = err;
+        });
+        return map;
+    }, []);
 
     return (
         <>
@@ -129,10 +138,20 @@ const SetGoals = () => {
                                 className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
-                        <CustomButton type='primary' onClick={() => addGoal({
-                            goalName: goalName,
-                            goalAmount: goalAmount
-                        })}>Thêm</CustomButton>
+                        <CustomButton type='primary' onClick={() => {
+                            if (goalAmount <= 0) {
+                                addError(errorMap["goalAmount"])
+                            }
+                            if (goalName.length === 0) {
+                                addError(errorMap["goalName"])
+                            }
+                            if (goalAmount > 0 && goalName.length > 0) {
+                                addGoal({
+                                    goalName: goalName,
+                                    goalAmount: goalAmount
+                                })
+                            }
+                        }}>Thêm</CustomButton>
 
                         <div className=''>
                             {errors.map((error, index) => {
@@ -159,7 +178,8 @@ const SetGoals = () => {
                                             {item.goalAmount.toLocaleString('vi-VN')}
                                         </p>
                                     </div>
-                                    <CustomButton type='primary' onClick={() => removeGoalWithName(item.goalName)}>Xóa</CustomButton>
+                                    <CustomButton type='primary'
+                                                  onClick={() => removeGoalWithName(item.goalName)}>Xóa</CustomButton>
                                 </div>
                             ))}
                         </div>
