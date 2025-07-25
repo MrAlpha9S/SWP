@@ -91,7 +91,7 @@ const HandleSendMessage = async (req, res) => {
             recipientAuth0Id: recipientAuth0Id,
             senderAuth0Id: auth0_id
         });
-        await createNotificationService(recipientAuth0Id, senderName, content, 'message', auth0_id)
+        await createNotificationService(recipientAuth0Id, senderName, content, 'message', {senderAuth0Id : auth0_id, recipientAuth0Id : recipientAuth0Id, conversationId : conversationId, messageId : data})
         await sendPushNotification(recipientAuth0Id, senderName, content, 'message');
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {

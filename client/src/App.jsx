@@ -39,7 +39,7 @@ import {useOnlineUsersStore, useSocketStore} from "./stores/useSocketStore.js";
 import {NotificationProvider, useNotificationManager} from './components/hooks/useNotificationManager.jsx';
 import {queryClient} from "./main.jsx";
 import {
-    useCurrentStepDashboard,
+    useCurrentStepDashboard, useHighlightCommentIdStore, useHighlightReviewIdStore,
     useNotificationAllowedStore,
     useSelectedUserAuth0IdStore,
     useUserInfoStore
@@ -64,6 +64,8 @@ function AppContent() {
     const navigate = useNavigate();
     const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
     const { notificationAllowed } = useNotificationAllowedStore();
+    const {setHighlightCommentId} = useHighlightCommentIdStore()
+    const {setHighlightReviewId} = useHighlightReviewIdStore()
 
 
     const updateFCMMutation = useMutation({
@@ -166,7 +168,6 @@ function AppContent() {
                 queryClient.invalidateQueries(['notifications'])
                 if (!location.pathname.startsWith('/dashboard') || (location.pathname.startsWith('/dashboard') && currentStepDashboard !== 'coach' && currentStepDashboard !== 'notifications')) {
                     const onClick = () => {
-                        console.log(data)
                         if (userData?.userInfo?.role === 'Coach') {
                             setCurrentStepDashboard('coach-user')
                             setSelectedUserAuth0Id(data.senderAuth0Id)
@@ -205,6 +206,7 @@ function AppContent() {
                 queryClient.invalidateQueries(['notifications'])
                 if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
+                    setHighlightReviewId(data.reviewId)
                     setCurrentStepDashboard('user-review')
                     navigate('/dashboard')
                 }
@@ -226,7 +228,12 @@ function AppContent() {
                 queryClient.invalidateQueries(['notifications'])
                 if (currentStepDashboard === 'notifications') return
                 const onClick = () => {
-                    navigate(`${data.from}`)
+                    if (data.inner_type === 'post') {
+                        navigate(`/forum/${data.category_tag}/${data.post_id}`)
+                    } else if (data.inner_type === 'comment') {
+                        setHighlightCommentId(data.comment_id)
+                        navigate(`/forum/${data.category_tag}/${data.post_id}`)
+                    }
                 }
                 openNotification('like', data, onClick)
 

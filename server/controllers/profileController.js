@@ -66,7 +66,7 @@ const handlePostOnboarding = async (req, res) => {
                     updaterUsername: updater.username,
                     timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                 });
-                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'plan', null)
+                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'coach', {inner_type : 'coach-edit-user-plan'})
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
                 if (coach) {
@@ -77,7 +77,7 @@ const handlePostOnboarding = async (req, res) => {
                         updaterUsername: user.username,
                         timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                     });
-                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, ` `, 'plan', updaterUserAuth0Id)
+                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, '', 'coach', {inner_type : 'user-edit-own-plan', userAuth0Id : userAuth0Id})
                 }
             }
         } else {
@@ -109,7 +109,7 @@ const handlePostOnboarding = async (req, res) => {
                     updaterUsername: updater.username,
                     timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                 });
-                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'plan', null)
+                await createNotificationService(userAuth0Id, `Huấn luyện viên ${updater.username} vừa chỉnh sửa kế hoạch của bạn.`, ` `, 'coach', {inner_type : 'coach-edit-user-plan'})
             } else {
                 const coach = await getCoachDetailsById(null, userAuth0Id)
                 if (coach) {
@@ -120,7 +120,7 @@ const handlePostOnboarding = async (req, res) => {
                         updaterUsername: user.username,
                         timestamp: `${getCurrentUTCDateTime().getUTCHours()}:${getCurrentUTCDateTime().getUTCMinutes()}`,
                     });
-                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, ` `, 'plan', updaterUserAuth0Id)
+                    await createNotificationService(coach.coach.auth0_id, `Người dùng ${user.username} vừa chỉnh sửa kế hoạch của họ.`, ` `, 'coach', {inner_type : 'user-edit-own-plan', userAuth0Id : userAuth0Id})
                 }
             }
         }

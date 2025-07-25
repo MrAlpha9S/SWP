@@ -45,7 +45,6 @@ export default function MessageBox({
             return await SendMessage(user, senderName, recipientAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
         },
         onSuccess: (data) => {
-            console.log('Message sent successfully');
             if (onEmitMessage) {
                 onEmitMessage({
                     conversationId,

@@ -18,7 +18,12 @@ import {
 import {queryClient} from "../../../main.jsx";
 import {useAuth0} from "@auth0/auth0-react";
 import {formatUtcToLocalString} from "../../utils/dateUtils.js";
-import {useCurrentStepDashboard, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
+import {
+    useCurrentStepDashboard,
+    useHighlightCommentIdStore, useHighlightReviewIdStore,
+    useSelectedUserAuth0IdStore,
+    useUserInfoStore
+} from "../../../stores/store.js";
 import {useNavigate} from "react-router-dom";
 
 const {Title, Text} = Typography;
@@ -58,6 +63,8 @@ function Notifications() {
     const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore();
     const {userInfo} = useUserInfoStore();
     const navigate = useNavigate();
+    const {setHighlightCommentId} = useHighlightCommentIdStore()
+    const {setHighlightReviewId} = useHighlightReviewIdStore()
 
     const {data: notificationsData} = useQuery({
         queryKey: ['notifications', user?.sub, activeTab, page],
@@ -117,37 +124,52 @@ function Notifications() {
         const type = noti.type;
         const currentUserRole = userInfo?.role;
         switch (type) {
-            case 'message':
+            case 'message': {
+                const metadata = JSON.parse(noti.metadata)
                 if (currentUserRole === 'Coach') {
-                    setSelectedUserAuth0Id(noti.from);
+                    setSelectedUserAuth0Id(metadata.senderAuth0Id);
                     setCurrentStepDashboard('coach-user');
                 } else {
+                    setSelectedUserAuth0Id(metadata.recipientAuth0Id);
                     setCurrentStepDashboard('coach');
                 }
                 break;
+            }
             case 'system':
-                setCurrentStepDashboard('badges');
+            {
+                const metadata = JSON.parse(noti.metadata);
+                if (metadata.inner_type === 'achievements') {
+                    setCurrentStepDashboard('badges');
+                }
                 break;
-            case 'coach':
-                if (noti.noti_title.includes('vừa tạo đánh giá')) {
+            }
+            case 'coach': {
+                const metadata = JSON.parse(noti.metadata);
+                if (metadata.inner_type === 'user-review') {
+                    setHighlightReviewId(metadata.review_id)
                     setCurrentStepDashboard('user-review')
-                } else {
-                    console.log(noti.from)
-                    setSelectedUserAuth0Id(noti.from);
+                } else if (metadata.inner_type === 'user-selection') {
+                    setSelectedUserAuth0Id(metadata.userAuth0Id);
                     setCurrentStepDashboard('coach-user');
-                }
-                break;
-            case 'plan':
-                if (currentUserRole === 'Coach') {
-                    setSelectedUserAuth0Id(noti.from);
-                    setCurrentStepDashboard('coach-user');
-                } else {
+                } else if (metadata.inner_type === 'coach-edit-user-plan') {
                     setCurrentStepDashboard('coach');
+                } else if (metadata.inner_type === 'user-edit-own-plan') {
+                    setSelectedUserAuth0Id(metadata.userAuth0Id);
+                    setCurrentStepDashboard('coach-user');
                 }
                 break;
-                case 'community':
-                    navigate(`${noti.from}`)
+            }
+            case 'community': {
+                const metadata = JSON.parse(noti.metadata);
+                console.log(metadata);
+                if (metadata.inner_type === 'post') {
+                    navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
+                } else if (metadata.inner_type === 'comment') {
+                    setHighlightCommentId(metadata.comment_id)
+                    navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
+                }
                 break;
+            }
             default:
                 break;
         }

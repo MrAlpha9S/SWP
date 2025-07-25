@@ -1,10 +1,10 @@
-// PostPage.tsx - Updated with Report Modal Integration and AddReport
+// PostPage.tsx - Updated with Report Modal Integration, AddReport, and Scroll/Highlight functionality
 import SideBar from "./sideBar.jsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getComments, getPosts } from "../../utils/forumUtils.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
 import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
 import { AddComment, AddLike } from '../../utils/forumUtils.js'; // Added AddReport import
@@ -28,6 +28,9 @@ export default function PostPage() {
     const [isReportSubmitting, setIsReportSubmitting] = useState(false); // Added for report submission state
     const {userInfo} = useUserInfoStore()
     const {highlightCommentId, setHighlightCommentId} = useHighlightCommentIdStore()
+
+    // Refs for scroll behavior
+    const commentRefs = useRef({});
 
     // Report Modal State
     const [reportModal, setReportModal] = useState({
@@ -70,6 +73,27 @@ export default function PostPage() {
             setComments(commentsData.data);
         }
     }, [commentsData, isCommentsPending])
+
+    // Scroll to highlighted comment
+    useEffect(() => {
+        if (highlightCommentId && highlightCommentId !== 0 && comments.length > 0) {
+            const commentElement = commentRefs.current[highlightCommentId];
+            if (commentElement) {
+                // Add a small delay to ensure the DOM is fully rendered
+                setTimeout(() => {
+                    commentElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+        }
+    }, [highlightCommentId, comments]);
+
+    // Reset highlight when leaving the page
+    useEffect(() => {
+        return () => setHighlightCommentId(0);
+    }, []);
 
     const addCommentMutation = useMutation({
         mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, replyContent }) => {
@@ -239,6 +263,13 @@ export default function PostPage() {
             commentId,
             username
         });
+    };
+
+    // Function to handle comment hover (removes highlight)
+    const handleCommentHover = (commentId) => {
+        if (highlightCommentId === commentId) {
+            setHighlightCommentId(0);
+        }
     };
 
     // Loading state
@@ -420,6 +451,7 @@ export default function PostPage() {
                                 {comments.map((comment) =>
                                     <Comment
                                         key={comment.comment_id}
+                                        ref={(el) => commentRefs.current[comment.comment_id] = el}
                                         commentId={comment.comment_id}
                                         date={comment.created_at}
                                         author={comment.username}
@@ -431,6 +463,8 @@ export default function PostPage() {
                                         isLiked={comment.isLiked}
                                         onLike={onLike}
                                         onReportClick={handleReportClick}
+                                        isHighlighted={highlightCommentId === comment.comment_id}
+                                        onHover={handleCommentHover}
                                     />
                                 )}
                             </div>
@@ -458,11 +492,39 @@ export default function PostPage() {
     );
 }
 
-export function Comment({ author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike, onReportClick }) {
+export const Comment = React.forwardRef(({
+                                             author,
+                                             commentId,
+                                             date,
+                                             content,
+                                             role,
+                                             likes,
+                                             avatar,
+                                             auth0_id,
+                                             isLiked,
+                                             onLike,
+                                             onReportClick,
+                                             isHighlighted,
+                                             onHover
+                                         }, ref) => {
     const navigate = useNavigate();
 
+    const handleMouseEnter = () => {
+        if (isHighlighted && onHover) {
+            onHover(commentId);
+        }
+    };
+
     return (
-        <div className="bg-white p-4 rounded-xl shadow space-y-2 hover:shadow-md transition-shadow">
+        <div
+            ref={ref}
+            className={`bg-white p-4 rounded-xl shadow space-y-2 hover:shadow-md transition-all duration-300 ${
+                isHighlighted
+                    ? 'ring-2 ring-primary-400 bg-primary-50 shadow-lg'
+                    : ''
+            }`}
+            onMouseEnter={handleMouseEnter}
+        >
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
                     {avatar ? (
@@ -506,4 +568,4 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
             </div>
         </div>
     );
-}
+});

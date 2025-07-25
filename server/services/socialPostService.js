@@ -208,7 +208,6 @@ const getPostComments = async ({ postId, currentUserId = null }) => {
 
         // Handle currentUserId for isLiked check
         if (currentUserId) {
-            console.log('currentUserId: ', currentUserId)
             const currentUserIdInt = await getUserIdFromAuth0Id(currentUserId);
             request.input('currentUserId', sql.Int, currentUserIdInt);
         } else {

@@ -52,9 +52,7 @@ export default function Messenger({ role }) {
           setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id);
           setSelectedContactId(userConversations.data[0]?.conversation_id);
         } else if (selectedUserAuth0Id?.length > 0) {
-          console.log(selectedUserAuth0Id);
           const conversation_id = userConversations.data?.find((entry) => entry.other_participant_id === selectedUserAuth0Id).conversation_id;
-          console.log('conversation_id', conversation_id);
           setSelectedContactId(conversation_id);
         }
 

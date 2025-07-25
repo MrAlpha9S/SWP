@@ -128,10 +128,10 @@ export const NotificationProvider = ({ children }) => {
                 break;
             case 'like':
                 api.open({
-                    key: `like-${payload.likeOwner}`,
-                    message: `${payload.postTitle ? `Người dùng ${payload.likeOwner} vừa thích bài viết của bạn.` : `Người dùng ${payload.likeOwner} vừa thích bình luận của bạn.`}`,
+                    key: `like-${payload.like_owner}`,
+                    message: `${payload.post_title ? `Người dùng ${payload.like_owner} vừa thích bài viết của bạn.` : `Người dùng ${payload.like_owner} vừa thích bình luận của bạn.`}`,
                     description: <div>
-                        {payload.postTitle ? `Bài viết: ${payload.postTitle}` : `Bình luận: ${payload.commentContent}`}
+                        {payload.post_title ? `Bài viết: ${payload.post_title}` : `Bình luận: ${payload.comment_content}`}
                     </div>,
                     placement: 'topRight',
                     icon: <HeartIcon className="size-5"/>,

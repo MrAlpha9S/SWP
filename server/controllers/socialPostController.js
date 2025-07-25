@@ -312,24 +312,35 @@ const handleAddLike = async (req, res) => {
         let ownerInfo = null
         if (post_id) {
             ownerInfo = await getPostOwnerInfoByPostId(post_id);
-            await createNotificationService(ownerInfo.auth0_id, `Người dùng ${username} vừa thích bài viết của bạn.`, `Bài viết: ${ownerInfo.title}`, 'community', `/forum/${ownerInfo.category_tag}/${post_id}`)
+            const metadata = {
+                category_tag: ownerInfo.category_tag,
+                post_id: post_id,
+                inner_type: 'post',
+            }
+            await createNotificationService(ownerInfo.auth0_id, `Người dùng ${username} vừa thích bài viết của bạn.`, `Bài viết: ${ownerInfo.title}`, 'community', metadata)
             const io = socket.getIo()
             io.to(`${ownerInfo.auth0_id}`).emit('like', {
-                likeOwner: username,
-                postTitle: ownerInfo.title,
-                from: `/forum/${ownerInfo.category_tag}/${post_id}`,
+                ...metadata,
+                like_owner: username,
+                post_title: ownerInfo.title,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
         } else if (comment_id) {
             ownerInfo = await getPostOwnerInfoByCommentId(comment_id);
-            await createNotificationService(ownerInfo.commenter_auth0_id, `Người dùng ${username} vừa thích bình luận của bạn.`, `Bình luận: ${ownerInfo.content}`, 'community', `/forum/${ownerInfo.category_tag}/${ownerInfo.post_id}`)
+            const metadata = {
+                category_tag: ownerInfo.category_tag,
+                post_id: ownerInfo.post_id,
+                comment_id: comment_id,
+                inner_type: 'comment',
+            }
+            await createNotificationService(ownerInfo.commenter_auth0_id, `Người dùng ${username} vừa thích bình luận của bạn.`, `Bình luận: ${ownerInfo.content}`, 'community', metadata)
             const io = socket.getIo()
             io.to(`${ownerInfo.commenter_auth0_id}`).emit('like', {
-                likeOwner: username,
-                commentContent: ownerInfo.content,
-                from: `/forum/${ownerInfo.category_tag}/${ownerInfo.post_id}`,
+                ...metadata,
+                like_owner: username,
+                comment_content: ownerInfo.content,
                 timestamp: getCurrentUTCDateTime().toISOString(),
-                commentId: comment_id,
+                comment_id: comment_id,
             });
         }
 

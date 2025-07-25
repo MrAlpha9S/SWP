@@ -46,7 +46,6 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
 
     useEffect(() => {
         if (userAuth0Id) {
-            console.log('user in coachuser', userAuth0Id)
             setSelectedUserAuth0Id(userAuth0Id);
         }
     }, [setSelectedUserAuth0Id, userAuth0Id])

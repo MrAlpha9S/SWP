@@ -17,9 +17,6 @@ export default function AllMembers({
     const [viewMode, setViewMode] = useState("grid"); // grid or list
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
-    useEffect(() => {
-        console.log(selectedUserAuth0Id)
-    }, [selectedUserAuth0Id]);
 
     // Filter members based on search term and online status
     const filteredMembers = useMemo(() => {

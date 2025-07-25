@@ -46,7 +46,7 @@ const getAllNotificationsService = async (userAuth0Id, page, limit, type) => {
 };
 
 
-const createNotificationService = async (userAuth0Id, noti_title, content, type, from) => {
+const createNotificationService = async (userAuth0Id, noti_title, content, type, metadata = {}) => {
     try {
         const pool = await poolPromise;
         const user_id = await getUserIdFromAuth0Id(userAuth0Id);
@@ -57,12 +57,11 @@ const createNotificationService = async (userAuth0Id, noti_title, content, type,
             .input('content', mssql.NVarChar(200), content)
             .input('created_at', mssql.DateTime, getCurrentUTCDateTime())
             .input('type', mssql.NVarChar(50), type)
-            .input('from', mssql.NVarChar(50), from ?? null)
+            .input('metadata', mssql.NVarChar(mssql.MAX), JSON.stringify(metadata))
             .query(`
-                INSERT INTO [notifications]
-                    (user_id, noti_title, content, created_at, is_read, type, [from])
+                INSERT INTO [notifications] (user_id, noti_title, content, created_at, is_read, type, metadata)
                     OUTPUT INSERTED.*
-                VALUES (@user_id, @noti_title, @content, @created_at, 0, @type, @from)
+                VALUES (@user_id, @noti_title, @content, @created_at, 0, @type, @metadata)
             `);
 
         return result.recordset[0];
@@ -71,6 +70,7 @@ const createNotificationService = async (userAuth0Id, noti_title, content, type,
         return false;
     }
 };
+
 
 
 const deleteAllNotificationsService = async (userAuth0Id) => {

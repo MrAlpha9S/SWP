@@ -91,7 +91,7 @@ const sendAchievementNotifications = async (userAuth0Id, achievements) => {
         // Send notification for each new achievement
         for (const achievement of achievements) {
             console.log(`🎉 Achievement unlocked for user ${user.user_id}: ${achievement.achievement_name}`);
-            await createNotificationService(userAuth0Id, `Bạn vừa đạt thành tựu ${achievement.achievement_name}`, achievement.criteria, 'system')
+            await createNotificationService(userAuth0Id, `Bạn vừa đạt thành tựu ${achievement.achievement_name}`, achievement.criteria, 'system', {inner_type : 'achievements'})
 
             io.to(userAuth0Id).emit('new-achievement', {
                 achievement_name: achievement.achievement_name,
@@ -106,7 +106,6 @@ const sendAchievementNotifications = async (userAuth0Id, achievements) => {
 
 // Process achievements and send notifications
 const processAchievementsWithNotifications = async (userAuth0Id) => {
-    console.log('hey userAuth0Id', userAuth0Id);
     const newAchievements = await processAchievements(userAuth0Id);
     console.log('new', newAchievements);
     if (newAchievements.length > 0) {
@@ -124,12 +123,13 @@ const getRecentAchievements = async (userAuth0Id, secondsBack = 15) => {
         const result = await pool.request()
             .input('userId', sql.Int, userId)
             .input('secondsBack', sql.Int, secondsBack)
+            .input('current_date', sql.DateTime, getCurrentUTCDateTime().toISOString())
             .query(`
                 SELECT a.achievement_id, a.achievement_name, a.criteria
                 FROM user_achievements ua
                 JOIN achievements a ON a.achievement_id = ua.achievement_id
                 WHERE ua.user_id = @userId
-                AND ua.achieved_at >= DATEADD(SECOND, -@secondsBack, GETDATE())
+                AND ua.achieved_at >= DATEADD(SECOND, -@secondsBack, @current_date)
                 ORDER BY ua.achieved_at DESC
             `);
 
