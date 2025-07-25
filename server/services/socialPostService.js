@@ -352,25 +352,33 @@ const PostAddComment = async (parent_comment_id, auth0_id, post_id, content, cre
     try {
         const pool = await poolPromise;
         const user_id = await getUserIdFromAuth0Id(auth0_id);
+
         const result = await pool.request()
-            .input('parent_comment_id', sql.Int, null, parent_comment_id)
+            .input('parent_comment_id', sql.Int, parent_comment_id ?? null) // pass null if undefined
             .input('user_id', sql.Int, user_id)
             .input('post_id', sql.Int, post_id)
             .input('content', content)
             .input('created_at', sql.DateTime, created_at)
             .input('is_reported', sql.Int, is_reported)
-            .query(`INSERT INTO [social_comments] ([parent_comment_id], [user_id], [post_id], [content], [created_at], [is_reported])
-VALUES (@parent_comment_id, @user_id, @post_id, @content, @created_at, @is_reported);
-`);
-        if (result.rowsAffected[0] === 0) {
-            throw new Error('error in insert');
+            .query(`
+                INSERT INTO [social_comments]
+                ([parent_comment_id], [user_id], [post_id], [content], [created_at], [is_reported])
+                VALUES
+                    (@parent_comment_id, @user_id, @post_id, @content, @created_at, @is_reported);
+                SELECT SCOPE_IDENTITY() as comment_id;
+            `);
+
+        if (!result.recordset || result.recordset.length === 0) {
+            throw new Error('Insert succeeded but no ID returned.');
         }
-        return true;
+
+        return result.recordset[0].comment_id;
     } catch (err) {
-        console.error('SQL error at PostSocialPosts', err);
-        return false;
+        console.error('SQL error at PostAddComment', err);
+        return null;
     }
-}
+};
+
 const getAllSocialPosts = async () => {
     try {
         const pool = await poolPromise;

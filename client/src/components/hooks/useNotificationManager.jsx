@@ -1,6 +1,6 @@
 import { notification } from 'antd';
 import React, { createContext, useContext, useMemo } from 'react';
-import {BsFillPeopleFill} from "react-icons/bs";
+import {BsFillPeopleFill, BsFillReplyFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
 import {FaCheck, FaCross, FaMedal, FaRegLightbulb} from "react-icons/fa";
@@ -135,6 +135,18 @@ export const NotificationProvider = ({ children }) => {
                     </div>,
                     placement: 'topRight',
                     icon: <HeartIcon className="size-5"/>,
+                    onClick: onClick
+                });
+                break;
+            case 'reply':
+                api.open({
+                    key: `reply-${payload.commenter_auth0_id}`,
+                    message: <div>{`Người dùng ${payload.commenter_username} vừa bình luận bài viết ${payload.post_title} của bạn.`}</div>,
+                    description: <div>
+                        {`Bình luận: ${payload.content}`}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <BsFillReplyFill className="size-5"/>,
                     onClick: onClick
                 });
                 break;

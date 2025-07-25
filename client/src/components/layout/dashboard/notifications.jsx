@@ -167,6 +167,9 @@ function Notifications() {
                 } else if (metadata.inner_type === 'comment') {
                     setHighlightCommentId(metadata.comment_id)
                     navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
+                } else if (metadata.inner_type === 'post-reply') {
+                    setHighlightCommentId(metadata.comment_id)
+                    navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
                 }
                 break;
             }

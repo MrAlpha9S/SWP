@@ -236,7 +236,16 @@ function AppContent() {
                     }
                 }
                 openNotification('like', data, onClick)
+            })
 
+            socket.on('reply', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                const onClick = () => {
+                    setHighlightCommentId(data.comment_id)
+                    navigate(`/forum/${data.category_tag}/${data.post_id}`)
+                }
+                openNotification('reply', data, onClick)
             })
 
             return () => {
