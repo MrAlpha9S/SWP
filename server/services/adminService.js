@@ -84,11 +84,100 @@ async function updateUserById(id, data) {
   }
   return userUpdated;
 }
+
 async function deleteUserById(id) {
   const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query('DELETE FROM users WHERE user_id = @id');
-  return result.rowsAffected[0] > 0;
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    const request = transaction.request();
+    request.input('userId', sql.Int, id);
+
+    // 1. Delete likes on comments under posts created by the user
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE comment_id IN (
+        SELECT comment_id
+        FROM social_comments
+        WHERE post_id IN (
+          SELECT post_id FROM social_posts WHERE user_id = @userId
+        )
+      )
+    `);
+
+    // 2. Delete likes on posts by the user
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE post_id IN (
+        SELECT post_id FROM social_posts WHERE user_id = @userId
+      )
+    `);
+
+    // 3. Delete reports on comments/posts created by the user
+    await request.query(`
+      DELETE FROM social_reports
+      WHERE post_id IN (
+        SELECT post_id FROM social_posts WHERE user_id = @userId
+      )
+      OR comment_id IN (
+        SELECT comment_id FROM social_comments WHERE post_id IN (
+          SELECT post_id FROM social_posts WHERE user_id = @userId
+        )
+      )
+    `);
+
+    // 4. Delete comments on posts created by the user
+    await request.query(`
+      DELETE FROM social_comments
+      WHERE post_id IN (
+        SELECT post_id FROM social_posts WHERE user_id = @userId
+      )
+    `);
+
+    // 5. Delete posts created by the user
+    await request.query(`
+      DELETE FROM social_posts WHERE user_id = @userId
+    `);
+
+    // 6a. Delete likes on comments made by the user
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE comment_id IN (
+        SELECT comment_id FROM social_comments WHERE user_id = @userId
+      )
+    `);
+
+// 6b. Now delete the comments made by the user
+    await request.query(`
+      DELETE FROM social_comments WHERE user_id = @userId
+    `);
+
+    // 7. Delete likes made by the user
+    await request.query(`
+      DELETE FROM social_likes WHERE user_id = @userId
+    `);
+
+    // 8. Delete reports made by the user
+    await request.query(`
+      DELETE FROM social_reports WHERE user_id = @userId
+    `);
+
+    // 9. Finally, delete the user
+    const result = await request.query(`
+      DELETE FROM users WHERE user_id = @userId
+    `);
+
+    await transaction.commit();
+    return result.rowsAffected[0] > 0;
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error during user deletion:', error);
+    return false;
+  }
 }
+
 async function toggleBanUserById(id, isBanned) {
   const pool = await poolPromise;
   const result = await pool.request().input('id', sql.Int, id).input('isBanned', sql.Bit, isBanned).query('UPDATE users SET isBanned = @isBanned WHERE user_id = @id');
@@ -168,13 +257,64 @@ async function updatePost(id, data) {
   if (data.content !== undefined) req.input('content', sql.NVarChar, data.content);
   if (data.is_pinned !== undefined) req.input('is_pinned', sql.Bit, data.is_pinned);
   if (data.is_reported !== undefined) req.input('is_reported', sql.Bit, data.is_reported);
-  const result = await req.query(`UPDATE social_posts SET ${fields.join(', ')} WHERE post_id = @id`);
+  const result = await req.query(`UPDATE social_posts
+                                  SET ${fields.join(', ')}
+                                  WHERE post_id = @id`);
   return result.rowsAffected[0] > 0;
 }
+
 async function deletePostById(id) {
   const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query('DELETE FROM social_posts WHERE post_id = @id');
-  return result.rowsAffected[0] > 0;
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    const request = transaction.request();
+    request.input('postId', sql.Int, id);
+
+    // 1. Delete likes on comments under the post
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE comment_id IN (
+        SELECT comment_id FROM social_comments WHERE post_id = @postId
+      )
+    `);
+
+    // 2. Delete likes on the post itself
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE post_id = @postId
+    `);
+
+    // 3. Delete reports on the post or its comments
+    await request.query(`
+      DELETE FROM social_reports
+      WHERE post_id = @postId
+         OR comment_id IN (
+              SELECT comment_id FROM social_comments WHERE post_id = @postId
+         )
+    `);
+
+    // 4. Delete comments on the post
+    await request.query(`
+      DELETE FROM social_comments
+      WHERE post_id = @postId
+    `);
+
+    // 5. Finally, delete the post
+    const result = await request.query(`
+      DELETE FROM social_posts
+      WHERE post_id = @postId
+    `);
+
+    await transaction.commit();
+    return result.rowsAffected[0] > 0;
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error deleting post:', error);
+    return false;
+  }
 }
 async function getPostLikes(postId) {
   const pool = await poolPromise;
@@ -204,10 +344,42 @@ async function getAllComments() {
   `);
   return result.recordset;
 }
+
 async function deleteCommentById(id) {
   const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query('DELETE FROM social_comments WHERE comment_id = @id');
-  return result.rowsAffected[0] > 0;
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    const request = transaction.request();
+    request.input('commentId', sql.Int, id);
+
+    // 1. Delete likes on the comment
+    await request.query(`
+      DELETE FROM social_likes
+      WHERE comment_id = @commentId
+    `);
+
+    // 2. Delete reports on the comment
+    await request.query(`
+      DELETE FROM social_reports
+      WHERE comment_id = @commentId
+    `);
+
+    // 3. Finally, delete the comment
+    const result = await request.query(`
+      DELETE FROM social_comments
+      WHERE comment_id = @commentId
+    `);
+
+    await transaction.commit();
+    return result.rowsAffected[0] > 0;
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error deleting comment:', error);
+    return false;
+  }
 }
 
 // BLOG
