@@ -9,6 +9,7 @@ import BlogManagement from '../../components/layout/admin/BlogManagement.jsx';
 import TopicManagement from '../../components/layout/admin/TopicManagement.jsx';
 import SubscriptionManagement from '../../components/layout/admin/SubscriptionManagement.jsx';
 import CheckinManagement from '../../components/layout/admin/CheckinManagement.jsx';
+import UserAchievementManagement from '../../components/layout/admin/UserAchivementManagement.jsx';
 import Statistics from '../../components/layout/admin/Statistics.jsx';
 
 const boardMap = {
@@ -20,6 +21,7 @@ const boardMap = {
   topic: <TopicManagement />,
   subscription: <SubscriptionManagement />,
   checkin: <CheckinManagement />,
+  'user-achievement': <UserAchievementManagement />,
   statistics: <Statistics />,
 };
 
@@ -47,4 +49,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;

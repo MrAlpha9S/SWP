@@ -11,6 +11,7 @@ const items = [
   { key: 'topic', label: 'Quản lý Chủ đề', icon: <TagsOutlined /> },
   { key: 'subscription', label: 'Quản lý Subscription', icon: <DollarOutlined /> },
   { key: 'checkin', label: 'Quản lý Check-in', icon: <EditOutlined /> },
+  { key: 'user-achievement', label: 'Quản lý Huy hiệu', icon: <TagsOutlined /> },
   { key: 'statistics', label: 'Thống kê', icon: <BarChartOutlined /> },
 ];
 

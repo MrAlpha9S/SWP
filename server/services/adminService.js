@@ -424,6 +424,36 @@ async function getStatistics() {
   };
 }
 
+// USER ACHIEVEMENTS
+async function getAllUserAchievements() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT ua.user_id, u.username, ua.achievement_id, a.achievement_name, a.criteria, ua.achieved_at
+    FROM user_achievements ua
+    JOIN users u ON ua.user_id = u.user_id
+    JOIN achievements a ON ua.achievement_id = a.achievement_id
+    ORDER BY ua.achieved_at DESC
+  `);
+  return result.recordset;
+}
+async function createUserAchievement(user_id, achievement_id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('user_id', sql.Int, user_id)
+    .input('achievement_id', sql.NVarChar, achievement_id)
+    .input('achieved_at', sql.DateTime, new Date())
+    .query('INSERT INTO user_achievements (user_id, achievement_id, achieved_at) VALUES (@user_id, @achievement_id, @achieved_at)');
+  return result.rowsAffected[0] > 0;
+}
+async function deleteUserAchievement(user_id, achievement_id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('user_id', sql.Int, user_id)
+    .input('achievement_id', sql.NVarChar, achievement_id)
+    .query('DELETE FROM user_achievements WHERE user_id = @user_id AND achievement_id = @achievement_id');
+  return result.rowsAffected[0] > 0;
+}
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -459,5 +489,8 @@ module.exports = {
   createUserSubscription,
   updateUserSubscription,
   deleteUserSubscription,
-  getStatistics
-}; 
+  getStatistics,
+  getAllUserAchievements,
+  createUserAchievement,
+  deleteUserAchievement,
+};
