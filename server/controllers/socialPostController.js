@@ -22,7 +22,7 @@ const socket = require("../utils/socket");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
 const handleDeleteComment = async (req, res) => {
-    const {comment_id} = req.body;
+    const {comment_id, comment_author_auth0_id, comment_content, reason} = req.body;
     console.log('handleDeleteComment:', comment_id)
 
     if (!comment_id) {
@@ -38,6 +38,15 @@ const handleDeleteComment = async (req, res) => {
         if (!deleteSP) {
             return res.status(200).json({success: true, message: 'Cant handleDeleteComment', data: null});
         }
+        if (reason) {
+            const io = socket.getIo()
+            io.to(`${comment_author_auth0_id}`).emit('delete-on-report-comment', {
+                comment_content: comment_content,
+                reason: reason,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+            await createNotificationService(comment_author_auth0_id, `Bình luận "${comment_content}" của bạn bị xóa.`, `Lý do: ${reason}`, 'community', {userAuth0Id : comment_author_auth0_id, inner_type : 'delete-on-report-comment'})
+        }
         return res.status(200).json({success: true, message: 'handleDeleteComment successfully', data: deleteSP});
     } catch (error) {
         console.error('Error in handleDeleteComment:', error);
@@ -46,7 +55,7 @@ const handleDeleteComment = async (req, res) => {
 }
 
 const handleApprovePost = async (req, res) => {
-    const {post_id} = req.body;
+    const {post_id, poster_auth0_id, post_title, category_tag} = req.body;
 
     if (!post_id) {
         return res.status(400).json({
@@ -61,6 +70,15 @@ const handleApprovePost = async (req, res) => {
         if (!update) {
             return res.status(404).json({success: false, message: 'Cant handleApprovePost', data: null});
         }
+        const io = socket.getIo()
+        io.to(`${poster_auth0_id}`).emit('post-approved', {
+            post_id: post_id,
+            poster_auth0_id: poster_auth0_id,
+            post_title: post_title,
+            category_tag: category_tag,
+            timestamp: getCurrentUTCDateTime().toISOString()
+        });
+        await createNotificationService(poster_auth0_id, `Bài viết ${post_title} của bạn vừa được duyệt.`, ` `, 'community', {userAuth0Id : poster_auth0_id, inner_type : 'post-approved', category_tag: category_tag, post_id: post_id})
         return res.status(200).json({success: true, message: 'handleApprovePost successfully', data: update});
     } catch (error) {
         console.error('Error in handleApprovePost:', error);
@@ -285,7 +303,7 @@ const handleUpdateSocialPosts = async (req, res) => {
 }
 
 const handleDeleteSocialPosts = async (req, res) => {
-    const {post_id} = req.body;
+    const {post_id, reason, poster_auth0_id, post_title} = req.body;
 
     if (!post_id) {
         return res.status(400).json({
@@ -299,6 +317,24 @@ const handleDeleteSocialPosts = async (req, res) => {
         const deleteSP = await DeleteSocialPosts(post_id);
         if (!deleteSP) {
             return res.status(404).json({success: false, message: 'Cant handleDeleteSocialPosts', data: null});
+        }
+        if (reason === 'rejected') {
+            const io = socket.getIo()
+            io.to(`${poster_auth0_id}`).emit('post-rejected', {
+                post_id: post_id,
+                poster_auth0_id: poster_auth0_id,
+                post_title: post_title,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+            await createNotificationService(poster_auth0_id, `Bài viết ${post_title} của bạn bị từ chối.`, ` `, 'community', {userAuth0Id : poster_auth0_id, inner_type : 'post-rejected'})
+        } else if (reason) {
+            const io = socket.getIo()
+            io.to(`${poster_auth0_id}`).emit('delete-on-report-post', {
+                post_title: post_title,
+                reason: reason,
+                timestamp: getCurrentUTCDateTime().toISOString()
+            });
+            await createNotificationService(poster_auth0_id, `Bài viết ${post_title} của bạn bị xóa.`, `Lý do: ${reason}`, 'community', {userAuth0Id : poster_auth0_id, inner_type : 'delete-on-report-post'})
         }
         return res.status(200).json({success: true, message: 'handleDeleteSocialPosts successfully', data: deleteSP});
     } catch (error) {

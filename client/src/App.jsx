@@ -1,5 +1,5 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { createContext, useMemo } from "react";
+import {Routes, Route, useNavigate} from "react-router-dom";
+import {createContext, useMemo} from "react";
 import Navbar from './components/layout/navbar.jsx';
 import './App.css';
 import Homepage from './pages/homepage/homepage.jsx';
@@ -31,7 +31,7 @@ import BlogPost from "./pages/topicsPage/blogPost.jsx";
 import SubscriptionPage from "./pages/subscriptionPage/subscriptionPage.jsx";
 import CongratulationPage from "./pages/subscriptionPage/CongratulationPage.jsx";
 import CoachSelectPage from "./pages/subscriptionPage/coachSelectPage.jsx";
-import { AnimatePresence } from "framer-motion";
+import {AnimatePresence} from "framer-motion";
 import Profile from "./pages/profilePage/profile.jsx";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import {useEffect} from "react";
@@ -45,31 +45,30 @@ import {
     useUserInfoStore
 } from "./stores/store.js";
 import CoachRegistration from "./pages/coachRegisterPage/coachRegister.jsx";
-import { generateToken } from "../notifications/firebase.js";
-import { onMessage } from 'firebase/messaging'
-import { messaging } from '../notifications/firebase.js'
-import { updateUserToken } from "./components/utils/userUtils.js";
+import {generateToken} from "../notifications/firebase.js";
+import {onMessage} from 'firebase/messaging'
+import {messaging} from '../notifications/firebase.js'
+import {updateUserToken} from "./components/utils/userUtils.js";
 import Settings from "./pages/profilePage/settings.jsx";
 import AdminDashboard from './pages/adminPage/adminDashboard.jsx';
 
-const Context = createContext({ name: 'Default' });
-
+const Context = createContext({name: 'Default'});
 
 
 function AppContent() {
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+    const {isAuthenticated, user, getAccessTokenSilently} = useAuth0();
     const initSocket = useSocketStore((state) => state.initSocket);
-    const { openNotification } = useNotificationManager();
-    const { setCurrentStepDashboard, currentStepDashboard } = useCurrentStepDashboard();
+    const {openNotification} = useNotificationManager();
+    const {setCurrentStepDashboard, currentStepDashboard} = useCurrentStepDashboard();
     const navigate = useNavigate();
-    const { setSelectedUserAuth0Id } = useSelectedUserAuth0IdStore()
-    const { notificationAllowed } = useNotificationAllowedStore();
+    const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
+    const {notificationAllowed} = useNotificationAllowedStore();
     const {setHighlightCommentId} = useHighlightCommentIdStore()
     const {setHighlightReviewId} = useHighlightReviewIdStore()
 
 
     const updateFCMMutation = useMutation({
-        mutationFn: async ({ token, user, getAccessTokenSilently, isAuthenticated }) => {
+        mutationFn: async ({token, user, getAccessTokenSilently, isAuthenticated}) => {
             return await updateUserToken(user, getAccessTokenSilently, isAuthenticated, token);
         },
     });
@@ -78,7 +77,7 @@ function AppContent() {
         const setupFCM = async () => {
             const token = await generateToken();
             if (token) {
-                updateFCMMutation.mutate({ user, getAccessTokenSilently, isAuthenticated, token });
+                updateFCMMutation.mutate({user, getAccessTokenSilently, isAuthenticated, token});
 
                 onMessage(messaging, (payload) => {
                     const isVisible = document.visibilityState === 'visible';
@@ -93,10 +92,10 @@ function AppContent() {
 
         if (!user && !isAuthenticated) return
         setupFCM();
-    }, [ isAuthenticated, user, notificationAllowed]);
+    }, [isAuthenticated, user, notificationAllowed]);
 
 
-    const { isPending, data: userData } = useQuery({
+    const {isPending, data: userData} = useQuery({
         queryKey: ['user-profile'],
         queryFn: async () => {
             if (!isAuthenticated || !user) return null;
@@ -248,6 +247,53 @@ function AppContent() {
                 openNotification('reply', data, onClick)
             })
 
+            socket.on('post-approved', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                const onClick = () => {
+                    navigate(`/forum/${data.category_tag}/${data.post_id}`)
+                }
+                openNotification('success', {
+                    message: <span>
+                Bài viết <strong>{data.post_title}</strong> vừa được duyệt.
+            </span>,
+                    content: ``,
+                    ...data
+                }, onClick)
+            })
+
+            socket.on('post-rejected', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                openNotification('failed', {
+                    message: <span>
+                Bài viết <strong>{data.post_title}</strong> bị từ chối.
+            </span>,
+                    content: ``,
+                    ...data
+                })
+            })
+
+            socket.on('delete-on-report-post', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                openNotification('failed', {
+                    message: <span>Bài viết <strong>{data.post_title}</strong> của bạn bị xóa.</span>,
+                    content: `Lý do: ${data.reason}`,
+                    timestamp: data.timestamp
+                })
+            })
+
+            socket.on('delete-on-report-comment', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                openNotification('failed', {
+                    message: <span>Bình luận <strong>{data.comment_content}</strong> của bạn bị xóa.</span>,
+                    content: `Lý do: ${data.reason}`,
+                    timestamp: data.timestamp
+                })
+            })
+
             return () => {
                 socket.disconnect();
             };
@@ -256,7 +302,7 @@ function AppContent() {
         connectSocket();
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData, openNotification, navigate, setCurrentStepDashboard, setSelectedUserAuth0Id]);
 
-    const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
+    const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
 
     return (
         <Context.Provider value={contextValue}>
@@ -292,8 +338,8 @@ function AppContent() {
                         <Route path="/forum/editor" element={<ForumEditor/>}></Route>
                         <Route path="/forum/profile/:auth0_id" element={<ForumProfile/>}></Route>
                         <Route path="/coach-register" element={<CoachRegistration/>}></Route>
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/forum/edit/:postId" element={<UpdateForumEditor />}></Route>
+                        <Route path="/admin" element={<AdminDashboard/>}/>
+                        <Route path="/forum/edit/:postId" element={<UpdateForumEditor/>}></Route>
                     </Routes>
                 </AnimatePresence>
             </div>

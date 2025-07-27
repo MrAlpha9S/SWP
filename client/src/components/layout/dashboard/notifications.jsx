@@ -161,7 +161,6 @@ function Notifications() {
             }
             case 'community': {
                 const metadata = JSON.parse(noti.metadata);
-                console.log(metadata);
                 if (metadata.inner_type === 'post') {
                     navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
                 } else if (metadata.inner_type === 'comment') {
@@ -169,6 +168,8 @@ function Notifications() {
                     navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
                 } else if (metadata.inner_type === 'post-reply') {
                     setHighlightCommentId(metadata.comment_id)
+                    navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
+                } else if (metadata.inner_type === 'post-approved') {
                     navigate(`/forum/${metadata.category_tag}/${metadata.post_id}`)
                 }
                 break;

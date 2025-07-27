@@ -1,7 +1,7 @@
 import { GetIsPendingSocialPosts, ApproveSocialPosts, DeleteSocialPosts } from '../../../utils/forumUtils'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import Swal from 'sweetalert2'
 
 export default function IsPendingPost() {
@@ -22,6 +22,10 @@ export default function IsPendingPost() {
         enabled: isAuthenticated && !!user,
     })
 
+    useEffect(() => {
+        console.log(qPost)
+    }, [qPost])
+
     const posts = qPost?.data?.recordset || []
 
     const totalPages = Math.ceil(posts.length / postsPerPage)
@@ -33,9 +37,9 @@ export default function IsPendingPost() {
         setCurrentPage(1)
     }
 
-    const handleApprove = async (post_id) => {
+    const handleApprove = async (post) => {
         try {
-            await ApproveSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id)
+            await ApproveSocialPosts(user, getAccessTokenSilently, isAuthenticated, post?.post_id, post?.auth0_id, post?.title, post?.category_tag)
             Swal.fire({
                 icon: 'success',
                 title: 'Đã duyệt bài viết!',
@@ -52,7 +56,7 @@ export default function IsPendingPost() {
         }
     }
 
-    const handleDelete = async (post_id) => {
+    const handleDelete = async (post) => {
         const result = await Swal.fire({
             title: 'Bạn có chắc chắn?',
             text: 'Bài viết sẽ bị xoá vĩnh viễn.',
@@ -66,7 +70,7 @@ export default function IsPendingPost() {
 
         if (result.isConfirmed) {
             try {
-                await DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id)
+                await DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, post?.post_id, 'rejected', post?.auth0_id, post?.title)
                 Swal.fire({
                     icon: 'success',
                     title: 'Đã xoá bài viết!',
@@ -122,13 +126,13 @@ export default function IsPendingPost() {
 
                                 <div className="mt-4 flex gap-4">
                                     <button
-                                        onClick={() => handleApprove(post.post_id)}
+                                        onClick={() => handleApprove(post)}
                                         className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600"
                                     >
                                         Duyệt
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(post.post_id)}
+                                        onClick={() => handleDelete(post)}
                                         className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
                                     >
                                         Xoá
