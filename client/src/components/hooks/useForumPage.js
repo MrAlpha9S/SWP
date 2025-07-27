@@ -25,7 +25,7 @@ export default function useForumPage(initialCategoryTag, queryKeyPrefix, auth0_i
                 fromDate,
                 toDate,
                 auth0_id,
-                currentUserId: user.sub,
+                currentUserId: user?.sub,
             }),
     });
 

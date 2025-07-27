@@ -58,7 +58,7 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
 
             return await res.json();
         } else {
-            const auth0_null = ''
+            const auth0_null = 'null'
             const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}&currentUserId=${currentUserId}`, {
                 method: 'GET',
                 headers: {

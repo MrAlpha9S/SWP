@@ -4,6 +4,9 @@ const { poolPromise, sql } = require('../configs/sqlConfig');
 
 // --- USER ---
 const handleGetAllUsers = async (req, res) => {
+  // Lấy auth0_id từ access token đã decode
+  const auth0Id = req.auth?.payload?.sub;
+  console.log('auth0 id', auth0Id);
   try {
     const users = await adminService.getAllUsers();
     return res.status(200).json({ success: true, data: users });
@@ -408,6 +411,42 @@ const handleDeleteUserSubscription = async (req, res) => {
   }
 };
 
+// --- USER ACHIEVEMENTS ---
+const handleGetAllUserAchievements = async (req, res) => {
+  try {
+    const achievements = await adminService.getAllUserAchievements();
+    return res.status(200).json({ success: true, data: achievements });
+  } catch (error) {
+    console.error('Error in handleGetAllUserAchievements:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch user achievements' });
+  }
+};
+const handleCreateUserAchievement = async (req, res) => {
+  const { user_id, achievement_id } = req.body;
+  if (!user_id || !achievement_id) {
+    return res.status(400).json({ success: false, message: 'user_id and achievement_id are required' });
+  }
+  try {
+    const created = await adminService.createUserAchievement(user_id, achievement_id);
+    if (!created) return res.status(400).json({ success: false, message: 'Failed to add achievement' });
+    return res.status(201).json({ success: true, message: 'Achievement added successfully' });
+  } catch (error) {
+    console.error('Error in handleCreateUserAchievement:', error);
+    return res.status(500).json({ success: false, message: 'Failed to add achievement' });
+  }
+};
+const handleDeleteUserAchievement = async (req, res) => {
+  const { user_id, achievement_id } = req.params;
+  try {
+    const deleted = await adminService.deleteUserAchievement(user_id, achievement_id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Achievement not found' });
+    return res.status(200).json({ success: true, message: 'Achievement deleted successfully' });
+  } catch (error) {
+    console.error('Error in handleDeleteUserAchievement:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete achievement' });
+  }
+};
+
 module.exports = {
   // User
   handleGetAllUsers,
@@ -452,5 +491,9 @@ module.exports = {
   handleGetAllUserSubscriptions,
   handleCreateUserSubscription,
   handleUpdateUserSubscription,
-  handleDeleteUserSubscription
+  handleDeleteUserSubscription,
+  // User Achievements
+  handleGetAllUserAchievements,
+  handleCreateUserAchievement,
+  handleDeleteUserAchievement
 };
