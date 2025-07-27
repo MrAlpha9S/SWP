@@ -30,7 +30,8 @@ CREATE TABLE [users]
   [isBanned] int DEFAULT (0),
   [is_social] int,
   [fcm_token] varchar(255),
-  [time_to_send_push] varchar(40)
+  [time_to_send_push] varchar(40),
+  [is_pending_for_coach] bit default(0),
 )
 GO
 
@@ -425,6 +426,22 @@ CREATE TABLE [quotes]
   [content] nvarchar(max),
   [author] nvarchar(100)
 )
+GO
+
+CREATE TABLE [notifications]
+(
+  [noti_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [noti_title] nvarchar(100),
+  [content] nvarchar(200),
+  [created_at] DATETIME,
+  [is_read] bit DEFAULT(0),
+  [type] nvarchar(50),
+  [metadata] nvarchar(max)
+)
+GO
+
+ALTER TABLE [notifications] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]) ON DELETE CASCADE;
 GO
 
 -- Foreign keys with fixed CASCADE paths
@@ -951,6 +968,5 @@ BEGIN
   WHERE user_id IN (SELECT user_id FROM deleted);
 END
 GO
-
-select *
-from users
+select isBanned from users
+select * from coach_user where coach_id = 6
