@@ -113,7 +113,7 @@ async function getPosts({ categoryTag = null, keyword = null, page = 1, pageSize
             request.input('currentUserId', sql.Int, 0);
         }
 
-        if (auth0_id) {
+        if (auth0_id && auth0_id !== 'null') {
             const user_id = await getUserIdFromAuth0Id(auth0_id);
             filters.push(`u.user_id = @user_id`);
             request.input('user_id', sql.Int, user_id);

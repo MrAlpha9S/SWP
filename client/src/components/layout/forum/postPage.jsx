@@ -41,7 +41,7 @@ export default function PostPage() {
         queryFn: () =>
             getPosts({
                 postId: postId,
-                currentUserId: user.sub,
+                currentUserId: user?.sub,
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -51,7 +51,7 @@ export default function PostPage() {
         queryFn: () =>
             getComments({
                 postId: postId,
-                currentUserId: user.sub
+                currentUserId: user?.sub
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -290,7 +290,7 @@ export default function PostPage() {
     }
 
     // No post found
-    if (!post || !user) {
+    if (!post) {
         return (
             <PageFadeWrapper>
                 <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
@@ -340,7 +340,7 @@ export default function PostPage() {
                                 <p>đăng bởi </p>
                                 <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
                             </div>
-                            {user.sub === post.auth0_id && (
+                            {user?.sub === post.auth0_id && (
                                 <div
                                     className="text-primary-600 ml-auto hover:underline cursor-pointer"
                                     onClick={() => navigate(`/forum/edit/${post.post_id}`)}
@@ -356,7 +356,7 @@ export default function PostPage() {
                             <button
                                 className='flex items-center gap-2 hover:text-primary-600 transition-colors'
                                 onClick={() => onLike(post.post_id, null)}
-                                disabled={post.isLiked === 1}
+                                disabled={post.isLiked === 1 || !user}
                             >
                                 {post.isLiked === 1 ? (
                                     <FaHeart className='size-4 text-primary-600' />
@@ -371,6 +371,7 @@ export default function PostPage() {
                             <button
                                 className='flex items-center gap-2 hover:text-red-500 transition-colors'
                                 onClick={() => handleReportClick('post', post.post_id, post.username)}
+                                disabled={!user}
                             >
                                 <FaFlag /> Report
                             </button>
@@ -424,6 +425,7 @@ export default function PostPage() {
                                         isLiked={comment.isLiked}
                                         onLike={onLike}
                                         onReportClick={handleReportClick}
+                                        currentUserId={user?.sub}
                                     />
                                 )}
                             </div>
@@ -451,7 +453,7 @@ export default function PostPage() {
     );
 }
 
-export function Comment({ author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike, onReportClick }) {
+export function Comment({ author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike, onReportClick, currentUserId }) {
     const navigate = useNavigate();
 
     return (
@@ -481,7 +483,7 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
                 <button
                     className='flex items-center gap-2 hover:text-primary-600 transition-colors'
                     onClick={() => onLike(null, commentId)}
-                    disabled={isLiked === 1}
+                    disabled={isLiked === 1 || !currentUserId}
                 >
                     {isLiked === 1 ? (
                         <FaHeart className='size-4 text-primary-600' />
@@ -493,6 +495,7 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
                 <button
                     className='flex items-center gap-2 hover:text-red-500 transition-colors'
                     onClick={() => onReportClick('comment', commentId, author)}
+                    disabled={!currentUserId}
                 >
                     <FaFlag /> Report
                 </button>
