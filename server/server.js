@@ -9,6 +9,7 @@ const cors = require('cors');
 const socket = require('./utils/socket');
 const {initializeApp} = require("firebase-admin/app");
 const path = require('path');
+console.log("NODE_ENV is", process.env.NODE_ENV);
 
 const firebaseApp = initializeApp({
     projectId: process.env.VITE_FIREBASE_PROJECT_ID,
