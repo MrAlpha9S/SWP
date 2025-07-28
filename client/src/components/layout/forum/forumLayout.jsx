@@ -1,8 +1,8 @@
 // components/forum/ForumLayout.jsx
 import React, { useEffect, useState } from 'react';
-import Hero from "./Hero.jsx"; // or pass this in via props
-import PostCard from './PostCard.jsx';
-import Sidebar from './Sidebar.jsx';
+import Hero from "./hero.jsx"; // or pass this in via props
+import PostCard from './postCard.jsx';
+import Sidebar from './sideBar.jsx';
 import { Input, Divider, Pagination } from 'antd';
 
 export default function ForumLayout({
