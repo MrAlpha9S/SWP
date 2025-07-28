@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {Input} from 'antd';
 import {useAuth0} from "@auth0/auth0-react";
-import ChatMessage from './ChatMessage';
+import ChatMessage from './chatmessage.jsx';
 import {SendOutlined} from '@ant-design/icons';
 import {SendMessage} from '../../../utils/messagerUtils';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
