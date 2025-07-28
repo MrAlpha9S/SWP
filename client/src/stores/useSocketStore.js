@@ -9,7 +9,8 @@ export const useSocketStore = create((set, get) => ({
         const existing = get().socket;
         if (existing) return existing;
 
-        const socket = io(`${getWebSocketUrl()}`, {
+        const socket = io(getWebSocketUrl(), {
+            path: import.meta.env.MODE === 'production' ? '/socket.io/' : undefined,
             withCredentials: true,
             transports: ['websocket', 'polling'],
             auth: {
