@@ -20,6 +20,7 @@ const {processAchievementsWithNotifications} = require("../services/achievementS
 const {createNotificationService} = require("../services/notificationService");
 const socket = require("../utils/socket");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
+const {deleteCommentById, deletePostById} = require("../services/adminService");
 
 const handleDeleteComment = async (req, res) => {
     const {comment_id, comment_author_auth0_id, comment_content, reason} = req.body;
@@ -34,7 +35,7 @@ const handleDeleteComment = async (req, res) => {
     }
 
     try {
-        const deleteSP = await DeleteComment(comment_id);
+        const deleteSP = await deleteCommentById(comment_id);
         if (!deleteSP) {
             return res.status(200).json({success: true, message: 'Cant handleDeleteComment', data: null});
         }
@@ -314,7 +315,7 @@ const handleDeleteSocialPosts = async (req, res) => {
     }
 
     try {
-        const deleteSP = await DeleteSocialPosts(post_id);
+        const deleteSP = await deletePostById(post_id);
         if (!deleteSP) {
             return res.status(404).json({success: false, message: 'Cant handleDeleteSocialPosts', data: null});
         }
