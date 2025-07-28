@@ -43,10 +43,10 @@ const IsPendingBlog = () => {
   };
 
   // Approve blog
-  const handleApproveBlog = async (blog_id) => {
+  const handleApproveBlog = async (blog_id, auth0_id, title, topic_id) => {
     try {
       const token = await getAccessTokenSilently();
-      await approveBlog(blog_id, token);
+      await approveBlog(blog_id, token, auth0_id, title, topic_id);
       message.success('Duyệt blog thành công');
       fetchBlogs();
     } catch (err) {
@@ -55,10 +55,10 @@ const IsPendingBlog = () => {
   };
 
   // Xóa blog
-  const handleDeleteBlog = async (blog_id) => {
+  const handleDeleteBlog = async (blog_id, auth0_id, title, topic_id) => {
     try {
       const token = await getAccessTokenSilently();
-      await deleteBlog(blog_id, token);
+      await deleteBlog(blog_id, token, auth0_id, title, topic_id);
       message.success('Xóa blog thành công');
       fetchBlogs();
     } catch (err) {
@@ -89,8 +89,8 @@ const IsPendingBlog = () => {
       render: (_, blog) => (
         <>
           <Button icon={<EyeOutlined />} onClick={() => handleViewBlog(blog.blog_id)} className="mr-2" />
-          <Button icon={<CheckOutlined className='text-green-500' />} onClick={() => handleApproveBlog(blog.blog_id)} className="mr-2 border-green-500" />
-          <Popconfirm title="Xóa blog này?" onConfirm={() => handleDeleteBlog(blog.blog_id)} okText="Xóa" cancelText="Hủy">
+          <Button icon={<CheckOutlined className='text-green-500' />} onClick={() => handleApproveBlog(blog.blog_id, blog.auth0_id, blog.title, blog.topic_id)} className="mr-2 border-green-500" />
+          <Popconfirm title="Xóa blog này?" onConfirm={() => handleDeleteBlog(blog.blog_id, blog.auth0_id, blog.title, blog.topic_id)} okText="Xóa" cancelText="Hủy">
             <Button icon={<DeleteOutlined />} danger />
           </Popconfirm>
         </>

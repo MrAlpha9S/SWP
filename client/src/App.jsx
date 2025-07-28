@@ -294,6 +294,29 @@ function AppContent() {
                 })
             })
 
+            socket.on('blog-approved', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                const onClick = () => {
+                    navigate(`/topics/${data.topic_id}/${data.blog_id}`)
+                }
+                openNotification('success', {
+                    message: <span>Bài blog <strong>{data.title}</strong> của bạn đã được duyệt.</span>,
+                    content: ``,
+                    timestamp: data.timestamp
+                }, onClick)
+            })
+
+            socket.on('blog-rejected', (data) => {
+                queryClient.invalidateQueries(['notifications'])
+                if (currentStepDashboard === 'notifications') return
+                openNotification('failed', {
+                    message: <span>Bài blog <strong>{data.title}</strong> của bạn bị từ chối.</span>,
+                    content: ``,
+                    timestamp: data.timestamp
+                })
+            })
+
             return () => {
                 socket.disconnect();
             };

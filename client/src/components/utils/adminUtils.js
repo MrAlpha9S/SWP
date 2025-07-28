@@ -164,10 +164,11 @@ export async function getAllBlogs(token) {
   return await res.json();
 }
 
-export async function approveBlog(id, token) {
+export async function approveBlog(id, token, auth0_id, title, topic_id) {
   const res = await fetch(`http://localhost:3000/admin/blogs/${id}/approve`, {
     method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
+    body: JSON.stringify({ auth0_id: auth0_id, title: title, topic_id: topic_id })
   });
   if (!res.ok) throw new Error('Lỗi phê duyệt blog');
   return await res.json();
@@ -189,10 +190,11 @@ export async function getBlogById(id, token) {
   return await res.json();
 }
 
-export async function deleteBlog(id, token) {
+export async function deleteBlog(id, token, auth0_id, title, topic_id) {
   const res = await fetch(`http://localhost:3000/admin/blogs/${id}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
+    body: JSON.stringify({ auth0_id: auth0_id, title: title, topic_id: topic_id })
   });
   if (!res.ok) throw new Error('Lỗi xóa blog');
   return await res.json();

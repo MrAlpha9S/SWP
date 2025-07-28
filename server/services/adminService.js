@@ -397,7 +397,7 @@ async function getAllBlogs() {
 async function getIsPendingBlogs() {
   const pool = await poolPromise;
   const result = await pool.request().query(`
-    SELECT b.*, u.username, u.avatar
+    SELECT b.*, u.username, u.avatar, u.auth0_id
     FROM blog_posts b
     JOIN users u ON b.user_id = u.user_id
    	WHERE isPendingForApprovement = 1

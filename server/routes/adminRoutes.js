@@ -33,7 +33,6 @@ router.get('/comments', adminController.handleGetAllComments);
 router.delete('/comments/:id', adminController.handleDeleteComment);
 
 // Route quản lý blog
-
 router.get('/blogs/pending', adminController.handleGetIsPendingBlogs);
 router.get('/blogs', adminController.handleGetAllBlogs);
 router.get('/blogs/:id', adminController.handleGetBlogById);

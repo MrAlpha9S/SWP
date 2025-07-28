@@ -140,6 +140,8 @@ function Notifications() {
                 const metadata = JSON.parse(noti.metadata);
                 if (metadata.inner_type === 'achievements') {
                     setCurrentStepDashboard('badges');
+                } else if (metadata.inner_type === 'blog-approved') {
+                    navigate(`/topics/${metadata.topic_id}/${metadata.blog_id}`)
                 }
                 break;
             }

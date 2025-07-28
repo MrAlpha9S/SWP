@@ -3,6 +3,9 @@ const adminService = require('../services/adminService');
 const { poolPromise, sql } = require('../configs/sqlConfig');
 const {getSubscribedUsers} = require("../services/coachService");
 const {getRevenue} = require("../services/adminService");
+const socket = require("../utils/socket");
+const {getCurrentUTCDateTime} = require("../utils/dateUtils");
+const {createNotificationService} = require("../services/notificationService");
 
 // --- USER ---
 const handleGetAllUsers = async (req, res) => {
@@ -218,9 +221,20 @@ const handleGetAllBlogs = async (req, res) => {
 };
 const handleApproveBlog = async (req, res) => {
   const { id } = req.params;
+  const { auth0_id, title, topic_id } = req.body;
+  console.log('info', auth0_id, title, topic_id);
   try {
     const approved = await adminService.approveBlog(id);
     if (!approved) return res.status(404).json({ success: false, message: 'Blog not found' });
+    const io = socket.getIo()
+    io.to(`${auth0_id}`).emit('blog-approved', {
+      title: title,
+      author: auth0_id,
+      topic: topic_id,
+      blog_id: id,
+      timestamp: getCurrentUTCDateTime().toISOString()
+    });
+    await createNotificationService(auth0_id, `Bài blog ${title} của bạn đã được duyệt.`, ` `, 'system', {userAuth0Id : auth0_id, inner_type : 'blog-approved', topic_id : topic_id, blog_id : id})
     return res.status(200).json({ success: true, message: 'Blog approved successfully' });
   } catch (error) {
     console.error('Error in handleApproveBlog:', error);
@@ -249,9 +263,17 @@ const handleGetBlogById = async (req, res) => {
 };
 const handleDeleteBlog = async (req, res) => {
   const { id } = req.params;
+  const { auth0_id, title } = req.body;
   try {
     const deleted = await adminService.deleteBlogById(Number(id));
     if (!deleted) return res.status(404).json({ success: false, message: 'Blog not found' });
+    const io = socket.getIo()
+    io.to(`${auth0_id}`).emit('blog-rejected', {
+      title: title,
+      author: auth0_id,
+      timestamp: getCurrentUTCDateTime().toISOString()
+    });
+    await createNotificationService(auth0_id, `Bài blog ${title} của bạn bị từ chối.`, ` `, 'system', {userAuth0Id : auth0_id, inner_type : 'blog-rejected'})
     return res.status(200).json({ success: true, message: 'Blog deleted successfully' });
   } catch (error) {
     console.error('Error in handleDeleteBlog:', error);
