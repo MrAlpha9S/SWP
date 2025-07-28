@@ -55,7 +55,7 @@ const schedulePushForUser = (userAuth0Id, timeString, reasonsCSV) => {
         let hour = parseInt(localHour);
 
         if (process.env.NODE_ENV === 'production') {
-            hour = (hour - 7 + 24) % 24;
+            hour = (hour + 7);
         }
 
         const cronExp = `${minute} ${hour} * * *`;
