@@ -366,6 +366,13 @@ server.listen(portSocket, () => {
     console.log(`Socket.IO server running at http://localhost:${portSocket}`);
 });
 
-scheduleUserPushes()
+(async () => {
+    try {
+        await scheduleUserPushes();
+        console.log('✅ Scheduled user pushes');
+    } catch (err) {
+        console.error('❌ Failed to schedule user pushes:', err);
+    }
+})();
 
 module.exports = { io, firebaseApp }
