@@ -16,6 +16,7 @@ export default function PostSignUpCallback() {
             try {
                 const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 if (!data.success) return navigate('/error');
+                if (data.message.role === 'Admin') return navigate('/admin');
 
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 if (profileRes.success) {

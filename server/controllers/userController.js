@@ -36,8 +36,9 @@ const handlePostSignup = async (req, res) => {
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required'});
 
     try {
-        if (await userExists(userAuth0Id)) {
-            return res.status(200).json({success: true, message: 'User info already exist'});
+        const isUserExists = await userExists(userAuth0Id);
+        if (isUserExists) {
+            return res.status(200).json({success: true, message: isUserExists});
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);

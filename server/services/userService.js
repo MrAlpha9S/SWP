@@ -24,8 +24,8 @@ const userExists = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('auth0_id', auth0_id)
-            .query('SELECT * FROM users WHERE auth0_id = @auth0_id');
-        return result.recordset.length > 0;
+            .query('SELECT role FROM users WHERE auth0_id = @auth0_id');
+        return result.recordset.length > 0 ? result.recordset[0] : false;
     } catch (error) {
         console.error('error in userExists', error);
         return false;
