@@ -2,6 +2,7 @@ import React from 'react';
 import {Tabs} from 'antd';
 import PostBlog from "./postblog.jsx";
 import PostedBlog from './postedblog.jsx'
+import IsPendingBlog from './ispendingblog.jsx';
 
 const onChange = key => {
     console.log(key);
@@ -20,7 +21,7 @@ const items = [
     {
         key: '3',
         label: 'Bài viết chờ duyệt',
-        children: 'Bài viết chờ duyệt',
+        children: <IsPendingBlog/>,
     },
 ];
 const ManageBlog = () => {

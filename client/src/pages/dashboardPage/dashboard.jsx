@@ -23,14 +23,12 @@ import SavingsMenu from "../../components/layout/dashboard/savingsMenu.jsx";
 import DistractionTools from "../../components/layout/dashboard/distractionTools.jsx";
 import BadgesMenu from "../../components/layout/dashboard/badgesMenu.jsx";
 
-import PostBlog from '../../components/layout/coachboard/postblog.jsx'
-import MessageBox from "../../components/layout/coachboard/messager/messager.jsx";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import CoachDashboard from "../../components/layout/dashboard/coachDashboard.jsx";
 import Messager from "../../components/layout/coachboard/messager/messager.jsx";
 import CoachOverview from "../../components/layout/coachboard/coachOverview.jsx";
 import {getStats} from "../../components/utils/coachUtils.js";
-import ManageBlog from "../../components/layout/coachboard/manageBlog.jsx";
+import ManageBlog from "../../components/layout/coachboard/blogmanage/manageBlog.jsx";
 import ManageForum from "../../components/layout/coachboard/manageforum/manageforum.jsx";
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
 import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";

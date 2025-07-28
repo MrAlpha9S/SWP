@@ -17,3 +17,30 @@ export async function postBlog(user, getAccessTokenSilently, isAuthenticated, to
 
     return await res.json();
 }
+
+export async function getPostedBlog(user, getAccessTokenSilently, isAuthenticated) {
+
+    if (!isAuthenticated || !user) return;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch('http://localhost:3000/topics/getblog', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({auth0_id: user.sub})
+    });
+    
+
+    return await res.json();
+}
+
+export async function getBlogById(id, token) {
+  const res = await fetch(`http://localhost:3000/topics/getblogbyid/${id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy blog');
+  return await res.json();
+}
