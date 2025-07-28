@@ -5,7 +5,7 @@ const {
     getCoaches,
     getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
     deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken,
-    updateUserTimesForPush, getUserReasonsCSVByAuth0Id
+    updateUserTimesForPush, getUserReasonsCSVByAuth0Id, leaderboardStatsService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -474,6 +474,20 @@ const handleUpdateUserTimesForPush = async (req, res) => {
     }
 };
 
+const getLeaderboardStats = async (req, res) => {
+    try {
+        const result = await leaderboardStatsService()
+        if (result) {
+            return res.status(200).json({success: true, data: result});
+        } else {
+            return res.status(404).json({success: false, message: 'Failed to get leaderboard'});
+        }
+    } catch (error) {
+        console.error('Error in getLeaderboardStats', error);
+        return res.status(500).json({success: false, message: error.message});
+    }
+}
+
 
 
 module.exports = {
@@ -498,5 +512,6 @@ module.exports = {
     createReviewController,
     handleUpdateUserFCMToken,
     sendPushNotificationTo,
-    handleUpdateUserTimesForPush
+    handleUpdateUserTimesForPush,
+    getLeaderboardStats
 };

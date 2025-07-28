@@ -298,3 +298,15 @@ export async function updateUserTimesForPush(user, getAccessTokenSilently, isAut
 
     return res.json();
 }
+
+export async function getLeaderboard() {
+
+    const res = await fetch(`http://localhost:3000/users/leaderboard`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return res.json();
+}
