@@ -441,6 +441,33 @@ CREATE TABLE [notifications]
 )
 GO
 
+CREATE TABLE [revenue]
+(
+  [id] int PRIMARY KEY IDENTITY(1, 1),
+  [amount] float,
+  [created_at] DATETIME,
+  [sub_id] INT
+)
+GO
+
+CREATE TABLE [coach_revenue]
+(
+  [id] int PRIMARY KEY IDENTITY(1, 1),
+  [coach_id] int,
+  [amount] float,
+  [created_at] DATETIME,
+  [sub_id] INT
+)
+
+ALTER TABLE [revenue] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id]);
+GO
+
+ALTER TABLE [coach_revenue] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id]);
+GO
+
+ALTER TABLE [coach_revenue] ADD FOREIGN KEY ([coach_id]) REFERENCES [users] ([user_id]) ON DELETE CASCADE;
+GO
+
 ALTER TABLE [notifications] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]) ON DELETE CASCADE;
 GO
 
@@ -968,5 +995,43 @@ BEGIN
   WHERE user_id IN (SELECT user_id FROM deleted);
 END
 GO
-select isBanned from users
-select * from coach_user where coach_id = 6
+
+-- Trigger 1: Create revenue entry when user purchases subscription
+CREATE TRIGGER TR_UserSubscription_Revenue
+ON [users_subscriptions]
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO [revenue] ([amount], [created_at], [sub_id])
+    SELECT 
+        s.price,
+        i.purchased_date,
+        i.sub_id
+    FROM inserted i
+    INNER JOIN [subscriptions] s ON i.sub_id = s.sub_id;
+END;
+GO
+
+-- Trigger 2: Create coach revenue entry when coach gets assigned to user
+CREATE TRIGGER TR_CoachUser_CoachRevenue
+ON [coach_user]
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    INSERT INTO [coach_revenue] ([coach_id], [amount], [created_at], [sub_id])
+    SELECT 
+        i.coach_id,
+        s.price * ISNULL(ci.commission_rate, 0.3), -- Use default 0.3 if commission_rate is NULL
+        i.started_date,
+        u.sub_id
+    FROM inserted i
+    INNER JOIN [users] u ON i.user_id = u.user_id
+    INNER JOIN [subscriptions] s ON u.sub_id = s.sub_id
+    LEFT JOIN [coach_info] ci ON i.coach_id = ci.coach_id
+    WHERE i.user_id IS NOT NULL; -- Only process if user_id is not NULL
+END;
+GO

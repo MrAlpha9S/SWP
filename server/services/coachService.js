@@ -9,11 +9,8 @@ const getSubscribedUsers = async (userAuth0Id) => {
         const result = await pool.request()
             .input('user_id', sql.Int, userId)
             .query(`   SELECT *
-                       FROM coach_user cu
-                                LEFT JOIN users u ON cu.user_id = u.user_id
-                                LEFT JOIN users_subscriptions us ON u.user_id = us.user_id
-                                LEFT JOIN subscriptions s ON u.sub_id = s.sub_id
-                       WHERE cu.coach_id = @user_id;`)
+                       FROM coach_revenue
+                       WHERE coach_id = @user_id;`)
         return result.recordset;
     }catch (error) {
         console.error('error in getSubscribedUsers', error);
