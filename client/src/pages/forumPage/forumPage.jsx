@@ -45,7 +45,7 @@ export default function ForumPage() {
 
     useEffect(() => {
         if (!isforumCategoryMetadataPending) {
-            setCategoryMetadata(forumCategoryMetadata.data)
+            setCategoryMetadata(forumCategoryMetadata?.data)
         }
     }, [forumCategoryMetadata, isforumCategoryMetadataPending])
 
@@ -89,7 +89,7 @@ export default function ForumPage() {
                 <div className="max-w-7xl bg-primary-50 mx-auto px-14 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Left Section */}
                     <div className="md:col-span-3 space-y-6">
-                        {!isforumCategoryMetadataPending && categoryMetadata.length > 0 && categoryMetadata.map((section, idx) => (
+                        {!isforumCategoryMetadataPending && categoryMetadata?.length > 0 && categoryMetadata?.map((section, idx) => (
                             <Card key={idx} hoverable className="bg-primary-100 border-0"
                                   onClick={() => navigate(`/forum/${section.category_tag}`)}>
                                 <div className="flex items-center gap-6 bg-primary-100 py-6 h-[170px]">

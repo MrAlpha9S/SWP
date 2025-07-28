@@ -1,10 +1,11 @@
 import React from 'react';
-import { UserOutlined, TeamOutlined, FileTextOutlined, MessageOutlined, BookOutlined, TagsOutlined, DollarOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import { UserOutlined, ExceptionOutlined, TeamOutlined, FileTextOutlined, MessageOutlined, BookOutlined, TagsOutlined, DollarOutlined, EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 
 const items = [
   { key: 'user', label: 'Quản lý User', icon: <UserOutlined /> },
   { key: 'coach', label: 'Quản lý Coach', icon: <TeamOutlined /> },
+  { key: 'reports', label: 'Quản lý Báo cáo', icon: <ExceptionOutlined /> },
   { key: 'post', label: 'Quản lý Bài viết', icon: <FileTextOutlined /> },
   { key: 'comment', label: 'Quản lý Bình luận', icon: <MessageOutlined /> },
   { key: 'blog', label: 'Quản lý Blog', icon: <BookOutlined /> },

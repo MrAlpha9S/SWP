@@ -216,6 +216,26 @@ const handleGetAllBlogs = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to fetch blogs' });
   }
 };
+const handleApproveBlog = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const approved = await adminService.approveBlog(id);
+    if (!approved) return res.status(404).json({ success: false, message: 'Blog not found' });
+    return res.status(200).json({ success: true, message: 'Blog approved successfully' });
+  } catch (error) {
+    console.error('Error in handleApproveBlog:', error);
+    return res.status(500).json({ success: false, message: 'Failed to approve blog' });
+  }
+};
+const handleGetIsPendingBlogs = async (req, res) => {
+  try {
+    const blogs = await adminService.getIsPendingBlogs();
+    return res.status(200).json({ success: true, data: blogs });
+  } catch (error) {
+    console.error('Error in handleGetIsPendingBlogs:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch blogs' });
+  }
+};
 const handleGetBlogById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -586,6 +606,8 @@ module.exports = {
   handleDeleteComment,
   handleGetPostLikes,
   // Blog & Topic
+  handleApproveBlog,
+  handleGetIsPendingBlogs,
   handleGetAllBlogs,
   handleGetBlogById,
   handleDeleteBlog,

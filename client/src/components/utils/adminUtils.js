@@ -164,6 +164,23 @@ export async function getAllBlogs(token) {
   return await res.json();
 }
 
+export async function approveBlog(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/blogs/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi phê duyệt blog');
+  return await res.json();
+}
+
+export async function getIsPendingBlogs(token) {
+  const res = await fetch('http://localhost:3000/admin/blogs/pending', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách blog');
+  return await res.json();
+}
+
 export async function getBlogById(id, token) {
   const res = await fetch(`http://localhost:3000/admin/blogs/${id}`, {
     headers: { Authorization: `Bearer ${token}` }

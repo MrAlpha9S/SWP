@@ -51,23 +51,18 @@ const columns = [
 const BlogPost = () => {
   const { topicId, blogId } = useParams();
 
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
-
   const { isPending, error, data } = useQuery({
     queryKey: ['Blog', topicId],
     queryFn: async () => {
-      const token = await getAccessTokenSilently();
-      if (!isAuthenticated || !user || !token) return;
       const result = await fetch(`http://localhost:3000/topics/${topicId}/${blogId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
       });
       return await result.json();
     },
-    enabled: isAuthenticated && !!user && !!topicId,
+    enabled: !!topicId,
   });
 
 

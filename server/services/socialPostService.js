@@ -355,6 +355,7 @@ const DeleteSocialPosts = async (post_id) => {
                 WHERE comment_id IN (SELECT comment_id
                                      FROM social_comments
                                      WHERE post_id = @post_id);
+                DELETE FROM social_reports WHERE post_id = @post_id;
 
                 DELETE
                 FROM social_comments
