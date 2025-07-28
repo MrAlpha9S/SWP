@@ -47,7 +47,7 @@ export default function PostPage() {
         queryFn: () =>
             getPosts({
                 postId: postId,
-                currentUserId: user?.sub,
+                currentUserId: user?.sub ?? null,
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -57,7 +57,7 @@ export default function PostPage() {
         queryFn: () =>
             getComments({
                 postId: postId,
-                currentUserId: user?.sub
+                currentUserId: user?.sub ?? null,
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -328,7 +328,7 @@ export default function PostPage() {
     }
 
     // No post found
-    if (!post || !user) {
+    if (!post) {
         return (
             <PageFadeWrapper>
                 <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">

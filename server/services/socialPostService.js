@@ -113,12 +113,15 @@ async function getPosts({
         const filters = [];
         const request = pool.request();
 
-        // Handle currentUserId (auth0_id) for isLiked check
-        if (currentUserId) {
+        if (
+            typeof currentUserId === 'string' &&
+            currentUserId.trim() !== '' &&
+            currentUserId !== 'null' &&
+            currentUserId !== 'undefined'
+        ) {
             const currentUserIdInt = await getUserIdFromAuth0Id(currentUserId);
-            request.input('currentUserId', sql.Int, currentUserIdInt);
+            request.input('currentUserId', sql.Int, currentUserIdInt ?? 0);
         } else {
-            // If no user context, set to 0 so no posts show as liked
             request.input('currentUserId', sql.Int, 0);
         }
 
@@ -223,12 +226,15 @@ const getPostComments = async ({postId, currentUserId = null}) => {
         const request = pool.request()
             .input('postId', sql.Int, postId);
 
-        // Handle currentUserId for isLiked check
-        if (currentUserId) {
+        if (
+            typeof currentUserId === 'string' &&
+            currentUserId.trim() !== '' &&
+            currentUserId !== 'null' &&
+            currentUserId !== 'undefined'
+        ) {
             const currentUserIdInt = await getUserIdFromAuth0Id(currentUserId);
-            request.input('currentUserId', sql.Int, currentUserIdInt);
+            request.input('currentUserId', sql.Int, currentUserIdInt ?? 0);
         } else {
-            // If no user context, set to 0 so no comments show as liked
             request.input('currentUserId', sql.Int, 0);
         }
 
