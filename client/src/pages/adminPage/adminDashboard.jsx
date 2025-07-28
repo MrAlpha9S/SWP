@@ -3,21 +3,25 @@ import AdminSidebar from '../../components/layout/admin/adminSidebar.jsx';
 import PageFadeWrapper from '../../components/utils/PageFadeWrapper.jsx';
 import UserManagement from '../../components/layout/admin/UserManagement.jsx';
 import CoachManagement from '../../components/layout/admin/CoachManagement.jsx';
-import PostManagement from '../../components/layout/admin/PostManagement.jsx';
+import PostManagement from '../../components/layout/admin/postmanage/PostManagement.jsx';
 import CommentManagement from '../../components/layout/admin/CommentManagement.jsx';
-import BlogManagement from '../../components/layout/admin/BlogManagement.jsx';
+import BlogManagement from '../../components/layout/admin/blogmanage/BlogManagement.jsx';
 import TopicManagement from '../../components/layout/admin/TopicManagement.jsx';
 import SubscriptionManagement from '../../components/layout/admin/SubscriptionManagement.jsx';
 import CheckinManagement from '../../components/layout/admin/CheckinManagement.jsx';
 import UserAchievementManagement from '../../components/layout/admin/UserAchivementManagement.jsx';
 import Statistics from '../../components/layout/admin/Statistics.jsx';
+import PostManage from '../../components/layout/admin/postmanage/postManageTabs.jsx';
+import Report from '../../components/layout/coachboard/manageforum/report.jsx';
+import BlogManage from '../../components/layout/admin/blogmanage/blogManageTabs.jsx';
 
 const boardMap = {
   user: <UserManagement />,
   coach: <CoachManagement />,
-  post: <PostManagement />,
+  reports: <Report />,
+  post: <PostManage />,
   comment: <CommentManagement />,
-  blog: <BlogManagement />,
+  blog: <BlogManage />,
   topic: <TopicManagement />,
   subscription: <SubscriptionManagement />,
   checkin: <CheckinManagement />,
@@ -40,7 +44,7 @@ const AdminDashboard = () => {
             <AdminSidebar currentTab={currentTab} setCurrentTab={setCurrentTab} collapse={true} mode="horizontal" />
           </div>
           {/* Board */}
-          <div className="w-full flex flex-col items-center gap-4 px-1 pb-4 md:px-4">
+          <div className="w-full flex flex-col gap-4 px-1 pb-4 md:px-4">
             {boardMap[currentTab]}
           </div>
         </div>
