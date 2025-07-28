@@ -35,6 +35,7 @@ import ManageForum from "../../components/layout/coachboard/manageforum/managefo
 import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
 import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
 import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
+import Notifications from "../../components/layout/dashboard/notifications.jsx";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -240,8 +241,12 @@ function Dashboard() {
 
                 case 'forum-manage':
                     return <ManageForum />
+
                 case 'overview':
                     return <CoachOverview stats={coachStats}/>
+
+                case 'notifications':
+                    return <Notifications />;
 
                 case 'coach-user':
                     return <CoachUser/>

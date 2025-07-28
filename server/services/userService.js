@@ -271,6 +271,7 @@ const getCoachDetailsById = async (coachId = null, userId = null) => {
                 SELECT cr.review_content,
                        cr.stars,
                        cr.created_date,
+                       cr.review_id,
                        u.username AS reviewer_name
                 FROM coach_reviews cr
                          JOIN users u ON cr.user_id = u.user_id
@@ -527,13 +528,15 @@ const createReviewService = async (userAuth0Id, coachAuth0Id, stars, reviewConte
             .input('updatedDate', getCurrentUTCDateTime().toISOString())
             .query(`
                 INSERT INTO coach_reviews (review_content, stars, user_id, coach_id, created_date, updated_date)
+                    OUTPUT INSERTED.review_id
                 VALUES (@reviewContent, @stars, @userId, @coachId, @createdDate, @updatedDate)
             `);
 
-        return result.rowsAffected[0] > 0;
+        // Return the inserted ID
+        return result.recordset[0]?.review_id || null;
     } catch (error) {
         console.error('error in createReviewService', error);
-        return false;
+        return null;
     }
 };
 

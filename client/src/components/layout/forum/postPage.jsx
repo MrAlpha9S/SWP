@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getComments, getPosts } from "../../utils/forumUtils.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { convertYYYYMMDDStrToDDMMYYYYStr } from "../../utils/dateUtils.js";
 import { FaCommentAlt, FaRegHeart, FaHeart, FaFlag } from "react-icons/fa";
 import { AddComment, AddLike } from '../../utils/forumUtils.js'; // Added AddReport import
@@ -15,6 +15,7 @@ import { ReplyForm } from './postpagecomponents/replyform.jsx'
 
 import { useAuth0 } from "@auth0/auth0-react";
 import PageFadeWrapper from "../../utils/PageFadeWrapper.jsx";
+import {useHighlightCommentIdStore, useUserInfoStore} from "../../../stores/store.js";
 
 export default function PostPage() {
     const navigate = useNavigate();
@@ -25,6 +26,11 @@ export default function PostPage() {
     const [replyContent, setReplyContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isReportSubmitting, setIsReportSubmitting] = useState(false); // Added for report submission state
+    const {userInfo} = useUserInfoStore()
+    const {highlightCommentId, setHighlightCommentId} = useHighlightCommentIdStore()
+
+    // Refs for scroll behavior
+    const commentRefs = useRef({});
 
     // Report Modal State
     const [reportModal, setReportModal] = useState({
@@ -68,6 +74,27 @@ export default function PostPage() {
         }
     }, [commentsData, isCommentsPending])
 
+    // Scroll to highlighted comment
+    useEffect(() => {
+        if (highlightCommentId && highlightCommentId !== 0 && comments.length > 0) {
+            const commentElement = commentRefs.current[highlightCommentId];
+            if (commentElement) {
+                // Add a small delay to ensure the DOM is fully rendered
+                setTimeout(() => {
+                    commentElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+        }
+    }, [highlightCommentId, comments]);
+
+    // Reset highlight when leaving the page
+    useEffect(() => {
+        return () => setHighlightCommentId(0);
+    }, []);
+
     const addCommentMutation = useMutation({
         mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, replyContent }) => {
             const currentDate = new Date().toISOString();
@@ -98,7 +125,7 @@ export default function PostPage() {
     });
 
     const addLikeMutation = useMutation({
-        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId }) => {
+        mutationFn: async ({ user, getAccessTokenSilently, isAuthenticated, postId, commentId, username }) => {
             console.log('addLikeMutation: ', user.sub, postId, commentId)
             const currentDate = new Date().toISOString();
             return await AddLike(
@@ -108,6 +135,7 @@ export default function PostPage() {
                 postId,
                 commentId,
                 currentDate,
+                username
             );
         },
         onSuccess: (data) => {
@@ -225,13 +253,23 @@ export default function PostPage() {
             return;
         }
 
+        const username = userInfo?.username;
+
         addLikeMutation.mutate({
             user,
             getAccessTokenSilently,
             isAuthenticated,
             postId,
             commentId,
+            username
         });
+    };
+
+    // Function to handle comment hover (removes highlight)
+    const handleCommentHover = (commentId) => {
+        if (highlightCommentId === commentId) {
+            setHighlightCommentId(0);
+        }
     };
 
     // Loading state
@@ -290,7 +328,7 @@ export default function PostPage() {
     }
 
     // No post found
-    if (!post) {
+    if (!post || !user) {
         return (
             <PageFadeWrapper>
                 <div className="flex min-h-screen mx-auto px-14 pt-14 pb-8 gap-8">
@@ -414,6 +452,7 @@ export default function PostPage() {
                                 {comments.map((comment) =>
                                     <Comment
                                         key={comment.comment_id}
+                                        ref={(el) => commentRefs.current[comment.comment_id] = el}
                                         commentId={comment.comment_id}
                                         date={comment.created_at}
                                         author={comment.username}
@@ -426,6 +465,8 @@ export default function PostPage() {
                                         onLike={onLike}
                                         onReportClick={handleReportClick}
                                         currentUserId={user?.sub}
+                                        isHighlighted={highlightCommentId === comment.comment_id}
+                                        onHover={handleCommentHover}
                                     />
                                 )}
                             </div>
@@ -453,11 +494,40 @@ export default function PostPage() {
     );
 }
 
-export function Comment({ author, commentId, date, content, role, likes, avatar, auth0_id, isLiked, onLike, onReportClick, currentUserId }) {
+export const Comment = React.forwardRef(({
+                                             author,
+                                             commentId,
+                                             date,
+                                             content,
+                                             role,
+                                             likes,
+                                             avatar,
+                                             auth0_id,
+                                             isLiked,
+                                             onLike,
+                                             onReportClick,
+                                             isHighlighted,
+                                             onHover,
+                                             currentUserId
+                                         }, ref) => {
     const navigate = useNavigate();
 
+    const handleMouseEnter = () => {
+        if (isHighlighted && onHover) {
+            onHover(commentId);
+        }
+    };
+
     return (
-        <div className="bg-white p-4 rounded-xl shadow space-y-2 hover:shadow-md transition-shadow">
+        <div
+            ref={ref}
+            className={`bg-white p-4 rounded-xl shadow space-y-2 hover:shadow-md transition-all duration-300 ${
+                isHighlighted
+                    ? 'ring-2 ring-primary-400 bg-primary-50 shadow-lg'
+                    : ''
+            }`}
+            onMouseEnter={handleMouseEnter}
+        >
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
                     {avatar ? (
@@ -502,4 +572,4 @@ export function Comment({ author, commentId, date, content, role, likes, avatar,
             </div>
         </div>
     );
-}
+});

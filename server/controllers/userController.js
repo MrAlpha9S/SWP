@@ -222,6 +222,7 @@ const assignUserToCoachController = async (req, res) => {
                 userAuth0Id,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
+            await createNotificationService(coachAuth0Id, `Người dùng ${username} vừa chọn bạn.`, `Bạn nhận được ${commission.toLocaleString()} VNĐ`, 'coach', {userAuth0Id : userAuth0Id, inner_type : 'user-selection'})
             return res.status(200).json({success: true, message: "Assign successful"});
         } else {
             return res.status(500).json({success: false, message: "Assign failed"});
@@ -350,8 +351,10 @@ const createReviewController = async (req, res) => {
                 username: username,
                 content: content,
                 stars: stars,
+                reviewId: success,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
+            await createNotificationService(coachAuth0Id, `Người dùng ${username} vừa tạo đánh giá.`, `${content} - ${stars} sao`, 'coach', {inner_type : 'user-review', review_id : success})
             return res.status(201).json({success: true, message: 'Review created'});
         } else {
             return res.status(400).json({success: false, message: 'Failed to create review'});
@@ -442,6 +445,7 @@ const sendPushNotificationTo = async (req, res) => {
 
 const { schedulePushForUser } = require('../utils/pushScheduler');
 const {processAchievementsWithNotifications} = require("../services/achievementService");
+const {createNotificationService} = require("../services/notificationService");
 
 const handleUpdateUserTimesForPush = async (req, res) => {
     const { userAuth0Id, times } = req.body;

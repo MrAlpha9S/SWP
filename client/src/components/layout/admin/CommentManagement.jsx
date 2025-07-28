@@ -3,6 +3,7 @@ import { Table, Button, Popconfirm, message, Modal, Avatar, Card, Tag, Divider }
 import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { getAllComments, deleteComment } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
+import dayjs from 'dayjs';
 
 const CommentManagement = () => {
   const [comments, setComments] = useState([]);
@@ -50,7 +51,12 @@ const CommentManagement = () => {
   const columns = [
     { title: 'ID', dataIndex: 'comment_id', key: 'comment_id' },
     { title: 'Nội dung', dataIndex: 'content', key: 'content', ellipsis: true },
-    { title: 'Ngày tạo', dataIndex: 'created_at', key: 'created_at' },
+    { 
+      title: 'Ngày tạo', 
+      dataIndex: 'created_at', 
+      key: 'created_at',
+      render: (text) => text ? dayjs(text).format('DD/MM/YYYY HH:mm') : '',
+    },
     { title: 'User', key: 'username', render: (_, c) => (
         <span style={{display:'flex', alignItems:'center', gap:8}}>
           <Avatar src={c.avatar} size={24} />
@@ -101,7 +107,9 @@ const CommentManagement = () => {
               )}
               <div style={{fontWeight:700, fontSize:20, marginBottom:8}}>Bình luận</div>
               <div style={{fontSize:16, background:'#f6f6f6', borderRadius:8, padding:14, marginBottom:8, lineHeight:1.6}}>{viewingComment.content}</div>
-              <div style={{color:'#888', fontSize:13, marginBottom:8}}>Ngày tạo: {new Date(viewingComment.created_at).toLocaleString()}</div>
+              <div style={{color:'#888', fontSize:13, marginBottom:8}}>
+                Ngày tạo: {viewingComment?.created_at ? dayjs(viewingComment.created_at).format('DD/MM/YYYY HH:mm') : ''}
+              </div>
             </div>
             <Divider style={{margin:'16px 0'}}/>
             <div style={{fontWeight:600, marginBottom:8, fontSize:16}}>User bình luận</div>
@@ -118,4 +126,4 @@ const CommentManagement = () => {
   );
 };
 
-export default CommentManagement; 
+export default CommentManagement;

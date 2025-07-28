@@ -1,6 +1,7 @@
 const { SendMessage, GetUserConversations, GetMessageConversation, CreateConversation } = require('../services/messageService');
 const socket = require('../utils/socket');
 const {sendPushNotification} = require("../utils/sendPushNotification");
+const {createNotificationService} = require("../services/notificationService");
 
 const HandleCreateConversation = async (req, res) => {
     const auth0_id  = req.body.auth0_id;
@@ -71,7 +72,7 @@ const HandleSendMessage = async (req, res) => {
     const content = req.body.content;
     const created_at = req.body.created_at;
     const senderName = req.body.senderName;
-    const senderAuth0Id = req.body.senderAuth0Id;
+    const recipientAuth0Id = req.body.recipientAuth0Id;
 
     if (!auth0_id || !conversationId || !content || !created_at) {
         return res.status(400).json({ success: false, message: 'error in HandleSendMessage: params is required', data: null });
@@ -82,14 +83,16 @@ const HandleSendMessage = async (req, res) => {
         if (!data) {
             return res.status(404).json({ success: false, message: 'Cant HandleSendMessage', data: null });
         }
-        socket.getIo().to(`${senderAuth0Id}`).emit('new_message_noti', {
+        socket.getIo().to(`${recipientAuth0Id}`).emit('new_message_noti', {
             conversation_id: conversationId,
             content: content,
             created_at: created_at,
             senderName: senderName,
-            senderAuth0Id: senderAuth0Id
+            recipientAuth0Id: recipientAuth0Id,
+            senderAuth0Id: auth0_id
         });
-        await sendPushNotification(senderAuth0Id, senderName, content, 'message');
+        await createNotificationService(recipientAuth0Id, senderName, content, 'message', {senderAuth0Id : auth0_id, recipientAuth0Id : recipientAuth0Id, conversationId : conversationId, messageId : data})
+        await sendPushNotification(recipientAuth0Id, senderName, content, 'message');
         return res.status(200).json({ success: true, message: 'HandleSendMessage successfully', data: data });
     } catch (error) {
         console.error('Error in HandleSendMessage:', error);

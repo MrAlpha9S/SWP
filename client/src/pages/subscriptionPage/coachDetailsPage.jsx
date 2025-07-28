@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useState, useRef} from 'react'
 import {
     Star,
     MessageCircle,
@@ -11,10 +11,15 @@ import {
 } from 'lucide-react'
 import {useQuery} from '@tanstack/react-query'
 import {getCoachByIdOrAuth0Id} from '../../components/utils/userUtils'
+import {useHighlightReviewIdStore} from "../../stores/store.js";
 
 const CoachDetailsPage = ({coachId, from}) => {
     const [showAllReviews, setShowAllReviews] = useState(false)
     const [coachInfo, setCoachInfo] = useState()
+    const {highlightReviewId, setHighlightReviewId} = useHighlightReviewIdStore()
+
+    // Refs for scroll behavior
+    const reviewRefs = useRef({});
 
     const {isPending, data} = useQuery({
         queryFn: async () => await getCoachByIdOrAuth0Id(coachId),
@@ -24,8 +29,30 @@ const CoachDetailsPage = ({coachId, from}) => {
     useEffect(() => {
         if (!isPending && data) {
             setCoachInfo(data.data)
+            console.log(data.data)
         }
     }, [isPending, data])
+
+    // Scroll to highlighted review
+    useEffect(() => {
+        if (highlightReviewId && highlightReviewId > 0 && reviews.length > 0) {
+            const reviewElement = reviewRefs.current[highlightReviewId];
+            if (reviewElement) {
+                // Add a small delay to ensure the DOM is fully rendered
+                setTimeout(() => {
+                    reviewElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+        }
+    }, [highlightReviewId, coachInfo]);
+
+    // Reset highlight when leaving the page
+    useEffect(() => {
+        return () => setHighlightReviewId(0);
+    }, []);
 
     const coach = coachInfo?.coach
     const specialties = coachInfo?.specialties || []
@@ -47,7 +74,16 @@ const CoachDetailsPage = ({coachId, from}) => {
         ))
     }
 
+    // Function to handle review hover (removes highlight)
+    const handleReviewHover = (reviewId) => {
+        if (highlightReviewId === reviewId) {
+            setHighlightReviewId(0);
+        }
+    };
+
     const reviewsToShow = showAllReviews ? reviews : reviews.slice(0, 3)
+
+    console.log(reviewsToShow)
 
     if (isPending || !coach) return <div className="text-center p-10">Loading...</div>
 
@@ -185,7 +221,16 @@ const CoachDetailsPage = ({coachId, from}) => {
                 </h2>
                 <div className="space-y-6">
                     {reviewsToShow.map((review, index) => (
-                        <div key={index} className="border-b border-gray-200 pb-6 last:border-b-0">
+                        <div
+                            key={index}
+                            ref={(el) => reviewRefs.current[review.review_id] = el}
+                            className={`border-b border-gray-200 pb-6 last:border-b-0 transition-all duration-300 ${
+                                highlightReviewId === review.review_id
+                                    ? 'ring-2 ring-primary-400 bg-primary-50 p-4 rounded-lg shadow-lg'
+                                    : ''
+                            }`}
+                            onMouseEnter={() => handleReviewHover(review.review_id)}
+                        >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                     <div
@@ -233,16 +278,26 @@ const CoachDetailsPage = ({coachId, from}) => {
 
                     <div className="space-y-4">
                         {reviewsToShow.map((review, index) => (
-                            <div key={index} className="border-b last:border-0 pb-4">
+                            <div
+                                key={index}
+                                ref={(el) => reviewRefs.current[review.review_id] = el}
+                                className={`border-b last:border-0 pb-4 transition-all duration-300 ${
+                                    highlightReviewId === review.review_id
+                                        ? 'ring-2 ring-primary-400 bg-primary-50 p-3 rounded-lg shadow-lg'
+                                        : ''
+                                }`}
+                                onMouseEnter={() => handleReviewHover(review.review_id)}
+                            >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold uppercase">
+                                        <div
+                                            className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold uppercase">
                                             {review.reviewer_name.charAt(0)}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1">
                                                 <span className="font-semibold">{review.reviewer_name}</span>
-                                                <CheckCircle className="w-4 h-4 text-success-500" />
+                                                <CheckCircle className="w-4 h-4 text-success-500"/>
                                             </div>
                                             <span className="text-sm text-gray-500">
                   {new Date(review.created_date).toLocaleDateString('vi-VN')}

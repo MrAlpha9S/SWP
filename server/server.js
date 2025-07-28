@@ -31,6 +31,7 @@ const achievementRouter = require("./routes/achievementRoute");
 const reportRouter = require("./routes/reportRoute")
 const {scheduleUserPushes} = require("./utils/pushScheduler");
 const adminRouter = require("./routes/adminRoutes");
+const notificationRouter = require("./routes/notificationRoute");
 
 
 const server = http.createServer(app);
@@ -346,6 +347,7 @@ app.use('/admin', adminRouter)
 app.use('/coaches', coachRouter)
 app.use('/achievements', achievementRouter)
 app.use('/reports', reportRouter)
+app.use('/notifications', notificationRouter)
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

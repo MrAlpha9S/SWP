@@ -356,3 +356,26 @@ export async function deleteUserSubscription(user_id, sub_id, token) {
   if (!res.ok) throw new Error('Lỗi xóa user subscription');
   return await res.json();
 } 
+export async function getAllUserAchievements(token) {
+  return fetch('http://localhost:3000/admin/user-achievements', {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(res => res.json());
+}
+export async function addUserAchievement(data, token) {
+  return fetch('http://localhost:3000/admin/user-achievements', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data)
+  }).then(res => res.json());
+}
+export async function deleteUserAchievement(user_id, achievement_id, token) {
+  return fetch(`/api/admin/user-achievements/${user_id}/${achievement_id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(res => res.json());
+}
+export async function getAllAchievements(token) {
+  return fetch('/api/achievements', {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(res => res.json());
+}

@@ -414,30 +414,6 @@ function SubscriptionPage() {
                     {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from}/>}
                 </Modal>
 
-                <button
-                    onClick={() => {
-                        setSubscriptionData({
-                            sub_name: isYearly ? "Gói 12 tháng" : "Gói 1 tháng",
-                            vip_end_date: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000),
-                            price: isYearly ? 2400000 : 300000
-                        });
-                        setIsModalOpen(true);
-                    }}
-                    style={{
-                        position: 'fixed',
-                        bottom: 20,
-                        right: 20,
-                        zIndex: 9999,
-                        background: '#10b981',
-                        color: 'white',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    Test modal chúc mừng
-                </button>
-
             </div>
         </PageFadeWrapper>
 

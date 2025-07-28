@@ -3,6 +3,7 @@ import { Table, Button, Modal, Popconfirm, message, Form, Input, Card, Tag, Divi
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllPosts, getPostById, deletePost, createPost, updatePost, getPostLikes } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
+import dayjs from 'dayjs';
 
 const PostManagement = () => {
   const [posts, setPosts] = useState([]);
@@ -99,7 +100,12 @@ const PostManagement = () => {
     { title: 'Tiêu đề', dataIndex: 'title', key: 'title' },
     { title: 'Chủ đề', dataIndex: 'category_name', key: 'category_name' },
     { title: 'Nội dung', dataIndex: 'content', key: 'content', ellipsis: true },
-    { title: 'Ngày tạo', dataIndex: 'created_at', key: 'created_at' },
+    { 
+      title: 'Ngày tạo', 
+      dataIndex: 'created_at', 
+      key: 'created_at',
+      render: (text) => text ? dayjs(text).format('DD/MM/YYYY HH:mm') : '',
+    },
     { title: 'User đăng', dataIndex: 'username', key: 'username' },
     { title: 'Like', dataIndex: 'likes', key: 'likes' },
     { title: 'Comment', dataIndex: 'comments', key: 'comments' },
@@ -161,7 +167,9 @@ const PostManagement = () => {
               <div style={{fontWeight:700, fontSize:22, marginBottom:8}}>{viewingPost.title}</div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>ID: {viewingPost.post_id}</div>
               <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Nội dung:</b> {viewingPost.content}</div>
-              <div style={{color:'#888', fontSize:13, marginBottom:8}}>Ngày tạo: {viewingPost.created_at ? new Date(viewingPost.created_at).toLocaleString() : ''}</div>
+              <div style={{color:'#888', fontSize:13, marginBottom:8}}>
+                Ngày tạo: {viewingPost?.created_at ? dayjs(viewingPost.created_at).format('DD/MM/YYYY HH:mm') : ''}
+              </div>
             </div>
             <Divider style={{margin:'16px 0'}}/>
             <div style={{fontWeight:600, marginBottom:8, fontSize:16}}>User đăng</div>
@@ -192,7 +200,9 @@ const PostManagement = () => {
                     <div style={{flex:1}}>
                       <div style={{fontWeight:600, fontSize:15, marginBottom:2}}>{c.username}</div>
                       <div style={{fontSize:14, margin:'2px 0 6px 0', lineHeight:1.5}}>{c.content}</div>
-                      <div style={{fontSize:11, color:'#888'}}>{new Date(c.created_at).toLocaleString()}</div>
+                      <div style={{fontSize:11, color:'#888'}}>
+                        {c.created_at ? dayjs(c.created_at).format('DD/MM/YYYY HH:mm') : ''}
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -205,4 +215,4 @@ const PostManagement = () => {
   );
 };
 
-export default PostManagement; 
+export default PostManagement;

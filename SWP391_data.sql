@@ -71,6 +71,46 @@ INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [r
 VALUES
 ('google-oauth2|105341948329602399922', 'The anh Pham', 'mr28042005@gmail.com', '2025-06-01 23:53:52.713', 'https://lh3.googleusercontent.com/a/ACg8ocLYPV7naWRpRuftTU7TJCcD1vyU4NDJGH52SwJQoG3X6ctCEm4=s96-c', 'Coach', 1);
 
+-- PLAN notifications
+INSERT INTO [notifications] ([user_id], [noti_title], [content], [created_at], [is_read], [type], [metadata])
+VALUES
+(4, 'Workout plan created', 'Your new workout plan is ready.', GETDATE() - 1, 0, 'plan', NULL),
+(4, 'Rest day added', 'A rest day has been added to your routine.', GETDATE() - 2, 0, 'plan', NULL),
+(4, 'Plan updated', 'Your training plan was updated by your coach.', GETDATE() - 3, 1, 'plan', NULL),
+(4, 'Plan reminder', 'Don’t forget today’s workout session.', GETDATE() - 4, 0, 'plan', NULL),
+(4, 'Goal milestone', 'You’ve reached the halfway point of your plan!', GETDATE() - 5, 1, 'plan', NULL);
+
+-- MESSAGE notifications
+INSERT INTO [notifications] ([user_id], [noti_title], [content], [created_at], [is_read], [type], [metadata])
+VALUES
+(4, 'Message from coach', 'Great progress this week!', GETDATE() - 1, 0, 'message', NULL),
+(4, 'New group chat', 'You’ve been added to a workout group.', GETDATE() - 2, 1, 'message', NULL),
+(4, 'Reminder', 'Don’t forget to check in today.', GETDATE() - 3, 0, 'message', NULL),
+(4, 'Encouragement', 'Keep pushing! You’re doing great.', GETDATE() - 4, 0, 'message', NULL),
+(4, 'Feedback available', 'You received feedback on your last session.', GETDATE() - 5, 1, 'message', NULL);
+
+-- COACH notifications
+INSERT INTO [notifications] ([user_id], [noti_title], [content], [created_at], [is_read], [type], [metadata])
+VALUES
+(4, 'Coach assigned', 'A new coach has been assigned to you.', GETDATE() - 1, 1, 'coach', NULL),
+(4, 'Weekly check-in', 'Please complete your weekly check-in.', GETDATE() - 2, 0, 'coach', NULL),
+(4, 'Form review', 'Your coach has reviewed your squat form.', GETDATE() - 3, 0, 'coach', NULL),
+(4, 'Program feedback', 'Your coach left feedback on your progress.', GETDATE() - 4, 1, 'coach', NULL),
+(4, 'Session summary', 'Here’s a summary of your last training.', GETDATE() - 5, 0, 'coach', NULL);
+
+-- COMMUNITY notifications
+INSERT INTO [notifications] ([user_id], [noti_title], [content], [created_at], [is_read], [type], [metadata])
+VALUES
+(4, 'Post approved', 'Your post in the community has been approved.', GETDATE() - 1, 0, 'community', NULL),
+(4, 'New comment', 'Someone commented on your thread.', GETDATE() - 2, 0, 'community', NULL),
+(4, 'Your comment was liked', 'Your reply received a new like.', GETDATE() - 3, 1, 'community', NULL),
+(4, 'Thread featured', 'Your thread is now featured in the community!', GETDATE() - 4, 0, 'community', NULL),
+(4, 'Report resolved', 'A reported comment has been reviewed.', GETDATE() - 5, 1, 'community', NULL);
+
+INSERT INTO [notifications] ([user_id], [noti_title], [content], [created_at], [is_read], [type], [metadata])
+VALUES
+(4, 'Post dawdawdawdaw', 'Your post in the community has been approved.', '2025-07-25T01:30:00Z', 0, 'community', NULL);
+
 
 INSERT INTO coach_info (coach_id, years_of_exp, bio, detailed_bio, motto)
 VALUES 

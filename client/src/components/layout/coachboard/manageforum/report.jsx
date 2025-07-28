@@ -2,7 +2,7 @@ import { GetReports, DeleteReport } from '../../../utils/reportUtils'
 import { DeleteComment, DeleteSocialPosts } from '../../../utils/forumUtils'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import Swal from 'sweetalert2'
 
 export default function Report() {
@@ -22,6 +22,10 @@ export default function Report() {
         },
         enabled: isAuthenticated && !!user,
     })
+
+    useEffect(() => {
+        console.log(qReport)
+    }, [qReport])
 
     // Flatten the nested array from your JSON
     const reports = qReport?.data?.flat() || []
@@ -63,9 +67,9 @@ export default function Report() {
     if (result.isConfirmed) {
         try {
             if (isPostReport) {
-                await DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, report.post_id)
+                await DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, report.post_id, report.reason, report.post_author_auth0_id, report.post_title,)
             } else if (isCommentReport) {
-                await DeleteComment(user, getAccessTokenSilently, isAuthenticated, report.comment_id)
+                await DeleteComment(user, getAccessTokenSilently, isAuthenticated, report.comment_id, report.reason, report.comment_author_auth0_id, report.comment_content)
             }
             await DeleteReport(user, getAccessTokenSilently, isAuthenticated, reportId)
             

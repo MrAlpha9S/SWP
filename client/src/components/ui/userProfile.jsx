@@ -48,7 +48,7 @@ const Profile = () => {
         navigate("/settings");
     }
 
-    const items = [
+    let items = [
         {
             key: "1",
             label: <span onClick={handleDashboardClick}>Bảng điều khiển</span>,
@@ -65,18 +65,29 @@ const Profile = () => {
             key: "4",
             label: <span onClick={handleSettingsClick}>Cài đặt thông báo</span>,
         },
-        {
-            key: "5",
-            danger: true,
-            label: (
-                <a
-                    href={`https://${import.meta.env.VITE_AUTH0_DOMAIN}/v2/logout?returnTo=http://localhost:5173&client_id=${import.meta.env.VITE_AUTH0_CLIENT_ID}`}
-                >
-                    Đăng xuất
-                </a>
-            ),
-        },
     ];
+
+    if (userInfo?.role === 'Admin') {
+        items = [
+            {
+                key: "admin",
+                label: <span onClick={() => navigate("/admin")}>Quản trị Admin</span>,
+            },
+            ...items,
+        ];
+    }
+
+    items.push({
+        key: "5",
+        danger: true,
+        label: (
+            <a
+                href={`https://${import.meta.env.VITE_AUTH0_DOMAIN}/v2/logout?returnTo=http://localhost:5173&client_id=${import.meta.env.VITE_AUTH0_CLIENT_ID}`}
+            >
+                Đăng xuất
+            </a>
+        ),
+    });
 
     return (
         isAuthenticated && (
