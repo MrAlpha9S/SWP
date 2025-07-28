@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Popconfirm, message, Form, Input, Card, Tag, Divider, Avatar, Tooltip } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getAllPosts, getPostById, deletePost, createPost, updatePost, getPostLikes } from '../../utils/adminUtils';
+import { getAllPosts, getPostById, deletePost, createPost, updatePost, getPostLikes } from '../../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 import dayjs from 'dayjs';
 

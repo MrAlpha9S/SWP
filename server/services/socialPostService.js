@@ -324,12 +324,11 @@ DELETE FROM social_likes WHERE comment_id IN (
 
 DELETE FROM social_likes WHERE post_id = @post_id;
 
-DELETE FROM social_reports
-WHERE comment_id IN (
-    SELECT comment_id
-    FROM social_comments
-    WHERE post_id = @post_id
+DELETE FROM social_reports WHERE comment_id IN (
+    SELECT comment_id FROM social_comments WHERE post_id = @post_id
 );
+
+DELETE FROM social_reports WHERE post_id = @post_id;
 
 DELETE FROM social_comments WHERE post_id = @post_id;
 
@@ -480,17 +479,14 @@ const DeleteComment = async (comment_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('comment_id', sql.Int, comment_id)
-            .query(`DELETE FROM social_comments
-WHERE parent_comment_id = @comment_id;
+            .query(`
+DELETE FROM social_reports WHERE comment_id = @comment_id;
 
-DELETE FROM social_likes 
-WHERE comment_id = @comment_id;
+DELETE FROM social_likes WHERE comment_id = @comment_id;
 
-DELETE FROM social_comments 
-WHERE comment_id = @comment_id;
+DELETE FROM social_comments WHERE parent_comment_id = @comment_id;
 
-DELETE FROM social_reports
-WHERE comment_id = @comment_id;
+DELETE FROM social_comments WHERE comment_id = @comment_id;
 `);
         if (result.rowsAffected[0] === 0) {
             throw new Error('error in DeleteComment');
