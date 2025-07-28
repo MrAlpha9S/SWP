@@ -1,4 +1,4 @@
-// PostPage.tsx - Updated with Report Modal Integration, AddReport, and Scroll/Highlight functionality
+// PostPage.tsx - Updated with Report Modal Integration and AddReport
 import SideBar from "./sideBar.jsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -47,7 +47,7 @@ export default function PostPage() {
         queryFn: () =>
             getPosts({
                 postId: postId,
-                currentUserId: user.sub,
+                currentUserId: user?.sub,
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -57,7 +57,7 @@ export default function PostPage() {
         queryFn: () =>
             getComments({
                 postId: postId,
-                currentUserId: user.sub
+                currentUserId: user?.sub
             }),
         enabled: !!postId, // Only run query if postId exists
     });
@@ -378,7 +378,7 @@ export default function PostPage() {
                                 <p>đăng bởi </p>
                                 <a className="font-semibold hover:underline cursor-pointer" onClick={() => navigate(`/forum/profile/${post.auth0_id}`)}>{post.username}</a>
                             </div>
-                            {user.sub === post.auth0_id && (
+                            {user?.sub === post.auth0_id && (
                                 <div
                                     className="text-primary-600 ml-auto hover:underline cursor-pointer"
                                     onClick={() => navigate(`/forum/edit/${post.post_id}`)}
@@ -394,7 +394,7 @@ export default function PostPage() {
                             <button
                                 className='flex items-center gap-2 hover:text-primary-600 transition-colors'
                                 onClick={() => onLike(post.post_id, null)}
-                                disabled={post.isLiked === 1}
+                                disabled={post.isLiked === 1 || !user}
                             >
                                 {post.isLiked === 1 ? (
                                     <FaHeart className='size-4 text-primary-600' />
@@ -409,6 +409,7 @@ export default function PostPage() {
                             <button
                                 className='flex items-center gap-2 hover:text-red-500 transition-colors'
                                 onClick={() => handleReportClick('post', post.post_id, post.username)}
+                                disabled={!user}
                             >
                                 <FaFlag /> Report
                             </button>
@@ -463,6 +464,7 @@ export default function PostPage() {
                                         isLiked={comment.isLiked}
                                         onLike={onLike}
                                         onReportClick={handleReportClick}
+                                        currentUserId={user?.sub}
                                         isHighlighted={highlightCommentId === comment.comment_id}
                                         onHover={handleCommentHover}
                                     />
@@ -505,7 +507,8 @@ export const Comment = React.forwardRef(({
                                              onLike,
                                              onReportClick,
                                              isHighlighted,
-                                             onHover
+                                             onHover,
+                                             currentUserId
                                          }, ref) => {
     const navigate = useNavigate();
 
@@ -550,7 +553,7 @@ export const Comment = React.forwardRef(({
                 <button
                     className='flex items-center gap-2 hover:text-primary-600 transition-colors'
                     onClick={() => onLike(null, commentId)}
-                    disabled={isLiked === 1}
+                    disabled={isLiked === 1 || !currentUserId}
                 >
                     {isLiked === 1 ? (
                         <FaHeart className='size-4 text-primary-600' />
@@ -562,6 +565,7 @@ export const Comment = React.forwardRef(({
                 <button
                     className='flex items-center gap-2 hover:text-red-500 transition-colors'
                     onClick={() => onReportClick('comment', commentId, author)}
+                    disabled={!currentUserId}
                 >
                     <FaFlag /> Report
                 </button>
