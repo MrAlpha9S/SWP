@@ -54,8 +54,10 @@ const schedulePushForUser = (userAuth0Id, timeString, reasonsCSV) => {
         const [localHour, minute] = time.split(':');
         let hour = parseInt(localHour);
 
+        console.log('is production', process.env.NODE_ENV === 'production')
+
         if (process.env.NODE_ENV === 'production') {
-            hour = (hour + 7);
+            hour = (hour + 7) % 24;
             console.log('hour', hour)
         }
 
