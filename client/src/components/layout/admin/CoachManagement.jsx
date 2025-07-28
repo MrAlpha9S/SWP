@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, Select, Popconfirm, message } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getAllCoaches, updateCoach, deleteCoach } from '../../utils/adminUtils';
+import { Table, Button, Modal, Form, Input, Select, Popconfirm, message, Card, Tag, Divider, Avatar } from 'antd';
+import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { getAllCoaches, updateCoach, deleteCoach, getCoachUserByCoachId } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const { Option } = Select;
 
 const CoachManagement = () => {
   const [coaches, setCoaches] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingCoach, setEditingCoach] = useState(null);
+  const [viewingUsers, setViewingUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [form] = Form.useForm();
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -66,6 +69,19 @@ const CoachManagement = () => {
     }
   };
 
+  // Hàm xem user liên kết coach
+  const handleViewUser = async (coach) => {
+    try {
+      const token = await getAccessTokenSilently();
+      const coachId = coach.coach_id || coach.user_id;
+      const data = await getCoachUserByCoachId(coachId, token);
+      setViewingUsers(data.data || []);
+      setIsViewModalOpen(true);
+    } catch (err) {
+      message.error('Lỗi tải thông tin user');
+    }
+  };
+
   const columns = [
     { title: 'ID', dataIndex: 'user_id', key: 'user_id' },
     { title: 'Username', dataIndex: 'username', key: 'username' },
@@ -80,6 +96,7 @@ const CoachManagement = () => {
       key: 'action',
       render: (_, coach) => (
         <>
+          <Button icon={<EyeOutlined />} onClick={() => handleViewUser(coach)} className="mr-2" />
           <Button icon={<EditOutlined />} onClick={() => openEditModal(coach)} className="mr-2" />
           <Popconfirm title="Xóa coach này?" onConfirm={() => handleDeleteCoach(coach.user_id)} okText="Xóa" cancelText="Hủy">
             <Button icon={<DeleteOutlined />} danger />
@@ -159,8 +176,47 @@ const CoachManagement = () => {
           <Form.Item name="motto" label="Motto"><Input /></Form.Item>
         </Form>
       </Modal>
+      <Modal
+        title={null}
+        open={isViewModalOpen}
+        onCancel={() => setIsViewModalOpen(false)}
+        footer={null}
+        styles={{padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002'}}
+        style={{borderRadius: 24, overflow: 'hidden', backdropFilter: 'blur(2px)'}}
+      >
+        <Card bordered={false} style={{margin:0, borderRadius:20, boxShadow:'none', background:'#f7f9fa', minWidth:340}}>
+          <div style={{marginBottom: 18}}>
+            <Tag color="blue" style={{fontSize:15, marginBottom:8, padding:'2px 12px', borderRadius:8}}>Danh sách User liên kết Coach</Tag>
+            <Divider style={{margin:'16px 0'}}/>
+            {viewingUsers.length === 0 && <div style={{color:'#888'}}>Không có user liên kết</div>}
+            {viewingUsers.map((user, idx) => (
+              <div key={user.user_id || idx} style={{marginBottom:16, background:'#fff', borderRadius:12, padding:12, boxShadow:'0 2px 8px #0001'}}>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <Avatar src={user.avatar} size={40} style={{background:'#eee', color:'#555'}}>
+                    {user.username ? user.username[0] : 'U'}
+                  </Avatar>
+                  <div>
+                    <div style={{fontWeight:600, fontSize:16}}>
+                      {user.user_id ? user.username : <span style={{color:'red'}}>User đã bị xóa</span>}
+                    </div>
+                    <div style={{color:'#888', fontSize:13}}>
+                      {user.user_id ? user.email : ''}
+                    </div>
+                    <div style={{color:'#888', fontSize:13}}>
+                      {user.user_id ? user.role : ''}
+                    </div>
+                    <div style={{color:'#444', fontSize:13}}>
+                      <b>Ngày bắt đầu:</b> {user.started_date ? new Date(user.started_date).toLocaleDateString() : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </Modal>
     </div>
   );
 };
 
-export default CoachManagement; 
+export default CoachManagement;

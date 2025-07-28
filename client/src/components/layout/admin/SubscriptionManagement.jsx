@@ -128,7 +128,7 @@ const SubscriptionManagement = () => {
       ) },
     { title: 'Gói', key: 'plan', render: (_, r) => r.sub_name },
     { title: 'Ngày bắt đầu', dataIndex: 'purchased_date', key: 'purchased_date', render: t => t ? new Date(t).toLocaleDateString() : '' },
-    { title: 'Ngày kết thúc', dataIndex: 'end_date', key: 'end_date', render: t => t ? new Date(t).toLocaleDateString() : '' },
+    { title: 'Ngày kết thúc', key: 'vip_end_date', render: r => r.vip_end_date ? new Date(r.vip_end_date).toLocaleDateString() : '' },
     { title: 'Trạng thái', key: 'status', render: (_, r) => (r.end_date && new Date(r.end_date) > new Date() ? 'Đang hoạt động' : 'Hết hạn') },
     {
       title: 'Hành động',
@@ -239,4 +239,4 @@ const SubscriptionManagement = () => {
   );
 };
 
-export default SubscriptionManagement; 
+export default SubscriptionManagement;

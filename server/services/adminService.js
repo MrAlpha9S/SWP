@@ -203,6 +203,18 @@ async function getCoachDetailsById(id) {
   `);
   return result.recordset[0];
 }
+async function getCoachUserByCoachId(coach_id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('coach_id', sql.Int, coach_id)
+    .query(`
+      SELECT cu.user_id, u.username, u.email, u.role, u.avatar, cu.started_date
+      FROM coach_user cu
+      LEFT JOIN users u ON cu.user_id = u.user_id
+      WHERE cu.coach_id = @coach_id
+    `);
+  return result.recordset;
+}
 
 // POST
 async function getAllPosts() {
@@ -635,6 +647,7 @@ module.exports = {
   toggleBanUserById,
   getCoaches,
   getCoachDetailsById,
+  getCoachUserByCoachId,
   getAllPosts,
   getPostById,
   createPost,

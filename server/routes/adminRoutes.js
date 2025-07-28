@@ -20,6 +20,7 @@ router.get('/coaches', adminController.handleGetAllCoaches);
 router.get('/coaches/:id', adminController.handleGetCoachById);
 router.put('/coaches/:id', adminController.handleUpdateCoach);
 router.delete('/coaches/:id', adminController.handleDeleteCoach);
+router.get('/coach-user/:coach_id', adminController.handleGetCoachUser);
 
 // Route quản lý social post
 router.get('/posts', adminController.handleGetAllPosts);

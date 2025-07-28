@@ -379,3 +379,10 @@ export async function getAllAchievements(token) {
     headers: { Authorization: `Bearer ${token}` }
   }).then(res => res.json());
 }
+export async function getCoachUserByCoachId(coach_id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coach-user/${coach_id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy user liên kết coach');
+  return await res.json();
+}

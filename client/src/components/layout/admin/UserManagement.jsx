@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, Input, Select, Switch, Popconfirm, message } from 'antd';
 import { EditOutlined, DeleteOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons';
-import { getAllUsers, updateUser, deleteUser, toggleBanUser, createUser } from '../../utils/adminUtils';
+import { getAllUsers, updateUser, deleteUser, toggleBanUser, createUser, getCoachUserByCoachId } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const { Option } = Select;
@@ -17,6 +17,7 @@ const UserManagement = () => {
   // Thêm state cho modal tạo user mới
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createForm] = Form.useForm();
+  const [isSocial, setIsSocial] = useState(false);
 
   // Hàm mở modal tạo user mới và reset form
   const openCreateModal = () => {
@@ -46,8 +47,7 @@ const UserManagement = () => {
   // Open edit modal
   const openEditModal = (user) => {
     setEditingUser(user);
-    // Log để debug
-    console.log('User edit:', user);
+    setIsSocial(user.is_social === 1); // Lưu trạng thái is_social
     form.setFieldsValue({
       username: user.username || '',
       email: user.email || '',
@@ -75,6 +75,15 @@ const UserManagement = () => {
   // Delete user
   const handleDeleteUser = async (user_id) => {
     try {
+      const user = users.find(u => u.user_id === user_id);
+      if (user.role === 'Coach') {
+        const token = await getAccessTokenSilently();
+        const res = await getCoachUserByCoachId(user_id, token);
+        if (res.data && res.data.length > 0) {
+          message.error('Không thể xóa huấn luyện viên đã có học viên liên kết!');
+          return;
+        }
+      }
       const token = await getAccessTokenSilently();
       await deleteUser(user_id, token);
       message.success('Xóa user thành công');
@@ -145,7 +154,13 @@ const UserManagement = () => {
         onCancel={() => setIsModalOpen(false)}
         okText="Lưu"
         cancelText="Hủy"
+        okButtonProps={{ disabled: isSocial }} // Disable nếu là social
       >
+        {isSocial && (
+          <div style={{ color: 'red', marginBottom: 8 }}>
+            Không thể chỉnh sửa user đăng nhập bằng mạng xã hội.
+          </div>
+        )}
         <Form form={form} layout="vertical">
           <Form.Item
             name="username"
@@ -277,4 +292,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement; 
+export default UserManagement;

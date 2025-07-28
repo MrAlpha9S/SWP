@@ -119,6 +119,15 @@ const handleDeleteCoach = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to delete coach' });
   }
 };
+const handleGetCoachUser = async (req, res) => {
+  const { coach_id } = req.params;
+  try {
+    const users = await adminService.getCoachUserByCoachId(Number(coach_id));
+    return res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch user' });
+  }
+};
 
 // --- SOCIAL POST & COMMENT ---
 const handleGetAllPosts = async (req, res) => {
@@ -460,6 +469,7 @@ module.exports = {
   handleGetCoachById,
   handleUpdateCoach,
   handleDeleteCoach,
+  handleGetCoachUser,
   // Social Post & Comment
   handleGetAllPosts,
   handleCreatePost,
