@@ -697,7 +697,7 @@ BEGIN
   -- Grant achievements (new-member removed since it's handled by trigger)
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT @UserId, a.achievement_id, GETDATE()
+  SELECT @UserId, a.achievement_id, DATEADD(HOUR, 7, GETDATE())
   FROM achievements a
     CROSS JOIN user_achievement_progress uap
   WHERE uap.user_id = @UserId
