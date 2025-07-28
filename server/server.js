@@ -8,6 +8,7 @@ const portSocket = 3001; // Port for Socket.IO server
 const cors = require('cors');
 const socket = require('./utils/socket');
 const {initializeApp} = require("firebase-admin/app");
+const path = require('path');
 
 const firebaseApp = initializeApp({
     projectId: process.env.VITE_FIREBASE_PROJECT_ID,
@@ -348,6 +349,14 @@ app.use('/coaches', coachRouter)
 app.use('/achievements', achievementRouter)
 app.use('/reports', reportRouter)
 app.use('/notifications', notificationRouter)
+
+
+
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+app.get('/{*any}', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
