@@ -344,6 +344,7 @@ function AppContent() {
                         <Route path="/post-signup" element={<PostSignUpCallback/>}/>
                         <Route path="/onboarding/:from?" element={<Onboarding/>}/>
                         <Route path="/error" element={<ErrorPage/>}/>
+                        <Route path="/banned" element={<ErrorPage status='403' title='Tài khoản của bạn đã bị khóa.' subTitle='Hãy liên hệ với hỗ trợ nếu bạn nghĩ đây là một sự nhầm lẫn.'/>}/>
                         <Route path="/post-onboarding/:from?" element={<PostOnboardingCallback/>}/>
                         <Route path="/my-profile" element={<MyProfile/>}/>
                         <Route path="/profile" element={<Profile/>}/>

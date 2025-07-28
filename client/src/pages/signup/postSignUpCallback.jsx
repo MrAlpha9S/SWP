@@ -6,7 +6,7 @@ import { getUserProfile, syncProfileToStores } from "../../components/utils/prof
 import {useCurrentStepStore, useProfileExists} from "../../stores/store.js";
 
 export default function PostSignUpCallback() {
-    const { user, getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const { user, getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,7 +16,11 @@ export default function PostSignUpCallback() {
             try {
                 const data = await postUserInfo(user, getAccessTokenSilently, isAuthenticated);
                 if (!data.success) return navigate('/error');
+                console.log(data);
                 if (data.message.role === 'Admin') return navigate('/admin');
+                if (data.message.isBanned === 1) {
+                    await logout({logoutParams: {returnTo: 'http://localhost:5173/banned'}})
+                }
 
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
                 if (profileRes.success) {
