@@ -389,32 +389,10 @@ async function getAllBlogs() {
     SELECT b.*, u.username, u.avatar
     FROM blog_posts b
     JOIN users u ON b.user_id = u.user_id
-   	WHERE isPendingForApprovement = 0
     ORDER BY b.created_at DESC
   `);
   return result.recordset;
 }
-async function getIsPendingBlogs() {
-  const pool = await poolPromise;
-  const result = await pool.request().query(`
-    SELECT b.*, u.username, u.avatar
-    FROM blog_posts b
-    JOIN users u ON b.user_id = u.user_id
-   	WHERE isPendingForApprovement = 1
-    ORDER BY b.created_at DESC
-  `);
-  return result.recordset;
-}
-async function approveBlog(id) {
-  const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query(`
-    UPDATE blog_posts
-    SET isPendingForApprovement = 0
-    WHERE blog_id = @id
-  `);
-  return result.rowsAffected[0] > 0;
-}
-
 async function getBlogById(id) {
   const pool = await poolPromise;
   const result = await pool.request().input('id', sql.Int, id).query(`
@@ -649,7 +627,6 @@ async function deleteUserAchievement(user_id, achievement_id) {
 }
 
 module.exports = {
-  approveBlog,
   getAllUsers,
   createUser,
   getUserById,
@@ -667,7 +644,6 @@ module.exports = {
   getAllComments,
   deleteCommentById,
   getAllBlogs,
-  getIsPendingBlogs,
   getBlogById,
   deleteBlogById,
   getAllTopics,

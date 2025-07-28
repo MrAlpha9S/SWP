@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Popconfirm, message, Avatar, Card, Tag, Divider } from 'antd';
-import { EyeOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
-import { getAllBlogs, getBlogById, deleteBlog } from '../../../utils/adminUtils';
+import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { getAllBlogs, getBlogById, deleteBlog } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const BlogManagement = () => {
@@ -54,12 +54,6 @@ const BlogManagement = () => {
     }
   };
 
-  // Handle reload
-  const handleReload = () => {
-    fetchBlogs();
-    message.success('Làm mới danh sách blog');
-  };
-
   const columns = [
     { title: 'ID', dataIndex: 'blog_id', key: 'blog_id' },
     { title: 'Tiêu đề', dataIndex: 'title', key: 'title' },
@@ -87,17 +81,7 @@ const BlogManagement = () => {
 
   return (
     <div className="w-full bg-white rounded-lg shadow p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Quản lý Blog</h2>
-        <Button 
-          type="primary" 
-          icon={<ReloadOutlined />} 
-          onClick={handleReload}
-          loading={loading}
-        >
-          Làm mới
-        </Button>
-      </div>
+      <h2 className="text-xl font-bold mb-4">Quản lý Blog</h2>
       <Table
         dataSource={blogs}
         columns={columns}
@@ -120,9 +104,7 @@ const BlogManagement = () => {
               <div style={{fontWeight:700, fontSize:22, marginBottom:8}}>{viewingBlog.title}</div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>ID: {viewingBlog.blog_id}</div>
               <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Mô tả:</b> {viewingBlog.description}</div>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Nội dung:</b> 
-              <span dangerouslySetInnerHTML={{ __html: viewingBlog.content }} />
-              </div>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Nội dung:</b> {viewingBlog.content}</div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>Ngày tạo: {viewingBlog.created_at ? new Date(viewingBlog.created_at).toLocaleString() : ''}</div>
             </div>
             <Divider style={{margin:'16px 0'}}/>
@@ -140,4 +122,4 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement;
+export default BlogManagement; 
