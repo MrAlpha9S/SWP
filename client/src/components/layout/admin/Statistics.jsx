@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Statistic, Row, Col, Table, notification } from 'antd';
-import { getStatistics } from '../../utils/adminUtils';
+import {Card, Statistic, Row, Col, Table, notification, Skeleton} from 'antd';
+import {getRevenueDataset, getStatistics} from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ComposedChart, Bar
+} from 'recharts';
 import { Select } from 'antd';
+import {getCurrentUTCDateTime} from "../../utils/dateUtils.js";
+import {useQuery} from "@tanstack/react-query";
 const { Option } = Select;
 
 const Statistics = () => {
@@ -12,9 +24,13 @@ const Statistics = () => {
   const [monthlyCheckins, setMonthlyCheckins] = useState([]);
   const [loading, setLoading] = useState(false);
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [filteredRevenue, setFilteredRevenue] = useState([]);
+  const [month, setMonth] = React.useState(`${getCurrentUTCDateTime().getUTCMonth() + 1}`);
+  const [year, setYear] = React.useState(`${getCurrentUTCDateTime().getUTCFullYear()}`);
+  const [userCommissionData, setUserCommissionData] = React.useState([]);
+  const [listOfMonths, setListOfMonths] = React.useState([]);
+  const [listOfYears, setListOfYears] = React.useState([]);
+  const [displayMonthSelect, setDisplayMonthSelect] = React.useState(true);
+  const [filterMode, setFilterMode] = React.useState("monthNYear");
 
   // Fetch statistics
   const fetchStats = async () => {
@@ -37,13 +53,43 @@ const Statistics = () => {
     // eslint-disable-next-line
   }, [isAuthenticated]);
 
+  const {isPending, data} = useQuery({
+    queryKey: ['revenue-dataset', month, year],
+    queryFn: async () => {
+      const token = await getAccessTokenSilently();
+      return await getRevenueDataset(token, month, year);
+    },
+    enabled: isAuthenticated,
+  })
+
   useEffect(() => {
-    if (stats.monthlyRevenue) {
-      setFilteredRevenue(
-        stats.monthlyRevenue.filter(item => item.month.startsWith(selectedYear.toString()))
-      );
+    if (!isPending) {
+      console.log(data.data)
+      setUserCommissionData(data?.data.chartData)
+      setListOfMonths(data?.data.arrayOfMonths)
+      setListOfYears(data?.data.arrayOfYears)
     }
-  }, [stats.monthlyRevenue, selectedYear]);
+  }, [isPending, data])
+
+  const handleFilterChange = (e) => {
+    setFilterMode(e);
+    if (e === 'monthNYear') {
+      setMonth(`${getCurrentUTCDateTime().getUTCMonth() + 1}`)
+      setDisplayMonthSelect(true);
+    } else {
+      setMonth('');
+      setDisplayMonthSelect(false);
+    }
+  };
+
+  const handleMonthChange = (e) => {
+    setMonth(e)
+  }
+
+  const handleYearChange = (e) => {
+    setYear(e)
+  }
+
 
   const statList = [
     { title: 'Tổng User', value: stats.userCount },
@@ -66,9 +112,6 @@ const Statistics = () => {
     { title: 'Số check-in', dataIndex: 'count', key: 'count' },
   ];
 
-  const years = stats.monthlyRevenue
-    ? Array.from(new Set(stats.monthlyRevenue.map(item => item.month.slice(0, 4))))
-    : [];
 
   return (
     <div className="p-6 bg-white rounded shadow min-h-[400px]">
@@ -109,23 +152,89 @@ const Statistics = () => {
         </div>
       </div>
       <div className="mt-8">
-        <h3 className="font-semibold mb-2">Doanh thu theo tháng</h3>
-        <div style={{ marginBottom: 16 }}>
-          <span>Chọn năm: </span>
-          <Select value={selectedYear} onChange={setSelectedYear} style={{ width: 100 }}>
-            {years.map(y => <Option key={y} value={y}>{y}</Option>)}
-          </Select>
-        </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={filteredRevenue}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="revenue" stroke="#8884d8" name="Doanh thu" />
-          </LineChart>
-        </ResponsiveContainer>
+        <h3 className="font-semibold mb-2">Biểu đồ số đăng ký & doanh thu</h3>
+        {isPending ? (
+            <Skeleton active className="!w-full !h-80 rounded-md"/>
+        ) : (
+            <div className="w-full h-80 bg-white rounded-md p-4 shadow">
+              <div className='flex items-center'>
+                <p>Lọc theo:</p>
+                <Select
+                    value={filterMode}
+                    variant="borderless"
+                    style={{width: 90}}
+                    onChange={handleFilterChange}
+                    options={[
+                      {value: 'monthNYear', label: 'Tháng'},
+                      {value: 'year', label: 'Năm'},
+                    ]}
+                />
+                {displayMonthSelect && <div className='flex items-center'>
+                  <p>Chọn tháng:</p>
+                  <Select
+                      value={`${month}`}
+                      variant="borderless"
+                      style={{width: 110}}
+                      onChange={handleMonthChange}
+                      options={(listOfMonths || []).map((m) => ({
+                        value: m.toString(),
+                        label: `Tháng ${m}`
+                      }))}
+                  />
+                </div>}
+                <div className='flex items-center'>
+                  <p>Chọn năm:</p>
+                  <Select
+                      value={`${year}`}
+                      variant="borderless"
+                      style={{width: 90}}
+                      onChange={handleYearChange}
+                      options={(listOfYears || []).map((y) => ({
+                        value: y.toString(),
+                        label: y.toString()
+                      }))}
+                  />
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={userCommissionData}>
+                  <CartesianGrid strokeDasharray="3 3"/>
+                  <XAxis dataKey="date"/>
+                  <YAxis
+                      yAxisId="left"
+                      allowDecimals={false}
+                      label={{value: 'Số gói đăng ký', angle: -90, position: 'insideLeft'}}
+                  />
+                  <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      domain={[0, 'auto']}
+                      label={{value: 'VNĐ', angle: -90, position: 'insideRight'}}
+                  />
+                  <Tooltip
+                      formatter={(value, name) =>
+                          name.includes('VNĐ') ? `${value.toLocaleString()} VNĐ` : value
+                      }
+                  />
+                  <Legend/>
+                  <Bar
+                      yAxisId="left"
+                      dataKey="users"
+                      fill="#134e4a"
+                      name="Số gói đăng ký"
+                  />
+                  <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="commission"
+                      stroke="#82ca9d"
+                      dot={{r: 4}}
+                      name="Doanh thu (VNĐ)"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+
+            </div>)}
       </div>
     </div>
   );

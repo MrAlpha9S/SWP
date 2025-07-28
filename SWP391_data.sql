@@ -58,7 +58,7 @@ VALUES
 ('auth0|xyz789', 'jane_smith', 'jane@example.com', '2025-05-26 00:00:00', null, 0, 1, null, 'Member'),
 ('auth0|lmn456', 'bob_lee', 'bob@example.com', '2025-05-23 00:00:00', null, 0, 1, null, 'Member'),
 ('google-oauth2|105815855269571869013', N'Minh Thiện', 'ubw1212@gmail.com', '2025-05-15 00:00:00', 'https://lh3.googleusercontent.com/a/ACg8ocIVvvIT6NIJhzBx3ktxTSYJ6x3phvcqCzaJOHSznVOomREzAA=s96-c', 1, 2, '2025-07-29T00:00:00Z', 'Member'),
-('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1, 2, '2025-07-29T00:00:00Z', 'Member'),
+('google-oauth2|111595895123096866179', N'Lak Big', 'biglak123@gmail.com', '2025-06-03 18:06:27.967', 'https://lh3.googleusercontent.com/a/ACg8ocKI_H6d_viefsrC78Sm2iWTnndeEjJuGRuHMhwFoNfoFAn5ag=s96-c', 1, 2, '2025-07-29T00:00:00Z', 'Admin'),
 ('google-oauth2|108533841030682315532', N'Tran Minh Thien (K18 HCM)', 'thientmse184897@fpt.edu.vn', '2025-06-01 02:55:15.157', 'https://lh3.googleusercontent.com/a/ACg8ocLspJRXpILQwHstZtQyGO0_g0mpzP8GeeVJFVxZ5ETTiHGujDY=s96-c', 1, 1, null, 'Coach'),
 ('google-oauth2|118429602254096661272', N'Thien Tran', 'thien.tm2727@gmail.com', '2025-05-01 00:58:02.400', 'https://lh3.googleusercontent.com/a/ACg8ocIrgAzxmaR9_zwicS_OTgbP5mFGMJgeZElFR8TntqJXR3pXiqs=s96-c', 1, 1, null, 'Coach'),
 ('google-oauth2|101805593223909898949', N'qwe asd', 'accracc2@gmail.com', '2025-06-01 00:58:54.637', 'https://lh3.googleusercontent.com/a/ACg8ocKByukGSvQp0D4AR_bivfRSOxW5b3WJKSbd7AxYzNe05Egfvg=s96-c', 1, 1, null, 'Coach'),

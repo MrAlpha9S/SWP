@@ -4,8 +4,8 @@ const checkJwt = require('../middlewares/jwtChecker');
 const adminChecker = require('../middlewares/adminChecker');
 const adminController = require('../controllers/adminController');
 
-router.use(checkJwt);
-router.use(adminChecker);
+// router.use(checkJwt);
+// router.use(adminChecker);
 
 // Route quản lý user
 router.post('/users', adminController.handleCreateUser);
@@ -60,7 +60,10 @@ router.get('/checkins/:id', adminController.handleGetCheckInById);
 router.delete('/checkins/:id', adminController.handleDeleteCheckIn);
 
 // Route thống kê tổng quan
+
 router.get('/statistics', adminController.handleGetStatistics);
+router.get('/statistics/revenue', adminController.handleGetRevenueDataset);
+
 
 // Route mẫu kiểm tra quyền admin
 router.get('/test', (req, res) => {

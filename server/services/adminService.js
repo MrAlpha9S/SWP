@@ -550,13 +550,12 @@ async function getStatistics() {
   const blogCount = (await pool.request().query('SELECT COUNT(*) as total FROM blog_posts')).recordset[0].total;
   const topicCount = (await pool.request().query('SELECT COUNT(*) as total FROM Topics')).recordset[0].total;
   const checkinCount = (await pool.request().query('SELECT COUNT(*) as total FROM checkin_log')).recordset[0].total;
-  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM subscriptions')).recordset[0].total;
+  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM revenue')).recordset[0].total;
   let totalRevenue = null;
   try {
     const revenueResult = await pool.request().query(`
-      SELECT SUM(s.price) as total
-      FROM users_subscriptions us
-      JOIN subscriptions s ON us.sub_id = s.sub_id
+      SELECT SUM(amount) as total
+      FROM revenue
     `);
     totalRevenue = revenueResult.recordset[0].total || 0;
   } catch (e) {
@@ -625,6 +624,12 @@ async function deleteUserAchievement(user_id, achievement_id) {
     .query('DELETE FROM user_achievements WHERE user_id = @user_id AND achievement_id = @achievement_id');
   return result.rowsAffected[0] > 0;
 }
+async function getRevenue() {
+  const pool = await poolPromise;
+  const result = await pool.request()
+      .query(`SELECT * from revenue`)
+  return result.recordset;
+}
 
 module.exports = {
   getAllUsers,
@@ -665,4 +670,5 @@ module.exports = {
   getAllUserAchievements,
   createUserAchievement,
   deleteUserAchievement,
+  getRevenue
 };

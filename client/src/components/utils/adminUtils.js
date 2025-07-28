@@ -1,6 +1,8 @@
 // Các hàm util gọi API admin backend
 // Sử dụng fetch, truyền token nếu cần, base URL: /api/admin
 
+import {data} from "autoprefixer";
+
 export async function getAllUsers(token) {
   const res = await fetch('http://localhost:3000/admin/users', {
     headers: { Authorization: `Bearer ${token}` }
@@ -377,5 +379,15 @@ export async function deleteUserAchievement(user_id, achievement_id, token) {
 export async function getAllAchievements(token) {
   return fetch('/api/achievements', {
     headers: { Authorization: `Bearer ${token}` }
+  }).then(res => res.json());
+}
+
+export async function getRevenueDataset(token, month, year) {
+  return fetch(`http://localhost:3000/admin/statistics/revenue?month=${month}&year=${year}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
   }).then(res => res.json());
 }
