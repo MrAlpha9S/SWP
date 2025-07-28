@@ -9,10 +9,15 @@ const cors = require('cors');
 const socket = require('./utils/socket');
 const {initializeApp} = require("firebase-admin/app");
 const path = require('path');
-console.log("NODE_ENV is", process.env.NODE_ENV);
+const admin = require('firebase-admin');
 
-const firebaseApp = initializeApp({
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+
+const firebaseApp = admin.initializeApp({
+    credential: admin.credential.cert({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.VITE_FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.VITE_FIREBASE_PRIVATE_KEY,
+    }),
     storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
 });
 
