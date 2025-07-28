@@ -1,6 +1,6 @@
 import {useState, useMemo, useEffect} from 'react';
 import SearchFilter from '../../components/layout/coachboard/searchFilter.jsx';
-import CoachCard from '../../components/layout/coachboard/CoachCard';
+import CoachCard from '../../components/layout/coachboard/coachCard.jsx';
 import {getCoachByIdOrAuth0Id, getCoaches} from "../../components/utils/userUtils.js";
 import {useQuery} from "@tanstack/react-query";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
