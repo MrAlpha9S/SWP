@@ -657,8 +657,8 @@ const getUserReasonsCSVByAuth0Id = async (auth0Id) => {
         .query(`
             SELECT STRING_AGG(pr.reason_value, ',') AS reasons
             FROM users u
-            JOIN user_profiles up ON u.user_id = up.user_id
-            JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
+                     JOIN user_profiles up ON u.user_id = up.user_id
+                     JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
             WHERE u.auth0_id = @auth0Id
             GROUP BY u.user_id
         `);
@@ -691,7 +691,9 @@ const updateUserById = async (user_id, data) => {
         if (data.role !== undefined) fields.push('role = @role');
         if (data.isBanned !== undefined) fields.push('isBanned = @isBanned');
         if (fields.length === 0) return false;
-        const query = `UPDATE users SET ${fields.join(', ')} WHERE user_id = @user_id`;
+        const query = `UPDATE users
+                       SET ${fields.join(', ')}
+                       WHERE user_id = @user_id`;
         const request = pool.request().input('user_id', sql.Int, user_id);
         if (data.username !== undefined) request.input('username', sql.NVarChar, data.username);
         if (data.email !== undefined) request.input('email', sql.NVarChar, data.email);
@@ -735,6 +737,27 @@ const toggleBanUserById = async (user_id, isBanned) => {
     }
 };
 
+const leaderboardStatsService = async () => {
+    try {
+        const pool = await poolPromise;
+        const daysWithoutSmoking = await pool.request()
+            .query('select top 5 u.username, u.avatar, u.auth0_id, u.created_at, uap.days_without_smoking from users u join user_achievement_progress uap on u.user_id = uap.user_id order by uap.days_without_smoking DESC')
+        const moneySaved = await pool.request()
+            .query('select top 5 u.username, u.avatar, u.auth0_id, u.created_at, uap.money_saved from users u join user_achievement_progress uap on u.user_id = uap.user_id order by uap.money_saved DESC')
+        const achievedBadges = await pool.request()
+            .query('select top 5 u.username, u.avatar, u.auth0_id, u.created_at, count(ua.achievement_id) as achievement_count from users u join user_achievements ua on u.user_id = ua.user_id group by u.username, u.auth0_id, u.created_at, u.avatar order by achievement_count DESC')
+
+        return {
+            daysWithoutSmoking : daysWithoutSmoking.recordset,
+            moneySaved : moneySaved.recordset,
+            achievedBadges : achievedBadges.recordset,
+        }
+    } catch (error) {
+        console.error('error in leaderboardStats', error);
+        return null;
+    }
+}
+
 module.exports = {
     userExists,
     createUser,
@@ -766,5 +789,6 @@ module.exports = {
     getUserById,
     updateUserById,
     deleteUserById,
-    toggleBanUserById
+    toggleBanUserById,
+    leaderboardStatsService
 };

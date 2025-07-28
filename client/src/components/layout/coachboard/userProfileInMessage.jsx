@@ -131,16 +131,6 @@ const UserProfileInMessage = ({
     }, [expectedQuitDate, mergedDataSet, today]);
 
 
-    useEffect(() => {
-        console.log(coach ? 'yes coach' : 'no coach')
-    }, [coach]);
-
-    useEffect(() => {
-        console.log('userInfo', userInfo)
-        console.log('coachInfo', coachInfo)
-        console.log('coach', coach)
-    }, [coach, coachInfo, userInfo])
-
     // Show loading state if data is still being fetched
     if (isPending) {
         return (
