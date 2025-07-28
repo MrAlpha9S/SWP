@@ -49,14 +49,21 @@ const schedulePushForUser = (userAuth0Id, timeString, reasonsCSV) => {
     const matchedReasons = reasonListOptions.filter(r => reasonList.includes(r.value));
     const reasonText = matchedReasons.map(r => `${r.label.toLowerCase()}`).join(', ');
 
-    const times = timeString.split('-'); // ['08:00', '13:30']
+    const times = timeString.split('-');
     const jobs = times.map(time => {
-        const [hour, minute] = time.split(':');
+        const [localHour, minute] = time.split(':');
+        let hour = parseInt(localHour);
+
+        if (process.env.NODE_ENV === 'production') {
+            hour = (hour - 7 + 24) % 24;
+        }
+
         const cronExp = `${minute} ${hour} * * *`;
 
         const job = cron.schedule(cronExp, async () => {
             console.log(`Sending push to user ${userAuth0Id} at ${time}`);
-            await sendPushNotification(userAuth0Id,
+            await sendPushNotification(
+                userAuth0Id,
                 `💪 Tiếp tục kiên trì nhé!`,
                 `Lý do bạn đang cố gắng: ${reasonText.length > 0 ? reasonText : 'chưa có'}`
             );
