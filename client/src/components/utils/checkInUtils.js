@@ -1,3 +1,4 @@
+import {getBackendUrl} from "./getBackendURL.js";
 
 
 export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected) {
@@ -26,7 +27,7 @@ export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated,
         }
     }
 
-    const res = await fetch('http://localhost:3000/check-in/post-check-in', {
+    const res = await fetch(`${getBackendUrl()}/check-in/post-check-in`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +44,7 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/check-in/get-data-set?userAuth0Id=${userAuth0Id}`, {
+    const res = await fetch(`${getBackendUrl()}/check-in/get-data-set?userAuth0Id=${userAuth0Id}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -279,7 +280,7 @@ export async function getCheckInData(user, getAccessTokenSilently, isAuthenticat
 
     const token = await getAccessTokenSilently();
 
-    let fetchURL = searchDate ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}&date=${searchDate}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}`
+    let fetchURL = searchDate ? `${getBackendUrl()}/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}&date=${searchDate}` : `${getBackendUrl()}/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}`
 
     if (action !== null) {
         fetchURL += `&action=${action}`;

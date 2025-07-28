@@ -1,9 +1,11 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function getAchievements(user, getAccessTokenSilently, isAuthenticated) {
 
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/achievements/', {
+    const res = await fetch(`${getBackendUrl()}/achievements/`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +21,7 @@ export async function getAchievementProgress(user, getAccessTokenSilently, isAut
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/achievements/progress/' + user.sub, {
+    const res = await fetch(`${getBackendUrl()}/achievements/progress/` + user.sub, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -35,7 +37,7 @@ export async function getAchieved(user, getAccessTokenSilently, isAuthenticated)
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/achievements/achieved/' + user.sub, {
+    const res = await fetch(`${getBackendUrl()}/achievements/achieved/` + user.sub, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,

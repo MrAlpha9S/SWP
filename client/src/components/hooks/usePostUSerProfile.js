@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
+import {getBackendUrl} from "../utils/getBackendURL.js";
 
 export const usePostUserProfile = (getAccessTokenSilently, user) => {
     return useMutation({
         mutationFn: async (payload) => {
             const token = await getAccessTokenSilently();
 
-            const response = await fetch('http://localhost:3000/profiles/postOnboarding', {
+            const response = await fetch(`${getBackendUrl()}/profiles/postOnboarding`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,

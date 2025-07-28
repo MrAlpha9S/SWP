@@ -1,10 +1,12 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function getStats(user, getAccessTokenSilently, isAuthenticated) {
 
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/coaches/stats/${user.sub}`, {
+    const res = await fetch(`${getBackendUrl()}/coaches/stats/${user.sub}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -20,7 +22,7 @@ export async function getUserCommissionDataset(user, getAccessTokenSilently, isA
 
     const token = await getAccessTokenSilently();
 
-    const url = `http://localhost:3000/coaches/user-commission-dataset/${user.sub}?month=${month}&year=${year}&commissionRate=${commissionRate}`;
+    const url = `${getBackendUrl()}/coaches/user-commission-dataset/${user.sub}?month=${month}&year=${year}&commissionRate=${commissionRate}`;
 
     const res = await fetch(url, {
         method: 'GET',

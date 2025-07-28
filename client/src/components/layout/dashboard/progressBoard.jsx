@@ -32,6 +32,7 @@ import {addFinancialAchievement, getAchieved} from "../../utils/achievementsUtil
 import QuoteCarousel from "../../ui/quotesCarousel.jsx";
 import html2canvas from "html2canvas";
 import {useEditorContentStore} from "../../../stores/store.js";
+import {getBackendUrl} from "../../utils/getBackendURL.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -302,7 +303,7 @@ const ProgressBoard = ({
             try {
                 const token = await getAccessTokenSilently();
 
-                const response = await fetch('http://localhost:3000/achievements/update-money-saved', {
+                const response = await fetch(`${getBackendUrl()}/achievements/update-money-saved`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

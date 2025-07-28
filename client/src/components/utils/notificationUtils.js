@@ -1,10 +1,10 @@
-const BASE_URL = 'http://localhost:3000/notifications';
+import {getBackendUrl} from "./getBackendURL.js";
 
 export async function getNotifications(user, getAccessTokenSilently, isAuthenticated, page = 1, limit = 10, activeTab) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
-    const res = await fetch(`${BASE_URL}?userAuth0Id=${user.sub}&page=${page}&limit=${limit}&type=${activeTab}`, {
+    const res = await fetch(`${getBackendUrl()}/notifications?userAuth0Id=${user.sub}&page=${page}&limit=${limit}&type=${activeTab}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +19,7 @@ export async function createNotification(user, getAccessTokenSilently, isAuthent
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
-    const res = await fetch(`${BASE_URL}`, {
+    const res = await fetch(`${getBackendUrl()}/notifications`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -39,7 +39,7 @@ export async function deleteAllNotifications(user, getAccessTokenSilently, isAut
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
-    const res = await fetch(`${BASE_URL}?userAuth0Id=${user.sub}`, {
+    const res = await fetch(`${getBackendUrl()}/notifications?userAuth0Id=${user.sub}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ export async function markNotificationAsRead(user, getAccessTokenSilently, isAut
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
-    const res = await fetch(`${BASE_URL}/mark-read`, {
+    const res = await fetch(`${getBackendUrl()}/notifications/mark-read`, {
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ export async function markAllNotificationsAsRead(user, getAccessTokenSilently, i
     };
     if (type) body.type = type;
 
-    const res = await fetch(`${BASE_URL}/mark-all-read`, {
+    const res = await fetch(`${getBackendUrl()}/notifications/mark-all-read`, {
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ export async function getUnreadCount(user, getAccessTokenSilently, isAuthenticat
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
-    const url = new URL(`${BASE_URL}/unread-count`);
+    const url = new URL(`${getBackendUrl()}/notifications/unread-count`);
     url.searchParams.append('userAuth0Id', user.sub);
     if (type) url.searchParams.append('type', type);
 

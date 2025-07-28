@@ -4,6 +4,7 @@ import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllPosts, getPostById, deletePost, createPost, updatePost, getPostLikes } from '../../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 import dayjs from 'dayjs';
+import {getBackendUrl} from "../../../utils/getBackendURL.js";
 
 const PostManagement = () => {
   const [posts, setPosts] = useState([]);
@@ -46,7 +47,7 @@ const PostManagement = () => {
       const likeRes = await getPostLikes(post_id, token);
       setLikes(likeRes.data || []);
       // Lấy comments
-      const commentRes = await fetch(`http://localhost:3000/social-posts/comments/${post_id}`);
+      const commentRes = await fetch(`${getBackendUrl()}/social-posts/comments/${post_id}`);
       const commentData = await commentRes.json();
       setComments(commentData.data || []);
       setIsModalOpen(true);

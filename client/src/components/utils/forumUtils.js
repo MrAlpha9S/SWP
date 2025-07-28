@@ -1,6 +1,8 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function getForumCategoryMetadata() {
     try {
-        const res = await fetch('http://localhost:3000/social-posts/get-post-comment-count', {
+        const res = await fetch(`${getBackendUrl()}/social-posts/get-post-comment-count`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -21,7 +23,7 @@ export async function getForumCategoryMetadata() {
 
 export async function getPostsByCategoryTag(categoryTag) {
     try {
-        const res = await fetch(`http://localhost:3000/social-posts/${categoryTag}`, {
+        const res = await fetch(`${getBackendUrl()}/social-posts/${categoryTag}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -44,7 +46,7 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
     try {
         if (auth0_id) {
 
-            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_id}&currentUserId=${currentUserId}`, {
+            const res = await fetch(`${getBackendUrl()}/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_id}&currentUserId=${currentUserId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -59,7 +61,7 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
             return await res.json();
         } else {
             const auth0_null = 'null'
-            const res = await fetch(`http://localhost:3000/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}&currentUserId=${currentUserId}`, {
+            const res = await fetch(`${getBackendUrl()}/social-posts?categoryTag=${categoryTag}&keyword=${keyword}&page=${page}&fromDate=${fromDate}&toDate=${toDate}&postId=${postId}&auth0_id=${auth0_null}&currentUserId=${currentUserId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -84,7 +86,7 @@ export async function getPosts({ categoryTag = '', keyword = '', page = 1, fromD
 export async function getComments({ postId, currentUserId }) {
     try {
 
-        const res = await fetch(`http://localhost:3000/social-posts/comments/${postId}/${currentUserId}`, {
+        const res = await fetch(`${getBackendUrl()}/social-posts/comments/${postId}/${currentUserId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -110,7 +112,7 @@ export async function PostSocialPosts(user, getAccessTokenSilently, isAuthentica
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/post-socialposts`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/post-socialposts`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -130,7 +132,7 @@ export async function UpdateSocialPosts(user, getAccessTokenSilently, isAuthenti
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/update`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/update`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -149,7 +151,7 @@ export async function DeleteSocialPosts(user, getAccessTokenSilently, isAuthenti
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/delete`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/delete`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -166,7 +168,7 @@ export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, 
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/addcomment`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/addcomment`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -183,7 +185,7 @@ export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, pos
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/like`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/like`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -201,7 +203,7 @@ export async function GetIsPendingSocialPosts(user, getAccessTokenSilently, isAu
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/getIsPendingPosts`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/getIsPendingPosts`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -220,7 +222,7 @@ export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthent
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/approvepost`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/approvepost`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -239,7 +241,7 @@ export async function DeleteComment(user, getAccessTokenSilently, isAuthenticate
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/social-posts/deletecomment`, {
+    const res = await fetch(`${getBackendUrl()}/social-posts/deletecomment`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,

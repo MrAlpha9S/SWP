@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import {getBackendUrl} from "../../components/utils/getBackendURL.js";
 
 const Topic = () => {
     const navigate = useNavigate();
@@ -13,7 +14,7 @@ const Topic = () => {
     const { isPending, error, data } = useQuery({
         queryKey: ['Topic', topicId],
         queryFn: async () => {
-            const result = await fetch(`http://localhost:3000/topics/${topicId}`, {
+            const result = await fetch(`${getBackendUrl()}/topics/${topicId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
