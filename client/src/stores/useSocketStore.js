@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io } from 'socket.io-client';
+import {getWebSocketUrl} from "../components/utils/getBackendURL.js";
 
 export const useSocketStore = create((set, get) => ({
     socket: null,
@@ -8,7 +9,7 @@ export const useSocketStore = create((set, get) => ({
         const existing = get().socket;
         if (existing) return existing;
 
-        const socket = io('http://localhost:3001', {
+        const socket = io(`${getWebSocketUrl}`, {
             withCredentials: true,
             transports: ['websocket', 'polling'],
             auth: {
