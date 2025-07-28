@@ -9,23 +9,19 @@ import { useNavigate } from 'react-router-dom';
 const Topic = () => {
     const navigate = useNavigate();
     const { topicId } = useParams();
-    const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
 
     const { isPending, error, data } = useQuery({
         queryKey: ['Topic', topicId],
         queryFn: async () => {
-            const token = await getAccessTokenSilently();
-            if (!isAuthenticated || !user || !token) return;
             const result = await fetch(`http://localhost:3000/topics/${topicId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
             });
             return await result.json();
         },
-        enabled: isAuthenticated && !!user && !!topicId,
+        enabled: !!topicId,
     });
 
 
@@ -80,5 +76,4 @@ const Topic = () => {
 
 };
 
-const AuthTopic = withAuthenticationRequired(Topic);
-export default AuthTopic;
+export default Topic;

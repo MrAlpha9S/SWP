@@ -1046,7 +1046,7 @@ INSERT INTO [blog_posts] ([title], [description], [content], [user_id], [topic_i
 <h2 style="color:#2c3e50; font-size:22px; margin-top:30px;">🎯 Kết luận</h2>
 <p><strong>Phỏng vấn tạo động lực không phải là thuyết phục, mà là đồng hành.</strong> Với kỹ thuật phù hợp, nhân viên y tế có thể giúp bệnh nhân chuyển từ do dự sang hành động – và giữ vững cam kết thay đổi lâu dài.</p>
 </body>
-', 14, 'resources-for-health-professionals'),
+', 14, 'resources-for-health-professionals', 0),
 (N'Hướng dẫn lâm sàng trong cai thuốc', N'Cách tiếp cận dựa trên bằng chứng khoa học.', N'<body style="font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; background-color: #f9f9f9; color: #333;">
 <h1 style="color:#2c3e50; font-size:28px; margin-bottom:10px;">🩺 Hướng dẫn lâm sàng trong cai thuốc</h1>
 <p><strong>Cách tiếp cận dựa trên bằng chứng khoa học giúp nhân viên y tế hỗ trợ người bệnh bỏ thuốc hiệu quả</strong></p>
