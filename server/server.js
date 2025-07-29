@@ -11,7 +11,6 @@ const {initializeApp} = require("firebase-admin/app");
 const path = require('path');
 const admin = require('firebase-admin');
 
-
 const firebaseApp = admin.initializeApp({
     credential: admin.credential.cert({
         projectId: process.env.VITE_FIREBASE_PROJECT_ID,
