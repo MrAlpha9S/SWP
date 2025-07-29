@@ -382,6 +382,30 @@ async function deleteCommentById(id) {
   }
 }
 
+async function getCommentsByPostId(postId) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('postId', sql.Int, postId)
+      .query(`
+        SELECT 
+          scmt.comment_id,
+          scmt.content,
+          scmt.created_at,
+          u.username,
+          u.avatar
+        FROM social_comments scmt
+        LEFT JOIN users u ON scmt.user_id = u.user_id
+        WHERE scmt.post_id = @postId
+        ORDER BY scmt.created_at DESC
+      `);
+    return result.recordset;
+  } catch (err) {
+    console.error('Error in getCommentsByPostId:', err);
+    throw err;
+  }
+}
+
 // BLOG
 async function getAllBlogs() {
   const pool = await poolPromise;
@@ -653,6 +677,43 @@ async function getRevenue() {
   return result.recordset;
 }
 
+async function getPendingCoaches() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT u.*, ci.bio, ci.years_of_exp, ci.detailed_bio, ci.motto
+    FROM users u
+    LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
+    WHERE u.is_pending_for_coach = 1
+  `);
+  return result.recordset;
+}
+
+async function approveCoach(id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET role = 'Coach',
+          is_pending_for_coach = 0
+      WHERE user_id = @id
+    `);
+  return result.rowsAffected[0] > 0;
+}
+
+const rejectCoach = async (id) => {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET is_pending_for_coach = 0
+      WHERE user_id = @id AND is_pending_for_coach = 1
+    `);
+  return result.rowsAffected[0] > 0;
+};
+
+
 module.exports = {
   approveBlog,
   getAllUsers,
@@ -694,5 +755,8 @@ module.exports = {
   getAllUserAchievements,
   createUserAchievement,
   deleteUserAchievement,
-  getRevenue
+  getRevenue,
+  getPendingCoaches,
+  approveCoach,
+  rejectCoach,
 };

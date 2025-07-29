@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, Select, Popconfirm, message } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, Popconfirm, message, Tabs } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllCoaches, updateCoach, deleteCoach } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
+import IsPendingCoach from './coachmanage/isPendingCoach';
 
 const { Option } = Select;
 
@@ -163,4 +164,4 @@ const CoachManagement = () => {
   );
 };
 
-export default CoachManagement; 
+export default CoachManagement;

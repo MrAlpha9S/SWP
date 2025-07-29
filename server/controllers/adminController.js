@@ -212,6 +212,19 @@ const handleGetPostLikes = async (req, res) => {
         return res.status(500).json({success: false, message: 'Failed to fetch post likes'});
     }
 };
+async function handleGetCommentsByPostId(postId) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('postId', sql.Int, postId)
+      .query('SELECT * FROM social_comments WHERE post_id = @postId');
+    return result.recordset;
+  } catch (err) {
+    console.error('Error in getCommentsByPostId:', err);
+    throw err;
+  }
+}
+
 
 // --- BLOG & TOPIC ---
 const handleGetAllBlogs = async (req, res) => {
@@ -620,6 +633,44 @@ const handleDeleteUserAchievement = async (req, res) => {
     }
 };
 
+// LẤY DANH SÁCH COACH CHỜ DUYỆT
+const handleGetPendingCoaches = async (req, res) => {
+    try {
+        const coaches = await adminService.getPendingCoaches();
+        return res.status(200).json({success: true, data: coaches});
+    } catch (error) {
+        console.error('Error in handleGetPendingCoaches:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch pending coaches'});
+    }
+};
+
+// DUYỆT COACH
+const handleApproveCoach = async (req, res) => {
+    const {id} = req.params;
+    try {
+        const approved = await adminService.approveCoach(id);
+        if (!approved) return res.status(404).json({success: false, message: 'Coach not found'});
+        return res.status(200).json({success: true, message: 'Coach approved successfully'});
+    } catch (error) {
+        console.error('Error in handleApproveCoach:', error);
+        return res.status(500).json({success: false, message: 'Failed to approve coach'});
+    }
+};
+
+const handleRejectCoach = async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const success = await adminService.rejectCoach(userId);
+      if (!success) {
+        return res.status(404).json({ success: false, message: 'Không tìm thấy coach hoặc đã từ chối rồi' });
+      }
+      return res.status(200).json({ success: true, message: 'Từ chối coach thành công' });
+    } catch (error) {
+      console.error('Lỗi rejectCoach:', error);
+      return res.status(500).json({ success: false, message: 'Lỗi server khi từ chối coach' });
+    }
+  };
+
 module.exports = {
     // User
     handleGetAllUsers,
@@ -633,6 +684,7 @@ module.exports = {
     handleGetCoachById,
     handleUpdateCoach,
     handleDeleteCoach,
+    handleRejectCoach,
     // Social Post & Comment
     handleGetAllPosts,
     handleCreatePost,
@@ -642,6 +694,7 @@ module.exports = {
     handleGetAllComments,
     handleDeleteComment,
     handleGetPostLikes,
+    handleGetCommentsByPostId,
     // Blog & Topic
     handleApproveBlog,
     handleGetIsPendingBlogs,
@@ -671,5 +724,8 @@ module.exports = {
     // User Achievements
     handleGetAllUserAchievements,
     handleCreateUserAchievement,
-    handleDeleteUserAchievement
+    handleDeleteUserAchievement,
+    // Coach Pending
+    handleGetPendingCoaches,
+    handleApproveCoach
 };

@@ -410,3 +410,43 @@ export async function getRevenueDataset(token, month, year) {
     },
   }).then(res => res.json());
 }
+
+export async function getPendingCoaches(token) {
+  const res = await fetch('http://localhost:3000/admin/coaches/pending', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách coach chờ duyệt');
+  return await res.json();
+}
+
+export async function approveCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi duyệt coach');
+  return await res.json();
+}
+
+export async function rejectCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/reject`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi từ chối coach');
+  return await res.json();
+}
+
+export async function getCommentsByPostId(postId, token) {
+  const res = await fetch(`http://localhost:3000/admin/comments/post/${postId}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  
+  if (!res.ok) throw new Error('Lỗi khi lấy comment theo postId');
+  
+  const result = await res.json();
+  return result.data; // chỉ trả về mảng comment
+}

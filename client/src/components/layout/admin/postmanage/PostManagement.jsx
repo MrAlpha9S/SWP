@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Popconfirm, message, Form, Input, Card, Tag, Divider, Avatar, Tooltip } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getAllPosts, getPostById, deletePost, createPost, updatePost, getPostLikes } from '../../../utils/adminUtils';
+import { getAllPosts, getPostById, deletePost, getPostLikes, getCommentsByPostId  } from '../../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 import dayjs from 'dayjs';
 
@@ -46,9 +46,8 @@ const PostManagement = () => {
       const likeRes = await getPostLikes(post_id, token);
       setLikes(likeRes.data || []);
       // Lấy comments
-      const commentRes = await fetch(`http://localhost:3000/social-posts/comments/${post_id}`);
-      const commentData = await commentRes.json();
-      setComments(commentData.data || []);
+      //const commentData = await getCommentsByPostId(post_id, token);
+      //setComments(commentData || []);
       setIsModalOpen(true);
     } catch (err) {
       message.error('Lỗi tải chi tiết bài viết');
@@ -64,34 +63,6 @@ const PostManagement = () => {
       fetchPosts();
     } catch (err) {
       message.error('Lỗi xóa bài viết');
-    }
-  };
-
-  const openCreateModal = () => {
-    setEditingPost(null);
-    form.resetFields();
-    setIsEditModalOpen(true);
-  };
-  const openEditModal = (post) => {
-    setEditingPost(post);
-    form.setFieldsValue(post);
-    setIsEditModalOpen(true);
-  };
-  const handleSavePost = async () => {
-    try {
-      const values = await form.validateFields();
-      const token = await getAccessTokenSilently();
-      if (editingPost) {
-        await updatePost(editingPost.post_id, values, token);
-        message.success('Cập nhật bài viết thành công');
-      } else {
-        await createPost(values, token);
-        message.success('Tạo bài viết thành công');
-      }
-      setIsEditModalOpen(false);
-      fetchPosts();
-    } catch (err) {
-      message.error('Lỗi lưu bài viết');
     }
   };
 
@@ -126,7 +97,6 @@ const PostManagement = () => {
   return (
     <div className="w-full bg-white rounded-lg shadow p-4">
       <h2 className="text-xl font-bold mb-4">Quản lý Bài viết</h2>
-      <Button type="primary" className="mb-4" onClick={openCreateModal}>Thêm bài viết</Button>
       <Table
         dataSource={posts}
         columns={columns}
@@ -134,24 +104,6 @@ const PostManagement = () => {
         loading={loading}
         pagination={{ pageSize: 10 }}
       />
-      <Modal
-        title={editingPost ? 'Sửa bài viết' : 'Thêm bài viết'}
-        open={isEditModalOpen}
-        onOk={handleSavePost}
-        onCancel={() => setIsEditModalOpen(false)}
-        okText={editingPost ? 'Lưu' : 'Tạo'}
-        cancelText="Hủy"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="title" label="Tiêu đề" rules={[{ required: true, message: 'Nhập tiêu đề' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="content" label="Nội dung" rules={[{ required: true, message: 'Nhập nội dung' }]}>
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          {/* Có thể bổ sung category_id, is_pinned, is_reported nếu cần */}
-        </Form>
-      </Modal>
       <Modal
         title={null}
         open={isModalOpen}
