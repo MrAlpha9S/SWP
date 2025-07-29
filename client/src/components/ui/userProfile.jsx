@@ -48,7 +48,16 @@ const Profile = () => {
         navigate("/settings");
     }
 
-    let items = [
+    const handleAdminClick = () => {
+        navigate("/admin");
+    }
+
+    let items = userInfo?.role === 'Admin' ? [
+        {
+            key: "1",
+            label: <span onClick={handleAdminClick}>Quản trị</span>,
+        }
+    ] : [
         {
             key: "1",
             label: <span onClick={handleDashboardClick}>Bảng điều khiển</span>,
@@ -66,16 +75,6 @@ const Profile = () => {
             label: <span onClick={handleSettingsClick}>Cài đặt thông báo</span>,
         },
     ];
-
-    if (userInfo?.role === 'Admin') {
-        items = [
-            {
-                key: "admin",
-                label: <span onClick={() => navigate("/admin")}>Quản trị Admin</span>,
-            },
-            ...items,
-        ];
-    }
 
     items.push({
         key: "5",

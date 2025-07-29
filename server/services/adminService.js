@@ -394,6 +394,30 @@ async function deleteCommentById(id) {
   }
 }
 
+async function getCommentsByPostId(postId) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('postId', sql.Int, postId)
+      .query(`
+        SELECT 
+          scmt.comment_id,
+          scmt.content,
+          scmt.created_at,
+          u.username,
+          u.avatar
+        FROM social_comments scmt
+        LEFT JOIN users u ON scmt.user_id = u.user_id
+        WHERE scmt.post_id = @postId
+        ORDER BY scmt.created_at DESC
+      `);
+    return result.recordset;
+  } catch (err) {
+    console.error('Error in getCommentsByPostId:', err);
+    throw err;
+  }
+}
+
 // BLOG
 async function getAllBlogs() {
   const pool = await poolPromise;
@@ -401,10 +425,32 @@ async function getAllBlogs() {
     SELECT b.*, u.username, u.avatar
     FROM blog_posts b
     JOIN users u ON b.user_id = u.user_id
+   	WHERE isPendingForApprovement = 0
     ORDER BY b.created_at DESC
   `);
   return result.recordset;
 }
+async function getIsPendingBlogs() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT b.*, u.username, u.avatar, u.auth0_id
+    FROM blog_posts b
+    JOIN users u ON b.user_id = u.user_id
+   	WHERE isPendingForApprovement = 1
+    ORDER BY b.created_at DESC
+  `);
+  return result.recordset;
+}
+async function approveBlog(id) {
+  const pool = await poolPromise;
+  const result = await pool.request().input('id', sql.Int, id).query(`
+    UPDATE blog_posts
+    SET isPendingForApprovement = 0
+    WHERE blog_id = @id
+  `);
+  return result.rowsAffected[0] > 0;
+}
+
 async function getBlogById(id) {
   const pool = await poolPromise;
   const result = await pool.request().input('id', sql.Int, id).query(`
@@ -562,13 +608,12 @@ async function getStatistics() {
   const blogCount = (await pool.request().query('SELECT COUNT(*) as total FROM blog_posts')).recordset[0].total;
   const topicCount = (await pool.request().query('SELECT COUNT(*) as total FROM Topics')).recordset[0].total;
   const checkinCount = (await pool.request().query('SELECT COUNT(*) as total FROM checkin_log')).recordset[0].total;
-  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM subscriptions')).recordset[0].total;
+  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM revenue')).recordset[0].total;
   let totalRevenue = null;
   try {
     const revenueResult = await pool.request().query(`
-      SELECT SUM(s.price) as total
-      FROM users_subscriptions us
-      JOIN subscriptions s ON us.sub_id = s.sub_id
+      SELECT SUM(amount) as total
+      FROM revenue
     `);
     totalRevenue = revenueResult.recordset[0].total || 0;
   } catch (e) {
@@ -637,8 +682,52 @@ async function deleteUserAchievement(user_id, achievement_id) {
     .query('DELETE FROM user_achievements WHERE user_id = @user_id AND achievement_id = @achievement_id');
   return result.rowsAffected[0] > 0;
 }
+async function getRevenue() {
+  const pool = await poolPromise;
+  const result = await pool.request()
+      .query(`SELECT * from revenue`)
+  return result.recordset;
+}
+
+async function getPendingCoaches() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT u.*, ci.bio, ci.years_of_exp, ci.detailed_bio, ci.motto
+    FROM users u
+    LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
+    WHERE u.is_pending_for_coach = 1
+  `);
+  return result.recordset;
+}
+
+async function approveCoach(id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET role = 'Coach',
+          is_pending_for_coach = 0
+      WHERE user_id = @id
+    `);
+  return result.rowsAffected[0] > 0;
+}
+
+const rejectCoach = async (id) => {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET is_pending_for_coach = 0
+      WHERE user_id = @id AND is_pending_for_coach = 1
+    `);
+  return result.rowsAffected[0] > 0;
+};
+
 
 module.exports = {
+  approveBlog,
   getAllUsers,
   createUser,
   getUserById,
@@ -657,6 +746,7 @@ module.exports = {
   getAllComments,
   deleteCommentById,
   getAllBlogs,
+  getIsPendingBlogs,
   getBlogById,
   deleteBlogById,
   getAllTopics,
@@ -678,4 +768,8 @@ module.exports = {
   getAllUserAchievements,
   createUserAchievement,
   deleteUserAchievement,
+  getRevenue,
+  getPendingCoaches,
+  approveCoach,
+  rejectCoach,
 };

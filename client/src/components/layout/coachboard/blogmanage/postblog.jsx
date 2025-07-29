@@ -6,9 +6,9 @@ import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import { Select } from 'antd'
 import Swal from 'sweetalert2'
-import { getCurrentUTCDateTime } from '../../utils/dateUtils'
+import { getCurrentUTCDateTime } from '../../../utils/dateUtils'
 import { useMutation } from '@tanstack/react-query';
-import { postBlog } from '../../utils/blogUtils'
+import { postBlog } from '../../../utils/blogUtils'
 import { useAuth0 } from "@auth0/auth0-react";
 
 
@@ -53,6 +53,10 @@ export default function PostBlog({ user_id }) {
                 title: 'Đăng bài thành công',
                 text: 'Bài viết của bạn đã được lưu!',
             })
+            setCurrentTopic('')
+            setCurrentTitle('')
+            setCurrentDescription('')
+            editor?.commands.clearContent()
         },
         onError: () => {
 

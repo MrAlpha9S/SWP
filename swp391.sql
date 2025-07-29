@@ -474,6 +474,22 @@ CREATE TABLE [quotes]
 )
 GO
 
+CREATE TABLE [notifications]
+(
+  [noti_id] int PRIMARY KEY IDENTITY(1, 1),
+  [user_id] int,
+  [noti_title] nvarchar(100),
+  [content] nvarchar(200),
+  [created_at] DATETIME,
+  [is_read] bit DEFAULT(0),
+  [type] nvarchar(50),
+  [metadata] nvarchar(max)
+)
+GO
+
+ALTER TABLE [notifications] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id])
+GO
+
 ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id])
 GO
 
@@ -692,7 +708,7 @@ BEGIN
   -- Grant achievements (new-member removed since it's handled by trigger)
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT @UserId, a.achievement_id, GETDATE()
+  SELECT @UserId, a.achievement_id, DATEADD(HOUR, 7, GETDATE())
   FROM achievements a
     CROSS JOIN user_achievement_progress uap
   WHERE uap.user_id = @UserId
@@ -964,7 +980,7 @@ BEGIN
   -- Grant "new-member" achievement to all new users
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT i.user_id, 'new-member', GETDATE()
+  SELECT i.user_id, 'new-member', DATEADD(HOUR, 7, GETDATE())
   FROM inserted i
   WHERE NOT EXISTS (
         SELECT 1

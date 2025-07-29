@@ -45,7 +45,32 @@ const updateUserAuth0 = async (auth0_id, username = null, email = null, avatar =
         return false;
     }
     return true;
-
 }
 
-module.exports = {getUserFromAuth0, updateUserAuth0};
+const createUserAuth0Service = async (username, email, avatar, password) => {
+    const token = await getManagementToken();
+    const rawRes = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            username: username,
+            email: email,
+            picture: avatar,
+            password: password,
+            connection: "Username-Password-Authentication",
+        }),
+    });
+
+    const resData = await rawRes.json();
+    if (!rawRes.ok) {
+        console.error('Auth0 error:', resData);
+        return false;
+    }
+    return true;
+}
+
+module.exports = {getUserFromAuth0, updateUserAuth0, createUserAuth0Service};

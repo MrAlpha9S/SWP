@@ -107,4 +107,4 @@ const TopicsPage = () => {
   );
 };
 
-export default withAuthenticationRequired(TopicsPage);
+export default TopicsPage;

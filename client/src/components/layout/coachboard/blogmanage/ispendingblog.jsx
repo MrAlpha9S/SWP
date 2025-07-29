@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Popconfirm, message, Avatar, Card, Tag, Divider } from 'antd';
-import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getAllBlogs, getBlogById, deleteBlog } from '../../utils/adminUtils';
+import { EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { getPostedBlog, getBlogById } from '../../../utils/blogUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 
-const BlogManagement = () => {
+const IsPendingBlog = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewingBlog, setViewingBlog] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
 
   // Fetch blogs
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const token = await getAccessTokenSilently();
-      const data = await getAllBlogs(token);
-      setBlogs(data.data || data.blogs || []);
+      const data = await getPostedBlog(user, getAccessTokenSilently, isAuthenticated);
+      console.log('Fetched blogs:', data);
+      setBlogs((data.data || data.blogs || []).filter(blog => blog.isPendingForApprovement === 1));
     } catch (err) {
       message.error('Lỗi tải danh sách blog');
     } finally {
@@ -42,16 +42,11 @@ const BlogManagement = () => {
     }
   };
 
-  // Xóa blog
-  const handleDeleteBlog = async (blog_id) => {
-    try {
-      const token = await getAccessTokenSilently();
-      await deleteBlog(blog_id, token);
-      message.success('Xóa blog thành công');
-      fetchBlogs();
-    } catch (err) {
-      message.error('Lỗi xóa blog');
-    }
+
+  // Handle reload
+  const handleReload = () => {
+    fetchBlogs();
+    message.success('Làm mới danh sách blog chờ duyệt');
   };
 
   const columns = [
@@ -71,9 +66,6 @@ const BlogManagement = () => {
       render: (_, blog) => (
         <>
           <Button icon={<EyeOutlined />} onClick={() => handleViewBlog(blog.blog_id)} className="mr-2" />
-          <Popconfirm title="Xóa blog này?" onConfirm={() => handleDeleteBlog(blog.blog_id)} okText="Xóa" cancelText="Hủy">
-            <Button icon={<DeleteOutlined />} danger />
-          </Popconfirm>
         </>
       ),
     },
@@ -81,7 +73,17 @@ const BlogManagement = () => {
 
   return (
     <div className="w-full bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-4">Quản lý Blog</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Quản lý Blog</h2>
+        <Button 
+          type="primary" 
+          icon={<ReloadOutlined />} 
+          onClick={handleReload}
+          loading={loading}
+        >
+          Làm mới
+        </Button>
+      </div>
       <Table
         dataSource={blogs}
         columns={columns}
@@ -104,7 +106,9 @@ const BlogManagement = () => {
               <div style={{fontWeight:700, fontSize:22, marginBottom:8}}>{viewingBlog.title}</div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>ID: {viewingBlog.blog_id}</div>
               <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Mô tả:</b> {viewingBlog.description}</div>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Nội dung:</b> {viewingBlog.content}</div>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Nội dung:</b> 
+              <span dangerouslySetInnerHTML={{ __html: viewingBlog.content }} />
+              </div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>Ngày tạo: {viewingBlog.created_at ? new Date(viewingBlog.created_at).toLocaleString() : ''}</div>
             </div>
             <Divider style={{margin:'16px 0'}}/>
@@ -122,4 +126,4 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement; 
+export default IsPendingBlog;

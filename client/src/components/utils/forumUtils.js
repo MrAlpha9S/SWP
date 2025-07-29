@@ -143,7 +143,7 @@ export async function UpdateSocialPosts(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
-export async function DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id) {
+export async function DeleteSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id, reason, poster_auth0_id, post_title) {
 
     if (!isAuthenticated || !user) return;
 
@@ -155,7 +155,7 @@ export async function DeleteSocialPosts(user, getAccessTokenSilently, isAuthenti
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ post_id: post_id})
+        body: JSON.stringify({ post_id: post_id, reason: reason, poster_auth0_id: poster_auth0_id, post_title: post_title })
     });
 
 
@@ -178,7 +178,7 @@ export const AddComment = async (user, getAccessTokenSilently, isAuthenticated, 
     return await res.json();
 };
 
-export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at) => {
+export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, created_at, username) => {
 
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
@@ -189,7 +189,7 @@ export const AddLike = async (user, getAccessTokenSilently, isAuthenticated, pos
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({auth0_id: user.sub, post_id: post_id, comment_id: comment_id, created_at: created_at})
+        body: JSON.stringify({auth0_id: user.sub, post_id: post_id, comment_id: comment_id, created_at: created_at, username: username})
     });
 
     return await res.json();
@@ -213,7 +213,7 @@ export async function GetIsPendingSocialPosts(user, getAccessTokenSilently, isAu
     return await res.json();
 }
 
-export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id) {
+export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthenticated, post_id, poster_auth0_id, post_title, category_tag) {
     console.log('ApproveSocialPosts: ', post_id)
 
     if (!isAuthenticated || !user) return;
@@ -226,14 +226,14 @@ export async function ApproveSocialPosts(user, getAccessTokenSilently, isAuthent
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ post_id: post_id})
+        body: JSON.stringify({ post_id: post_id, poster_auth0_id: poster_auth0_id, post_title: post_title, category_tag: category_tag })
     });
 
 
     return await res.json();
 }
 
-export async function DeleteComment(user, getAccessTokenSilently, isAuthenticated, comment_id) {
+export async function DeleteComment(user, getAccessTokenSilently, isAuthenticated, comment_id, reason, comment_author_auth0_id, comment_content) {
 
     if (!isAuthenticated || !user) return;
 
@@ -245,7 +245,7 @@ export async function DeleteComment(user, getAccessTokenSilently, isAuthenticate
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ comment_id: comment_id})
+        body: JSON.stringify({ comment_id: comment_id, comment_author_auth0_id: comment_author_auth0_id, comment_content, reason: reason })
     });
 
 

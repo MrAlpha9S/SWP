@@ -17,11 +17,14 @@ router.patch('/users/:id/ban', adminController.handleToggleBanUser);
 
 // Route quản lý coach
 router.get('/coaches', adminController.handleGetAllCoaches);
+router.get('/coaches/pending', adminController.handleGetPendingCoaches);
 router.get('/coaches/:id', adminController.handleGetCoachById);
 router.put('/coaches/:id', adminController.handleUpdateCoach);
 router.delete('/coaches/:id', adminController.handleDeleteCoach);
 router.get('/coach-user/:coach_id', adminController.handleGetCoachUser);
 
+router.patch('/coaches/:id/approve', adminController.handleApproveCoach);
+router.patch('/coaches/:id/reject', adminController.handleRejectCoach);
 // Route quản lý social post
 router.get('/posts', adminController.handleGetAllPosts);
 router.post('/posts', adminController.handleCreatePost);
@@ -32,11 +35,15 @@ router.get('/posts/:id/likes', adminController.handleGetPostLikes);
 // Route quản lý comment
 router.get('/comments', adminController.handleGetAllComments);
 router.delete('/comments/:id', adminController.handleDeleteComment);
+router.get('/comments/post/:postId', adminController.handleGetCommentsByPostId);
+
 
 // Route quản lý blog
+router.get('/blogs/pending', adminController.handleGetIsPendingBlogs);
 router.get('/blogs', adminController.handleGetAllBlogs);
 router.get('/blogs/:id', adminController.handleGetBlogById);
 router.delete('/blogs/:id', adminController.handleDeleteBlog);
+router.patch('/blogs/:id/approve', adminController.handleApproveBlog);
 // Route quản lý topic
 router.get('/topics', adminController.handleGetAllTopics);
 router.post('/topics', adminController.handleCreateTopic);
@@ -61,7 +68,10 @@ router.get('/checkins/:id', adminController.handleGetCheckInById);
 router.delete('/checkins/:id', adminController.handleDeleteCheckIn);
 
 // Route thống kê tổng quan
+
 router.get('/statistics', adminController.handleGetStatistics);
+router.get('/statistics/revenue', adminController.handleGetRevenueDataset);
+
 
 // Route mẫu kiểm tra quyền admin
 router.get('/test', (req, res) => {

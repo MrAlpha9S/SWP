@@ -5,7 +5,7 @@ const {
     getCoaches,
     getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
     deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken,
-    updateUserTimesForPush, getUserReasonsCSVByAuth0Id
+    updateUserTimesForPush, getUserReasonsCSVByAuth0Id, leaderboardStatsService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
 
@@ -36,8 +36,9 @@ const handlePostSignup = async (req, res) => {
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required'});
 
     try {
-        if (await userExists(userAuth0Id)) {
-            return res.status(200).json({success: true, message: 'User info already exist'});
+        const isUserExists = await userExists(userAuth0Id);
+        if (isUserExists) {
+            return res.status(200).json({success: true, message: isUserExists});
         }
 
         const userData = await getUserFromAuth0(userAuth0Id);
@@ -222,6 +223,7 @@ const assignUserToCoachController = async (req, res) => {
                 userAuth0Id,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
+            await createNotificationService(coachAuth0Id, `Người dùng ${username} vừa chọn bạn.`, `Bạn nhận được ${commission.toLocaleString()} VNĐ`, 'coach', {userAuth0Id : userAuth0Id, inner_type : 'user-selection'})
             return res.status(200).json({success: true, message: "Assign successful"});
         } else {
             return res.status(500).json({success: false, message: "Assign failed"});
@@ -350,8 +352,10 @@ const createReviewController = async (req, res) => {
                 username: username,
                 content: content,
                 stars: stars,
+                reviewId: success,
                 timestamp: getCurrentUTCDateTime().toISOString()
             });
+            await createNotificationService(coachAuth0Id, `Người dùng ${username} vừa tạo đánh giá.`, `${content} - ${stars} sao`, 'coach', {inner_type : 'user-review', review_id : success})
             return res.status(201).json({success: true, message: 'Review created'});
         } else {
             return res.status(400).json({success: false, message: 'Failed to create review'});
@@ -442,6 +446,7 @@ const sendPushNotificationTo = async (req, res) => {
 
 const { schedulePushForUser } = require('../utils/pushScheduler');
 const {processAchievementsWithNotifications} = require("../services/achievementService");
+const {createNotificationService} = require("../services/notificationService");
 
 const handleUpdateUserTimesForPush = async (req, res) => {
     const { userAuth0Id, times } = req.body;
@@ -470,6 +475,20 @@ const handleUpdateUserTimesForPush = async (req, res) => {
     }
 };
 
+const getLeaderboardStats = async (req, res) => {
+    try {
+        const result = await leaderboardStatsService()
+        if (result) {
+            return res.status(200).json({success: true, data: result});
+        } else {
+            return res.status(404).json({success: false, message: 'Failed to get leaderboard'});
+        }
+    } catch (error) {
+        console.error('Error in getLeaderboardStats', error);
+        return res.status(500).json({success: false, message: error.message});
+    }
+}
+
 
 
 module.exports = {
@@ -494,5 +513,6 @@ module.exports = {
     createReviewController,
     handleUpdateUserFCMToken,
     sendPushNotificationTo,
-    handleUpdateUserTimesForPush
+    handleUpdateUserTimesForPush,
+    getLeaderboardStats
 };

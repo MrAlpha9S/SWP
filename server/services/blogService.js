@@ -54,4 +54,19 @@ const getAllBlogPostsOfUser = async (userAuth0Id) => {
     }
 }
 
-module.exports = {Blog, PostBlog, getAllBlogPostsOfUser};
+const getBlog = async (userAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id);
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query(`select * from blog_posts where user_id = @user_id`);
+        return result.recordset;
+    } catch (error) {
+        console.error('error in getBlog', error);
+        return [];
+    }
+}
+
+module.exports = {Blog, PostBlog, getAllBlogPostsOfUser, getBlog};

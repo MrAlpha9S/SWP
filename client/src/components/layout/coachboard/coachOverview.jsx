@@ -77,7 +77,7 @@ export default function CoachOverview({stats, isDataPending}) {
                     <StatCard icon={<UsergroupAddOutlined />} onClick={() => setCurrentStepDashboard('coach-user')} value={stats?.subscribedUserCount} label="Người dùng đã đăng ký" />
                 </Skeleton>
                 <Skeleton loading={isPending} active>
-                    <StatCard icon={<DollarOutlined />} value={`${(stats?.totalCommission * coachInfo?.coach?.commission_rate).toLocaleString()} VNĐ`} label="Tổng hoa hồng" />
+                    <StatCard icon={<DollarOutlined />} value={`${(stats?.totalCommission)?.toLocaleString()} VNĐ`} label="Tổng hoa hồng" />
                 </Skeleton>
                 <Skeleton loading={isPending} active>
                     <StatCard icon={<FileTextOutlined />} onClick={() => setCurrentStepDashboard('post-blog')} value={stats?.approvedBlogPostCount} label="Bài blog đã đăng" />

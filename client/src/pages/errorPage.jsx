@@ -15,7 +15,7 @@ const ErrorPage = ({
                        onHomeClick = () => window.location.href = '/',
                        onRefreshClick = () => window.location.reload()
                    }) => {
-    const {navigate} = useNavigate()
+    const navigate = useNavigate()
     const getDefaultContent = () => {
         switch (status) {
             case '404':
@@ -55,7 +55,7 @@ const ErrorPage = ({
                 className="bg-blue-500 hover:bg-blue-600 border-blue-500 hover:border-blue-600"
                 key="home"
             >
-                Back to Home
+                Trở về trang chủ
             </Button>
         );
     }
@@ -101,19 +101,19 @@ const ErrorPage = ({
                         className="!p-0"
                     />
 
-                    <div className="mt-12 pt-8 border-t border-gray-100">
-                        <div className="text-center">
-                            <Paragraph className="!text-gray-500 !text-sm">
-                                Need help? Contact our{' '}
-                                <a
-                                    href="mailto:support@example.com"
-                                    className="text-blue-500 hover:text-blue-600 underline decoration-blue-200 hover:decoration-blue-400 transition-colors"
-                                >
-                                    support team
-                                </a>
-                            </Paragraph>
-                        </div>
-                    </div>
+                    {/*<div className="mt-12 pt-8 border-t border-gray-100">*/}
+                    {/*    <div className="text-center">*/}
+                    {/*        <Paragraph className="!text-gray-500 !text-sm">*/}
+                    {/*            Need help? Contact our{' '}*/}
+                    {/*            <a*/}
+                    {/*                href="mailto:support@example.com"*/}
+                    {/*                className="text-blue-500 hover:text-blue-600 underline decoration-blue-200 hover:decoration-blue-400 transition-colors"*/}
+                    {/*            >*/}
+                    {/*                support team*/}
+                    {/*            </a>*/}
+                    {/*        </Paragraph>*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
                 </div>
 
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">

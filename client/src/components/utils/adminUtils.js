@@ -1,6 +1,8 @@
 // Các hàm util gọi API admin backend
 // Sử dụng fetch, truyền token nếu cần, base URL: /api/admin
 
+import {data} from "autoprefixer";
+
 export async function getAllUsers(token) {
   const res = await fetch('http://localhost:3000/admin/users', {
     headers: { Authorization: `Bearer ${token}` }
@@ -162,6 +164,24 @@ export async function getAllBlogs(token) {
   return await res.json();
 }
 
+export async function approveBlog(id, token, auth0_id, title, topic_id) {
+  const res = await fetch(`http://localhost:3000/admin/blogs/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
+    body: JSON.stringify({ auth0_id: auth0_id, title: title, topic_id: topic_id })
+  });
+  if (!res.ok) throw new Error('Lỗi phê duyệt blog');
+  return await res.json();
+}
+
+export async function getIsPendingBlogs(token) {
+  const res = await fetch('http://localhost:3000/admin/blogs/pending', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách blog');
+  return await res.json();
+}
+
 export async function getBlogById(id, token) {
   const res = await fetch(`http://localhost:3000/admin/blogs/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -170,10 +190,11 @@ export async function getBlogById(id, token) {
   return await res.json();
 }
 
-export async function deleteBlog(id, token) {
+export async function deleteBlog(id, token, auth0_id, title, topic_id) {
   const res = await fetch(`http://localhost:3000/admin/blogs/${id}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', },
+    body: JSON.stringify({ auth0_id: auth0_id, title: title, topic_id: topic_id })
   });
   if (!res.ok) throw new Error('Lỗi xóa blog');
   return await res.json();
@@ -385,4 +406,54 @@ export async function getCoachUserByCoachId(coach_id, token) {
   });
   if (!res.ok) throw new Error('Lỗi lấy user liên kết coach');
   return await res.json();
+}
+
+export async function getRevenueDataset(token, month, year) {
+  return fetch(`http://localhost:3000/admin/statistics/revenue?month=${month}&year=${year}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+  }).then(res => res.json());
+}
+
+export async function getPendingCoaches(token) {
+  const res = await fetch('http://localhost:3000/admin/coaches/pending', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách coach chờ duyệt');
+  return await res.json();
+}
+
+export async function approveCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi duyệt coach');
+  return await res.json();
+}
+
+export async function rejectCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/reject`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi từ chối coach');
+  return await res.json();
+}
+
+export async function getCommentsByPostId(postId, token) {
+  const res = await fetch(`http://localhost:3000/admin/comments/post/${postId}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) throw new Error('Lỗi khi lấy comment theo postId');
+
+  const result = await res.json();
+  return result.data; // chỉ trả về mảng comment
 }

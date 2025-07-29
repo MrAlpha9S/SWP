@@ -1,9 +1,11 @@
 import { notification } from 'antd';
 import React, { createContext, useContext, useMemo } from 'react';
-import {BsFillPeopleFill} from "react-icons/bs";
+import {BsFillPeopleFill, BsFillReplyFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
 import {FaCheck, FaCross, FaMedal, FaRegLightbulb} from "react-icons/fa";
+import {HeartIcon} from "lucide-react";
+import {ImCancelCircle} from "react-icons/im";
 
 const NotificationContext = createContext();
 
@@ -42,9 +44,10 @@ export const NotificationProvider = ({ children }) => {
             case 'success':
                 api.open({
                     key: `success_message`,
-                    message: `${payload.message}`,
+                    message: payload?.message,
                     description: <div>
-                        {payload.content}
+                        {payload?.content}
+                        {payload?.timestamp ? <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
                     </div>,
                     placement: 'topRight',
                     icon: <FaCheck className="size-5"/>
@@ -53,12 +56,13 @@ export const NotificationProvider = ({ children }) => {
             case 'failed':
                 api.open({
                     key: `failed_message`,
-                    message: `${payload.message}`,
+                    message: payload?.message,
                     description: <div>
-                        {payload.content}
+                        {payload?.content}
+                        {payload?.timestamp ? <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
                     </div>,
                     placement: 'topRight',
-                    icon: <FaCross className="size-5"/>
+                    icon: <ImCancelCircle className="size-5"/>
                 });
                 break;
             case 'plan-edit-by-coach':
@@ -123,6 +127,32 @@ export const NotificationProvider = ({ children }) => {
                     </div>,
                     placement: 'topRight',
                     icon: <FaRegLightbulb className="size-5"/>,
+                });
+                break;
+            case 'like':
+                api.open({
+                    key: `like-${payload.like_owner}`,
+                    message: payload.post_title ?
+                        <div>Người dùng <strong>{payload.like_owner}</strong> vừa thích bài viết của bạn.</div> :
+                        <div>Người dùng <strong>{payload.like_owner}</strong> vừa thích bình luận của bạn.</div>,
+                    description: <div>
+                        {payload.post_title ? `Bài viết: ${payload.post_title}` : `Bình luận: ${payload.comment_content}`}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <HeartIcon className="size-5"/>,
+                    onClick: onClick
+                });
+                break;
+            case 'reply':
+                api.open({
+                    key: `reply-${payload.commenter_auth0_id}`,
+                    message: <div>Người dùng <strong>{payload.commenter_username}</strong> vừa bình luận bài viết <strong>{payload.post_title}</strong> của bạn.</div>,
+                    description: <div>
+                        Bình luận: {payload.content}
+                    </div>,
+                    placement: 'topRight',
+                    icon: <BsFillReplyFill className="size-5"/>,
+                    onClick: onClick
                 });
                 break;
             default:

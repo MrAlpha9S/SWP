@@ -49,3 +49,17 @@ export function convertUTCStringToLocalDate(dateStringFromDB) {
     return new Date(new Date(adjustedTime).toISOString());
 }
 
+export function formatUtcToLocalString(utcString) {
+    const date = new Date(utcString);
+
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    const day = pad(date.getUTCDate());
+    const month = pad(date.getUTCMonth() + 1);
+    const year = pad(date.getUTCFullYear() % 100);
+    const hours = pad(date.getUTCHours());
+    const minutes = pad(date.getUTCMinutes());
+
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+}
+

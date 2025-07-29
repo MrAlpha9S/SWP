@@ -14,7 +14,7 @@ const getDashboardStats = async (req, res) => {
         const subscribedUserCount = subscribedUsers.length
         let totalCommission = 0
         for (const subscribedUser of subscribedUsers) {
-            totalCommission += subscribedUser.price
+            totalCommission += subscribedUser.amount
         }
         let approvedBlogPostCount = 0
         let pendingBlogPostCount = 0
@@ -65,7 +65,7 @@ const getUserCommissionDataset = async (req, res) => {
         const yearsSet = new Set();
 
         subscribedUsers.forEach((user) => {
-            const date = new Date(user.started_date);
+            const date = new Date(user.created_at);
             monthsSet.add(date.getUTCMonth() + 1); // 1–12
             yearsSet.add(date.getUTCFullYear());
         });
@@ -75,12 +75,11 @@ const getUserCommissionDataset = async (req, res) => {
 
         // Prepare chart data
         const chartMap = new Map();
-        const commissionFloat = parseFloat(commissionRate);
         const inputMonth = month ? parseInt(month, 10) : null;
         const inputYear = year ? parseInt(year, 10) : null;
 
         subscribedUsers.forEach((user) => {
-            const startedDate = new Date(user.started_date);
+            const startedDate = new Date(user.created_at);
             const userMonth = startedDate.getUTCMonth(); // 0–11
             const userYear = startedDate.getUTCFullYear();
 
@@ -102,7 +101,7 @@ const getUserCommissionDataset = async (req, res) => {
                 const current = chartMap.get(key);
                 chartMap.set(key, {
                     users: current.users + 1,
-                    commission: current.commission + parseFloat(user.price) * commissionFloat,
+                    commission: current.commission + parseFloat(user.amount),
                 });
             }
         });

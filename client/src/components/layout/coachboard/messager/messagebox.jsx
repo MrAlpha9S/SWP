@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {Input} from 'antd';
 import {useAuth0} from "@auth0/auth0-react";
-import ChatMessage from './ChatMessage';
+import ChatMessage from './chatmessage.jsx';
 import {SendOutlined} from '@ant-design/icons';
 import {SendMessage} from '../../../utils/messagerUtils';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
@@ -35,17 +35,16 @@ export default function MessageBox({
         mutationFn: async ({
                                user,
                                senderName,
-                               senderAuth0Id,
+                               recipientAuth0Id,
                                getAccessTokenSilently,
                                isAuthenticated,
                                conversationId,
                                content,
                                created_at
                            }) => {
-            return await SendMessage(user, senderName, senderAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
+            return await SendMessage(user, senderName, recipientAuth0Id, getAccessTokenSilently, isAuthenticated, conversationId, content, created_at);
         },
         onSuccess: (data) => {
-            console.log('Message sent successfully');
             if (onEmitMessage) {
                 onEmitMessage({
                     conversationId,
@@ -64,7 +63,7 @@ export default function MessageBox({
         if (!input || input.trim() === '') return;
         const username = userInfo?.username;
         const message = {
-            senderAuth0Id: recipientId,
+            recipientAuth0Id: recipientId,
             senderName: username,
             conversationId: conversationId,
             content: input.trim(),

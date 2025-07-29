@@ -1,5 +1,12 @@
 import React from 'react';
-import { FileTextOutlined, DashboardOutlined, WechatOutlined, UnorderedListOutlined, DollarOutlined } from '@ant-design/icons';
+import {
+    FileTextOutlined,
+    DashboardOutlined,
+    WechatOutlined,
+    UnorderedListOutlined,
+    DollarOutlined,
+    NotificationOutlined
+} from '@ant-design/icons';
 import { Menu } from 'antd';
 import {IoExtensionPuzzleOutline, IoMedalOutline} from "react-icons/io5";
 import {GrOverview} from "react-icons/gr";
@@ -10,6 +17,11 @@ const items = [
         key: 'overview',
         label: 'Tổng quan',
         icon: <GrOverview className="mr-4"/>
+    },
+    {
+        key: 'notifications',
+        label: 'Thông báo',
+        icon: <NotificationOutlined className="mr-4"/>,
     },
     {
         key: 'coach-user',

@@ -114,15 +114,21 @@ const SendMessage = async (auth0_id, conversationId, content, created_at) => {
             .input('conversationId', conversationId)
             .input('content', content)
             .input('created_at', mssql.DateTime, created_at)
-            .query(`INSERT INTO [messages] ([conversation_id], [user_id], [content], [created_at]) VALUES
-(@conversationId, @user_id, @content, @created_at);`);
-        if(result.rowsAffected[0] === 0) {
-            throw new Error('error in insert send message');
+            .query(`
+                INSERT INTO [messages] ([conversation_id], [user_id], [content], [created_at])
+                    OUTPUT INSERTED.message_id
+                VALUES (@conversationId, @user_id, @content, @created_at);
+            `);
+
+        if (!result.recordset || result.recordset.length === 0) {
+            throw new Error('No ID returned after insert');
         }
-        return true;
+
+        const insertedId = result.recordset[0].message_id;
+        return insertedId;
     } catch (error) {
         console.error('error in SendMessage', error);
-        return false;
+        return null;
     }
 };
 
