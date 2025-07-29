@@ -84,7 +84,7 @@ export default function PostSignUpCallback() {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            Loading...
+            <div className='loader'></div>
         </div>
     );
 }

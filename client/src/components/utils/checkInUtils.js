@@ -271,10 +271,6 @@ export function mergeByDate(
 }
 
 
-
-
-
-
 export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null, userAuth0Id = null) {
     if (!isAuthenticated || !user) return;
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {useQuery} from "@tanstack/react-query";
 import {getUserInfo} from "../utils/userUtils.js";
 import {useEffect, useState} from "react";
-import {getBackendUrl} from "../utils/getBackendURL.js";
+import {getBackendUrl, getFrontEndUrl} from "../utils/getBackendURL.js";
 
 const Profile = () => {
     const { user, isAuthenticated, getAccessTokenSilently, isLoading } = useAuth0();
@@ -82,7 +82,7 @@ const Profile = () => {
         danger: true,
         label: (
             <a
-                href={`https://${import.meta.env.VITE_AUTH0_DOMAIN}/v2/logout?returnTo=${getBackendUrl()}&client_id=${import.meta.env.VITE_AUTH0_CLIENT_ID}`}
+                href={`https://${import.meta.env.VITE_AUTH0_DOMAIN}/v2/logout?returnTo=${getFrontEndUrl()}&client_id=${import.meta.env.VITE_AUTH0_CLIENT_ID}`}
             >
                 Đăng xuất
             </a>

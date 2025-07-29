@@ -137,6 +137,7 @@ function SubscriptionPage() {
                 loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
             } else {
                 localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscriptionPagePayment'}));
+                loginWithRedirect({authorizationParams: {screen_hint: 'signup'}});
             }
 
         } else {

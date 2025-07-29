@@ -85,7 +85,7 @@ const CoachDetailsPage = ({coachId, from}) => {
 
     console.log(reviewsToShow)
 
-    if (isPending || !coach) return <div className="text-center p-10">Loading...</div>
+    if (isPending || !coach) return <div className="text-center p-10"><div className='loader'></div></div>
 
     return (
         <div className=" w-full mx-auto h-[80%] p-6 space-y-8">

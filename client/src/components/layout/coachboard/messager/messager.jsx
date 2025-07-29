@@ -152,7 +152,7 @@ export default function Messenger({ role }) {
   const emitConversationUpdate = (data) => socket?.emit('conversation_updated', data);
   const emitMemberInteraction = (data) => socket?.emit('member_interaction', data);
 
-  if (!contacts || !allMessages) return <div>Loading...</div>;
+  if (!contacts || !allMessages) return <div className='loader'></div>;
 
   return (
     <div className="w-[650px] h-[calc(100vh-250px)] flex bg-primary-700 rounded-lg text-white">
