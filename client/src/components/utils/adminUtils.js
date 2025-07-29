@@ -53,7 +53,7 @@ export async function toggleBanUser(id, isBanned, token) {
 }
 
 export async function getAllCoaches(token) {
-  const res = await fetch('${getBackendUrl()}/admin/coaches', {
+  const res = await fetch(`${getBackendUrl()}/admin/coaches`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách coach');
@@ -91,7 +91,7 @@ export async function deleteCoach(id, token) {
 }
 
 export async function getAllPosts(token) {
-  const res = await fetch('${getBackendUrl()}/admin/posts', {
+  const res = await fetch(`${getBackendUrl()}/admin/posts`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách post');
@@ -116,7 +116,7 @@ export async function deletePost(id, token) {
 }
 
 export async function createPost(data, token) {
-  const res = await fetch('${getBackendUrl()}/admin/posts', {
+  const res = await fetch(`${getBackendUrl()}/admin/posts`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -141,7 +141,7 @@ export async function updatePost(id, data, token) {
 }
 
 export async function getAllComments(token) {
-  const res = await fetch('${getBackendUrl()}/admin/comments', {
+  const res = await fetch(`${getBackendUrl()}/admin/comments`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách comment');
@@ -158,7 +158,7 @@ export async function deleteComment(id, token) {
 }
 
 export async function getAllBlogs(token) {
-  const res = await fetch('${getBackendUrl()}/admin/blogs', {
+  const res = await fetch(`${getBackendUrl()}/admin/blogs`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách blog');
@@ -176,7 +176,7 @@ export async function approveBlog(id, token, auth0_id, title, topic_id) {
 }
 
 export async function getIsPendingBlogs(token) {
-  const res = await fetch('${getBackendUrl()}/admin/blogs/pending', {
+  const res = await fetch(`${getBackendUrl()}/admin/blogs/pending`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách blog');
@@ -202,7 +202,7 @@ export async function deleteBlog(id, token, auth0_id, title, topic_id) {
 }
 
 export async function getAllTopics(token) {
-  const res = await fetch('${getBackendUrl()}/admin/topics', {
+  const res = await fetch(`${getBackendUrl()}/admin/topics`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách topic');
@@ -210,7 +210,7 @@ export async function getAllTopics(token) {
 }
 
 export async function createTopic(data, token) {
-  const res = await fetch('${getBackendUrl()}/admin/topics', {
+  const res = await fetch(`${getBackendUrl()}/admin/topics`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -249,7 +249,7 @@ export async function deleteTopic(id, token) {
 }
 
 export async function getAllSubscriptions(token) {
-  const res = await fetch('${getBackendUrl()}/admin/subscriptions', {
+  const res = await fetch(`${getBackendUrl()}/admin/subscriptions`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách subscription');
@@ -257,7 +257,7 @@ export async function getAllSubscriptions(token) {
 }
 
 export async function createSubscription(data, token) {
-  const res = await fetch('${getBackendUrl()}/admin/subscriptions', {
+  const res = await fetch(`${getBackendUrl()}/admin/subscriptions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -292,7 +292,7 @@ export async function deleteSubscription(id, token) {
 }
 
 export async function getAllCheckIns(token) {
-  const res = await fetch('${getBackendUrl()}/admin/checkins', {
+  const res = await fetch(`${getBackendUrl()}/admin/checkins`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách check-in');
@@ -317,7 +317,7 @@ export async function deleteCheckIn(id, token) {
 }
 
 export async function getStatistics(token) {
-  const res = await fetch('${getBackendUrl()}/admin/statistics', {
+  const res = await fetch(`${getBackendUrl()}/admin/statistics`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy thống kê');
@@ -325,7 +325,7 @@ export async function getStatistics(token) {
 }
 
 export async function createUser(data, token) {
-  const res = await fetch('${getBackendUrl()}/admin/users', {
+  const res = await fetch(`${getBackendUrl()}/admin/users`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -346,14 +346,14 @@ export async function getPostLikes(id, token) {
 }
 
 export async function getAllUserSubscriptions(token) {
-  const res = await fetch('${getBackendUrl()}/admin/user-subscriptions', {
+  const res = await fetch(`${getBackendUrl()}/admin/user-subscriptions`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách user subscriptions');
   return await res.json();
 }
 export async function createUserSubscription(data, token) {
-  const res = await fetch('${getBackendUrl()}/admin/user-subscriptions', {
+  const res = await fetch(`${getBackendUrl()}/admin/user-subscriptions`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
@@ -379,12 +379,12 @@ export async function deleteUserSubscription(user_id, sub_id, token) {
   return await res.json();
 } 
 export async function getAllUserAchievements(token) {
-  return fetch('${getBackendUrl()}/admin/user-achievements', {
+  return fetch(`${getBackendUrl()}/admin/user-achievements`, {
     headers: { Authorization: `Bearer ${token}` }
   }).then(res => res.json());
 }
 export async function addUserAchievement(data, token) {
-  return fetch('${getBackendUrl()}/admin/user-achievements', {
+  return fetch(`${getBackendUrl()}/admin/user-achievements`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(data)

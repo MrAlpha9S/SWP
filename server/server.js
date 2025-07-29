@@ -341,19 +341,23 @@ io.on('connection', (socket) => {
     });
 });
 
-app.use('/users', userRouter)
-app.use('/profiles', profileRouter)
-app.use('/topics', topicRouter);
-app.use('/check-in', checkInRouter)
-app.use('/social-posts', socialPostRouter)
-app.use('/messager', messageRouter)
-app.use('/subscription', subscriptionRouter)
+const apiRouter = express.Router();
+
+apiRouter.use('/users', userRouter);
+apiRouter.use('/profiles', profileRouter);
+apiRouter.use('/topics', topicRouter);
+apiRouter.use('/check-in', checkInRouter);
+apiRouter.use('/social-posts', socialPostRouter);
+apiRouter.use('/messager', messageRouter);
+apiRouter.use('/subscription', subscriptionRouter);
+apiRouter.use('/admin', adminRouter);
+apiRouter.use('/coaches', coachRouter);
+apiRouter.use('/achievements', achievementRouter);
+apiRouter.use('/reports', reportRouter);
+apiRouter.use('/notifications', notificationRouter);
+
+app.use('/api', apiRouter);
 app.use('/payment', paymentRouter)
-app.use('/admin', adminRouter)
-app.use('/coaches', coachRouter)
-app.use('/achievements', achievementRouter)
-app.use('/reports', reportRouter)
-app.use('/notifications', notificationRouter)
 
 
 

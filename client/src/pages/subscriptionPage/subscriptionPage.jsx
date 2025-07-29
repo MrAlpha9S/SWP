@@ -15,6 +15,7 @@ import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import {usePayOS} from "@payos/payos-checkout";
 import axios from "axios";
 import {queryClient} from "../../main.jsx";
+import {getFrontEndUrl} from "../../components/utils/getBackendURL.js";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -38,7 +39,7 @@ function SubscriptionPage() {
         open: openPayOS,
         exit: exitPayOS
     } = usePayOS({
-        RETURN_URL: `http://localhost:5173/payment-success`,
+        RETURN_URL: `${getFrontEndUrl()}/payment-success`,
         ELEMENT_ID: 'payos-container',
         CHECKOUT_URL: paymentLink,
         onExit: () => {
@@ -123,7 +124,7 @@ function SubscriptionPage() {
     const handlePaymentButton = () => {
         const amount = isYearly ? premiumYearlyPrice : premiumMonthlyPrice;
         const description = isYearly ? 'Premium - 1 Nam' : 'Premium - 1 Thang';
-        const returnUrl = `http://localhost:5173/payment-success`;
+        const returnUrl = `${getFrontEndUrl()}/payment-success`;
         const paymentInfo = {amount, description, returnUrl};
 
         if (!isAuthenticated) {
