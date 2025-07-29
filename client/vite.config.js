@@ -9,13 +9,13 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
   server: {
-    proxy: {
-      '/api/v1': {
-        target: isProduction ? 'https://ezquit.site' : 'http://localhost:3000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/v1/, '')
-      }
-    }
+    // proxy: {
+    //   '/api/v1': {
+    //     target: isProduction ? 'https://ezquit.site' : 'http://localhost:3000',
+    //     changeOrigin: true,
+    //     rewrite: (path) => path.replace(/^\/api\/v1/, '')
+    //   }
+    // }
   },
   plugins: [
     react()

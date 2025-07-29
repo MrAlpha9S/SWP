@@ -15,7 +15,7 @@ import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import {usePayOS} from "@payos/payos-checkout";
 import axios from "axios";
 import {queryClient} from "../../main.jsx";
-import {getFrontEndUrl} from "../../components/utils/getBackendURL.js";
+import {getBackendUrl, getFrontEndUrl} from "../../components/utils/getBackendURL.js";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -81,7 +81,7 @@ function SubscriptionPage() {
 
     const paymentMutation = useMutation({
         mutationFn: async (paymentInfo) => {
-            const res = await axios.post('/api/v1/payment/create-order', paymentInfo);
+            const res = await axios.post(`${getBackendUrl()}/payment/create-order`, paymentInfo);
             return res.data;
         },
         onSuccess: (data) => {

@@ -350,6 +350,7 @@ apiRouter.use('/check-in', checkInRouter);
 apiRouter.use('/social-posts', socialPostRouter);
 apiRouter.use('/messager', messageRouter);
 apiRouter.use('/subscription', subscriptionRouter);
+apiRouter.use('/payment', paymentRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/coaches', coachRouter);
 apiRouter.use('/achievements', achievementRouter);
@@ -357,7 +358,7 @@ apiRouter.use('/reports', reportRouter);
 apiRouter.use('/notifications', notificationRouter);
 
 app.use('/api', apiRouter);
-app.use('/payment', paymentRouter)
+//app.use('/payment', paymentRouter)
 
 
 
