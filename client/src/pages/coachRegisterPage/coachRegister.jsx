@@ -26,6 +26,8 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {useUserInfoStore} from "../../stores/store.js";
+import { registerCoach } from "../../components/utils/adminUtils";
+import { useAuth0 } from '@auth0/auth0-react';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -36,6 +38,7 @@ function CoachRegistration() {
     const [experiences, setExperiences] = useState([]);
     const [certificates, setCertificates] = useState([]);
     const {userInfo} = useUserInfoStore()
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
     useEffect(() => {
         if (userInfo?.username) {
@@ -116,20 +119,35 @@ function CoachRegistration() {
         setCertificates(certificates.filter(cert => cert.id !== id));
     };
 
-    const onFinish = () => {
-        const values = form.getFieldsValue(true); // `true` gets all fields regardless of visibility
-
+    const onFinish = async () => {
+    try {
+        const values = form.getFieldsValue(true);
         const formData = {
-            ...values,
-            experiences: experiences,
-            certificates: certificates,
-            cccdIssuedDate: values.cccdIssuedDate?.format('YYYY-MM-DD'),
+            name: values.name,
             birthdate: values.birthdate?.format('YYYY-MM-DD'),
+            sex: values.sex,
+            cccd: values.cccd,
+            cccdIssuedDate: values.cccdIssuedDate?.format('YYYY-MM-DD'),
+            address: values.address,
+            experiences: experiences,
+            motto: values.motto,
+            selfIntroduction: values.selfIntroduction,
+            certificates: certificates
         };
 
-        console.log('Form Data:', formData);
-        message.success('Đăng ký thành công!');
-    };
+        const token = await getAccessTokenSilently();
+        const result = await registerCoach(formData, token);
+        
+        if (result.success) {
+            message.success('Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.');
+        } else {
+            message.error(result.message || 'Đăng ký thất bại');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        message.error('Có lỗi xảy ra khi gửi đăng ký');
+    }
+};
 
 
     const nextStep = () => {

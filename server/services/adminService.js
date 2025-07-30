@@ -768,6 +768,209 @@ const rejectCoach = async (id) => {
   return result.rowsAffected[0] > 0;
 };
 
+async function registerCoach(coachData) {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+
+    try {
+        console.log('Starting coach registration with data:', coachData);
+        await transaction.begin();
+
+        const { auth0Id, personalInfo, experiences, motto, selfIntroduction, certificates } = coachData;
+
+        // 1. Tìm user_id từ auth0_id
+        const userResult = await transaction.request()
+            .input('auth0Id', sql.NVarChar, auth0Id)
+            .query('SELECT user_id, role, is_pending_for_coach FROM users WHERE auth0_id = @auth0Id');
+
+        console.log('User query result:', userResult.recordset);
+
+        if (userResult.recordset.length === 0) {
+            await transaction.rollback();
+            return {
+                success: false,
+                message: 'Không tìm thấy người dùng'
+            };
+        }
+
+        const user = userResult.recordset[0];
+        const userId = user.user_id;
+
+        console.log('User found:', user);
+
+        // Kiểm tra xem đã là coach hoặc admin chưa
+        if (user.role === 'Coach') {
+            await transaction.rollback();
+            return {
+                success: false,
+                message: 'Bạn đã là huấn luyện viên rồi'
+            };
+        }
+
+        if (user.role === 'Admin') {
+            await transaction.rollback();
+            return {
+                success: false,
+                message: 'Admin không thể đăng ký làm coach'
+            };
+        }
+
+        if (user.is_pending_for_coach === true) {
+            await transaction.rollback();
+            return {
+                success: false,
+                message: 'Hồ sơ đăng ký của bạn đang chờ được duyệt'
+            };
+        }
+
+        console.log('User validation passed, updating is_pending_for_coach...');
+
+        // 2. Cập nhật is_pending_for_coach = true trong bảng users
+        await transaction.request()
+            .input('userId', sql.Int, userId)
+            .query('UPDATE users SET is_pending_for_coach = 1 WHERE user_id = @userId');
+
+        console.log('Updated is_pending_for_coach successfully');
+
+        // 3. Thêm/cập nhật thông tin vào coach_info
+        // Kiểm tra xem đã có record trong coach_info chưa
+        const coachInfoCheck = await transaction.request()
+            .input('userId', sql.Int, userId)
+            .query('SELECT coach_id FROM coach_info WHERE coach_id = @userId');
+
+        console.log('Coach info check result:', coachInfoCheck.recordset);
+
+        // Tính years_of_exp dựa trên experiences (có thể customize logic này)
+        const yearsOfExp = experiences.length > 0 ? Math.max(...experiences.map(exp => 
+            exp.type === 'specialty' ? 2 : 1
+        ), 1) : 1;
+
+        console.log('Years of experience calculated:', yearsOfExp);
+
+        // Map giá trị sex từ form sang database
+        const sexMapping = {
+            'male': 'Nam',
+            'female': 'Nữ',
+            'other': 'Khác'
+        };
+        const dbSex = sexMapping[personalInfo.sex] || personalInfo.sex;
+
+        if (coachInfoCheck.recordset.length > 0) {
+            console.log('Updating existing coach_info record...');
+            // Update existing record
+            await transaction.request()
+                .input('coachId', sql.Int, userId)
+                .input('yearsOfExp', sql.Int, yearsOfExp)
+                .input('bio', sql.NVarChar, selfIntroduction)
+                .input('detailedBio', sql.NVarChar, selfIntroduction)
+                .input('motto', sql.NVarChar, motto)
+                .input('dateOfBirth', sql.DateTime, personalInfo.birthdate ? new Date(personalInfo.birthdate) : null)
+                .input('sex', sql.NVarChar, dbSex)
+                .input('cccd', sql.VarChar, personalInfo.cccd)
+                .input('cccdIssuedDate', sql.DateTime, personalInfo.cccdIssuedDate ? new Date(personalInfo.cccdIssuedDate) : null)
+                .input('address', sql.NVarChar, personalInfo.address)
+                .query(`
+                    UPDATE coach_info 
+                    SET years_of_exp = @yearsOfExp,
+                        bio = @bio,
+                        detailed_bio = @detailedBio,
+                        motto = @motto,
+                        date_of_birth = @dateOfBirth,
+                        sex = @sex,
+                        cccd = @cccd,
+                        cccd_issued_date = @cccdIssuedDate,
+                        address = @address
+                    WHERE coach_id = @coachId
+                `);
+        } else {
+            console.log('Inserting new coach_info record...');
+            // Insert new record
+            await transaction.request()
+                .input('coachId', sql.Int, userId)
+                .input('yearsOfExp', sql.Int, yearsOfExp)
+                .input('bio', sql.NVarChar, selfIntroduction)
+                .input('detailedBio', sql.NVarChar, selfIntroduction)
+                .input('motto', sql.NVarChar, motto)
+                .input('dateOfBirth', sql.DateTime, personalInfo.birthdate ? new Date(personalInfo.birthdate) : null)
+                .input('sex', sql.NVarChar, dbSex)
+                .input('cccd', sql.VarChar, personalInfo.cccd)
+                .input('cccdIssuedDate', sql.DateTime, personalInfo.cccdIssuedDate ? new Date(personalInfo.cccdIssuedDate) : null)
+                .input('address', sql.NVarChar, personalInfo.address)
+                .query(`
+                    INSERT INTO coach_info (
+                        coach_id, years_of_exp, bio, detailed_bio, motto,
+                        date_of_birth, sex, cccd, cccd_issued_date, address
+                    ) VALUES (
+                        @coachId, @yearsOfExp, @bio, @detailedBio, @motto,
+                        @dateOfBirth, @sex, @cccd, @cccdIssuedDate, @address
+                    )
+                `);
+        }
+
+        console.log('Coach info updated successfully');
+
+        await transaction.commit();
+        console.log('Transaction committed successfully');
+
+        return {
+            success: true,
+            message: 'Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.',
+            data: {
+                userId,
+                status: 'pending_approval'
+            }
+        };
+
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Error in registerCoach service:', error);
+        return {
+            success: false,
+            message: 'Lỗi khi xử lý đăng ký coach'
+        };
+    }
+}
+
+// Hàm hỗ trợ lấy thông tin coach đăng ký
+async function getCoachRegistrationInfo(auth0Id) {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('auth0Id', sql.NVarChar, auth0Id)
+            .query(`
+                SELECT u.user_id, u.username, u.email, u.is_pending_for_coach, u.role,
+                       ci.bio, ci.detailed_bio, ci.motto, ci.years_of_exp,
+                       ci.date_of_birth, ci.sex, ci.cccd, ci.cccd_issued_date, ci.address
+                FROM users u
+                LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
+                WHERE u.auth0_id = @auth0Id
+            `);
+
+        if (result.recordset.length === 0) {
+            return { success: false, message: 'Không tìm thấy người dùng' };
+        }
+
+        const user = result.recordset[0];
+        return {
+            success: true,
+            data: {
+                ...user,
+                personal_info: {
+                    name: user.username,
+                    birthdate: user.date_of_birth ? user.date_of_birth.toISOString().split('T')[0] : null,
+                    sex: user.sex,
+                    cccd: user.cccd,
+                    cccdIssuedDate: user.cccd_issued_date ? user.cccd_issued_date.toISOString().split('T')[0] : null,
+                    address: user.address
+                }
+            }
+        };
+    } catch (error) {
+        console.error('Error in getCoachRegistrationInfo:', error);
+        return { success: false, message: 'Lỗi khi lấy thông tin coach' };
+    }
+}
+
 
 module.exports = {
   approveBlog,
@@ -815,4 +1018,6 @@ module.exports = {
   getPendingCoaches,
   approveCoach,
   rejectCoach,
+  registerCoach,
+  getCoachRegistrationInfo,
 };
