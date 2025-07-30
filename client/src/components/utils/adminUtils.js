@@ -402,7 +402,7 @@ export async function getAllAchievements(token) {
   }).then(res => res.json());
 }
 export async function getCoachUserByCoachId(coach_id, token) {
-  const res = await fetch(`http://localhost:3000/admin/coach-user/${coach_id}`, {
+  const res = await fetch(`${getBackendUrl()}/admin/coach-user/${coach_id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy user liên kết coach');
@@ -420,7 +420,7 @@ export async function getRevenueDataset(token, month, year) {
 }
 
 export async function getPendingCoaches(token) {
-  const res = await fetch('http://localhost:3000/admin/coaches/pending', {
+  const res = await fetch(`${getBackendUrl()}/admin/coaches/pending`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy danh sách coach chờ duyệt');
@@ -428,7 +428,7 @@ export async function getPendingCoaches(token) {
 }
 
 export async function approveCoach(id, token) {
-  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/approve`, {
+  const res = await fetch(`${getBackendUrl()}/admin/coaches/${id}/approve`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -437,7 +437,7 @@ export async function approveCoach(id, token) {
 }
 
 export async function rejectCoach(id, token) {
-  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/reject`, {
+  const res = await fetch(`${getBackendUrl()}/admin/coaches/${id}/reject`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -446,7 +446,7 @@ export async function rejectCoach(id, token) {
 }
 
 export async function getCommentsByPostId(postId, token) {
-  const res = await fetch(`http://localhost:3000/admin/comments/post/${postId}`, {
+  const res = await fetch(`${getBackendUrl()}/admin/comments/post/${postId}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`
