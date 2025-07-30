@@ -173,4 +173,42 @@ export const quotes = [
     { content: 'Cuộc sống quá ngắn ngủi để lãng phí cho những thói quen hủy hoại sức khỏe.', author: 'Steve Jobs' },
 ];
 
+export const milestones = [
+    {
+        label: '24 giờ đến vài ngày sau khi cai thuốc',
+        description: 'Nồng độ nicotine trong máu giảm xuống 0. Mức carbon monoxide trong máu trở lại bình thường.',
+        hours: 24,
+    },
+    {
+        label: '1 đến 12 tháng sau khi cai thuốc',
+        description: 'Ho và khó thở giảm dần.',
+        hours: 24 * 30, // ~1 tháng
+    },
+    {
+        label: '1 đến 2 năm sau khi cai thuốc',
+        description: 'Nguy cơ bị đau tim giảm rõ rệt.',
+        hours: 24 * 365, // ~1 năm
+    },
+    {
+        label: '5 đến 10 năm sau khi cai thuốc',
+        description: 'Nguy cơ mắc ung thư miệng, họng và thanh quản giảm một nửa. Nguy cơ đột quỵ cũng giảm.',
+        hours: 24 * 365 * 5,
+    },
+    {
+        label: '10 năm sau khi cai thuốc',
+        description: 'Nguy cơ mắc ung thư phổi giảm còn khoảng một nửa so với người hút thuốc. Nguy cơ mắc ung thư bàng quang, thực quản và thận cũng giảm.',
+        hours: 24 * 365 * 10,
+    },
+    {
+        label: '15 năm sau khi cai thuốc',
+        description: 'Nguy cơ mắc bệnh tim mạch gần bằng với người chưa từng hút thuốc.',
+        hours: 24 * 365 * 15,
+    },
+    {
+        label: '20 năm sau khi cai thuốc',
+        description: 'Nguy cơ mắc nhiều loại ung thư (miệng, họng, thanh quản, tụy) gần như tương đương với người không hút thuốc. Nguy cơ ung thư cổ tử cung giảm một nửa.',
+        hours: 24 * 365 * 20,
+    },
+];
+
 

@@ -1,7 +1,7 @@
 const {
     postCheckIn,
     getCheckInLogDataset,
-    getCheckInDataService
+    getCheckInDataService, alreadyCheckedIn, updateCheckIn
 } = require("../services/checkInService");
 const {processAchievementsWithNotifications} = require("../services/achievementService");
 
@@ -18,19 +18,36 @@ const handlePostCheckIn = async (req, res) => {
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required', data: null});
 
     try {
-        const result = await postCheckIn(userAuth0Id,
-            feel,
-            checkedQuitItems,
-            cigsSmoked,
-            freeText,
-            qna, checkInDate);
+        const isAlreadyCheckedIn = await alreadyCheckedIn(userAuth0Id, checkInDate);
 
-        if (!result) {
-            return res.status(404).json({success: false, message: 'Check-in data insert failed', data: null});
+        if (!isAlreadyCheckedIn) {
+            const result = await postCheckIn(userAuth0Id,
+                feel,
+                checkedQuitItems,
+                cigsSmoked,
+                freeText,
+                qna, checkInDate);
+
+            if (!result) {
+                return res.status(404).json({success: false, message: 'Check-in data insert failed', data: null});
+            } else {
+                await processAchievementsWithNotifications(userAuth0Id);
+                return res.status(200).json({success: true, message: 'Check-in data insert successful', data: result});
+            }
         } else {
-            await processAchievementsWithNotifications(userAuth0Id);
-            return res.status(200).json({success: true, message: 'Check-in data insert successful', data: result});
+            const result = await updateCheckIn(userAuth0Id,
+                feel,
+                checkedQuitItems,
+                cigsSmoked,
+                freeText,
+                qna, checkInDate)
+            if (!result) {
+                return res.status(404).json({success: false, message: 'Check-in data update failed', data: null});
+            } else {
+                return res.status(200).json({success: true, message: 'Check-in data update successful', data: result});
+            }
         }
+
     } catch (err) {
         console.error('handlePostCheckIn error:', err);
         return res.status(500).json({success: false, message: 'Internal server error: ' + err.message, data: null});
