@@ -943,7 +943,7 @@ BEGIN
   -- Grant "new-member" achievement to all new users
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT i.user_id, 'new-member', GETDATE()
+  SELECT i.user_id, 'new-member', DATEADD(HOUR, 7, GETDATE())
   FROM inserted i
   WHERE NOT EXISTS (
         SELECT 1
