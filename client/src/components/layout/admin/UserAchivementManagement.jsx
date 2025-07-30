@@ -64,29 +64,28 @@ const UserAchievementManagement = () => {
       key: 'achieved_at',
       render: (text) => text ? dayjs(text).format('DD/MM/YYYY HH:mm') : '',
     },
-    {
-      title: 'Hành động',
-      key: 'action',
-      render: (_, record) => (
-        <Popconfirm
-          title="Xóa thành tựu này?"
-          onConfirm={() => handleDelete(record.user_id, record.achievement_id)}
-          okText="Xóa"
-          cancelText="Hủy"
-        >
-          <Button icon={<DeleteOutlined />} danger />
-        </Popconfirm>
-      ),
-    },
+    // {
+    //   title: 'Hành động',
+    //   key: 'action',
+    //   render: (_, record) => (
+    //     <Popconfirm
+    //       title="Xóa thành tựu này?"
+    //       onConfirm={() => handleDelete(record.user_id, record.achievement_id)}
+    //       okText="Xóa"
+    //       cancelText="Hủy"
+    //     >
+    //       <Button icon={<DeleteOutlined />} danger />
+    //     </Popconfirm>
+    //   ),
+    // },
   ];
 
   return (
     <div className="w-full bg-white rounded-lg shadow p-4">
       <h2 className="text-xl font-bold mb-4">Quản lý Huy hiệu</h2>
-      {/* Nếu muốn chỉ read thì ẩn nút này */}
-      <Button type="primary" className="mb-4" onClick={() => setIsModalOpen(true)}>
+      {/* <Button type="primary" className="mb-4" onClick={() => setIsModalOpen(true)}>
         Thêm thành tựu cho user
-      </Button>
+      </Button> */}
       <Table
         dataSource={data}
         columns={columns}
