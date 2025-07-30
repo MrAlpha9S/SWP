@@ -10,6 +10,7 @@ const socket = require('./utils/socket');
 const {initializeApp} = require("firebase-admin/app");
 const path = require('path');
 const admin = require('firebase-admin');
+require('./utils/checkExpiry')
 
 const firebaseApp = admin.initializeApp({
     credential: admin.credential.cert({
@@ -38,6 +39,7 @@ const reportRouter = require("./routes/reportRoute")
 const {scheduleUserPushes} = require("./utils/pushScheduler");
 const adminRouter = require("./routes/adminRoutes");
 const notificationRouter = require("./routes/notificationRoute");
+const {checkExpiry} = require("./utils/checkExpiry");
 
 
 const server = http.createServer(app);

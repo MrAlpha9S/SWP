@@ -61,8 +61,9 @@ export function formatUtcToLocalString(utcString) {
     const year = pad(date.getUTCFullYear() % 100);
     const hours = pad(date.getUTCHours());
     const minutes = pad(date.getUTCMinutes());
+    const seconds = pad(date.getUTCSeconds());
 
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
+    return `${day}-${month}-${year}, ${hours}:${minutes}:${seconds}`;
 }
 
 export const formatDate = (ms) => {

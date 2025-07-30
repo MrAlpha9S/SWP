@@ -6,8 +6,8 @@ import {
     useUserInfoStore
 } from "../../stores/store.js";
 import {saveProfileToLocalStorage} from "../../components/utils/profileUtils.js";
-import {useMutation} from "@tanstack/react-query";
-import {updateUserSubscription} from "../../components/utils/userUtils.js";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {getCoachByIdOrAuth0Id, updateUserSubscription} from "../../components/utils/userUtils.js";
 import {Modal} from "antd";
 import {useNavigate, useParams} from "react-router-dom";
 import CongratulationPage from "./CongratulationPage.jsx";
@@ -106,6 +106,14 @@ function SubscriptionPage() {
             console.error("Mutation failed:", error);
         }
     });
+
+    const {isPending : hasCoachPending, data : hasCoachData} = useQuery({
+        queryKey: ['has-coach'],
+        queryFn: async () => {
+            return await getCoachByIdOrAuth0Id(user.sub)
+        },
+        enabled: !!isAuthenticated
+    })
 
     const handleSignUpButton = () => {
         if (from) {
@@ -413,7 +421,7 @@ function SubscriptionPage() {
                     footer={null}
                     maskClosable={false}
                 >
-                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from}/>}
+                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from} hasCoach={hasCoachData?.success}/>}
                 </Modal>
 
             </div>

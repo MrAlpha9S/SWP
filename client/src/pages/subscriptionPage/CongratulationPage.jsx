@@ -1,7 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import {useCurrentStepStore} from "../../stores/store.js";
 
-const CongratulationPage = ({subscriptionData, from}) => {
+const CongratulationPage = ({subscriptionData, from, hasCoach}) => {
     const {setCurrentStep} = useCurrentStepStore()
     const navigate = useNavigate();
     const formatDate = (dateString) => {
@@ -99,36 +99,45 @@ const CongratulationPage = ({subscriptionData, from}) => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-                    <button
-                        onClick={() => {
-                            if (from === 'onboarding-step-5-payment') {
-                                setCurrentStep(5)
-                                navigate('/coach-selection/onboarding-step-5-payment')
-                            } else if (from === 'coach-dashboard') {
-                                navigate('/coach-selection')
-                            }
-                            else if (!from) {
-                                navigate('/coach-selection')
+                    {!hasCoach && <>
+                        <button
+                            onClick={() => {
+                                if (from === 'onboarding-step-5-payment') {
+                                    setCurrentStep(5)
+                                    navigate('/coach-selection/onboarding-step-5-payment')
+                                } else if (from === 'coach-dashboard') {
+                                    navigate('/coach-selection')
+                                } else if (!from) {
+                                    navigate('/coach-selection')
 
+                                }
+                            }}
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
+                            Chọn HLV
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (from === 'onboarding-step-5-payment') {
+                                    setCurrentStep(5)
+                                }
+                                navigate('/onboarding/onboarding-step-5-payment')
                             }
-                        }}
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
-                        Chọn HLV
-                    </button>
-                    <button
-                        onClick={() => {
-                            if (from === 'onboarding-step-5-payment') {
-                                setCurrentStep(5)
                             }
-                            navigate('/onboarding/onboarding-step-5-payment')
-                        }
-                        }
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
-                        {from === 'onboarding-step-5-payment' ? 'Tiếp tục lên kế hoạch' : 'Bắt đầu lên kế hoạch'}
-                    </button>
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
+                            {from === 'onboarding-step-5-payment' ? 'Tiếp tục lên kế hoạch' : 'Bắt đầu lên kế hoạch'}
+                        </button>
+                    </>}
                     {/*<button className="bg-white text-gray-700 px-8 py-3 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transform hover:scale-105 transition-all duration-200">*/}
                     {/*    Xem bảng điều khiển*/}
                     {/*</button>*/}
+                    {hasCoach && <button
+                        onClick={() => {
+                            navigate('/dashboard')
+                        }
+                        }
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">
+                        Tiếp tục đến Bảng điều khiển
+                    </button>}
                 </div>
 
                 <div className="mt-8 text-center animate-slide-up">

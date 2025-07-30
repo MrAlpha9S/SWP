@@ -51,6 +51,7 @@ import {messaging} from '../notifications/firebase.js'
 import {updateUserToken} from "./components/utils/userUtils.js";
 import Settings from "./pages/profilePage/settings.jsx";
 import AdminDashboard from './pages/adminPage/adminDashboard.jsx';
+import {formatDate, getCurrentUTCDateTime} from "./components/utils/dateUtils.js";
 
 const Context = createContext({name: 'Default'});
 
@@ -326,6 +327,32 @@ function AppContent() {
     }, [isAuthenticated, getAccessTokenSilently, initSocket, user, userData, openNotification, navigate, setCurrentStepDashboard, setSelectedUserAuth0Id]);
 
     const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
+
+    useEffect(() => {
+        if (userData) {
+            if (userData.userInfo) {
+                if (userData.userInfo.vip_end_date) {
+                    const vipEndDate = new Date(userData.userInfo.vip_end_date)
+                    const today = getCurrentUTCDateTime()
+                    const numOfDaysInMs = 7 * 24 * 60 * 60 * 1000 // 7  days
+                    const diffInMs = vipEndDate - today;
+                    if (diffInMs > 0 && diffInMs <= numOfDaysInMs) {
+                        const onClick = () => {
+                            navigate('/profile')
+                        }
+                        const dateObj = formatDate(diffInMs)
+                        openNotification('notice', {
+                            message: <strong>Gói đăng ký của bạn sắp hết hạn!</strong>,
+                            content: <div>
+                                <p>Còn {dateObj.days} ngày {dateObj.hours} giờ {dateObj.minutes} phút nữa.</p>
+                                <p>Nhấn vào đây để xem chi tiết</p>
+                            </div>
+                        }, onClick)
+                    }
+                }
+            }
+        }
+    }, [userData])
 
     return (
         <Context.Provider value={contextValue}>
