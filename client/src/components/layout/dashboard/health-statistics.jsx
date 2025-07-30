@@ -37,16 +37,16 @@ const HealthStatistics = ({achievementProgress, checkInDataset}) => {
     }, [timeDiff]);
 
     useEffect(() => {
-        if (checkInDataset && achievementProgress && timeDiff && timeDiffObj) {
+        if (checkInDataset && achievementProgress) {
             setShouldRender(true);
         }
-    }, [achievementProgress, checkInDataset, timeDiff, timeDiffObj]);
+    }, [achievementProgress, checkInDataset]);
 
     if (!shouldRender) return <div className='loader'></div>;
 
     return (
         <div className="w-full mx-auto space-y-6">
-            <p><strong>Bạn đã bỏ thuốc được: {timeDiffObj?.days} ngày {timeDiffObj?.hours} giờ {timeDiffObj?.minutes} phút</strong></p>
+            <p><strong>Bạn đã bỏ thuốc được: {timeDiffObj?.days ? timeDiffObj?.days : '0'} ngày {timeDiffObj?.hours ? timeDiffObj?.hours : '0'} giờ {timeDiffObj?.minutes ? timeDiffObj?.minutes : '0'} phút</strong></p>
             <List
                 header={<p className="font-semibold text-lg">Các mốc cải thiện sức khỏe của bạn</p>}
                 dataSource={milestones}
