@@ -83,8 +83,8 @@ const TopicManagement = () => {
     setEditingTopic(topic);
     setModalVisible(true);
     form.setFieldsValue({
-      name: topic.name,
-      description: topic.description,
+      name: topic.topic_name,
+      description: topic.topic_content,
     });
   };
 
@@ -130,7 +130,7 @@ const TopicManagement = () => {
       key: 'action',
       width: 120,
       render: (_, record) => (
-        <div style={{display:'flex', gap:8}}>
+        <div style={{ display: 'flex', gap: 8 }}>
           <Button icon={<EyeOutlined />} size="small" onClick={() => handleViewTopic(record)} />
           <Button icon={<EditOutlined />} size="small" onClick={() => openEditModal(record)} />
           <Popconfirm
@@ -167,18 +167,18 @@ const TopicManagement = () => {
         open={isViewModalOpen}
         onCancel={() => setIsViewModalOpen(false)}
         footer={null}
-        bodyStyle={{padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002'}}
-        style={{borderRadius: 24, overflow: 'hidden', backdropFilter: 'blur(2px)'}}
+        bodyStyle={{ padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002' }}
+        style={{ borderRadius: 24, overflow: 'hidden', backdropFilter: 'blur(2px)' }}
       >
         {viewingTopic && (
-          <Card bordered={false} style={{margin:0, borderRadius:20, boxShadow:'none', background:'#f7f9fa', minWidth:340}}>
-            <div style={{marginBottom: 18}}>
-              <Tag color="blue" style={{fontSize:15, marginBottom:8, padding:'2px 12px', borderRadius:8}}>Chủ đề</Tag>
-              <div style={{fontWeight:700, fontSize:22, marginBottom:8}}>{viewingTopic.topic_name}</div>
-              <div style={{color:'#888', fontSize:13, marginBottom:8}}>ID: {viewingTopic.topic_id}</div>
-              <Divider style={{margin:'16px 0'}}/>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Mô tả:</b> {viewingTopic.topic_content}</div>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Số bài viết:</b> {viewingTopic.postCount}</div>
+          <Card bordered={false} style={{ margin: 0, borderRadius: 20, boxShadow: 'none', background: '#f7f9fa', minWidth: 340 }}>
+            <div style={{ marginBottom: 18 }}>
+              <Tag color="blue" style={{ fontSize: 15, marginBottom: 8, padding: '2px 12px', borderRadius: 8 }}>Chủ đề</Tag>
+              <div style={{ fontWeight: 700, fontSize: 22, marginBottom: 8 }}>{viewingTopic.topic_name}</div>
+              <div style={{ color: '#888', fontSize: 13, marginBottom: 8 }}>ID: {viewingTopic.topic_id}</div>
+              <Divider style={{ margin: '16px 0' }} />
+              <div style={{ fontSize: 15, marginBottom: 8, color: '#444', background: '#f3f6fa', borderRadius: 8, padding: 10 }}><b>Mô tả:</b> {viewingTopic.topic_content}</div>
+              <div style={{ fontSize: 15, marginBottom: 8, color: '#444', background: '#f3f6fa', borderRadius: 8, padding: 10 }}><b>Số bài viết:</b> {viewingTopic.postCount}</div>
             </div>
           </Card>
         )}

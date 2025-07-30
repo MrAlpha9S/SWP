@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AdminSidebar from '../../components/layout/admin/adminSidebar.jsx';
 import PageFadeWrapper from '../../components/utils/PageFadeWrapper.jsx';
 import UserManagement from '../../components/layout/admin/UserManagement.jsx';
-import CoachManagement from '../../components/layout/admin/CoachManagement.jsx';
+import CoachTabs from '../../components/layout/admin/CoachTabs.jsx';
 import PostManagement from '../../components/layout/admin/postmanage/PostManagement.jsx';
 import CommentManagement from '../../components/layout/admin/CommentManagement.jsx';
 import BlogManagement from '../../components/layout/admin/blogmanage/BlogManagement.jsx';
@@ -17,7 +17,7 @@ import BlogManage from '../../components/layout/admin/blogmanage/blogManageTabs.
 
 const boardMap = {
   user: <UserManagement />,
-  coach: <CoachManagement />,
+  coach: <CoachTabs />,
   reports: <Report />,
   post: <PostManage />,
   comment: <CommentManagement />,

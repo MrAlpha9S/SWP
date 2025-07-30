@@ -128,6 +128,15 @@ const handleDeleteCoach = async (req, res) => {
         return res.status(500).json({success: false, message: 'Failed to delete coach'});
     }
 };
+const handleGetCoachUser = async (req, res) => {
+    const {coach_id} = req.params;
+    try {
+        const users = await adminService.getCoachUserByCoachId(Number(coach_id));
+        return res.status(200).json({success: true, data: users});
+    } catch (error) {
+        return res.status(500).json({success: false, message: 'Failed to fetch user'});
+    }
+};
 
 // --- SOCIAL POST & COMMENT ---
 const handleGetAllPosts = async (req, res) => {
@@ -212,6 +221,17 @@ const handleGetPostLikes = async (req, res) => {
         return res.status(500).json({success: false, message: 'Failed to fetch post likes'});
     }
 };
+const handleGetCommentsByPostId = async (req, res) => {
+    const { postId } = req.params;
+    try {
+      const comments = await adminService.getCommentsByPostId(Number(postId));
+      return res.status(200).json({ success: true, data: comments });
+    } catch (err) {
+      console.error('Error in handleGetCommentsByPostId:', err);
+      return res.status(500).json({ success: false, message: 'Failed to fetch comments' });
+    }
+};
+
 
 // --- BLOG & TOPIC ---
 const handleGetAllBlogs = async (req, res) => {
@@ -313,27 +333,30 @@ const handleCreateTopic = async (req, res) => {
     }
 };
 const handleUpdateTopic = async (req, res) => {
-    const {id} = req.params;
-    const {topic_name, topic_content} = req.body;
-    try {
-        const updated = await adminService.updateTopic(Number(id), topic_name, topic_content);
-        if (!updated) return res.status(404).json({success: false, message: 'Topic not found'});
-        return res.status(200).json({success: true, message: 'Topic updated successfully'});
-    } catch (error) {
-        console.error('Error in handleUpdateTopic:', error);
-        return res.status(500).json({success: false, message: 'Failed to update topic'});
-    }
+  const { id } = req.params;
+  const { topic_name, topic_content } = req.body;
+
+  try {
+    const updated = await adminService.updateTopic(id, topic_name, topic_content); 
+    if (!updated)
+      return res.status(404).json({ success: false, message: 'Topic not found' });
+
+    return res.status(200).json({ success: true, message: 'Topic updated successfully' });
+  } catch (error) {
+    console.error('Error in handleUpdateTopic:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update topic' });
+  }
 };
 const handleDeleteTopic = async (req, res) => {
-    const {id} = req.params;
-    try {
-        const deleted = await adminService.deleteTopic(Number(id));
-        if (!deleted) return res.status(404).json({success: false, message: 'Topic not found'});
-        return res.status(200).json({success: true, message: 'Topic deleted successfully'});
-    } catch (error) {
-        console.error('Error in handleDeleteTopic:', error);
-        return res.status(500).json({success: false, message: 'Failed to delete topic'});
-    }
+  const { id } = req.params;
+  try {
+    const deleted = await adminService.deleteTopic(id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Topic not found' });
+    return res.status(200).json({ success: true, message: 'Topic deleted successfully' });
+  } catch (error) {
+    console.error('Error in handleDeleteTopic:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete topic' });
+  }
 };
 
 // --- SUBSCRIPTION ---
@@ -620,6 +643,44 @@ const handleDeleteUserAchievement = async (req, res) => {
     }
 };
 
+// LẤY DANH SÁCH COACH CHỜ DUYỆT
+const handleGetPendingCoaches = async (req, res) => {
+    try {
+        const coaches = await adminService.getPendingCoaches();
+        return res.status(200).json({success: true, data: coaches});
+    } catch (error) {
+        console.error('Error in handleGetPendingCoaches:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch pending coaches'});
+    }
+};
+
+// DUYỆT COACH
+const handleApproveCoach = async (req, res) => {
+    const {id} = req.params;
+    try {
+        const approved = await adminService.approveCoach(id);
+        if (!approved) return res.status(404).json({success: false, message: 'Coach not found'});
+        return res.status(200).json({success: true, message: 'Coach approved successfully'});
+    } catch (error) {
+        console.error('Error in handleApproveCoach:', error);
+        return res.status(500).json({success: false, message: 'Failed to approve coach'});
+    }
+};
+
+const handleRejectCoach = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const success = await adminService.rejectCoach(userId);
+        if (!success) {
+            return res.status(404).json({success: false, message: 'Không tìm thấy coach hoặc đã từ chối rồi'});
+        }
+        return res.status(200).json({success: true, message: 'Từ chối coach thành công'});
+    } catch (error) {
+        console.error('Lỗi rejectCoach:', error);
+        return res.status(500).json({success: false, message: 'Lỗi server khi từ chối coach'});
+    }
+};
+
 module.exports = {
     // User
     handleGetAllUsers,
@@ -633,6 +694,8 @@ module.exports = {
     handleGetCoachById,
     handleUpdateCoach,
     handleDeleteCoach,
+    handleGetCoachUser,
+    handleRejectCoach,
     // Social Post & Comment
     handleGetAllPosts,
     handleCreatePost,
@@ -642,6 +705,7 @@ module.exports = {
     handleGetAllComments,
     handleDeleteComment,
     handleGetPostLikes,
+    handleGetCommentsByPostId,
     // Blog & Topic
     handleApproveBlog,
     handleGetIsPendingBlogs,
@@ -671,5 +735,8 @@ module.exports = {
     // User Achievements
     handleGetAllUserAchievements,
     handleCreateUserAchievement,
-    handleDeleteUserAchievement
+    handleDeleteUserAchievement,
+  // Coach Pending
+  handleGetPendingCoaches,
+  handleApproveCoach
 };

@@ -203,6 +203,18 @@ async function getCoachDetailsById(id) {
   `);
   return result.recordset[0];
 }
+async function getCoachUserByCoachId(coach_id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('coach_id', sql.Int, coach_id)
+    .query(`
+      SELECT cu.user_id, u.username, u.email, u.role, u.avatar, cu.started_date
+      FROM coach_user cu
+      LEFT JOIN users u ON cu.user_id = u.user_id
+      WHERE cu.coach_id = @coach_id
+    `);
+  return result.recordset;
+}
 
 // POST
 async function getAllPosts() {
@@ -382,6 +394,30 @@ async function deleteCommentById(id) {
   }
 }
 
+async function getCommentsByPostId(postId) {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('postId', sql.Int, postId)
+      .query(`
+        SELECT 
+          scmt.comment_id,
+          scmt.content,
+          scmt.created_at,
+          u.username,
+          u.avatar
+        FROM social_comments scmt
+        LEFT JOIN users u ON scmt.user_id = u.user_id
+        WHERE scmt.post_id = @postId
+        ORDER BY scmt.created_at DESC
+      `);
+    return result.recordset;
+  } catch (err) {
+    console.error('Error in getCommentsByPostId:', err);
+    throw err;
+  }
+}
+
 // BLOG
 async function getAllBlogs() {
   const pool = await poolPromise;
@@ -456,17 +492,21 @@ async function createTopic(topic_id, topic_name, topic_content) {
 async function updateTopic(id, topic_name, topic_content) {
   const pool = await poolPromise;
   const result = await pool.request()
-    .input('id', sql.Int, id)
+    .input('id', sql.NVarChar, id)  
     .input('topic_name', sql.NVarChar, topic_name)
     .input('topic_content', sql.NVarChar, topic_content)
     .query('UPDATE Topics SET topic_name = @topic_name, topic_content = @topic_content WHERE topic_id = @id');
+
   return result.rowsAffected[0] > 0;
 }
 async function deleteTopic(id) {
   const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query('DELETE FROM Topics WHERE topic_id = @id');
+  const result = await pool.request()
+    .input('id', sql.NVarChar, id)
+    .query('DELETE FROM Topics WHERE topic_id = @id');
   return result.rowsAffected[0] > 0;
 }
+
 
 // SUBSCRIPTION
 async function getAllSubscriptions() {
@@ -533,14 +573,34 @@ async function getAllUserSubscriptions() {
   return result.recordset;
 }
 async function createUserSubscription(data) {
-  const pool = await poolPromise;
-  const req = pool.request();
-  req.input('user_id', sql.Int, data.user_id);
-  req.input('sub_id', sql.Int, data.sub_id);
-  req.input('purchased_date', sql.DateTime, data.purchased_date);
-  req.input('end_date', sql.DateTime, data.end_date);
-  const result = await req.query('INSERT INTO users_subscriptions (user_id, sub_id, purchased_date, end_date) VALUES (@user_id, @sub_id, @purchased_date, @end_date)');
-  return result.rowsAffected[0] > 0;
+  try {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Insert vào users_subscriptions (KHÔNG có end_date)
+    const req = transaction.request();
+    req.input('user_id', sql.Int, data.user_id);
+    req.input('sub_id', sql.Int, data.sub_id);
+    req.input('purchased_date', sql.DateTime, data.purchased_date);
+
+    const insertResult = await req.query(
+      'INSERT INTO users_subscriptions (user_id, sub_id, purchased_date) VALUES (@user_id, @sub_id, @purchased_date)'
+    );
+
+    // Update vip_end_date và sub_id ở bảng users
+    const updateResult = await transaction.request()
+      .input('user_id', sql.Int, data.user_id)
+      .input('end_date', sql.DateTime, data.end_date) // end_date lấy từ form
+      .input('sub_id', sql.Int, data.sub_id)
+      .query('UPDATE users SET vip_end_date = @end_date, sub_id = @sub_id WHERE user_id = @user_id');
+
+    await transaction.commit();
+    return insertResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+  } catch (err) {
+    console.error('SQL ERROR in createUserSubscription:', err);
+    return false;
+  }
 }
 async function updateUserSubscription(user_id, sub_id, data) {
   const pool = await poolPromise;
@@ -557,9 +617,28 @@ async function updateUserSubscription(user_id, sub_id, data) {
   return result.rowsAffected[0] > 0;
 }
 async function deleteUserSubscription(user_id, sub_id) {
-  const pool = await poolPromise;
-  const result = await pool.request().input('user_id', sql.Int, user_id).input('sub_id', sql.Int, sub_id).query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
-  return result.rowsAffected[0] > 0;
+  try {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Xóa khỏi bảng users_subscriptions
+    const deleteResult = await transaction.request()
+      .input('user_id', sql.Int, user_id)
+      .input('sub_id', sql.Int, sub_id)
+      .query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
+
+    // Reset sub_id và vip_end_date ở bảng users
+    const updateResult = await transaction.request()
+      .input('user_id', sql.Int, user_id)
+      .query('UPDATE users SET sub_id = 1, vip_end_date = NULL WHERE user_id = @user_id');
+
+    await transaction.commit();
+    return deleteResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+  } catch (err) {
+    console.error('SQL ERROR in deleteUserSubscription:', err);
+    return false;
+  }
 }
 
 // STATISTICS
@@ -653,6 +732,43 @@ async function getRevenue() {
   return result.recordset;
 }
 
+async function getPendingCoaches() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT u.*, ci.bio, ci.years_of_exp, ci.detailed_bio, ci.motto
+    FROM users u
+    LEFT JOIN coach_info ci ON u.user_id = ci.coach_id
+    WHERE u.is_pending_for_coach = 1
+  `);
+  return result.recordset;
+}
+
+async function approveCoach(id) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET role = 'Coach',
+          is_pending_for_coach = 0
+      WHERE user_id = @id
+    `);
+  return result.rowsAffected[0] > 0;
+}
+
+const rejectCoach = async (id) => {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id', sql.Int, id)
+    .query(`
+      UPDATE users
+      SET is_pending_for_coach = 0
+      WHERE user_id = @id AND is_pending_for_coach = 1
+    `);
+  return result.rowsAffected[0] > 0;
+};
+
+
 module.exports = {
   approveBlog,
   getAllUsers,
@@ -663,6 +779,7 @@ module.exports = {
   toggleBanUserById,
   getCoaches,
   getCoachDetailsById,
+  getCoachUserByCoachId,
   getAllPosts,
   getPostById,
   createPost,
@@ -694,5 +811,8 @@ module.exports = {
   getAllUserAchievements,
   createUserAchievement,
   deleteUserAchievement,
-  getRevenue
+  getRevenue,
+  getPendingCoaches,
+  approveCoach,
+  rejectCoach,
 };

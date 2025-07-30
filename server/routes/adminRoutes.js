@@ -4,8 +4,8 @@ const checkJwt = require('../middlewares/jwtChecker');
 const adminChecker = require('../middlewares/adminChecker');
 const adminController = require('../controllers/adminController');
 
-// router.use(checkJwt);
-// router.use(adminChecker);
+router.use(checkJwt);
+router.use(adminChecker);
 
 // Route quản lý user
 router.post('/users', adminController.handleCreateUser);
@@ -17,10 +17,14 @@ router.patch('/users/:id/ban', adminController.handleToggleBanUser);
 
 // Route quản lý coach
 router.get('/coaches', adminController.handleGetAllCoaches);
+router.get('/coaches/pending', adminController.handleGetPendingCoaches);
 router.get('/coaches/:id', adminController.handleGetCoachById);
 router.put('/coaches/:id', adminController.handleUpdateCoach);
 router.delete('/coaches/:id', adminController.handleDeleteCoach);
+router.get('/coach-user/:coach_id', adminController.handleGetCoachUser);
 
+router.patch('/coaches/:id/approve', adminController.handleApproveCoach);
+router.patch('/coaches/:id/reject', adminController.handleRejectCoach);
 // Route quản lý social post
 router.get('/posts', adminController.handleGetAllPosts);
 router.post('/posts', adminController.handleCreatePost);
@@ -31,6 +35,8 @@ router.get('/posts/:id/likes', adminController.handleGetPostLikes);
 // Route quản lý comment
 router.get('/comments', adminController.handleGetAllComments);
 router.delete('/comments/:id', adminController.handleDeleteComment);
+router.get('/comments/post/:postId', adminController.handleGetCommentsByPostId);
+
 
 // Route quản lý blog
 router.get('/blogs/pending', adminController.handleGetIsPendingBlogs);

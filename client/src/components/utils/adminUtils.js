@@ -401,6 +401,13 @@ export async function getAllAchievements(token) {
     headers: { Authorization: `Bearer ${token}` }
   }).then(res => res.json());
 }
+export async function getCoachUserByCoachId(coach_id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coach-user/${coach_id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy user liên kết coach');
+  return await res.json();
+}
 
 export async function getRevenueDataset(token, month, year) {
   return fetch(`${getBackendUrl()}/admin/statistics/revenue?month=${month}&year=${year}`, {
@@ -410,4 +417,44 @@ export async function getRevenueDataset(token, month, year) {
       'Content-Type': 'application/json'
     },
   }).then(res => res.json());
+}
+
+export async function getPendingCoaches(token) {
+  const res = await fetch('http://localhost:3000/admin/coaches/pending', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách coach chờ duyệt');
+  return await res.json();
+}
+
+export async function approveCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi duyệt coach');
+  return await res.json();
+}
+
+export async function rejectCoach(id, token) {
+  const res = await fetch(`http://localhost:3000/admin/coaches/${id}/reject`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi từ chối coach');
+  return await res.json();
+}
+
+export async function getCommentsByPostId(postId, token) {
+  const res = await fetch(`http://localhost:3000/admin/comments/post/${postId}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) throw new Error('Lỗi khi lấy comment theo postId');
+
+  const result = await res.json();
+  return result.data; // chỉ trả về mảng comment
 }
