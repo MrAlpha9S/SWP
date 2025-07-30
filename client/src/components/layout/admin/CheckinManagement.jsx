@@ -61,13 +61,13 @@ const CheckinManagement = () => {
     { title: 'Ngày check-in', dataIndex: 'logged_at', key: 'logged_at', render: (text) => text ? new Date(text).toLocaleString() : '', width: 160 },
     { title: 'Cảm xúc', dataIndex: 'feeling', key: 'feeling' },
     { title: 'Số điếu', dataIndex: 'cigs_smoked', key: 'cigs_smoked' },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (text) => text === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành',
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   dataIndex: 'status',
+    //   key: 'status',
+    //   width: 100,
+    //   render: (text) => text === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành',
+    // },
     {
       title: 'Hành động',
       key: 'action',
