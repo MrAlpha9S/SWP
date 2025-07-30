@@ -50,7 +50,7 @@ CREATE TABLE [users_subscriptions]
   [user_id] int,
   [sub_id] int,
   [purchased_date] DATETIME,
-  PRIMARY KEY ([user_id], [sub_id])
+  PRIMARY KEY ([user_id], [sub_id], [purchased_date])
 )
 GO
 
@@ -997,13 +997,14 @@ END
 GO
 
 -- Trigger 1: Create revenue entry when user purchases subscription
-CREATE TRIGGER TR_UserSubscription_Revenue
+CREATE OR ALTER TRIGGER TR_UserSubscription_Revenue
 ON [users_subscriptions]
 AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
+    -- Insert into revenue table
     INSERT INTO [revenue] ([amount], [created_at], [sub_id])
     SELECT 
         s.price,
@@ -1011,8 +1012,26 @@ BEGIN
         i.sub_id
     FROM inserted i
     INNER JOIN [subscriptions] s ON i.sub_id = s.sub_id;
-END;
+
+    -- Insert into coach_revenue if user has a coach
+    INSERT INTO [coach_revenue] ([coach_id], [amount], [created_at], [sub_id])
+    SELECT 
+        cu.coach_id,
+        s.price * ISNULL(ci.commission_rate, 0.3), -- fallback if NULL
+        i.purchased_date,
+        i.sub_id
+    FROM inserted i
+    INNER JOIN [subscriptions] s ON i.sub_id = s.sub_id
+    INNER JOIN [coach_user] cu ON cu.user_id = i.user_id
+        AND cu.started_date = (
+            SELECT MAX(started_date)
+            FROM coach_user
+            WHERE user_id = i.user_id
+        )
+    LEFT JOIN coach_info ci ON ci.coach_id = cu.coach_id;
+END
 GO
+
 
 -- Trigger 2: Create coach revenue entry when coach gets assigned to user
 CREATE TRIGGER TR_CoachUser_CoachRevenue
