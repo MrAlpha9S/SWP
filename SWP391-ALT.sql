@@ -694,7 +694,7 @@ BEGIN
         )
     WHERE user_id = @UserId;
 
-  -- Grant achievements (new-member removed since it's handled by trigger)
+  -- Grant achievements
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
   SELECT @UserId, a.achievement_id, DATEADD(HOUR, 7, GETDATE())
