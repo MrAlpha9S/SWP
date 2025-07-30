@@ -333,27 +333,30 @@ const handleCreateTopic = async (req, res) => {
     }
 };
 const handleUpdateTopic = async (req, res) => {
-    const {id} = req.params;
-    const {topic_name, topic_content} = req.body;
-    try {
-        const updated = await adminService.updateTopic(Number(id), topic_name, topic_content);
-        if (!updated) return res.status(404).json({success: false, message: 'Topic not found'});
-        return res.status(200).json({success: true, message: 'Topic updated successfully'});
-    } catch (error) {
-        console.error('Error in handleUpdateTopic:', error);
-        return res.status(500).json({success: false, message: 'Failed to update topic'});
-    }
+  const { id } = req.params;
+  const { topic_name, topic_content } = req.body;
+
+  try {
+    const updated = await adminService.updateTopic(id, topic_name, topic_content); 
+    if (!updated)
+      return res.status(404).json({ success: false, message: 'Topic not found' });
+
+    return res.status(200).json({ success: true, message: 'Topic updated successfully' });
+  } catch (error) {
+    console.error('Error in handleUpdateTopic:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update topic' });
+  }
 };
 const handleDeleteTopic = async (req, res) => {
-    const {id} = req.params;
-    try {
-        const deleted = await adminService.deleteTopic(Number(id));
-        if (!deleted) return res.status(404).json({success: false, message: 'Topic not found'});
-        return res.status(200).json({success: true, message: 'Topic deleted successfully'});
-    } catch (error) {
-        console.error('Error in handleDeleteTopic:', error);
-        return res.status(500).json({success: false, message: 'Failed to delete topic'});
-    }
+  const { id } = req.params;
+  try {
+    const deleted = await adminService.deleteTopic(id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Topic not found' });
+    return res.status(200).json({ success: true, message: 'Topic deleted successfully' });
+  } catch (error) {
+    console.error('Error in handleDeleteTopic:', error);
+    return res.status(500).json({ success: false, message: 'Failed to delete topic' });
+  }
 };
 
 // --- SUBSCRIPTION ---

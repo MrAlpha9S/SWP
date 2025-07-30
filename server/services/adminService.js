@@ -492,17 +492,21 @@ async function createTopic(topic_id, topic_name, topic_content) {
 async function updateTopic(id, topic_name, topic_content) {
   const pool = await poolPromise;
   const result = await pool.request()
-    .input('id', sql.Int, id)
+    .input('id', sql.NVarChar, id)  
     .input('topic_name', sql.NVarChar, topic_name)
     .input('topic_content', sql.NVarChar, topic_content)
     .query('UPDATE Topics SET topic_name = @topic_name, topic_content = @topic_content WHERE topic_id = @id');
+
   return result.rowsAffected[0] > 0;
 }
 async function deleteTopic(id) {
   const pool = await poolPromise;
-  const result = await pool.request().input('id', sql.Int, id).query('DELETE FROM Topics WHERE topic_id = @id');
+  const result = await pool.request()
+    .input('id', sql.NVarChar, id)
+    .query('DELETE FROM Topics WHERE topic_id = @id');
   return result.rowsAffected[0] > 0;
 }
+
 
 // SUBSCRIPTION
 async function getAllSubscriptions() {
