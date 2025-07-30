@@ -36,14 +36,16 @@ const SubscriptionManagement = () => {
   // Fetch users and plans for select options (giữ nguyên fetch cũ nếu chưa có API admin)
   const fetchUsersAndPlans = async () => {
     try {
+      const token = await getAccessTokenSilently();
       const [userRes, planRes] = await Promise.all([
-        fetch('/api/admin/users'),
-        fetch('/api/admin/plans'),
+        fetch('http://localhost:3000/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('http://localhost:3000/admin/subscriptions', { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       const userData = await userRes.json();
       const planData = await planRes.json();
-      setUsers(userData.users || []);
-      setPlans(planData.plans || []);
+      const filteredUsers = (userData.data || []).filter(u => u.sub_id === 1);
+      setUsers(filteredUsers);
+      setPlans(planData.data || []);
     } catch (err) {
       // ignore
     }
@@ -129,7 +131,7 @@ const SubscriptionManagement = () => {
     { title: 'Gói', key: 'plan', render: (_, r) => r.sub_name },
     { title: 'Ngày bắt đầu', dataIndex: 'purchased_date', key: 'purchased_date', render: t => t ? new Date(t).toLocaleDateString() : '' },
     { title: 'Ngày kết thúc', key: 'vip_end_date', render: r => r.vip_end_date ? new Date(r.vip_end_date).toLocaleDateString() : '' },
-    { title: 'Trạng thái', key: 'status', render: (_, r) => (r.end_date && new Date(r.end_date) > new Date() ? 'Đang hoạt động' : 'Hết hạn') },
+    { title: 'Trạng thái', key: 'status', render: (_, r) => (r.vip_end_date && new Date(r.vip_end_date) > new Date() ? 'Đang hoạt động' : 'Hết hạn') },
     {
       title: 'Hành động',
       key: 'action',
@@ -204,7 +206,7 @@ const SubscriptionManagement = () => {
           >
             <Select showSearch placeholder="Chọn user">
               {users.map((u) => (
-                <Option key={u.id} value={u.id}>{u.username || u.email || u.id}</Option>
+                <Option key={u.user_id} value={u.user_id}>{u.username || u.email || u.user_id}</Option>
               ))}
             </Select>
           </Form.Item>
@@ -215,7 +217,7 @@ const SubscriptionManagement = () => {
           >
             <Select showSearch placeholder="Chọn gói">
               {plans.map((p) => (
-                <Option key={p.id} value={p.id}>{p.name || p.id}</Option>
+                <Option key={p.sub_id} value={p.sub_id}>{p.sub_name || p.sub_id}</Option>
               ))}
             </Select>
           </Form.Item>

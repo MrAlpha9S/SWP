@@ -569,14 +569,34 @@ async function getAllUserSubscriptions() {
   return result.recordset;
 }
 async function createUserSubscription(data) {
-  const pool = await poolPromise;
-  const req = pool.request();
-  req.input('user_id', sql.Int, data.user_id);
-  req.input('sub_id', sql.Int, data.sub_id);
-  req.input('purchased_date', sql.DateTime, data.purchased_date);
-  req.input('end_date', sql.DateTime, data.end_date);
-  const result = await req.query('INSERT INTO users_subscriptions (user_id, sub_id, purchased_date, end_date) VALUES (@user_id, @sub_id, @purchased_date, @end_date)');
-  return result.rowsAffected[0] > 0;
+  try {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Insert vào users_subscriptions (KHÔNG có end_date)
+    const req = transaction.request();
+    req.input('user_id', sql.Int, data.user_id);
+    req.input('sub_id', sql.Int, data.sub_id);
+    req.input('purchased_date', sql.DateTime, data.purchased_date);
+
+    const insertResult = await req.query(
+      'INSERT INTO users_subscriptions (user_id, sub_id, purchased_date) VALUES (@user_id, @sub_id, @purchased_date)'
+    );
+
+    // Update vip_end_date và sub_id ở bảng users
+    const updateResult = await transaction.request()
+      .input('user_id', sql.Int, data.user_id)
+      .input('end_date', sql.DateTime, data.end_date) // end_date lấy từ form
+      .input('sub_id', sql.Int, data.sub_id)
+      .query('UPDATE users SET vip_end_date = @end_date, sub_id = @sub_id WHERE user_id = @user_id');
+
+    await transaction.commit();
+    return insertResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+  } catch (err) {
+    console.error('SQL ERROR in createUserSubscription:', err);
+    return false;
+  }
 }
 async function updateUserSubscription(user_id, sub_id, data) {
   const pool = await poolPromise;
@@ -593,9 +613,28 @@ async function updateUserSubscription(user_id, sub_id, data) {
   return result.rowsAffected[0] > 0;
 }
 async function deleteUserSubscription(user_id, sub_id) {
-  const pool = await poolPromise;
-  const result = await pool.request().input('user_id', sql.Int, user_id).input('sub_id', sql.Int, sub_id).query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
-  return result.rowsAffected[0] > 0;
+  try {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    // Xóa khỏi bảng users_subscriptions
+    const deleteResult = await transaction.request()
+      .input('user_id', sql.Int, user_id)
+      .input('sub_id', sql.Int, sub_id)
+      .query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
+
+    // Reset sub_id và vip_end_date ở bảng users
+    const updateResult = await transaction.request()
+      .input('user_id', sql.Int, user_id)
+      .query('UPDATE users SET sub_id = 1, vip_end_date = NULL WHERE user_id = @user_id');
+
+    await transaction.commit();
+    return deleteResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+  } catch (err) {
+    console.error('SQL ERROR in deleteUserSubscription:', err);
+    return false;
+  }
 }
 
 // STATISTICS

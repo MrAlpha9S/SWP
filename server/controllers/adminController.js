@@ -221,18 +221,16 @@ const handleGetPostLikes = async (req, res) => {
         return res.status(500).json({success: false, message: 'Failed to fetch post likes'});
     }
 };
-async function handleGetCommentsByPostId(postId) {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('postId', sql.Int, postId)
-      .query('SELECT * FROM social_comments WHERE post_id = @postId');
-    return result.recordset;
-  } catch (err) {
-    console.error('Error in getCommentsByPostId:', err);
-    throw err;
-  }
-}
+const handleGetCommentsByPostId = async (req, res) => {
+    const { postId } = req.params;
+    try {
+      const comments = await adminService.getCommentsByPostId(Number(postId));
+      return res.status(200).json({ success: true, data: comments });
+    } catch (err) {
+      console.error('Error in handleGetCommentsByPostId:', err);
+      return res.status(500).json({ success: false, message: 'Failed to fetch comments' });
+    }
+};
 
 
 // --- BLOG & TOPIC ---
@@ -733,8 +731,8 @@ module.exports = {
   // User Achievements
   handleGetAllUserAchievements,
   handleCreateUserAchievement,
-  handleDeleteUserAchievement
-    // Coach Pending
-    handleGetPendingCoaches,
-    handleApproveCoach
+  handleDeleteUserAchievement,
+  // Coach Pending
+  handleGetPendingCoaches,
+  handleApproveCoach
 };

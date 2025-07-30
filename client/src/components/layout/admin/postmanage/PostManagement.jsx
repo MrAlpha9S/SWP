@@ -109,7 +109,7 @@ const PostManagement = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
-        bodyStyle={{padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002'}}
+        styles={{padding: 0, background: 'rgba(247,249,250,0.98)', borderRadius: 24, boxShadow: '0 8px 32px #0002'}}
         style={{borderRadius: 24, overflow: 'hidden', backdropFilter: 'blur(2px)'}}
       >
         {viewingPost ? (
@@ -141,7 +141,7 @@ const PostManagement = () => {
                 </Tooltip>
               ))}
             </Avatar.Group>
-            <Divider style={{margin:'16px 0'}}/>
+            {/* <Divider style={{margin:'16px 0'}}/>
             <div style={{fontWeight:600, marginBottom:8, fontSize:16}}>Comment ({comments.length})</div>
             {comments.length === 0 && <span style={{color:'#888'}}>Chưa có comment</span>}
             <div style={{display:'flex', flexDirection:'column', gap:18}}>
@@ -159,7 +159,7 @@ const PostManagement = () => {
                   </div>
                 </Card>
               ))}
-          </div>
+          </div> */}
           </Card>
         ) : <p style={{padding:32}}>Không có dữ liệu</p>}
       </Modal>
