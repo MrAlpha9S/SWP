@@ -61,13 +61,13 @@ const CheckinManagement = () => {
     { title: 'Ngày check-in', dataIndex: 'logged_at', key: 'logged_at', render: (text) => text ? new Date(text).toLocaleString() : '', width: 160 },
     { title: 'Cảm xúc', dataIndex: 'feeling', key: 'feeling' },
     { title: 'Số điếu', dataIndex: 'cigs_smoked', key: 'cigs_smoked' },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (text) => text === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành',
-    },
+    // {
+    //   title: 'Trạng thái',
+    //   dataIndex: 'status',
+    //   key: 'status',
+    //   width: 100,
+    //   render: (text) => text === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành',
+    // },
     {
       title: 'Hành động',
       key: 'action',
@@ -75,14 +75,14 @@ const CheckinManagement = () => {
       render: (_, record) => (
         <div style={{display:'flex', gap:8}}>
           <Button icon={<EyeOutlined />} size="small" onClick={() => openDetailModal(record)} />
-          <Popconfirm
+          {/* <Popconfirm
             title="Bạn có chắc muốn xóa check-in này?"
             onConfirm={() => handleDelete(record.log_id)}
             okText="Xóa"
             cancelText="Hủy"
           >
             <Button icon={<DeleteOutlined />} size="small" danger />
-          </Popconfirm>
+          </Popconfirm> */}
         </div>
       ),
     },
@@ -121,12 +121,12 @@ const CheckinManagement = () => {
             <Divider className="my-2" />
             <div className="mb-1"><b>ID:</b> {selectedCheckin.log_id}</div>
             <div className="mb-1"><b>Ngày check-in:</b> {selectedCheckin.logged_at ? new Date(selectedCheckin.logged_at).toLocaleString() : ''}</div>
-            <div className="mb-1 flex items-center gap-2">
+            {/* <div className="mb-1 flex items-center gap-2">
               <b>Trạng thái:</b>
               <Tag color={selectedCheckin.status === 'completed' ? 'green' : 'orange'}>
                 {selectedCheckin.status === 'completed' ? 'Hoàn thành' : 'Chưa hoàn thành'}
               </Tag>
-            </div>
+            </div> */}
             <div className="mb-1"><b>Cảm xúc:</b> {selectedCheckin.feeling || '-'}</div>
             <div className="mb-1"><b>Số điếu:</b> {selectedCheckin.cigs_smoked ?? '-'}</div>
             <Divider className="my-2" />
