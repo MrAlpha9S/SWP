@@ -82,7 +82,7 @@ const getUserWithSubscription = async (auth0_id) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('user_id', user_id)
-            .query('SELECT u.user_id, u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, u.time_to_send_push, u.fcm_token, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
+            .query('SELECT u.user_id, u.vip_end_date, u.auth0_id, u.avatar, u.username, u.email, u.role, u.created_at, u.updated_at, s.sub_id, u.isBanned, u.is_social, u.time_to_send_push, u.fcm_token, s.sub_name, s.duration, s.price FROM users u, subscriptions s WHERE u.user_id=@user_id AND u.sub_id = s.sub_id');
         return result.recordset[0];
     } catch (error) {
         console.error('error in getUser', error);
@@ -758,6 +758,20 @@ const leaderboardStatsService = async () => {
     }
 }
 
+const updateUserSub = async (userAuth0Id) => {
+    const userId = await getUserIdFromAuth0Id(userAuth0Id)
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query('UPDATE users SET sub_id = 1 WHERE user_id = @user_id');
+        return result.rowsAffected[0] > 0;
+    } catch (error) {
+        console.error('error in updateUserSub', error);
+        return false;
+    }
+}
+
 module.exports = {
     userExists,
     createUser,
@@ -790,5 +804,6 @@ module.exports = {
     updateUserById,
     deleteUserById,
     toggleBanUserById,
-    leaderboardStatsService
+    leaderboardStatsService,
+    updateUserSub
 };

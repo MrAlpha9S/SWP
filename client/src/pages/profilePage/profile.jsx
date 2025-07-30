@@ -9,6 +9,7 @@ import CreatedAtField from "../../components/layout/profilepage/CreatedAtField.j
 import { FaUser, FaEnvelope, FaUserTag, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCamera, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
+import {formatUtcToLocalString} from "../../components/utils/dateUtils.js";
 
 function Profile() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -50,6 +51,7 @@ function Profile() {
                     created_at: userData?.created_at || "",
                     is_social: userData?.is_social || false,
                     sub_id: userData?.sub_id,
+                    vip_end_date: userData?.vip_end_date || "",
                 };
                 setProfile(loadedProfile);
                 setOriginalProfile(loadedProfile);
@@ -260,6 +262,28 @@ function Profile() {
                                                 : 'Premium 12 tháng'
                                     }
                                 />
+                                <div className='mt-4'>
+                                    <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
+                                        <FaCalendarAlt className="text-primary-400" /> Thời hạn
+                                    </label>
+                                    {originalProfile.sub_id === 1 ? (
+                                        <input
+                                            type="text"
+                                            name="expiry"
+                                            value={'Vô thời hạn'}
+                                            disabled
+                                            className="w-full border rounded px-3 py-2 bg-gray-100"
+                                        />
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            name="expiry"
+                                            value={formatUtcToLocalString(originalProfile.vip_end_date)}
+                                            disabled
+                                            className="w-full border rounded px-3 py-2 bg-gray-100"
+                                        />
+                                    )}
+                                </div>
                             </div>
                             <button
                                 type="submit"
