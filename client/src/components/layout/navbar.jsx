@@ -10,6 +10,7 @@ import {FaSpinner} from "react-icons/fa";
 import {useNavigate} from "react-router-dom";
 import TopicsDropdown from "./topics.jsx";
 import {useUserInfoStore} from "../../stores/store.js";
+import NotificationIcon from "../ui/notificationIcon.jsx";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -54,11 +55,15 @@ function Navbar() {
 
                         </div>
 
-                        <div className="flex justify-end gap-2 h-full w-[50%]">
+                        <div className="flex justify-end gap-2 items-center h-full w-[50%]">
+
                             {isLoading ? (
                                 <FaSpinner icon="spinner" className="spinner size-10" color="white"/>
                             ) : isAuthenticated ? (
-                                <Profile/>
+                                <>
+                                    <NotificationIcon isFor='navbar' iconSize={'size-10 text-white'}/>
+                                    <Profile/>
+                                </>
                             ) : (
                                 <>
                                     <SignUpButton/>

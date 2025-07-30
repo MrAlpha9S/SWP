@@ -15,7 +15,7 @@ function Homepage() {
             <Stats />
             <LeaderBoard/>
             <SupportMethods />
-            <Testimonials />
+            {/*<Testimonials />*/}
         </main>
     </div>
         </PageFadeWrapper>

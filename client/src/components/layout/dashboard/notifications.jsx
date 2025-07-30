@@ -54,11 +54,11 @@ const tagColorMap = {
 
 const tabTypes = ['all', 'plan', 'message', 'coach', 'community', 'system'];
 
-function Notifications() {
+function Notifications({isFor}) {
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const [activeTab, setActiveTab] = useState('all');
     const [page, setPage] = useState(1);
-    const pageSize = 10;
+    const pageSize = isFor === 'navbar' ? '5' : '10';
     const {setCurrentStepDashboard} = useCurrentStepDashboard();
     const {setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore();
     const {userInfo} = useUserInfoStore();
@@ -182,7 +182,7 @@ function Notifications() {
     };
 
     return (
-        <div className="notification-container w-full">
+        <div className="w-full max-w-full notification-container flex flex-col">
             <div className="notification-header">
                 <div className="header-content">
                     <div className="header-left">
@@ -194,13 +194,15 @@ function Notifications() {
                         icon={<CheckOutlined/>}
                         onClick={() => markAllMutation.mutate()}
                         className="mark-all-button"
+                        size="small"
                     >
-                        Đánh dấu tất cả đã đọc
+                        <span className="hidden sm:inline">Đánh dấu tất cả đã đọc</span>
+                        <span className="sm:hidden">Đã đọc</span>
                     </Button>
                 </div>
             </div>
 
-            <div className="notification-content">
+            <div className="notification-content flex flex-col justify-center">
                 <Tabs
                     activeKey={activeTab}
                     onChange={(key) => {
@@ -208,7 +210,8 @@ function Notifications() {
                         setPage(1);
                     }}
                     items={tabItems}
-                    className="notification-tabs"
+                    className=""
+                    size="small"
                 />
 
                 <List
@@ -225,23 +228,23 @@ function Notifications() {
                             <List.Item.Meta
                                 avatar={
                                     <div className="notification-avatar">
-                                        <Avatar size={48} icon={iconMap[item.type]}/>
+                                        <Avatar size={48} icon={iconMap[item.type]} className="flex-shrink-0"/>
                                         {!item.is_read && <div className="unread-indicator"/>}
                                     </div>
                                 }
                                 title={
                                     <div className="notification-title">
-                                        <Text strong={!item.is_read} className="title-text">
+                                        <Text strong={!item.is_read} className="title-text truncate">
                                             {item.noti_title}
                                         </Text>
-                                        <Tag color={tagColorMap[item.type] || '#0d9488'}>
+                                        <Tag color={tagColorMap[item.type] || '#0d9488'} className="flex-shrink-0">
                                             {typeLabelMap[item.type] || item.type}
                                         </Tag>
                                     </div>
                                 }
                                 description={
                                     <div className="notification-description">
-                                        <Text className={!item.is_read ? 'unread-message' : 'read-message'}>
+                                        <Text className={`${!item.is_read ? 'unread-message' : 'read-message'} line-clamp-2`}>
                                             {item.content}
                                         </Text>
                                         <Text type="secondary" className="notification-time">
@@ -254,13 +257,15 @@ function Notifications() {
                     )}
                 />
 
-                <div className="pagination-wrapper" style={{textAlign: 'center', marginTop: 24}}>
+                <div className="pagination-wrapper flex justify-center mt-6">
                     <Pagination
                         current={page}
                         pageSize={pageSize}
                         total={total}
                         onChange={(p) => setPage(p)}
                         showSizeChanger={false}
+                        size="small"
+                        responsive
                     />
                 </div>
 

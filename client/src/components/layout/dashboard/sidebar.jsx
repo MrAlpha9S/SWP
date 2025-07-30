@@ -6,6 +6,8 @@ import {BsFillPeopleFill} from "react-icons/bs";
 import {useUserInfoStore} from "../../../stores/store.js";
 import {Crown} from "lucide-react";
 import PremiumBadge from "../../ui/premiumBadge.jsx";
+import {IoIosNotifications} from "react-icons/io";
+import NotificationIcon from "../../ui/notificationIcon.jsx";
 
 const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = false, mode}) => {
 
@@ -25,7 +27,7 @@ const Sidebar = ({currentStepDashboard, setCurrentStepDashboard, collapse = fals
         {
             key: 'notifications',
             label: 'Thông báo',
-            icon: <NotificationOutlined className="mr-4"/>,
+            icon: <NotificationIcon iconSize={'size-9'} isFor='sidebar'/>,
         },
         {
             key: 'check-in',
