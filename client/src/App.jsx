@@ -336,7 +336,7 @@ function AppContent() {
                     const today = getCurrentUTCDateTime()
                     const numOfDaysInMs = 7 * 24 * 60 * 60 * 1000 // 7  days
                     const diffInMs = today - vipEndDate
-                    if (today - vipEndDate < numOfDaysInMs) {
+                    if (today - vipEndDate < numOfDaysInMs && today - vipEndDate < 0) {
                         const onClick = () => {
                             navigate('/profile')
                         }

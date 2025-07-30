@@ -9,7 +9,7 @@ import CreatedAtField from "../../components/layout/profilepage/CreatedAtField.j
 import { FaUser, FaEnvelope, FaUserTag, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCamera, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
-import {formatUtcToLocalString} from "../../components/utils/dateUtils.js";
+import {formatUtcToLocalString, getCurrentUTCDateTime} from "../../components/utils/dateUtils.js";
 
 function Profile() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -28,6 +28,7 @@ function Profile() {
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const [showAvatarModal, setShowAvatarModal] = useState(false);
     const navigate = useNavigate();
+    const [expired, setExpired] = useState(false);
 
     useEffect(() => {
         if (currentStepDashboard !== "profile") {
@@ -131,6 +132,16 @@ function Profile() {
         setProfile({ ...profile, avatar: "" });
         setShowAvatarMenu(false);
     };
+
+    useEffect(() => {
+        if (originalProfile && originalProfile.vip_end_date) {
+            const today = getCurrentUTCDateTime()
+            const vipEndDate = new Date(originalProfile?.vip_end_date);
+            if (today - vipEndDate > 0) {
+                setExpired(true);
+            }
+        }
+    }, [originalProfile]);
 
     return (
         <PageFadeWrapper>
@@ -265,6 +276,9 @@ function Profile() {
                                 <div className='mt-4'>
                                     <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
                                         <FaCalendarAlt className="text-primary-400" /> Thời hạn
+                                        {expired && <span className='text-xs font-normal text-red-500'>Bạn có đăng ký gói trước đó hiện đã hết hạn. <a
+                                            className='cursor-pointer underline'
+                                            onClick={() => navigate('/subscription')}>Gia hạn ngay?</a></span>}
                                     </label>
                                     {originalProfile.sub_id === 1 ? (
                                         <input
