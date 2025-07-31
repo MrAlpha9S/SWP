@@ -180,8 +180,8 @@ const SubscriptionManagement = () => {
               <div style={{fontWeight:700, fontSize:20, marginBottom:8}}>Gói: {viewingSub.sub_name}</div>
               <div style={{color:'#888', fontSize:13, marginBottom:8}}>User: <Avatar src={viewingSub.avatar} size={24} /> {viewingSub.username}</div>
               <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Ngày bắt đầu:</b> {viewingSub.purchased_date ? new Date(viewingSub.purchased_date).toLocaleDateString() : ''}</div>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Ngày kết thúc:</b> {viewingSub.end_date ? new Date(viewingSub.end_date).toLocaleDateString() : ''}</div>
-              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Trạng thái:</b> {viewingSub.end_date && new Date(viewingSub.end_date) > new Date() ? 'Đang hoạt động' : 'Hết hạn'}</div>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Ngày kết thúc:</b> {viewingSub.vip_end_date ? new Date(viewingSub.vip_end_date).toLocaleDateString() : ''}</div>
+              <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Trạng thái:</b> {viewingSub.vip_end_date && new Date(viewingSub.vip_end_date) > new Date() ? 'Đang hoạt động' : 'Hết hạn'}</div>
               <div style={{fontSize:15, marginBottom:8, color:'#444', background:'#f3f6fa', borderRadius:8, padding:10}}><b>Giá:</b> {viewingSub.price}</div>
             </div>
           </Card>
