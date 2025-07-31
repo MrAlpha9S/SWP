@@ -8,6 +8,7 @@ const {
     updateUserTimesForPush, getUserReasonsCSVByAuth0Id, leaderboardStatsService
 } = require('../services/userService');
 const {updateUserService} = require('../services/userService');
+const userService = require('../services/userService');
 
 const {updateUserAuth0} = require("../services/auth0Service");
 const {getUserByAuth0Id, updateUserByAuth0Id} = require('../services/userService');
@@ -489,6 +490,120 @@ const getLeaderboardStats = async (req, res) => {
     }
 }
 
+const handleCoachRegistration = async (req, res) => {
+    try {
+        const {
+            // Thông tin cơ bản từ form
+            name,
+            birthdate,
+            sex,
+            cccd,
+            cccdIssuedDate,
+            address,
+            // Kinh nghiệm
+            experiences,
+            // Giới thiệu
+            motto,
+            selfIntroduction,
+            // Chứng chỉ
+            certificates
+        } = req.body;
+
+        // Lấy user_id từ token (giả sử đã có middleware decode token)
+        const auth0Id = req.auth?.payload?.sub;
+        if (!auth0Id) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized - No auth0 ID found'
+            });
+        }
+
+        // Kiểm tra dữ liệu bắt buộc
+        if (!name || !birthdate || !sex || !cccd || !cccdIssuedDate || !address || !motto || !selfIntroduction) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
+            });
+        }
+
+        // Chuẩn bị dữ liệu coach info
+        const coachData = {
+            auth0Id,
+            personalInfo: {
+                name,
+                birthdate,
+                sex,
+                cccd,
+                cccdIssuedDate,
+                address
+            },
+            experiences: experiences || [],
+            motto,
+            selfIntroduction,
+            certificates: certificates || []
+        };
+
+        // Gọi service để xử lý đăng ký
+        const result = await userService.registerCoach(coachData);
+        
+        console.log('Coach registration result:', result);
+
+        if (!result.success) {
+            return res.status(400).json({
+                success: false,
+                message: result.message || 'Đăng ký thất bại'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.',
+            data: result.data
+        });
+
+    } catch (error) {
+        console.error('Error in handleCoachRegistration:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi xử lý đăng ký coach'
+        });
+    }
+};
+
+const handleGetCoachRegistrationInfo = async (req, res) => {
+    try {
+        // Lấy user_id từ token
+        const auth0Id = req.auth?.payload?.sub;
+        if (!auth0Id) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized - No auth0 ID found'
+            });
+        }
+
+        // Gọi service để lấy thông tin đăng ký
+        const result = await userService.getCoachRegistrationInfo(auth0Id);
+
+        if (!result.success) {
+            return res.status(404).json({
+                success: false,
+                message: result.message || 'Không tìm thấy thông tin đăng ký'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: result.data
+        });
+
+    } catch (error) {
+        console.error('Error in handleGetCoachRegistrationInfo:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi lấy thông tin đăng ký coach'
+        });
+    }
+};
 
 
 module.exports = {
@@ -514,5 +629,7 @@ module.exports = {
     handleUpdateUserFCMToken,
     sendPushNotificationTo,
     handleUpdateUserTimesForPush,
-    getLeaderboardStats
+    getLeaderboardStats,
+    handleCoachRegistration,
+    handleGetCoachRegistrationInfo
 };

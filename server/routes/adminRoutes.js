@@ -25,6 +25,7 @@ router.get('/coach-user/:coach_id', adminController.handleGetCoachUser);
 
 router.patch('/coaches/:id/approve', adminController.handleApproveCoach);
 router.patch('/coaches/:id/reject', adminController.handleRejectCoach);
+router.get('/coaches/:id/details', adminController.handleGetPendingCoachDetails);
 // Route quản lý social post
 router.get('/posts', adminController.handleGetAllPosts);
 router.post('/posts', adminController.handleCreatePost);

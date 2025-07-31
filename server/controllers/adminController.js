@@ -681,118 +681,17 @@ const handleRejectCoach = async (req, res) => {
     }
 };
 
-const handleCoachRegistration = async (req, res) => {
+const handleGetPendingCoachDetails = async (req, res) => {
     try {
-        const {
-            // Thông tin cơ bản từ form
-            name,
-            birthdate,
-            sex,
-            cccd,
-            cccdIssuedDate,
-            address,
-            // Kinh nghiệm
-            experiences,
-            // Giới thiệu
-            motto,
-            selfIntroduction,
-            // Chứng chỉ
-            certificates
-        } = req.body;
-
-        // Lấy user_id từ token (giả sử đã có middleware decode token)
-        const auth0Id = req.auth?.payload?.sub;
-        if (!auth0Id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Unauthorized - No auth0 ID found'
-            });
+        const { id } = req.params;
+        const coachDetails = await adminService.getPendingCoachDetails(parseInt(id));
+        if (!coachDetails) {
+            return res.status(404).json({success: false, message: 'Không tìm thấy thông tin coach'});
         }
-
-        // Kiểm tra dữ liệu bắt buộc
-        if (!name || !birthdate || !sex || !cccd || !cccdIssuedDate || !address || !motto || !selfIntroduction) {
-            return res.status(400).json({
-                success: false,
-                message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
-            });
-        }
-
-        // Chuẩn bị dữ liệu coach info
-        const coachData = {
-            auth0Id,
-            personalInfo: {
-                name,
-                birthdate,
-                sex,
-                cccd,
-                cccdIssuedDate,
-                address
-            },
-            experiences: experiences || [],
-            motto,
-            selfIntroduction,
-            certificates: certificates || []
-        };
-
-        // Gọi service để xử lý đăng ký
-        const result = await adminService.registerCoach(coachData);
-        
-        console.log('Coach registration result:', result);
-
-        if (!result.success) {
-            return res.status(400).json({
-                success: false,
-                message: result.message || 'Đăng ký thất bại'
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: 'Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.',
-            data: result.data
-        });
-
+        return res.status(200).json({success: true, data: coachDetails});
     } catch (error) {
-        console.error('Error in handleCoachRegistration:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server khi xử lý đăng ký coach'
-        });
-    }
-};
-
-const handleGetCoachRegistrationInfo = async (req, res) => {
-    try {
-        // Lấy user_id từ token
-        const auth0Id = req.auth?.payload?.sub;
-        if (!auth0Id) {
-            return res.status(401).json({
-                success: false,
-                message: 'Unauthorized - No auth0 ID found'
-            });
-        }
-
-        // Gọi service để lấy thông tin đăng ký
-        const result = await adminService.getCoachRegistrationInfo(auth0Id);
-
-        if (!result.success) {
-            return res.status(404).json({
-                success: false,
-                message: result.message || 'Không tìm thấy thông tin đăng ký'
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: result.data
-        });
-
-    } catch (error) {
-        console.error('Error in handleGetCoachRegistrationInfo:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server khi lấy thông tin đăng ký coach'
-        });
+        console.error('Lỗi getPendingCoachDetails:', error);
+        return res.status(500).json({success: false, message: 'Lỗi server khi lấy thông tin coach'});
     }
 };
 
@@ -851,9 +750,8 @@ module.exports = {
     handleGetAllUserAchievements,
     handleCreateUserAchievement,
     handleDeleteUserAchievement,
-  // Coach Pending
-  handleGetPendingCoaches,
-  handleApproveCoach,
-  handleCoachRegistration,
-  handleGetCoachRegistrationInfo,
+    // Coach Pending
+    handleGetPendingCoaches,
+    handleApproveCoach,
+    handleGetPendingCoachDetails,
 };

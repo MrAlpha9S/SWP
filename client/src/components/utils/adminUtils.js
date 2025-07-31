@@ -445,6 +445,14 @@ export async function rejectCoach(id, token) {
   return await res.json();
 }
 
+export async function getPendingCoachDetails(id, token) {
+  const res = await fetch(`${getBackendUrl()}/admin/coaches/${id}/details`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy thông tin coach');
+  return await res.json();
+}
+
 export async function getCommentsByPostId(postId, token) {
   const res = await fetch(`${getBackendUrl()}/admin/comments/post/${postId}`, {
     method: 'GET',
@@ -457,25 +465,4 @@ export async function getCommentsByPostId(postId, token) {
 
   const result = await res.json();
   return result.data; // chỉ trả về mảng comment
-}
-
-export async function registerCoach(data, token) {
-    const res = await fetch('http://localhost:3000/coach/register', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Lỗi đăng ký coach');
-    return await res.json();
-}
-
-export async function getCoachRegistrationInfo(token) {
-    const res = await fetch('http://localhost:3000/coach/registration-info', {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Lỗi lấy thông tin đăng ký');
-    return await res.json();
 }

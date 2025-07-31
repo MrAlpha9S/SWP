@@ -26,7 +26,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import {useUserInfoStore} from "../../stores/store.js";
-import { registerCoach } from "../../components/utils/adminUtils";
+import { registerCoach } from "../../components/utils/userUtils";
 import { useAuth0 } from '@auth0/auth0-react';
 
 const { TextArea } = Input;
@@ -37,6 +37,8 @@ function CoachRegistration() {
     const [currentStep, setCurrentStep] = useState(0);
     const [experiences, setExperiences] = useState([]);
     const [certificates, setCertificates] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
     const {userInfo} = useUserInfoStore()
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -120,37 +122,65 @@ function CoachRegistration() {
     };
 
     const onFinish = async () => {
-    try {
-        const values = form.getFieldsValue(true);
-        const formData = {
-            name: values.name,
-            birthdate: values.birthdate?.format('YYYY-MM-DD'),
-            sex: values.sex,
-            cccd: values.cccd,
-            cccdIssuedDate: values.cccdIssuedDate?.format('YYYY-MM-DD'),
-            address: values.address,
-            experiences: experiences,
-            motto: values.motto,
-            selfIntroduction: values.selfIntroduction,
-            certificates: certificates
-        };
-
-        const token = await getAccessTokenSilently();
-        const result = await registerCoach(formData, token);
+        console.log('onFinish called at step:', currentStep);
+        console.log('isSubmitting:', isSubmitting, 'hasSubmitted:', hasSubmitted);
         
-        if (result.success) {
-            message.success('Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.');
-        } else {
-            message.error(result.message || 'Đăng ký thất bại');
+        // Ngăn chặn submit nhiều lần
+        if (isSubmitting || hasSubmitted) {
+            console.log('Already submitting or submitted, ignoring...');
+            return;
         }
-    } catch (error) {
-        console.error('Error:', error);
-        message.error('Có lỗi xảy ra khi gửi đăng ký');
-    }
-};
+
+        // Validate form trước khi submit
+        try {
+            await form.validateFields();
+        } catch (error) {
+            console.log('Form validation failed:', error);
+            message.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+            return;
+        }
+
+        console.log('Submitting coach registration...');
+        setIsSubmitting(true);
+        
+        try {
+            const values = form.getFieldsValue(true);
+            const formData = {
+                name: values.name,
+                birthdate: values.birthdate?.format('YYYY-MM-DD'),
+                sex: values.sex,
+                cccd: values.cccd,
+                cccdIssuedDate: values.cccdIssuedDate?.format('YYYY-MM-DD'),
+                address: values.address,
+                experiences: experiences,
+                motto: values.motto,
+                selfIntroduction: values.selfIntroduction,
+                certificates: certificates
+            };
+
+            console.log('Form data to submit:', formData);
+
+            const token = await getAccessTokenSilently();
+            const result = await registerCoach(formData, token);
+            
+            if (result.success) {
+                setHasSubmitted(true);
+                message.success('Đăng ký thành công! Hồ sơ của bạn đang chờ được duyệt.');
+                // Có thể redirect hoặc reset form ở đây
+            } else {
+                message.error(result.message || 'Đăng ký thất bại');
+            }
+        } catch (error) {
+            console.error('Error in onFinish:', error);
+            message.error('Có lỗi xảy ra khi gửi đăng ký');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
 
     const nextStep = () => {
+        console.log('nextStep called at step:', currentStep);
         if (currentStep < 4) {
             form.validateFields()
                 .then(() => {
@@ -161,9 +191,8 @@ function CoachRegistration() {
                 .catch(() => {
                     message.error('Vui lòng điền đầy đủ thông tin bắt buộc');
                 });
-        } else {
-            setCurrentStep(currentStep + 1);
         }
+        // Không cho phép chuyển tiếp từ step cuối cùng
     };
 
     const prevStep = () => {
@@ -184,7 +213,15 @@ function CoachRegistration() {
                                     rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
 
                                 >
-                                    <Input placeholder="Nhập họ và tên" disabled/>
+                                    <Input 
+                                        placeholder="Nhập họ và tên" 
+                                        disabled
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                    />
                                 </Form.Item>
                             </Col>
                             <Col span={12}>
@@ -587,8 +624,13 @@ function CoachRegistration() {
                     <Form
                         form={form}
                         layout="vertical"
-                        onFinish={onFinish}
                         className="space-y-6"
+                        onKeyPress={(e) => {
+                            // Ngăn chặn submit form bằng Enter key
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                            }
+                        }}
                     >
                         {renderStepContent()}
 
@@ -611,17 +653,20 @@ function CoachRegistration() {
                                         onClick={nextStep}
                                         size="large"
                                         className="bg-teal-600 hover:bg-teal-700"
+                                        htmlType="button" // Đảm bảo không submit form
                                     >
                                         {currentStep === steps.length - 2 ? 'Xem lại thông tin' : 'Tiếp theo'}
                                     </Button>
                                 ) : (
                                     <Button
                                         type="primary"
-                                        htmlType="submit"
+                                        onClick={onFinish}
                                         size="large"
                                         className="bg-green-600 hover:bg-green-700"
+                                        loading={isSubmitting}
+                                        disabled={hasSubmitted}
                                     >
-                                        Hoàn thành đăng ký
+                                        {hasSubmitted ? 'Đã đăng ký thành công' : 'Hoàn thành đăng ký'}
                                     </Button>
                                 )}
                             </div>

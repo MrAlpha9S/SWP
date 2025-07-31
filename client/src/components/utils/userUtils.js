@@ -312,3 +312,24 @@ export async function getLeaderboard() {
 
     return res.json();
 }
+
+export async function registerCoach(data, token) {
+    const res = await fetch('http://localhost:3000/api/users/coach/register', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('Lỗi đăng ký coach');
+    return await res.json();
+}
+
+export async function getCoachRegistrationInfo(token) {
+    const res = await fetch('http://localhost:3000/api/users/coach/registration-info', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Lỗi lấy thông tin đăng ký');
+    return await res.json();
+}
