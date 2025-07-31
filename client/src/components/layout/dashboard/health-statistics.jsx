@@ -11,21 +11,30 @@ const HealthStatistics = ({achievementProgress, checkInDataset}) => {
 
     useEffect(() => {
         if (checkInDataset && achievementProgress) {
+            console.log(checkInDataset)
 
-            let timeDiff = 0;
+            let streakStartDate = null;
+
+            if (checkInDataset[checkInDataset.length - 1]?.cigs !== 0) {
+                setTimeDiff(0);
+                return;
+            }
 
             for (let i = checkInDataset.length - 1; i >= 0; i--) {
                 const entry = checkInDataset[i];
-                if (entry.cigs !== 0 && i === checkInDataset.length - 1) {
-                    return;
-                } else if (entry.cigs === 0) {
-                    timeDiff = getCurrentUTCDateTime() - new Date(entry.date);
+
+                if (entry.cigs === 0) {
+                    streakStartDate = entry.date;
+                } else {
                     break;
-                } else if (entry.cigs !== 0) {
-                    return;
                 }
             }
-            setTimeDiff(timeDiff);
+
+            if (streakStartDate) {
+                const timeDiff = getCurrentUTCDateTime() - new Date(streakStartDate);
+                console.log('Streak started:', streakStartDate);
+                setTimeDiff(timeDiff);
+            }
         }
     }, [achievementProgress, checkInDataset]);
 
