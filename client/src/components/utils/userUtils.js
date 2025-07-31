@@ -314,7 +314,7 @@ export async function getLeaderboard() {
 }
 
 export async function registerCoach(data, token) {
-    const res = await fetch('http://localhost:3000/api/users/coach/register', {
+    const res = await fetch(`${getBackendUrl()}/users/coach/register`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -327,7 +327,7 @@ export async function registerCoach(data, token) {
 }
 
 export async function getCoachRegistrationInfo(token) {
-    const res = await fetch('http://localhost:3000/api/users/coach/registration-info', {
+    const res = await fetch(`${getBackendUrl()}/users/coach/registration-info`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Lỗi lấy thông tin đăng ký');
