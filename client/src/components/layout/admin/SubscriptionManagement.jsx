@@ -185,8 +185,6 @@ const SubscriptionManagement = () => {
             render: (_, r) => (
                 <div style={{display: 'flex', gap: 8}}>
                     <Button icon={<EyeOutlined/>} size="small" onClick={() => handleViewSub(r)}/>
-                    <Button disabled={r.vip_end_date && new Date(r.vip_end_date) < new Date()} icon={<EditOutlined/>}
-                            size="small" onClick={() => handleEditSub(r)}/>
                     <Popconfirm title="Bạn có chắc muốn xóa subscription này?"
                                 onConfirm={() => handleDeleteSub(r.user_id, r.sub_id)} okText="Xóa" cancelText="Hủy">
                         <Button disabled={r.vip_end_date && new Date(r.vip_end_date) < new Date()}
