@@ -27,7 +27,7 @@ export default function MessageBox({
     let recipientId
     const conversationId = conversation_id;
     if (contacts && contacts.length > 0) {
-        recipientId = contacts?.find((contact) => contact.conversation_id === conversationId).other_participant_id;
+        recipientId = contacts?.find((contact) => contact.conversation_id === conversationId)?.other_participant_id;
     }
 
 

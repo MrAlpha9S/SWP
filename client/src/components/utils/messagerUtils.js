@@ -1,4 +1,5 @@
-const API = 'http://localhost:3000/messager'
+import {getBackendUrl} from "./getBackendURL.js";
+
 
 export async function CreateConversation(user, getAccessTokenSilently, isAuthenticated, conversation_name, created_at, user_id) {
 
@@ -6,7 +7,7 @@ export async function CreateConversation(user, getAccessTokenSilently, isAuthent
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`${API}/createconversation`, {
+    const res = await fetch(`${getBackendUrl()}/messager/createconversation`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -26,7 +27,7 @@ export async function GetMessageConversations(user, getAccessTokenSilently, isAu
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`${API}/messageconversations`, {
+    const res = await fetch(`${getBackendUrl()}/messager/messageconversations`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -45,7 +46,7 @@ export async function GetUserConversations(user, getAccessTokenSilently, isAuthe
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`${API}/userconversations`, {
+    const res = await fetch(`${getBackendUrl()}/messager/userconversations`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +65,7 @@ export async function SendMessage(user,senderName, recipientAuth0Id, getAccessTo
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`${API}/sendmessage`, {
+    const res = await fetch(`${getBackendUrl()}/messager/sendmessage`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,

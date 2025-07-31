@@ -1,3 +1,5 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function AddReport(user, getAccessTokenSilently, isAuthenticated, post_id, comment_id, reason, description, created_at) {
     console.log('AddReport', user.sub, post_id, comment_id, reason, description, created_at)
 
@@ -5,7 +7,7 @@ export async function AddReport(user, getAccessTokenSilently, isAuthenticated, p
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/reports/addreport`, {
+    const res = await fetch(`${getBackendUrl()}/reports/addreport`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -24,7 +26,7 @@ export async function GetReports(user, getAccessTokenSilently, isAuthenticated) 
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/reports/getreports`, {
+    const res = await fetch(`${getBackendUrl()}/reports/getreports`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +43,7 @@ export async function DeleteReport(user, getAccessTokenSilently, isAuthenticated
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/reports/deletereport`, {
+    const res = await fetch(`${getBackendUrl()}/reports/deletereport`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,

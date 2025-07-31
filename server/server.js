@@ -9,9 +9,15 @@ const cors = require('cors');
 const socket = require('./utils/socket');
 const {initializeApp} = require("firebase-admin/app");
 const path = require('path');
+const admin = require('firebase-admin');
+require('./utils/checkExpiry')
 
-const firebaseApp = initializeApp({
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+const firebaseApp = admin.initializeApp({
+    credential: admin.credential.cert({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.VITE_FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.VITE_FIREBASE_PRIVATE_KEY,
+    }),
     storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
 });
 
@@ -33,6 +39,7 @@ const reportRouter = require("./routes/reportRoute")
 const {scheduleUserPushes} = require("./utils/pushScheduler");
 const adminRouter = require("./routes/adminRoutes");
 const notificationRouter = require("./routes/notificationRoute");
+const {checkExpiry} = require("./utils/checkExpiry");
 
 
 const server = http.createServer(app);
@@ -336,19 +343,23 @@ io.on('connection', (socket) => {
     });
 });
 
-app.use('/users', userRouter)
-app.use('/profiles', profileRouter)
-app.use('/topics', topicRouter);
-app.use('/check-in', checkInRouter)
-app.use('/social-posts', socialPostRouter)
-app.use('/messager', messageRouter)
-app.use('/subscription', subscriptionRouter)
-app.use('/payment', paymentRouter)
-app.use('/admin', adminRouter)
-image.pngapp.use('/coach', coachRouter)
-app.use('/achievements', achievementRouter)
-app.use('/reports', reportRouter)
-app.use('/notifications', notificationRouter)
+const apiRouter = express.Router();
+
+apiRouter.use('/users', userRouter);
+apiRouter.use('/profiles', profileRouter);
+apiRouter.use('/topics', topicRouter);
+apiRouter.use('/check-in', checkInRouter);
+apiRouter.use('/social-posts', socialPostRouter);
+apiRouter.use('/messager', messageRouter);
+apiRouter.use('/subscription', subscriptionRouter);
+apiRouter.use('/payment', paymentRouter);
+apiRouter.use('/admin', adminRouter);
+apiRouter.use('/coaches', coachRouter);
+apiRouter.use('/achievements', achievementRouter);
+apiRouter.use('/reports', reportRouter);
+apiRouter.use('/notifications', notificationRouter);
+
+app.use('/api', apiRouter);
 
 
 
@@ -366,6 +377,13 @@ server.listen(portSocket, () => {
     console.log(`Socket.IO server running at http://localhost:${portSocket}`);
 });
 
-scheduleUserPushes()
+(async () => {
+    try {
+        await scheduleUserPushes();
+        console.log('✅ Scheduled user pushes');
+    } catch (err) {
+        console.error('❌ Failed to schedule user pushes:', err);
+    }
+})();
 
 module.exports = { io, firebaseApp }

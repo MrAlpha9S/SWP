@@ -49,79 +49,6 @@ const Badge = ({label, icon, locked = false, description = '', progressInfo = ''
     );
 };
 
-const useProgressInfo = (achievementId, progress) => {
-    return useMemo(() => {
-        if (!progress) return '';
-
-        const totalPosts = (progress.posts_created || 0) + (progress.comments_created || 0);
-        const safeMoney = progress?.money_saved ?? 0;
-
-        switch (achievementId) {
-            case '5-days-streak':
-                return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days || 0} / 5`;
-            case '10-days-streak':
-                return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days || 0} / 10`;
-            case '50-days-streak':
-                return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days || 0} / 50`;
-            case '100-days-streak':
-                return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days || 0} / 100`;
-            case '1-year-streak':
-                return `Chuỗi hiện tại: ${progress.consecutive_smoke_free_days || 0} / 365`;
-            case '7-days-smoke-free':
-                return `Tổng: ${progress.days_without_smoking || 0} / 7`;
-            case '14-days-smoke-free':
-                return `Tổng: ${progress.days_without_smoking || 0} / 14`;
-            case '30-days-smoke-free':
-                return `Tổng: ${progress.days_without_smoking || 0} / 30`;
-            case '90-days-smoke-free':
-                return `Tổng: ${progress.days_without_smoking || 0} / 90`;
-            case '180-days-smoke-free':
-                return `Tổng: ${progress.days_without_smoking || 0} / 180`;
-            case '1-year-quit':
-                return `Tổng: ${progress.days_without_smoking || 0} / 365`;
-
-            case 'new-me':
-                return totalPosts >= 1 ? 'Đã hoàn thành' : '0 / 1';
-            case 'community-guru':
-                return `${totalPosts} / 100`;
-            case 'story-teller':
-                return `${totalPosts} / 50`;
-            case 'social-butterfly':
-                return `${totalPosts} / 25`;
-
-            case 'cheer-champion':
-                return `${progress.total_likes_given || 0} / 100`;
-            case 'kind-heart':
-                return `${progress.total_likes_given || 0} / 50`;
-            case 'warm-welcomer':
-                return `${progress.total_likes_given || 0} / 10`;
-
-            case 'smart-saver':
-                return progress.first_saving_goal_completed ? 'Đã hoàn thành' : 'Chưa hoàn thành';
-            case 'streak-starter':
-                return progress.first_check_in_completed ? 'Đã hoàn thành' : 'Chưa hoàn thành';
-
-            case 'new-member':
-                return 'Đã tham gia';
-
-            case '100k':
-                return `${safeMoney.toLocaleString()} / 100,000 VNĐ`;
-            case '500k':
-                return `${safeMoney.toLocaleString()} / 500,000 VNĐ`;
-            case '1m':
-                return `${safeMoney.toLocaleString()} / 1,000,000 VNĐ`;
-            case '5m':
-                return `${safeMoney.toLocaleString()} / 5,000,000 VNĐ`;
-            case '10m':
-                return `${safeMoney.toLocaleString()} / 10,000,000 VNĐ`;
-
-            default:
-                return '';
-        }
-    }, [achievementId, progress]);
-};
-
-// Create a separate function for getting progress info that can be used outside the hook
 const getProgressInfo = (achievementId, progress) => {
     if (!progress) return '';
 
@@ -436,12 +363,6 @@ const BadgesMenu = () => {
             setTitle(`Tôi vừa đạt được huy hiệu: ${badgeName}`)
             setContent(`<p>Tôi vừa đạt được huy hiệu "${badgeName}"!</p><img src="${base64}" />`)
             navigate('/forum/editor')
-
-            // // For now, just download
-            // const link = document.createElement('a');
-            // link.download = `badge-${badgeName.replace(/\s+/g, '-')}.png`;
-            // link.href = base64;
-            // link.click();
 
             message.success(`Đã tải xuống huy hiệu "${badgeName}"`);
 

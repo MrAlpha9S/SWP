@@ -1,9 +1,11 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function getAllReviews(user, getAccessTokenSilently, isAuthenticated, userAuth0Id, coachAuth0Id) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/coach-reviews/${userAuth0Id}/${coachAuth0Id}`, {
+    const res = await fetch(`${getBackendUrl()}/users/coach-reviews/${userAuth0Id}/${coachAuth0Id}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +21,7 @@ export async function createReview(user, getAccessTokenSilently, isAuthenticated
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/coach-reviews', {
+    const res = await fetch(`${getBackendUrl()}/users/coach-reviews`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -42,7 +44,7 @@ export async function updateReview(user, getAccessTokenSilently, isAuthenticated
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/coach-reviews', {
+    const res = await fetch(`${getBackendUrl()}/users/coach-reviews`, {
         method: 'PUT',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -63,7 +65,7 @@ export async function deleteReview(user, getAccessTokenSilently, isAuthenticated
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/coach-reviews/${reviewId}`, {
+    const res = await fetch(`${getBackendUrl()}/users/coach-reviews/${reviewId}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${token}`,

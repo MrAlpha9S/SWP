@@ -1,3 +1,5 @@
+import {useCallback} from "react";
+
 export const dateStringToUTCDateObj = (date) => {
     return new Date(date + 'T00:00:00Z')
 }
@@ -59,7 +61,22 @@ export function formatUtcToLocalString(utcString) {
     const year = pad(date.getUTCFullYear() % 100);
     const hours = pad(date.getUTCHours());
     const minutes = pad(date.getUTCMinutes());
+    const seconds = pad(date.getUTCSeconds());
 
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
+    return `${day}-${month}-${year}, ${hours}:${minutes}:${seconds}`;
 }
+
+export const formatDate = (ms) => {
+    const seconds = Math.abs(Math.floor(ms / 1000));
+    const minutes = Math.abs(Math.floor(seconds / 60));
+    const hours = Math.abs(Math.floor(minutes / 60));
+    const days = Math.abs(Math.floor(hours / 24));
+
+    return {
+        days: days,
+        hours: hours % 24,
+        minutes: minutes % 60,
+        seconds: seconds % 60
+    };
+};
 

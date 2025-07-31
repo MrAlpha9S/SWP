@@ -52,7 +52,7 @@ export default function Messenger({ role }) {
           setSelectedUserAuth0Id(userConversations.data[0]?.other_participant_id);
           setSelectedContactId(userConversations.data[0]?.conversation_id);
         } else if (selectedUserAuth0Id?.length > 0) {
-          const conversation_id = userConversations.data?.find((entry) => entry.other_participant_id === selectedUserAuth0Id).conversation_id;
+          const conversation_id = userConversations?.data?.find((entry) => entry.other_participant_id === selectedUserAuth0Id)?.conversation_id;
           setSelectedContactId(conversation_id);
         }
 
@@ -152,7 +152,7 @@ export default function Messenger({ role }) {
   const emitConversationUpdate = (data) => socket?.emit('conversation_updated', data);
   const emitMemberInteraction = (data) => socket?.emit('member_interaction', data);
 
-  if (!contacts || !allMessages) return <div>Loading...</div>;
+  if (!contacts || !allMessages) return <div className='loader'></div>;
 
   return (
     <div className="w-[650px] h-[calc(100vh-250px)] flex bg-primary-700 rounded-lg text-white">

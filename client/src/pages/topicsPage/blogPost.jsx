@@ -4,6 +4,7 @@ import { Typography, Table } from 'antd';
 import { useParams } from 'react-router-dom';
 import { useAuth0, withAuthenticationRequired } from '@auth0/auth0-react';
 import { useQuery } from '@tanstack/react-query';
+import {getBackendUrl} from "../../components/utils/getBackendURL.js";
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -54,7 +55,7 @@ const BlogPost = () => {
   const { isPending, error, data } = useQuery({
     queryKey: ['Blog', topicId],
     queryFn: async () => {
-      const result = await fetch(`http://localhost:3000/topics/${topicId}/${blogId}`, {
+      const result = await fetch(`${getBackendUrl()}/topics/${topicId}/${blogId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -70,7 +70,7 @@ const processAchievements = async (userAuth0Id) => {
             .execute('UpdateUserAchievementProgress');
 
         // Cache this user for 1 minute
-        const newAchievements = await getRecentAchievements(userAuth0Id, 10);
+        const newAchievements = await getRecentAchievements(userAuth0Id, 15);
         achievementCache.set(cacheKey, true);
 
         return newAchievements;

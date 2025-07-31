@@ -1,9 +1,11 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function postUserInfo(user, getAccessTokenSilently, isAuthenticated) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/postSignup', {
+    const res = await fetch(`${getBackendUrl()}/users/postSignup`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -27,7 +29,7 @@ export async function getUserCreationDate(user, getAccessTokenSilently, isAuthen
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/get-user-creation-date?userAuth0Id=' + userId, {
+    const res = await fetch(`${getBackendUrl()}/users/get-user-creation-date?userAuth0Id=` + userId, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +45,7 @@ export async function getUserInfo(user, getAccessTokenSilently, isAuthenticated)
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/info?userAuth0Id=${user.sub}`, {
+    const res = await fetch(`${getBackendUrl()}/users/info?userAuth0Id=${user.sub}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -56,7 +58,7 @@ export async function getUserInfo(user, getAccessTokenSilently, isAuthenticated)
 export async function updateUserInfo(user, getAccessTokenSilently, { username, email, avatar }) {
     const token = await getAccessTokenSilently();
 
-    const res = await fetch("http://localhost:3000/users/info", {
+    const res = await fetch(`${getBackendUrl()}/users/info`, {
         method: "PUT",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -80,7 +82,7 @@ export async function updateUserInfo(user, getAccessTokenSilently, { username, e
 export async function updateUserSubscription(user, getAccessTokenSilently, isAuthenticated, subscriptionId) {
     if (!isAuthenticated || !user) return;
     const token = await getAccessTokenSilently();
-    const res = await fetch('http://localhost:3000/users/update-subscription', {
+    const res = await fetch(`${getBackendUrl()}/users/update-subscription`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -95,7 +97,7 @@ export async function updateUserSubscription(user, getAccessTokenSilently, isAut
 }
 
 export async function getCoaches() {
-    const res = await fetch('http://localhost:3000/users/get-coaches', {
+    const res = await fetch(`${getBackendUrl()}/users/get-coaches`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -108,7 +110,7 @@ export async function getCoaches() {
 }
 
 export async function getCoachByIdOrAuth0Id(coachId) {
-    const res = await fetch('http://localhost:3000/users/coaches/' + coachId, {
+    const res = await fetch(`${getBackendUrl()}/users/coaches/` + coachId, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -125,7 +127,7 @@ export async function getCoachByIdOrAuth0Id(coachId) {
 export async function updateUserController(user, getAccessTokenSilently, { username, email, avatar }) {
     const token = await getAccessTokenSilently();
 
-    const res = await fetch("http://localhost:3000/users/update-user", {
+    const res = await fetch(`${getBackendUrl()}/users/update-user`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -151,7 +153,7 @@ export async function GetAllMembers(user, getAccessTokenSilently, isAuthenticate
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/getAllMembers`, {
+    const res = await fetch(`${getBackendUrl()}/users/getAllMembers`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -168,7 +170,7 @@ export async function assignCoachToUser (user, coachId, userId, username, coachA
     if (!isAuthenticated) return
     const token = await getAccessTokenSilently();
 
-    const res = await fetch("http://localhost:3000/users/assign-coach", {
+    const res = await fetch(`${getBackendUrl()}/users/assign-coach`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -195,7 +197,7 @@ export async function getUserNotes(user, getAccessTokenSilently, isAuthenticated
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/notes/' + userAuth0Id, {
+    const res = await fetch(`${getBackendUrl()}/users/notes/` + userAuth0Id, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -211,7 +213,7 @@ export async function createUserNote(user, getAccessTokenSilently, isAuthenticat
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/notes', {
+    const res = await fetch(`${getBackendUrl()}/users/notes`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -232,7 +234,7 @@ export async function updateUserNote(user, getAccessTokenSilently, isAuthenticat
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/users/notes', {
+    const res = await fetch(`${getBackendUrl()}/users/notes`, {
         method: 'PUT',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -254,7 +256,7 @@ export async function deleteUserNote(user, getAccessTokenSilently, isAuthenticat
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/notes/${noteId}`, {
+    const res = await fetch(`${getBackendUrl()}/users/notes/${noteId}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -270,7 +272,7 @@ export async function updateUserToken(user, getAccessTokenSilently, isAuthentica
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/token/`, {
+    const res = await fetch(`${getBackendUrl()}/users/token/`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -287,7 +289,7 @@ export async function updateUserTimesForPush(user, getAccessTokenSilently, isAut
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/users/push-notification-times/`, {
+    const res = await fetch(`${getBackendUrl()}/users/push-notification-times/`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -301,7 +303,7 @@ export async function updateUserTimesForPush(user, getAccessTokenSilently, isAut
 
 export async function getLeaderboard() {
 
-    const res = await fetch(`http://localhost:3000/users/leaderboard`, {
+    const res = await fetch(`${getBackendUrl()}/users/leaderboard`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

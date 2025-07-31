@@ -6,8 +6,8 @@ import {
     useUserInfoStore
 } from "../../stores/store.js";
 import {saveProfileToLocalStorage} from "../../components/utils/profileUtils.js";
-import {useMutation} from "@tanstack/react-query";
-import {updateUserSubscription} from "../../components/utils/userUtils.js";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {getCoachByIdOrAuth0Id, updateUserSubscription} from "../../components/utils/userUtils.js";
 import {Modal} from "antd";
 import {useNavigate, useParams} from "react-router-dom";
 import CongratulationPage from "./CongratulationPage.jsx";
@@ -15,6 +15,7 @@ import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
 import {usePayOS} from "@payos/payos-checkout";
 import axios from "axios";
 import {queryClient} from "../../main.jsx";
+import {getBackendUrl, getFrontEndUrl} from "../../components/utils/getBackendURL.js";
 
 function SubscriptionPage() {
     const [isYearly, setIsYearly] = useState(false);
@@ -38,7 +39,7 @@ function SubscriptionPage() {
         open: openPayOS,
         exit: exitPayOS
     } = usePayOS({
-        RETURN_URL: `http://localhost:5173/payment-success`,
+        RETURN_URL: `${getFrontEndUrl()}/payment-success`,
         ELEMENT_ID: 'payos-container',
         CHECKOUT_URL: paymentLink,
         onExit: () => {
@@ -80,7 +81,7 @@ function SubscriptionPage() {
 
     const paymentMutation = useMutation({
         mutationFn: async (paymentInfo) => {
-            const res = await axios.post('/api/v1/payment/create-order', paymentInfo);
+            const res = await axios.post(`${getBackendUrl()}/payment/create-order`, paymentInfo);
             return res.data;
         },
         onSuccess: (data) => {
@@ -106,6 +107,14 @@ function SubscriptionPage() {
         }
     });
 
+    const {isPending : hasCoachPending, data : hasCoachData} = useQuery({
+        queryKey: ['has-coach'],
+        queryFn: async () => {
+            return await getCoachByIdOrAuth0Id(user.sub)
+        },
+        enabled: !!isAuthenticated
+    })
+
     const handleSignUpButton = () => {
         if (from) {
             if (from === 'onboarding-step-5') {
@@ -123,7 +132,7 @@ function SubscriptionPage() {
     const handlePaymentButton = () => {
         const amount = isYearly ? premiumYearlyPrice : premiumMonthlyPrice;
         const description = isYearly ? 'Premium - 1 Nam' : 'Premium - 1 Thang';
-        const returnUrl = `http://localhost:5173/payment-success`;
+        const returnUrl = `${getFrontEndUrl()}/payment-success`;
         const paymentInfo = {amount, description, returnUrl};
 
         if (!isAuthenticated) {
@@ -137,6 +146,7 @@ function SubscriptionPage() {
                 loginWithRedirect({authorizationParams: {screen_hint: 'login'}});
             } else {
                 localStorage.setItem('referrerPayment', JSON.stringify({referrer: 'subscriptionPagePayment'}));
+                loginWithRedirect({authorizationParams: {screen_hint: 'signup'}});
             }
 
         } else {
@@ -411,7 +421,7 @@ function SubscriptionPage() {
                     footer={null}
                     maskClosable={false}
                 >
-                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from}/>}
+                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from} hasCoach={hasCoachData?.success}/>}
                 </Modal>
 
             </div>

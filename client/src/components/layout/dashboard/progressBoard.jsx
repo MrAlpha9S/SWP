@@ -23,7 +23,7 @@ import {getCheckInDataSet, mergeByDate} from "../../utils/checkInUtils.js";
 import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
 import {
     clonePlanLogToDDMMYYYY,
-    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime,
+    convertYYYYMMDDStrToDDMMYYYYStr, formatDate, getCurrentUTCDateTime,
 } from "../../utils/dateUtils.js";
 import {useQuery} from "@tanstack/react-query";
 import {useAuth0} from "@auth0/auth0-react";
@@ -32,6 +32,8 @@ import {addFinancialAchievement, getAchieved} from "../../utils/achievementsUtil
 import QuoteCarousel from "../../ui/quotesCarousel.jsx";
 import html2canvas from "html2canvas";
 import {useEditorContentStore} from "../../../stores/store.js";
+import {getBackendUrl} from "../../utils/getBackendURL.js";
+import HealthStatistics from "./health-statistics.jsx";
 
 const ProgressBoard = ({
                            startDate,
@@ -47,7 +49,8 @@ const ProgressBoard = ({
                            setCurrentStepDashboard = null,
                            setMoneySaved = null,
                            userInfo,
-                           from = null
+                           from = null,
+    achievementProgress = null
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -61,7 +64,6 @@ const ProgressBoard = ({
     const progressBoardRef = useRef(null);
     const {setTitle, setContent} = useEditorContentStore()
 
-    // Use different query keys based on context (coach vs user)
     const datasetQueryKey = from === 'coach-user'
         ? ['dataset-coach', userInfo?.auth0_id]
         : ['dataset', userInfo?.auth0_id];
@@ -148,17 +150,7 @@ const ProgressBoard = ({
     }, []);
 
     const formatDateDifference = useCallback((ms) => {
-        const seconds = Math.abs(Math.floor(ms / 1000));
-        const minutes = Math.abs(Math.floor(seconds / 60));
-        const hours = Math.abs(Math.floor(minutes / 60));
-        const days = Math.abs(Math.floor(hours / 24));
-
-        return {
-            days: days,
-            hours: hours % 24,
-            minutes: minutes % 60,
-            seconds: seconds % 60
-        };
+        return formatDate(ms)
     }, []);
 
     const timeDifference = useMemo(() => {
@@ -302,7 +294,7 @@ const ProgressBoard = ({
             try {
                 const token = await getAccessTokenSilently();
 
-                const response = await fetch('http://localhost:3000/achievements/update-money-saved', {
+                const response = await fetch(`${getBackendUrl()}/achievements/update-money-saved`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -662,6 +654,8 @@ const ProgressBoard = ({
                     )}
                 </div>
             )}
+
+            {!from && <HealthStatistics achievementProgress={achievementProgress?.data} checkInDataset={checkInDataset?.data} />}
 
             {!from && <div className="text-center">
                 {isPending ? (

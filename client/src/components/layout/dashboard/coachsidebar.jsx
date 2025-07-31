@@ -1,16 +1,12 @@
 import React from 'react';
 import {
     FileTextOutlined,
-    DashboardOutlined,
     WechatOutlined,
-    UnorderedListOutlined,
-    DollarOutlined,
-    NotificationOutlined
 } from '@ant-design/icons';
 import { Menu } from 'antd';
-import {IoExtensionPuzzleOutline, IoMedalOutline} from "react-icons/io5";
 import {GrOverview} from "react-icons/gr";
 import {RiUserCommunityLine} from "react-icons/ri";
+import NotificationIcon from "../../ui/notificationIcon.jsx";
 
 const items = [
     {
@@ -21,7 +17,7 @@ const items = [
     {
         key: 'notifications',
         label: 'Thông báo',
-        icon: <NotificationOutlined className="mr-4"/>,
+        icon: <NotificationIcon iconSize={'size-8'} isFor='sidebar'/>,
     },
     {
         key: 'coach-user',

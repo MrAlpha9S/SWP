@@ -1,3 +1,4 @@
+import {getBackendUrl} from "./getBackendURL.js";
 
 
 export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated, checkInDate, feel, checkedQuitItems, freeText, qna, isFreeText, cigsSmoked, isStepOneOnYes, isJournalSelected) {
@@ -26,7 +27,7 @@ export async function postCheckIn(user, getAccessTokenSilently, isAuthenticated,
         }
     }
 
-    const res = await fetch('http://localhost:3000/check-in/post-check-in', {
+    const res = await fetch(`${getBackendUrl()}/check-in/post-check-in`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +44,7 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch(`http://localhost:3000/check-in/get-data-set?userAuth0Id=${userAuth0Id}`, {
+    const res = await fetch(`${getBackendUrl()}/check-in/get-data-set?userAuth0Id=${userAuth0Id}`, {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -156,6 +157,8 @@ export function mergeByDate(
     // Sort planLog to ensure proper interpolation
     const sortedPlanLog = [...planLog].sort((a, b) => new Date(a.date) - new Date(b.date));
 
+    console.log('sortedPlanLog', sortedPlanLog);
+
     // Build interpolated plan ranges
     const planRanges = [];
     for (let i = 0; i < sortedPlanLog.length; i++) {
@@ -175,6 +178,7 @@ export function mergeByDate(
         });
     }
 
+    console.log('planRanges', planRanges)
 
     const getCurrentUTCDate = () => {
         const now = new Date();
@@ -194,10 +198,15 @@ export function mergeByDate(
         allDates.push(new Date(userCreationDate));
     }
 
+    console.log('allDates', allDates);
+
     const firstDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const lastDate = new Date(Math.max(...allDates.map(d => d.getTime()), currentDate.getTime()));
 
     const current = new Date(firstDate);
+    console.log('firstDate', firstDate);
+    console.log('lastDate', lastDate);
+    console.log('current', current);
     let lastKnownActual = null;
 
     while (current <= lastDate) {
@@ -270,16 +279,12 @@ export function mergeByDate(
 }
 
 
-
-
-
-
 export async function getCheckInData(user, getAccessTokenSilently, isAuthenticated, searchDate = null, action = null, userAuth0Id = null) {
     if (!isAuthenticated || !user) return;
 
     const token = await getAccessTokenSilently();
 
-    let fetchURL = searchDate ? `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}&date=${searchDate}` : `http://localhost:3000/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}`
+    let fetchURL = searchDate ? `${getBackendUrl()}/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}&date=${searchDate}` : `${getBackendUrl()}/check-in/get-check-in-data?userAuth0Id=${userAuth0Id ? userAuth0Id : user.sub}`
 
     if (action !== null) {
         fetchURL += `&action=${action}`;

@@ -19,7 +19,7 @@ const TimelineEntry = ({entry, userAuth0Id}) => {
             <div className="p-2 border-l-4 border-red-400 bg-red-50 rounded">
                 <p className="text-base font-semibold text-gray-800">{dateStrDDMMYY}</p>
                 <p className="text-sm italic text-gray-700">{!userAuth0Id ? 'Bạn' : 'Người dùng'} đã bỏ lỡ check-in trong ngày này.</p>
-                {!userAuth0Id && <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at.split('T')[0])}>Nhấn vào đây để Check-in ngay</button>}
+                {!userAuth0Id && <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at)}>Nhấn vào đây để Check-in ngay</button>}
             </div>
         );
     }

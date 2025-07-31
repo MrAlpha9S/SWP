@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { postUserInfo } from "../../components/utils/userUtils.js";
 import { getUserProfile, syncProfileToStores } from "../../components/utils/profileUtils.js";
 import {useCurrentStepStore, useProfileExists} from "../../stores/store.js";
+import {getFrontEndUrl} from "../../components/utils/getBackendURL.js";
 
 export default function PostSignUpCallback() {
     const { user, getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
@@ -19,7 +20,7 @@ export default function PostSignUpCallback() {
                 console.log(data);
                 if (data.message.role === 'Admin') return navigate('/admin');
                 if (data.message.isBanned === 1) {
-                    await logout({logoutParams: {returnTo: 'http://localhost:5173/banned'}})
+                    await logout({logoutParams: {returnTo: `${getFrontEndUrl()}/banned`}})
                 }
 
                 const profileRes = await getUserProfile(user, getAccessTokenSilently, isAuthenticated);
@@ -84,7 +85,7 @@ export default function PostSignUpCallback() {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            Loading...
+            <div className='loader'></div>
         </div>
     );
 }

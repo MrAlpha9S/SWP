@@ -34,6 +34,9 @@ import CoachUser from "../../components/layout/coachboard/coachUser.jsx";
 import {getCoachByIdOrAuth0Id} from "../../components/utils/userUtils.js";
 import UserReviews from "../../components/layout/coachboard/UserReviews.jsx";
 import Notifications from "../../components/layout/dashboard/notifications.jsx";
+import {getAchievementProgress} from "../../components/utils/achievementsUtils.js";
+import HealthStatistics from "../../components/layout/dashboard/health-statistics.jsx";
+import {getCheckInDataSet} from "../../components/utils/checkInUtils.js";
 
 function Dashboard() {
     const {readinessValue} = useQuitReadinessStore();
@@ -99,6 +102,29 @@ function Dashboard() {
             return await getCoachByIdOrAuth0Id(userInfo?.user_id);
         },
         enabled: isAuthenticated && !!user && userInfo?.role === 'Coach',
+    })
+
+    const {isPending: isAchievementProgressPending, data: achievementProgress} = useQuery({
+        queryKey: ['achievement-progress'],
+        queryFn: async () => {
+            return await getAchievementProgress(user, getAccessTokenSilently, isAuthenticated)
+        },
+        enabled: !!isAuthenticated && !!user,
+    })
+
+    const {
+        isPending: isDatasetPending,
+        error: datasetError,
+        data: checkInDataset,
+        isFetching: isDatasetFetching,
+    } = useQuery({
+        queryKey: ['checkin-dataset'],
+        queryFn: async () => {
+            return await getCheckInDataSet(user, getAccessTokenSilently, isAuthenticated, userInfo?.auth0_id);
+        },
+        enabled: isAuthenticated && !!user && !!userInfo?.auth0_id,
+        retry: 1,
+        //staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
     useEffect(() => {
@@ -195,7 +221,7 @@ function Dashboard() {
             switch (currentStepDashboard) {
                 case 'dashboard':
                     return userProfile?.data?.userProfile ? (
-                        <ProgressBoard
+                        <><ProgressBoard
                             startDate={startDate}
                             pricePerPack={pricePerPack}
                             cigsPerPack={cigsPerPack}
@@ -213,7 +239,9 @@ function Dashboard() {
                             isAuthenticated={isAuthenticated}
                             getAccessTokenSilently={getAccessTokenSilently}
                             setMoneySaved={setMoneySaved}
+                            achievementProgress={achievementProgress}
                         />
+                        </>
                     ) : (
                         currentStepDashboard === 'dashboard' && <NotFoundBanner title="Không tìm thấy kế hoạch của bạn" type="progressNCoach" />
                     );
@@ -233,7 +261,7 @@ function Dashboard() {
                 case 'badges':
                     return <BadgesMenu/>;
                 case 'messager':
-                    return <div className='w-full h-screen'><Messager role={userInfo?.role}/></div>
+                    return <div className='w-full h-screen'><Messager role={userInfo?.role} checkInDataset={checkInDataset}/></div>
                 case 'post-blog':
                     return <ManageBlog/>
 

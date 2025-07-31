@@ -8,7 +8,7 @@ firebase.initializeApp({
     storageBucket: 'ezquit-a88f3.firebasestorage.app',
     messagingSenderId: '221786247064',
     appId: '1:221786247064:web:5ae225f6c7656f7e2da5ed',
-    measurementId: 'G-X6Z671NJJL'
+    measurementId: 'G-X6Z671NJJL',
 });
 
 const messaging = firebase.messaging();

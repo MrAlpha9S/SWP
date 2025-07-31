@@ -2,13 +2,33 @@ const {poolPromise, sql} = require("../configs/sqlConfig");
 const {getUserIdFromAuth0Id, getUserCreationDateFromAuth0Id} = require("./userService")
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 
+const alreadyCheckedIn = async (userAuth0Id, checkInDate) => {
+    try {
+        const pool = await poolPromise;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
 
-const postCheckIn = async (userAuth0Id,
-                           feel,
-                           checkedQuitItems,
-                           cigsSmoked,
-                           freeText,
-                           qna, checkInDate) => {
+        console.log(checkInDate)
+
+        const isAlreadyCheckedIn = await pool.request()
+            .input('logged_at', sql.DateTime, new Date(checkInDate))
+            .input('user_id', sql.Int, userId)
+            .query(`
+                SELECT *
+                FROM checkin_log cl
+                         JOIN users u ON cl.user_id = u.user_id
+                WHERE CAST(logged_at AS DATE) = CAST(@logged_at AS DATE)
+                  AND cl.user_id = @user_id
+            `);
+
+        return isAlreadyCheckedIn.recordset.length > 0;
+
+    } catch (error) {
+        console.log('error in alreadyCheckedIn', error)
+        false
+    }
+}
+
+const postCheckIn = async (userAuth0Id, feel, checkedQuitItems, cigsSmoked, freeText, qna, checkInDate) => {
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
@@ -73,7 +93,7 @@ const getCheckInLogDataset = async (userAuth0Id) => {
             .input('user_id', sql.Int, userId)
             .query('SELECT logged_at as date, cigs_smoked as cigs FROM checkin_log WHERE user_id = @user_id');
 
-        return checkin_logs.recordset.sort((a, b) =>new Date(a.date) - new Date(b.date));
+        return checkin_logs.recordset.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     } catch (error) {
         console.error('error in getCheckInLogDataset', error);
@@ -95,9 +115,11 @@ const getCheckInDataService = async (userAuth0Id, date = null, action = null) =>
                    u.username,
                    u.email,
                    u.role,
-                   CAST((SELECT qna_question, qna_answer FROM qna q WHERE q.log_id = cl.log_id FOR JSON PATH) AS NVARCHAR(MAX)) AS qna,
+                   CAST((SELECT qna_question, qna_answer FROM qna q WHERE q.log_id = cl.log_id FOR JSON
+                        PATH) AS NVARCHAR(MAX)) AS qna,
                    ft.free_text_content,
-                   CAST((SELECT item_value FROM quitting_items qi WHERE qi.log_id = cl.log_id FOR JSON PATH) AS NVARCHAR(MAX)) AS quitting_items
+                   CAST((SELECT item_value FROM quitting_items qi WHERE qi.log_id = cl.log_id FOR JSON
+                        PATH) AS NVARCHAR(MAX)) AS quitting_items
             FROM checkin_log cl
                      LEFT JOIN users u ON cl.user_id = u.user_id
                      LEFT JOIN free_text ft ON cl.log_id = ft.log_id
@@ -130,10 +152,7 @@ const getCheckInDataService = async (userAuth0Id, date = null, action = null) =>
             quitting_items: row.quitting_items ? JSON.parse(row.quitting_items).map(item => item.item_value) : []
         }));
 
-        return !action || action !== 'journal'
-            ? (date ? (mapped[0] ?? false) : mapped)
-            : (date ? ((await fillMissingCheckInData(userAuth0Id, mapped))[0] ?? false)
-                : await fillMissingCheckInData(userAuth0Id, mapped));
+        return !action || action !== 'journal' ? (date ? (mapped[0] ?? false) : mapped) : (date ? ((await fillMissingCheckInData(userAuth0Id, mapped))[0] ?? false) : await fillMissingCheckInData(userAuth0Id, mapped));
 
 
     } catch (err) {
@@ -149,9 +168,7 @@ const fillMissingCheckInData = async (userAuth0Id, checkInResult) => {
 
     const result = [...checkInResult]; // clone
 
-    const loggedDates = new Set(
-        result.map(r => new Date(r.logged_at).toISOString().split('T')[0])
-    );
+    const loggedDates = new Set(result.map(r => new Date(r.logged_at).toISOString().split('T')[0]));
 
     let current = new Date(userCreationDate);
     const end = new Date(today);
@@ -161,8 +178,7 @@ const fillMissingCheckInData = async (userAuth0Id, checkInResult) => {
         const dateISO = current.toISOString().split('T')[0];
         if (!loggedDates.has(dateISO)) {
             result.push({
-                logged_at: new Date(current),
-                isMissed: true
+                logged_at: new Date(current), isMissed: true
             });
         }
         current.setUTCDate(current.getUTCDate() + 1);
@@ -208,5 +224,94 @@ const deleteCheckInById = async (log_id) => {
     }
 };
 
+const updateCheckIn = async (userAuth0Id, feel, checkedQuitItems, cigsSmoked, freeText, qna, checkInDate) => {
+    try {
+        console.log('checkin date up ', checkInDate)
+        const pool = await poolPromise;
+        const userId = await getUserIdFromAuth0Id(userAuth0Id);
 
-module.exports = {postCheckIn, getCheckInLogDataset, getCheckInDataService, fillMissingCheckInData, getAllCheckIns, getCheckInById, deleteCheckInById};
+        const result = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .input('feeling', sql.VarChar(10), feel)
+            .input('logged_at', sql.DateTime, new Date(checkInDate))
+            .input('cigs_smoked', sql.Int, typeof cigsSmoked === 'number' ? cigsSmoked : null)
+            .query(`
+                UPDATE checkin_log
+                SET feeling     = @feeling,
+                    logged_at   = @logged_at,
+                    cigs_smoked = @cigs_smoked OUTPUT INSERTED.log_id
+                WHERE user_id = @user_id
+                  AND CAST (logged_at AS DATE) = CAST (@logged_at AS DATE)
+            `);
+
+        const log_id = result.recordset[0]?.log_id;
+
+        if (qna && qna.length > 0) {
+            for (const [key, value] of Object.entries(qna)) {
+                await pool.request()
+                    .input('log_id', sql.Int, log_id)
+                    .input('qna_question', sql.VarChar(30), key)
+                    .input('qna_answer', sql.NVarChar(sql.MAX), value ?? null)
+                    .query(`
+        IF EXISTS (
+          SELECT 1 FROM qna WHERE log_id = @log_id AND qna_question = @qna_question
+        )
+        UPDATE qna
+        SET qna_answer = @qna_answer
+        WHERE log_id = @log_id AND qna_question = @qna_question
+        ELSE
+        INSERT INTO qna (log_id, qna_question, qna_answer)
+        VALUES (@log_id, @qna_question, @qna_answer)
+      `);
+            }
+        } else {
+            await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query(`DELETE
+                        FROM qna
+                        WHERE log_id = @log_id`);
+        }
+
+        if (checkedQuitItems && checkedQuitItems.length > 0) {
+            for (const quitItem of checkedQuitItems ?? []) {
+                await pool.request()
+                    .input('item_value', sql.VarChar(30), quitItem)
+                    .input('log_id', sql.Int, log_id)
+                    .query('UPDATE quitting_items SET item_value = @item_value WHERE log_id = @log_id');
+            }
+        } else {
+            await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query('DELETE FROM quitting_items WHERE log_id = @log_id');
+        }
+
+        if (freeText && freeText !== '') {
+            await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .input('free_text_content', sql.NVarChar(sql.MAX), freeText ?? null)
+                .query('UPDATE free_text SET free_text_content = @free_text_content WHERE log_id = @log_id');
+        } else {
+            await pool.request()
+                .input('log_id', sql.Int, log_id)
+                .query('DELETE FROM free_text WHERE log_id = @log_id');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('error in updateCheckin', error);
+        return false;
+    }
+}
+
+
+module.exports = {
+    postCheckIn,
+    getCheckInLogDataset,
+    getCheckInDataService,
+    fillMissingCheckInData,
+    getAllCheckIns,
+    getCheckInById,
+    deleteCheckInById,
+    alreadyCheckedIn,
+    updateCheckIn
+};

@@ -12,19 +12,27 @@ const userCronJobs = new Map();
  * Create cron jobs based on user's push time preference
  */
 const scheduleUserPushes = async () => {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-        SELECT u.user_id, u.auth0_id, u.time_to_send_push, STRING_AGG(pr.reason_value, ',') AS reasons
-        FROM users u
-                 JOIN user_profiles up ON u.user_id = up.user_id
-                 JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
-        WHERE u.fcm_token IS NOT NULL AND u.time_to_send_push IS NOT NULL
-        GROUP BY u.user_id, u.auth0_id, u.time_to_send_push
-    `);
+    console.log('📌 Inside scheduleUserPushes');
+    try {
+        const pool = await poolPromise;
+        console.log('✅ Got DB connection');
 
-    result.recordset.forEach(user => {
-        schedulePushForUser(user.auth0_id, user.time_to_send_push, user.reasons);
-    });
+        const result = await pool.request().query(`
+      SELECT u.user_id, u.auth0_id, u.time_to_send_push, STRING_AGG(pr.reason_value, ',') AS reasons
+      FROM users u
+               JOIN user_profiles up ON u.user_id = up.user_id
+               JOIN profiles_reasons pr ON up.profile_id = pr.profile_id
+      WHERE u.fcm_token IS NOT NULL AND u.time_to_send_push IS NOT NULL
+      GROUP BY u.user_id, u.auth0_id, u.time_to_send_push
+    `);
+        console.log('✅ Fetched users from DB:', result.recordset.length);
+
+        result.recordset.forEach(user => {
+            schedulePushForUser(user.auth0_id, user.time_to_send_push, user.reasons);
+        });
+    } catch (err) {
+        console.error('❌ Error in scheduleUserPushes:', err);
+    }
 };
 
 /**
@@ -41,14 +49,25 @@ const schedulePushForUser = (userAuth0Id, timeString, reasonsCSV) => {
     const matchedReasons = reasonListOptions.filter(r => reasonList.includes(r.value));
     const reasonText = matchedReasons.map(r => `${r.label.toLowerCase()}`).join(', ');
 
-    const times = timeString.split('-'); // ['08:00', '13:30']
+    const times = timeString.split('-');
     const jobs = times.map(time => {
-        const [hour, minute] = time.split(':');
+        const [localHour, minute] = time.split(':');
+        let hour = parseInt(localHour);
+
+        console.log('is production', process.env.NODE_ENV)
+        console.log('hour before', hour)
+
+        if (process.env.NODE_ENV === 'production') {
+            hour = (hour - 7 + 24) % 24;
+            console.log('hour after', hour)
+        }
+
         const cronExp = `${minute} ${hour} * * *`;
 
         const job = cron.schedule(cronExp, async () => {
             console.log(`Sending push to user ${userAuth0Id} at ${time}`);
-            await sendPushNotification(userAuth0Id,
+            await sendPushNotification(
+                userAuth0Id,
                 `💪 Tiếp tục kiên trì nhé!`,
                 `Lý do bạn đang cố gắng: ${reasonText.length > 0 ? reasonText : 'chưa có'}`
             );

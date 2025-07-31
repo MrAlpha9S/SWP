@@ -1,15 +1,15 @@
-import { notification } from 'antd';
-import React, { createContext, useContext, useMemo } from 'react';
+import {notification} from 'antd';
+import React, {createContext, useContext, useMemo} from 'react';
 import {BsFillPeopleFill, BsFillReplyFill} from "react-icons/bs";
 import {BiConversation} from "react-icons/bi";
 import {CiEdit} from "react-icons/ci";
 import {FaCheck, FaCross, FaMedal, FaRegLightbulb} from "react-icons/fa";
-import {HeartIcon} from "lucide-react";
+import {AlarmCheckIcon, HeartIcon} from "lucide-react";
 import {ImCancelCircle} from "react-icons/im";
 
 const NotificationContext = createContext();
 
-export const NotificationProvider = ({ children }) => {
+export const NotificationProvider = ({children}) => {
     const [api, contextHolder] = notification.useNotification();
 
     const openNotification = (type, payload, onClick) => {
@@ -47,7 +47,8 @@ export const NotificationProvider = ({ children }) => {
                     message: payload?.message,
                     description: <div>
                         {payload?.content}
-                        {payload?.timestamp ? <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
+                        {payload?.timestamp ?
+                            <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
                     </div>,
                     placement: 'topRight',
                     icon: <FaCheck className="size-5"/>
@@ -59,7 +60,8 @@ export const NotificationProvider = ({ children }) => {
                     message: payload?.message,
                     description: <div>
                         {payload?.content}
-                        {payload?.timestamp ? <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
+                        {payload?.timestamp ?
+                            <p className='text-gray-400 text-xs'>{`${new Date(payload.timestamp).getUTCHours()}:${new Date(payload.timestamp).getUTCMinutes()}`}</p> : ''}
                     </div>,
                     placement: 'topRight',
                     icon: <ImCancelCircle className="size-5"/>
@@ -70,7 +72,8 @@ export const NotificationProvider = ({ children }) => {
                     key: `plan-edit-by-coach`,
                     message: `Kế hoạch sửa bởi ${payload.updaterUsername}`,
                     description: <div>
-                        Kế hoạch của bạn vừa được chỉnh sửa bởi Huấn luyện viên <strong>{payload.updaterUsername}</strong>
+                        Kế hoạch của bạn vừa được chỉnh sửa bởi Huấn luyện
+                        viên <strong>{payload.updaterUsername}</strong>
                         <p className='text-gray-400 text-xs'>{payload.timestamp}</p>
                     </div>,
                     placement: 'topRight',
@@ -146,12 +149,23 @@ export const NotificationProvider = ({ children }) => {
             case 'reply':
                 api.open({
                     key: `reply-${payload.commenter_auth0_id}`,
-                    message: <div>Người dùng <strong>{payload.commenter_username}</strong> vừa bình luận bài viết <strong>{payload.post_title}</strong> của bạn.</div>,
+                    message: <div>Người dùng <strong>{payload.commenter_username}</strong> vừa bình luận bài
+                        viết <strong>{payload.post_title}</strong> của bạn.</div>,
                     description: <div>
                         Bình luận: {payload.content}
                     </div>,
                     placement: 'topRight',
                     icon: <BsFillReplyFill className="size-5"/>,
+                    onClick: onClick
+                });
+                break;
+            case 'notice':
+                api.open({
+                    key: `notice-${payload.message}`,
+                    message: payload.message,
+                    description: payload.content,
+                    placement: 'topRight',
+                    icon: <AlarmCheckIcon className="size-5"/>,
                     onClick: onClick
                 });
                 break;
@@ -163,7 +177,7 @@ export const NotificationProvider = ({ children }) => {
         }
     };
 
-    const value = useMemo(() => ({ openNotification }), []);
+    const value = useMemo(() => ({openNotification}), []);
 
     return (
         <NotificationContext.Provider value={value}>

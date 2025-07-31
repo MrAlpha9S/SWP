@@ -50,7 +50,7 @@ CREATE TABLE [users_subscriptions]
   [user_id] int,
   [sub_id] int,
   [purchased_date] DATETIME,
-  PRIMARY KEY ([user_id], [sub_id])
+  PRIMARY KEY ([user_id], [sub_id], [purchased_date])
 )
 GO
 
@@ -295,7 +295,6 @@ CREATE TABLE [user_achievement_progress]
   [posts_created] INT DEFAULT 0,
   [comments_created] INT DEFAULT 0,
   [total_likes_given] INT DEFAULT 0,
-  [total_likes_received] INT DEFAULT 0,
   [first_check_in_completed] BIT DEFAULT 0,
   [first_saving_goal_completed] BIT DEFAULT 0,
   [last_smoke_free_date] DATE NULL,
@@ -666,16 +665,6 @@ BEGIN
   FROM social_likes
   WHERE user_id = @UserId
         ),
-        total_likes_received = (
-            SELECT COUNT(*)
-  FROM social_likes sl
-  WHERE sl.post_id IN (SELECT post_id
-    FROM social_posts sp
-    WHERE sp.user_id = @UserId)
-    OR sl.comment_id IN (SELECT comment_id
-    FROM social_comments sc
-    WHERE sc.user_id = @UserId)
-        ),
         first_check_in_completed = CASE WHEN EXISTS (
             SELECT 1
   FROM checkin_log
@@ -694,10 +683,10 @@ BEGIN
         )
     WHERE user_id = @UserId;
 
-  -- Grant achievements (new-member removed since it's handled by trigger)
+  -- Grant achievements
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT @UserId, a.achievement_id, GETDATE()
+  SELECT @UserId, a.achievement_id, DATEADD(HOUR, 7, GETDATE())
   FROM achievements a
     CROSS JOIN user_achievement_progress uap
   WHERE uap.user_id = @UserId
@@ -747,10 +736,7 @@ BEGIN
   WHERE ua.user_id = @UserId
     AND ua.achieved_at >= DATEADD(SECOND, -10, GETDATE());
 END
-GO
 
-select *
-from achievements
 GO
 CREATE OR ALTER TRIGGER trg_checkin_log_progress
 ON checkin_log
@@ -856,7 +842,7 @@ BEGIN
 END
 GO
 
--- Social Likes Trigger (More Complex - Need to Handle Both Giver and Receiver)
+-- Social Likes Trigger
 CREATE OR ALTER TRIGGER trg_social_likes_progress
 ON social_likes
 AFTER INSERT
@@ -869,19 +855,7 @@ BEGIN
         -- Get all users who gave likes
               SELECT DISTINCT user_id
     FROM inserted
-  UNION
-    -- Get all users who received likes on their posts
-    SELECT DISTINCT sp.user_id
-    FROM inserted i
-      INNER JOIN social_posts sp ON i.post_id = sp.post_id
-    WHERE i.post_id IS NOT NULL
-  UNION
-    -- Get all users who received likes on their comments
-    SELECT DISTINCT sc.user_id
-    FROM inserted i
-      INNER JOIN social_comments sc ON i.comment_id = sc.comment_id
-    WHERE i.comment_id IS NOT NULL;
-
+  
   OPEN user_cursor;
   FETCH NEXT FROM user_cursor INTO @userId;
 
@@ -947,7 +921,7 @@ BEGIN
 END
 GO
 
--- 6. New User Trigger (Already handles multiple, but let's optimize)
+-- 6. New User Trigger 
 CREATE OR ALTER TRIGGER trg_NewUser_GrantInitialAchievements
 ON [users]
 AFTER INSERT
@@ -969,7 +943,7 @@ BEGIN
   -- Grant "new-member" achievement to all new users
   INSERT INTO user_achievements
     (user_id, achievement_id, achieved_at)
-  SELECT i.user_id, 'new-member', GETDATE()
+  SELECT i.user_id, 'new-member', DATEADD(HOUR, 7, GETDATE())
   FROM inserted i
   WHERE NOT EXISTS (
         SELECT 1
@@ -997,13 +971,14 @@ END
 GO
 
 -- Trigger 1: Create revenue entry when user purchases subscription
-CREATE TRIGGER TR_UserSubscription_Revenue
+CREATE OR ALTER TRIGGER TR_UserSubscription_Revenue
 ON [users_subscriptions]
 AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
+    -- Insert into revenue table
     INSERT INTO [revenue] ([amount], [created_at], [sub_id])
     SELECT 
         s.price,
@@ -1011,8 +986,26 @@ BEGIN
         i.sub_id
     FROM inserted i
     INNER JOIN [subscriptions] s ON i.sub_id = s.sub_id;
-END;
+
+    -- Insert into coach_revenue if user has a coach
+    INSERT INTO [coach_revenue] ([coach_id], [amount], [created_at], [sub_id])
+    SELECT 
+        cu.coach_id,
+        s.price * ISNULL(ci.commission_rate, 0.3), -- fallback if NULL
+        i.purchased_date,
+        i.sub_id
+    FROM inserted i
+    INNER JOIN [subscriptions] s ON i.sub_id = s.sub_id
+    INNER JOIN [coach_user] cu ON cu.user_id = i.user_id
+        AND cu.started_date = (
+            SELECT MAX(started_date)
+            FROM coach_user
+            WHERE user_id = i.user_id
+        )
+    LEFT JOIN coach_info ci ON ci.coach_id = cu.coach_id;
+END
 GO
+
 
 -- Trigger 2: Create coach revenue entry when coach gets assigned to user
 CREATE TRIGGER TR_CoachUser_CoachRevenue

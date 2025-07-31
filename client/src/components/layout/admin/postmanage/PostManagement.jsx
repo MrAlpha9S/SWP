@@ -4,6 +4,7 @@ import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getAllPosts, getPostById, deletePost, getPostLikes, getCommentsByPostId  } from '../../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
 import dayjs from 'dayjs';
+import {getBackendUrl} from "../../../utils/getBackendURL.js";
 
 const PostManagement = () => {
   const [posts, setPosts] = useState([]);

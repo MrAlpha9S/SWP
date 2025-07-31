@@ -10,6 +10,7 @@ import {
     usePlanStore,
     useGoalsStore, useUserInfoStore,
 } from '../../stores/store.js';
+import {getBackendUrl} from "./getBackendURL.js";
 
 export async function getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id = null) {
 
@@ -23,7 +24,7 @@ export async function getUserProfile(user, getAccessTokenSilently, isAuthenticat
         bodyPayload.userAuth0Id = user.sub;
     }
 
-    const res = await fetch('http://localhost:3000/profiles/getProfile', {
+    const res = await fetch(`${getBackendUrl()}/profiles/getProfile`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -49,7 +50,7 @@ export async function postGoal(goalId = null, goalName, goalAmount, user, getAcc
     try {
         const token = await getAccessTokenSilently();
 
-        const res = await fetch('http://localhost:3000/profiles/postGoal', {
+        const res = await fetch(`${getBackendUrl()}/profiles/postGoal`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -83,7 +84,7 @@ export const deleteGoal = async (goalId, user, getAccessTokenSilently, isAuthent
     try {
         const token = await getAccessTokenSilently();
 
-        const res = await fetch('http://localhost:3000/profiles/delete-goal', {
+        const res = await fetch(`${getBackendUrl()}/profiles/delete-goal`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,

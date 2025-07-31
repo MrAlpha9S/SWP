@@ -1,3 +1,5 @@
+import {getBackendUrl} from "./getBackendURL.js";
+
 export async function postBlog(user, getAccessTokenSilently, isAuthenticated, topic, title, description, content, created_at) {
 
     if (!isAuthenticated || !user) return;
@@ -5,7 +7,7 @@ export async function postBlog(user, getAccessTokenSilently, isAuthenticated, to
     const token = await getAccessTokenSilently();
 
 
-    const res = await fetch('http://localhost:3000/topics/post_blog', {
+    const res = await fetch(`${getBackendUrl()}/topics/post_blog`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -24,7 +26,7 @@ export async function getPostedBlog(user, getAccessTokenSilently, isAuthenticate
 
     const token = await getAccessTokenSilently();
 
-    const res = await fetch('http://localhost:3000/topics/getblog', {
+    const res = await fetch(`${getBackendUrl()}/topics/getblog`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -38,7 +40,7 @@ export async function getPostedBlog(user, getAccessTokenSilently, isAuthenticate
 }
 
 export async function getBlogById(id, token) {
-  const res = await fetch(`http://localhost:3000/topics/getblogbyid/${id}`, {
+  const res = await fetch(`${getBackendUrl()}/topics/getblogbyid/${id}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Lỗi lấy blog');

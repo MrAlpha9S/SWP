@@ -9,6 +9,7 @@ import CreatedAtField from "../../components/layout/profilepage/CreatedAtField.j
 import { FaUser, FaEnvelope, FaUserTag, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaCamera, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageFadeWrapper from "../../components/utils/PageFadeWrapper.jsx";
+import {formatUtcToLocalString, getCurrentUTCDateTime} from "../../components/utils/dateUtils.js";
 
 function Profile() {
     const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
@@ -27,6 +28,7 @@ function Profile() {
     const [showAvatarMenu, setShowAvatarMenu] = useState(false);
     const [showAvatarModal, setShowAvatarModal] = useState(false);
     const navigate = useNavigate();
+    const [expired, setExpired] = useState(false);
 
     useEffect(() => {
         if (currentStepDashboard !== "profile") {
@@ -50,6 +52,7 @@ function Profile() {
                     created_at: userData?.created_at || "",
                     is_social: userData?.is_social || false,
                     sub_id: userData?.sub_id,
+                    vip_end_date: userData?.vip_end_date || "",
                 };
                 setProfile(loadedProfile);
                 setOriginalProfile(loadedProfile);
@@ -129,6 +132,16 @@ function Profile() {
         setProfile({ ...profile, avatar: "" });
         setShowAvatarMenu(false);
     };
+
+    useEffect(() => {
+        if (originalProfile && originalProfile.vip_end_date) {
+            const today = getCurrentUTCDateTime()
+            const vipEndDate = new Date(originalProfile?.vip_end_date);
+            if (today - vipEndDate > 0) {
+                setExpired(true);
+            }
+        }
+    }, [originalProfile]);
 
     return (
         <PageFadeWrapper>
@@ -260,6 +273,31 @@ function Profile() {
                                                 : 'Premium 12 tháng'
                                     }
                                 />
+                                <div className='mt-4'>
+                                    <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
+                                        <FaCalendarAlt className="text-primary-400" /> Thời hạn
+                                        {expired && <span className='text-xs font-normal text-red-500'>Bạn có đăng ký gói trước đó hiện đã hết hạn. <a
+                                            className='cursor-pointer underline'
+                                            onClick={() => navigate('/subscription')}>Gia hạn ngay?</a></span>}
+                                    </label>
+                                    {originalProfile.sub_id === 1 ? (
+                                        <input
+                                            type="text"
+                                            name="expiry"
+                                            value={'Vô thời hạn'}
+                                            disabled
+                                            className="w-full border rounded px-3 py-2 bg-gray-100"
+                                        />
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            name="expiry"
+                                            value={formatUtcToLocalString(originalProfile.vip_end_date)}
+                                            disabled
+                                            className="w-full border rounded px-3 py-2 bg-gray-100"
+                                        />
+                                    )}
+                                </div>
                             </div>
                             <button
                                 type="submit"

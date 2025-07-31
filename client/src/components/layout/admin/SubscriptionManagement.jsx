@@ -4,6 +4,7 @@ import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getAllUserSubscriptions, createUserSubscription, updateUserSubscription, deleteUserSubscription, getAllUsers, getAllSubscriptions as getAllPlans } from '../../utils/adminUtils';
 import { useAuth0 } from '@auth0/auth0-react';
+import {getBackendUrl} from "../../utils/getBackendURL.js";
 
 const { Option } = Select;
 
@@ -38,8 +39,8 @@ const SubscriptionManagement = () => {
     try {
       const token = await getAccessTokenSilently();
       const [userRes, planRes] = await Promise.all([
-        fetch('http://localhost:3000/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:3000/admin/subscriptions', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${getBackendUrl()}/admin/users`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${getBackendUrl()}/admin/subscriptions`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       const userData = await userRes.json();
       const planData = await planRes.json();
