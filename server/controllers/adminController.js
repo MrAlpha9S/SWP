@@ -572,6 +572,7 @@ const handleGetAllUserSubscriptions = async (req, res) => {
     }
 };
 const handleCreateUserSubscription = async (req, res) => {
+    const { user_id, sub_id, purchased_date, end_date } = req.body;
     try {
         const created = await adminService.createUserSubscription(req.body);
         if (!created) return res.status(400).json({success: false, message: 'Failed to create user subscription'});

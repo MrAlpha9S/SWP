@@ -578,6 +578,16 @@ async function createUserSubscription(data) {
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
+    const alreadyHasSubscription = await checkSubscriptionExist(data.user_id)
+    if (alreadyHasSubscription) {
+      const req = transaction.request();
+      req.input('user_id', sql.Int, data.user_id);
+
+      const deleteResult = await req.query(
+          'DELETE FROM users_subscriptions WHERE user_id = @user_id'
+      );
+    }
+
     // Insert vào users_subscriptions (KHÔNG có end_date)
     const req = transaction.request();
     req.input('user_id', sql.Int, data.user_id);
@@ -813,6 +823,18 @@ const getPendingCoachDetails = async (id) => {
   return result.recordset[0];
 };
 
+const checkSubscriptionExist = async (user_id) => {
+    try {
+      const pool = await poolPromise;
+      const result = await pool.request()
+          .input('user_id', sql.Int, user_id)
+          .query('select * from users_subscriptions WHERE user_id = @user_id');
+      return result.recordset.length > 0;
+    } catch (error) {
+      console.error('Error in checkSubscriptionExist:', error);
+      return false;
+    }
+}
 
 module.exports = {
   approveBlog,
@@ -862,4 +884,5 @@ module.exports = {
   approveCoach,
   rejectCoach,
   getPendingCoachDetails,
+  checkSubscriptionExist
 };
