@@ -65,6 +65,8 @@ function Profile() {
     }, [isAuthenticated, user, getAccessTokenSilently]);
 
     const handleChange = (e) => {
+        // Không cho phép thay đổi nếu là social user
+        if (profile.is_social) return;
         setProfile({ ...profile, [e.target.name]: e.target.value });
     };
 
@@ -72,54 +74,42 @@ function Profile() {
         e.preventDefault();
         setError("");
         setSuccess("");
+        
+        // Không cho phép cập nhật nếu là social user
+        if (profile.is_social) {
+            setError("Tài khoản social không thể cập nhật thông tin.");
+            return;
+        }
+        
         try {
-            let payload;
-            if (profile.is_social) {
-                // Gửi đầy đủ thông tin hiện tại lên database, chỉ avatar là có thể thay đổi
-                payload = {
-                    username: profile.username,
-                    email: profile.email,
-                    avatar: profile.avatar
-                };
-            } else {
-                // Cho phép cập nhật tất cả
-                payload = {
-                    username: profile.username,
-                    email: profile.email,
-                    avatar: profile.avatar
-                };
-            }
+            const payload = {
+                username: profile.username,
+                email: profile.email,
+                avatar: profile.avatar
+            };
 
-            // 1. Cập nhật database (luôn gửi đủ trường)
+            // 1. Cập nhật database
             await updateUserInfo(user, getAccessTokenSilently, payload);
 
-            // 2. Cập nhật Auth0 (chỉ avatar nếu là social, còn lại thì gửi đủ)
-            let auth0Payload = profile.is_social
-                ? { avatar: profile.avatar }
-                : { username: profile.username, email: profile.email, avatar: profile.avatar };
+            // 2. Cập nhật Auth0
+            const auth0Payload = { 
+                username: profile.username, 
+                email: profile.email, 
+                avatar: profile.avatar 
+            };
 
             await updateUserController(user, getAccessTokenSilently, auth0Payload);
 
-            setSuccess("Cập nhật thành công! Đăng xuất và đăng nhập lại để thấy thông tin mới ở Hero.");
+            setSuccess("Cập nhật thành công!");
             setOriginalProfile(profile);
         } catch (err) {
             setError("Cập nhật thất bại!");
         }
     };
 
-    // Hàm cập nhật avatar (chọn file hoặc nhập link)
-    const handleAvatarChange = async (e) => {
-        let avatarUrl = "";
-        if (e.target.files && e.target.files[0]) {
-            // Upload lên server hoặc cloud, ở đây demo lấy URL local
-            avatarUrl = URL.createObjectURL(e.target.files[0]);
-        }
-        setProfile({ ...profile, avatar: avatarUrl });
-        setShowAvatarMenu(false);
-    };
-
-    // Hàm nhập link avatar
+    // Hàm nhập link avatar (chỉ cho non-social users)
     const handleAvatarLink = () => {
+        if (profile.is_social) return;
         const url = prompt("Nhập link ảnh avatar:");
         if (url) {
             setProfile({ ...profile, avatar: url });
@@ -127,8 +117,9 @@ function Profile() {
         setShowAvatarMenu(false);
     };
 
-    // Hàm xóa avatar
+    // Hàm xóa avatar (chỉ cho non-social users)
     const handleAvatarRemove = () => {
+        if (profile.is_social) return;
         setProfile({ ...profile, avatar: "" });
         setShowAvatarMenu(false);
     };
@@ -163,23 +154,20 @@ function Profile() {
                                     <FaUser />
                                 </div>
                             )}
-                            {/* Nút mở menu avatar */}
-                            <button
-                                type="button"
-                                className="absolute bottom-2 right-2 bg-primary-500 text-white rounded-full p-2 shadow hover:bg-primary-600 transition"
-                                onClick={() => setShowAvatarMenu((v) => !v)}
-                                title="Tùy chọn avatar"
-                            >
-                                <FaCamera />
-                            </button>
-                            {/* Menu avatar */}
-                            {showAvatarMenu && (
+                            {/* Chỉ hiển thị nút avatar menu cho non-social users */}
+                            {!profile.is_social && (
+                                <button
+                                    type="button"
+                                    className="absolute bottom-2 right-2 bg-primary-500 text-white rounded-full p-2 shadow hover:bg-primary-600 transition"
+                                    onClick={() => setShowAvatarMenu((v) => !v)}
+                                    title="Tùy chọn avatar"
+                                >
+                                    <FaCamera />
+                                </button>
+                            )}
+                            {/* Menu avatar chỉ cho non-social users */}
+                            {showAvatarMenu && !profile.is_social && (
                                 <div className="absolute z-10 right-0 mt-2 w-40 bg-white border rounded shadow-lg flex flex-col">
-                                    <label className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                        <FaCamera /> 
-                                        <span>Cập nhật từ file</span>
-                                        <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-                                    </label>
                                     <button
                                         className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
                                         onClick={handleAvatarLink}
@@ -199,20 +187,6 @@ function Profile() {
                             )}
                         </div>
                     </div>
-                    {/* Modal xem avatar */}
-                    {showAvatarModal && profile.avatar && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-10">
-                            <div className="bg-white rounded-lg p-4 shadow-lg flex flex-col items-center">
-                                <img src={profile.avatar} alt="avatar" className="w-64 h-64 object-cover rounded-full mb-4" />
-                                <button
-                                    className="mt-2 px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-                                    onClick={() => setShowAvatarModal(false)}
-                                >
-                                    Đóng
-                                </button>
-                            </div>
-                        </div>
-                    )}
                     {error && (
                         <div className="flex items-center text-red-600 mb-2 gap-2 justify-center">
                             <FaTimesCircle /> {error}
@@ -227,7 +201,15 @@ function Profile() {
                         <div className="text-center text-primary-500 font-semibold">Đang tải...</div>
                     ) : (
                         <form onSubmit={handleUpdate} className="space-y-4">
-                            {/* Nếu là social chỉ cho đổi avatar, disable các trường khác */}
+                            {/* Hiển thị thông báo cho social users */}
+                            {profile.is_social && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                    <p className="text-blue-800 text-sm">
+                                        Tài khoản social không thể cập nhật thông tin cá nhân.
+                                    </p>
+                                </div>
+                            )}
+                            
                             <div>
                                 <label className="block font-semibold mb-1 text-primary-700 flex items-center gap-2">
                                     <FaUser className="text-primary-400" /> Tên người dùng
@@ -235,7 +217,7 @@ function Profile() {
                                 <UsernameField
                                     value={profile.username}
                                     onChange={handleChange}
-                                    readOnly={profile.is_social} // Thêm dòng này
+                                    readOnly={profile.is_social}
                                 />
                             </div>
                             <div>
@@ -245,7 +227,7 @@ function Profile() {
                                 <EmailField
                                     value={profile.email}
                                     onChange={handleChange}
-                                    readOnly={profile.is_social} // Thêm dòng này
+                                    readOnly={profile.is_social}
                                 />
                             </div>
                             <div>
@@ -299,34 +281,31 @@ function Profile() {
                                     )}
                                 </div>
                             </div>
-                            <button
-                                type="submit"
-                                className={`w-full mt-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2
-                                    ${(
-                                        (!profile.is_social && (
+                            {/* Chỉ hiển thị nút cập nhật cho non-social users */}
+                            {!profile.is_social && (
+                                <button
+                                    type="submit"
+                                    className={`w-full mt-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2
+                                        ${(
                                             profile.username !== originalProfile.username ||
                                             profile.email !== originalProfile.email ||
                                             profile.avatar !== originalProfile.avatar
-                                        )) ||
-                                        (profile.is_social && profile.avatar !== originalProfile.avatar)
-                                    )
-                                        ? "bg-primary-500 hover:bg-primary-600 text-white shadow"
-                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    }`}
-                                disabled={
-                                    !(
-                                        (!profile.is_social && (
+                                        )
+                                            ? "bg-primary-500 hover:bg-primary-600 text-white shadow"
+                                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        }`}
+                                    disabled={
+                                        !(
                                             profile.username !== originalProfile.username ||
                                             profile.email !== originalProfile.email ||
                                             profile.avatar !== originalProfile.avatar
-                                        )) ||
-                                        (profile.is_social && profile.avatar !== originalProfile.avatar)
-                                    )
-                                }
-                            >
-                                <FaCheckCircle />
-                                Cập nhật
-                            </button>
+                                        )
+                                    }
+                                >
+                                    <FaCheckCircle />
+                                    Cập nhật
+                                </button>
+                            )}
                         </form>
                     )}
 
