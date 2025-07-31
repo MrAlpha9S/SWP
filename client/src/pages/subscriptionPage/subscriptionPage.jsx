@@ -107,7 +107,7 @@ function SubscriptionPage() {
         }
     });
 
-    const {isPending : hasCoachPending, data : hasCoachData} = useQuery({
+    const {isPending: hasCoachPending, data: hasCoachData} = useQuery({
         queryKey: ['has-coach'],
         queryFn: async () => {
             return await getCoachByIdOrAuth0Id(user.sub)
@@ -363,15 +363,9 @@ function SubscriptionPage() {
                         <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Câu hỏi Thường gặp</h2>
                         <div className="grid md:grid-cols-2 gap-8">
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể hủy bất cứ lúc nào
-                                    không?</h3>
-                                <p className="text-gray-600">Có, bạn có thể hủy gói đăng ký bất cứ lúc nào mà không cần
-                                    lý do.</p>
-                            </div>
-                            <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Bạn có hoàn tiền không?</h3>
-                                <p className="text-gray-600">Chúng tôi cung cấp chính sách hoàn tiền trong vòng 30 ngày
-                                    cho tất cả các gói Premium.</p>
+                                <p className="text-gray-600">Chúng tôi sẽ không hoàn tiền cho các giao dịch, vì vậy hãy
+                                    cân nhắc kỹ lưỡng trước khi thanh toán.</p>
                             </div>
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Bạn chấp nhận những phương thức
@@ -381,8 +375,8 @@ function SubscriptionPage() {
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Tôi có thể nâng cấp hoặc hạ cấp
                                     gói không?</h3>
-                                <p className="text-gray-600">Có, bạn có thể thay đổi gói bất cứ lúc nào trong phần cài
-                                    đặt tài khoản của bạn.</p>
+                                <p className="text-gray-600">Không, bạn sẽ cần đợi tới khi gói hết hạn. Chúng tôi sẽ
+                                    thông báo trước 7 ngày.</p>
                             </div>
                         </div>
                     </div>
@@ -401,7 +395,7 @@ function SubscriptionPage() {
                     footer={null}
                     maskClosable={false}
                     styles={{
-                        body: { height: '550px' }
+                        body: {height: '550px'}
                     }}
                 >
                     <div id="payos-container" style={{
@@ -421,7 +415,8 @@ function SubscriptionPage() {
                     footer={null}
                     maskClosable={false}
                 >
-                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from} hasCoach={hasCoachData?.success}/>}
+                    {subscriptionData && <CongratulationPage subscriptionData={subscriptionData} from={from}
+                                                             hasCoach={hasCoachData?.success}/>}
                 </Modal>
 
             </div>

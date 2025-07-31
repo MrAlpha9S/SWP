@@ -14,7 +14,7 @@ const CustomStageEditor = ({
     const [intervalType, setIntervalType] = useState("week"); // 'day' or 'week'
     const [validationError, setValidationError] = useState("");
 
-    // Initialize from planLog if customStages is empty
+
     useEffect(() => {
         if (customStages.length <= 1 && planLog.length > 0) {
             const stagesFromPlan = planLog.map(stage => ({
