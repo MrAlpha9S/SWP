@@ -6,7 +6,7 @@ import {
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
 import {checkboxStyle, quittingMethodOptions, onboardingErrorMsg} from "../../../constants/constants.js";
-import {Checkbox, DatePicker, Radio, Tabs} from "antd";
+import {Checkbox, DatePicker, Radio, Select, Tabs} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
@@ -71,6 +71,7 @@ const SetPlan = ({
     const mutation = usePostUserProfile(getAccessTokenSilently, user);
     const {currentStep, setCurrentStep} = useCurrentStepStore();
     const {setCurrentStepDashboard} = useCurrentStepDashboard()
+    const [selectedFilter, setSelectedFilter] = useState('overview')
 
     const errorMap = Object.fromEntries(
         onboardingErrorMsg
@@ -254,6 +255,22 @@ const SetPlan = ({
         }
     ]
 
+    let selectOptions = [
+        {
+            value: 'overview', label: 'Tổng quan'
+        }
+    ]
+
+    if (customPlanWithStages?.length > 0) {
+        let index = 0
+        for (const stage of customPlanWithStages) {
+            selectOptions.push({
+                value: `${index}`, label: `Giai đoạn ${index + 1}`
+            })
+            index++
+        }
+    }
+
     return (
         <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'} space-y-4`}>
             {/* Header for paid users and coach users */}
@@ -349,6 +366,7 @@ const SetPlan = ({
                                     }}
                                     type="card"
                                     items={tabsItems}
+                                    defaultActiveKey={useCustomPlan ? 'custom-stages' : 'quick-create'}
                                 />
                             </div>
 
@@ -442,8 +460,21 @@ const SetPlan = ({
                                     </div>
                                     <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
 
+                                    {selectOptions.length > 1 && <div className="mb-4 flex justify-center">
+                                        <Select
+                                            defaultValue="overview"
+                                            variant="borderless"
+                                            style={{width: 120}}
+                                            onChange={(e) => {
+                                                console.log(e)
+                                                setSelectedFilter(e)
+                                            }}
+                                            size="small"
+                                            options={selectOptions}
+                                        />
+                                    </div>}
                                     <ResponsiveContainer width="100%" height={300}>
-                                        <LineChart data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages))}
+                                        <LineChart data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter))}
                                                    margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                             <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
                                             <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>

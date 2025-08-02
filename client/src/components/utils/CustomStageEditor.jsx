@@ -216,15 +216,6 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
         setCustomPlanWithStages(customStageClone);
     }
 
-    useEffect(() => {
-        const allowComplete = !customPlanWithStages.some((stage) => stage.logs.some((log) => log.status === 'error' || log.status === 'warning'));
-        if (allowComplete) {
-            console.log(customPlanWithStages);
-            console.log('dataset', getDatasetFromCustomPlanWithStages(customPlanWithStages))
-        }
-        else console.log('error');
-    }, [customPlanWithStages]);
-
     return (
         <div className="flex flex-col gap-4 mt-4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
             <p className="text-lg font-semibold text-gray-800">Tùy chỉnh từng giai đoạn:</p>

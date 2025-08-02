@@ -1,4 +1,4 @@
- const getDatasetFromCustomPlanWithStages = (customPlanWithStages) => {
+ const getDatasetFromCustomPlanWithStages = (customPlanWithStages, selectedStage = null) => {
 
     if (!customPlanWithStages || !Array.isArray(customPlanWithStages) || customPlanWithStages.length === 0) {
         return [];
@@ -60,8 +60,12 @@
             dataset = filledDataset;
         }
     }
+     if (selectedStage !== 'overview') {
+         const stageNumber = parseInt(selectedStage, 10);
+         return dataset.filter((data) => data.stage === stageNumber);
+     }
 
-    return dataset;
+     return dataset;
 };
 
 export default getDatasetFromCustomPlanWithStages;
