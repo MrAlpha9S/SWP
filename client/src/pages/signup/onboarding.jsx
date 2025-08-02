@@ -80,6 +80,8 @@ const Onboarding = () => {
         setPlanLog,
         useCustomPlan,
         setUseCustomPlan,
+        customPlanWithStages,
+        setCustomPlanWithStages
     } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, goalName} = useGoalsStore()
     const navigate = useNavigate();
@@ -569,6 +571,8 @@ const Onboarding = () => {
                                     setPlanLogCloneDDMMYY={setPlanLogCloneDDMMYY}
                                     useCustomPlan={useCustomPlan}
                                     setUseCustomPlan={setUseCustomPlan}
+                                    customPlanWithStages={customPlanWithStages}
+                                    setCustomPlanWithStages={setCustomPlanWithStages}
                                 />
                                 }
                                 {currentStep === 6 && <Summary/>}

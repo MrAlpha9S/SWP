@@ -121,6 +121,8 @@ export const usePlanStore = create((set) => ({
     }),
     useCustomPlan: false,
     setUseCustomPlan: (value) => set({useCustomPlan: value}),
+    customPlanWithStages: [],
+    setCustomPlanWithStages: (value) => set({customPlanWithStages: value}),
 }))
 
 export const useErrorStore = create((set) => ({

@@ -4,27 +4,28 @@ import {PlusOutlined, DeleteOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "./dateUtils";
 import {IoWarningOutline} from "react-icons/io5";
+import {IoMdAddCircleOutline, IoMdRemoveCircleOutline} from "react-icons/io";
+import {useNotificationManager} from "../hooks/useNotificationManager.jsx";
+import getDatasetFromCustomPlanWithStages from "./getDatasetFromCustomPlanWithStages.js";
 
 const {RangePicker} = DatePicker;
 const {Panel} = Collapse;
 
-const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
+const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsPerDay}) => {
+    const { openNotification } = useNotificationManager()
     const [validationError, setValidationError] = useState("");
-    const [customStages, setCustomStages] = useState([]);
     const [currentId, setCurrentId] = useState(0);
 
+    // Initialize currentId based on existing stages
     useEffect(() => {
-        if (customStages.length === 0 && planLog.length > 0) {
-            const stagesFromPlan = planLog.map((stage) => ({
-                date: dayjs(stage.date).format("YYYY-MM-DD"),
-                cigs: stage.cigs,
-            }));
-            setCustomStages(stagesFromPlan);
+        if (customPlanWithStages.length > 0) {
+            const maxId = Math.max(...customPlanWithStages.map(stage => stage.id || 0));
+            setCurrentId(maxId + 1);
         }
-    }, [planLog]);
+    }, []);
 
-    const updateStageDate = (stageIndex, startDate, endDate) => {
-        const updatedStages = [...customStages];
+    const updateStageDate = (stageIndex, startDate, endDate, stageId) => {
+        const updatedStages = [...customPlanWithStages];
         const start = startDate.add(7, "hours").toDate();
         const end = endDate.add(7, "hours").toDate();
 
@@ -38,21 +39,26 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
             logs.push({
                 date: currentDate.toISOString(),
                 cigs: 0,
-                status: ''
+                status: '',
+                stageId: stageId,
             });
             currentDate.setUTCDate(currentDate.getUTCDate() + 1);
         }
 
         updatedStages[stageIndex].logs = logs;
-        setCustomStages(updatedStages);
+        console.log(updatedStages);
+        setCustomPlanWithStages(updatedStages);
     };
 
     const validateLogs = () => {
         let lastCigs = cigsPerDay
-        const updatedStages = customStages.map((stage) => {
+        const updatedStages = customPlanWithStages.map((stage) => {
             const updatedLogs = stage.logs.map((log, index, logsArray) => {
                 if (index === 0 && log.cigs > lastCigs) return {...log, status: 'warning'};
-                if (index === 0) return {...log, status: ''};
+                if (index === 0) {
+                    lastCigs = log.cigs
+                    return {...log, status: ''}
+                }
 
                 const prevCigs = logsArray[index - 1].cigs;
                 const isError = log.cigs > prevCigs;
@@ -70,11 +76,11 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
             };
         });
 
-        setCustomStages(updatedStages);
+        setCustomPlanWithStages(updatedStages);
     };
 
     const updateStageCigs = (stageIndex, logIndex, cigs) => {
-        const updatedStages = [...customStages];
+        const updatedStages = [...customPlanWithStages];
 
         if (
             updatedStages[stageIndex] &&
@@ -82,23 +88,23 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
             updatedStages[stageIndex].logs[logIndex]
         ) {
             updatedStages[stageIndex].logs[logIndex].cigs = cigs;
-            setCustomStages(updatedStages);
+            setCustomPlanWithStages(updatedStages);
         } else {
             setValidationError("Invalid stageIndex or logIndex in updateStageCigs");
         }
         validateLogs()
-        console.log(customStages)
     };
 
     const addNewStage = () => {
-        if (customStages.length > 0 && customStages[customStages.length - 1].startDate === "") {
+        if (customPlanWithStages.length > 0 && customPlanWithStages[customPlanWithStages.length - 1].startDate === "") {
             setValidationError('Hãy điền ngày bắt đầu, ngày kết thúc ở Giai đoạn trước.')
             return
         }
         setValidationError('')
-        setCustomStages([
-            ...customStages,
+        setCustomPlanWithStages([
+            ...customPlanWithStages,
             {
+                id: currentId,
                 startDate: "",
                 endDate: "",
                 logs: [],
@@ -110,23 +116,114 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
 
     const removeStage = (index) => {
         if (index === 0) return;
-        const clone = [...customStages];
+        const clone = [...customPlanWithStages];
         clone.splice(index, 1);
-        setCustomStages(clone);
+        setCustomPlanWithStages(clone);
         setValidationError("");
     };
 
+    const getMinDateForStage = (stageIndex) => {
+        if (stageIndex === 0) {
+            return dayjs();
+        }
+        const previousStage = customPlanWithStages[stageIndex - 1];
+        if (previousStage?.endDate) {
+            return dayjs(previousStage.endDate).add(1, 'day');
+        }
+        return dayjs();
+    };
 
+    const getMaxDateForStage = (stageIndex) => {
+        if (customPlanWithStages.length <= 1) return
+        const nextStage = customPlanWithStages[stageIndex + 1];
+        if (nextStage?.startDate) {
+            return dayjs(nextStage.startDate).add(-1, 'day');
+        }
+    }
+
+    const getRangePickerValue = (stage) => {
+        if (stage.startDate && stage.endDate) {
+            return [
+                dayjs(stage.startDate),
+                dayjs(stage.endDate)
+            ];
+        }
+        return null;
+    };
 
     useEffect(() => {
-        if (customStages.length > 0) {
+        if (customPlanWithStages.length > 0) {
             validateLogs();
-            console.log(customStages);
+            console.log(customPlanWithStages);
         }
-    }, [customStages.length]);
+    }, [customPlanWithStages.length]);
 
-    const lastStageEndDate = customStages[customStages.length - 2]?.endDate;
-    const minDate = customStages.length === 1 ? dayjs() : dayjs(lastStageEndDate).add(1, 'day');
+    const addDay = (stageId) => {
+        const index = customPlanWithStages.findIndex((stage) => stage.id === stageId);
+
+        if (customPlanWithStages[index + 1]) {
+            const currentStageEndDate = new Date(customPlanWithStages[index].endDate);
+            const nextDayAfterCurrentEnd = new Date(currentStageEndDate);
+            nextDayAfterCurrentEnd.setUTCDate(nextDayAfterCurrentEnd.getUTCDate() + 1);
+
+            const nextStageStartDate = new Date(customPlanWithStages[index + 1].startDate);
+
+            if (nextDayAfterCurrentEnd.toISOString() === nextStageStartDate.toISOString()) {
+                openNotification('failed', {
+                    message: 'Không thể thêm ngày',
+                    content: 'Ngày kết thúc của giai đoạn trước không được trùng với ngày bắt đầu của giai đoạn tiếp theo.'
+                })
+                return;
+            }
+        }
+
+        const customStageClone = [...customPlanWithStages];
+        const currentStage = customStageClone.find((stage) => stage.id === stageId);
+
+        const lastLog = currentStage.logs[currentStage.logs.length - 1];
+        const nextLogDate = new Date(lastLog.date);
+        nextLogDate.setUTCDate(nextLogDate.getUTCDate() + 1);
+
+        currentStage.logs.push({
+            date: nextLogDate.toISOString(),
+            cigs: 0,
+            status: '',
+            stageId: stageId,
+        });
+
+        const newEndDate = new Date(currentStage.endDate);
+        newEndDate.setUTCDate(newEndDate.getUTCDate() + 1);
+        currentStage.endDate = newEndDate.toISOString();
+
+        setCustomPlanWithStages(customStageClone);
+    };
+
+    const removeDay = (stageId) => {
+        const customStageClone = [...customPlanWithStages];
+        const currentStage = customStageClone.find((stage) => stage.id === stageId);
+        if (currentStage.logs.length === 1) {
+            return
+        }
+        const lastDateOfCurrentStageObj = new Date(currentStage.logs[currentStage.logs.length - 1].date)
+        if (!lastDateOfCurrentStageObj) {
+            return;
+        }
+        lastDateOfCurrentStageObj.setDate(lastDateOfCurrentStageObj.getDate() + 1)
+        currentStage.logs.pop()
+        const currentStageEndDateObj = new Date(currentStage.endDate)
+        currentStageEndDateObj.setUTCDate(currentStageEndDateObj.getUTCDate() - 1)
+        currentStage.endDate = currentStageEndDateObj.toISOString();
+        setCustomPlanWithStages(customStageClone);
+    }
+
+    useEffect(() => {
+        const allowComplete = !customPlanWithStages.some((stage) => stage.logs.some((log) => log.status === 'error' || log.status === 'warning'));
+        if (allowComplete) {
+            console.log(customPlanWithStages);
+            console.log('dataset', getDatasetFromCustomPlanWithStages(customPlanWithStages))
+        }
+        else console.log('error');
+    }, [customPlanWithStages]);
 
     return (
         <div className="flex flex-col gap-4 mt-4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
@@ -145,9 +242,9 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
 
             <Collapse
                 className='flex flex-col justify-center'>
-                {customStages.map((stage, stageIndex) => (
+                {customPlanWithStages.map((stage, stageIndex) => (
                     <Panel
-                        key={stageIndex}
+                        key={stage.id}
                         header={
                             <span className="text-white font-medium">
                                 Giai đoạn {stageIndex + 1}
@@ -157,17 +254,23 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
                                         {dayjs(stage.startDate).format("YYYY-MM-DD")} → {dayjs(stage.endDate).format("YYYY-MM-DD")}
                                     </>
                                 )}
-    </span>
+                            </span>
                         }
                     >
                         <div className="flex flex-col gap-4 w-full">
                             <div className="flex flex-wrap gap-3 items-center">
                                 <span className="text-gray-700 font-medium">Chọn ngày:</span>
                                 <RangePicker
-                                    minDate={minDate}
-                                    onChange={(e) => updateStageDate(stageIndex, e[0], e[1])}
+                                    format={'DD-MM-YYYY'}
+                                    key={`range-picker-${stage.id}`}
+                                    value={getRangePickerValue(stage)}
+                                    minDate={getMinDateForStage(stageIndex)}
+                                    maxDate={getMaxDateForStage(stageIndex)}
+                                    onChange={(e) => updateStageDate(stageIndex, e[0], e[1], stage.id)}
                                     className="w-full sm:w-auto"
                                 />
+                                <Button onClick={() => addDay(stage.id)}><IoMdAddCircleOutline/></Button>
+                                <Button onClick={() => removeDay(stage.id)}><IoMdRemoveCircleOutline/></Button>
                                 <Popconfirm
                                     title="Xóa giai đoạn"
                                     description="Bạn có chắc muốn xóa giai đoạn này?"
@@ -175,13 +278,13 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
                                     okText="Có"
                                     cancelText="Không"
                                 >
-                                <Button
-                                    disabled={customStages.length === 0}
-                                    danger
-                                    icon={<DeleteOutlined/>}
-                                >
-                                    Xóa
-                                </Button>
+                                    <Button
+                                        disabled={customPlanWithStages.length === 0}
+                                        danger
+                                        icon={<DeleteOutlined/>}
+                                    >
+                                        Xóa
+                                    </Button>
                                 </Popconfirm>
                             </div>
 
@@ -190,10 +293,10 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
                                     stage.logs.map((log, logIndex) => (
                                         <div
                                             className="flex flex-wrap gap-4 items-center border border-gray-200 bg-white p-3 rounded"
-                                            key={logIndex}
+                                            key={`${stage.id}-log-${logIndex}`}
                                         >
                                             <p className="w-40">
-                                                Ngày: {convertYYYYMMDDStrToDDMMYYYYStr(log.date.split("T")[0])}
+                                                Ngày: {convertYYYYMMDDStrToDDMMYYYYStr(log?.date?.split("T")[0])}
                                             </p>
                                             <span>Số điếu:</span>
                                             <InputNumber
@@ -207,9 +310,9 @@ const CustomStageEditor = ({planLog = [], cigsPerDay}) => {
                                             <span className="text-gray-600">điếu/ngày</span>
                                             {log.status === "warning" && (
                                                 <span className="text-warning-500 flex items-center gap-2">
-                <IoWarningOutline/>
-                <span>Số điếu hôm trước đang thấp hơn số điếu hiện tại.</span>
-              </span>
+                                                    <IoWarningOutline/>
+                                                    <span>Số điếu hôm trước đang thấp hơn số điếu hiện tại.</span>
+                                                </span>
                                             )}
                                         </div>
                                     ))}

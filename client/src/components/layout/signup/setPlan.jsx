@@ -25,6 +25,9 @@ import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 import {queryClient} from "../../../main.jsx";
 import {useSocketStore} from "../../../stores/useSocketStore.js";
 import QuickCreate from "./quickCreate.jsx";
+import getDatasetFromCustomPlanWithStages from "../../utils/getDatasetFromCustomPlanWithStages.js";
+import PlanSummaryReport from "./planSummaryReport.jsx";
+import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
 
 const SetPlan = ({
                      readinessValue,
@@ -55,7 +58,8 @@ const SetPlan = ({
                      goalList,
                      setPlanEditClicked,
                      useCustomPlan,
-                     setUseCustomPlan
+                     setUseCustomPlan,
+                     customPlanWithStages, setCustomPlanWithStages
                  }) => {
 
     const {errors} = useErrorStore();
@@ -244,8 +248,9 @@ const SetPlan = ({
         },
         {
             label: `Tạo chuyên sâu`,
-            key: 'custom-plan',
-            children: <CustomStageEditor cigsPerDay={cigsPerDay}/>,
+            key: 'custom-stages',
+            children: <CustomStageEditor cigsPerDay={cigsPerDay} customPlanWithStages={customPlanWithStages}
+                                         setCustomPlanWithStages={setCustomPlanWithStages}/>,
         }
     ]
 
@@ -338,13 +343,16 @@ const SetPlan = ({
 
                             <div className="min-w-[60%] max-w-[75%] flex flex-col gap-3">
                                 <Tabs
-                                    onChange={(e) => console.log(e)}
+                                    onChange={(e) => {
+                                        if (e === 'custom-stages') setUseCustomPlan(true)
+                                        else setUseCustomPlan(false)
+                                    }}
                                     type="card"
                                     items={tabsItems}
                                 />
                             </div>
 
-                            {(planLog.length > 0) && (
+                            {(planLog.length > 0 && !useCustomPlan) && (
                                 <>
                                     <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
                                         <h3>Tổng quan kế hoạch</h3>
@@ -416,6 +424,26 @@ const SetPlan = ({
 
                                     <ResponsiveContainer width="100%" height={300}>
                                         <LineChart data={planLogCloneDDMMYY}
+                                                   margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                            <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                            <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                            <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                            <YAxis/>
+                                            <Tooltip/>
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </>
+                            )}
+
+                            {useCustomPlan && customPlanWithStages.length > 0 && (
+                                <>
+                                    <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
+                                        <h3>Tổng quan kế hoạch</h3>
+                                    </div>
+                                    <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
+
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages))}
                                                    margin={{top: 20, right: 30, left: 20, bottom: 25}}>
                                             <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
                                             <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
