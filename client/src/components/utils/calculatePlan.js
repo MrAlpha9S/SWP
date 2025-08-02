@@ -1,4 +1,4 @@
-function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate = null) {
+function calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced = 0, expectedQuitDate = null) {
     const planLog = [];
     let date = new Date(startDate);
     let currentCigs = cigsPerDay;

@@ -6,7 +6,7 @@ import {
 } from "../../../stores/store.js";
 import ErrorText from "../../ui/errorText.jsx";
 import {checkboxStyle, quittingMethodOptions, onboardingErrorMsg} from "../../../constants/constants.js";
-import {Checkbox, DatePicker, Radio} from "antd";
+import {Checkbox, DatePicker, Radio, Tabs} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
@@ -24,7 +24,7 @@ import {useAuth0} from "@auth0/auth0-react";
 import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 import {queryClient} from "../../../main.jsx";
 import {useSocketStore} from "../../../stores/useSocketStore.js";
-
+import QuickCreate from "./quickCreate.jsx";
 
 const SetPlan = ({
                      readinessValue,
@@ -49,17 +49,19 @@ const SetPlan = ({
                      timeAfterWaking,
                      timeOfDayList,
                      triggers,
-                     customTimeOfDay, customTrigger, stoppedDate, goalList, setPlanEditClicked, coach
+                     customTimeOfDay,
+                     customTrigger,
+                     stoppedDate,
+                     goalList,
+                     setPlanEditClicked,
+                     useCustomPlan,
+                     setUseCustomPlan
                  }) => {
 
     const {errors} = useErrorStore();
     const scrollRef = useRef(null);
     const frequencyLabel = quittingMethod === "gradual-weekly" ? "tuần" : "ngày";
     const navigate = useNavigate();
-    const [useCustomStages, setUseCustomStages] = useState(false);
-    const [customStages, setCustomStages] = useState([
-        {date: startDate.split("T")[0], cigs: cigsPerDay}
-    ]);
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const {addError, removeError} = useErrorStore()
     const mutation = usePostUserProfile(getAccessTokenSilently, user);
@@ -72,7 +74,7 @@ const SetPlan = ({
             .map(msg => [msg.location, msg])
     );
     const {openNotification} = useNotificationManager();
-    const { socket } = useSocketStore()
+    const {socket} = useSocketStore()
 
     const validateCoachPlan = () => {
         if (from !== 'coach-user') return true;
@@ -152,21 +154,15 @@ const SetPlan = ({
         }
     }, [planLog]);
 
-    const createPlan = () => {
-        if (useCustomStages) {
-            const sorted = [...customStages].sort((a, b) => new Date(a.date) - new Date(b.date));
-            setPlanLog(sorted.map(stage => ({
-                date: new Date(stage.date).toISOString(),
-                cigs: stage.cigs
-            })));
-        } else {
-            if (quittingMethod === 'target-date' && expectedQuitDate.length > 0) {
-                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate));
-            } else if (quittingMethod !== 'target-date' && cigsReduced > 0) {
-                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced));
-            }
+    useEffect(() => {
+        if (quittingMethod === 'target-date' && expectedQuitDate.length > 0 && startDate.length > 0 && cigsPerDay > 0
+            && quittingMethod.length > 0) {
+            setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, 0, expectedQuitDate));
+        } else if (quittingMethod !== 'target-date' && startDate.length > 0 && cigsPerDay > 0
+            && quittingMethod.length > 0 && cigsReduced > 0) {
+            setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced));
         }
-    };
+    }, [cigsPerDay, cigsReduced, expectedQuitDate, quittingMethod, setPlanLog, startDate]);
 
 
     useEffect(() => {
@@ -238,6 +234,21 @@ const SetPlan = ({
         });
     }
 
+    const tabsItems = [
+        {
+            label: `Tạo nhanh`,
+            key: 'quick-create',
+            children: <QuickCreate from={from} cigsReduced={cigsReduced} setQuittingMethod={setQuittingMethod}
+                                   quittingMethod={quittingMethod} setCigsReduced={setCigsReduced} errors={errors}
+                                   expectedQuitDate={expectedQuitDate} setExpectedQuitDate={setExpectedQuitDate}/>,
+        },
+        {
+            label: `Tạo chuyên sâu`,
+            key: 'custom-plan',
+            children: <CustomStageEditor cigsPerDay={cigsPerDay}/>,
+        }
+    ]
+
     return (
         <div className={`${from === 'coach-user' && 'bg-primary-100 p-5 rounded-2xl'} space-y-4`}>
             {/* Header for paid users and coach users */}
@@ -256,15 +267,17 @@ const SetPlan = ({
             {readinessValue === 'ready' && (
                 <>
                     {/* Free user - show promotional content */}
-                    {userInfo?.sub_id === 1 && (
+                    {(userInfo?.sub_id === 1 || !isAuthenticated) && (
                         <>
                             <h2 className="text-left md:text-4xl lg:text-5xl font-bold">
                                 6. Lên kế hoạch
                             </h2>
                             <div className="text-left text-sm md:text-base">
                                 <p>
-                                    Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ thuốc.
-                                    Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng bước
+                                    Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu
+                                    bỏ thuốc.
+                                    Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và
+                                    từng bước
                                     tiến bộ ra sao.
                                 </p>
                                 <p className="mt-2">
@@ -291,22 +304,30 @@ const SetPlan = ({
                             {from !== 'coach-user' && (
                                 <div className="text-left text-sm md:text-base space-y-4 my-4">
                                     <p>
-                                        Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục tiêu bỏ
+                                        Việc lên kế hoạch cụ thể là một bước quan trọng giúp bạn tiến gần hơn đến mục
+                                        tiêu bỏ
                                         thuốc.
-                                        Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi và từng
+                                        Một kế hoạch rõ ràng sẽ giúp bạn biết mình đang ở đâu trong hành trình thay đổi
+                                        và từng
                                         bước
                                         tiến bộ ra sao.
-                                        Bạn hãy chọn ngày bắt đầu, số lượng thuốc bạn hút mỗi ngày và tốc độ bạn muốn giảm dần.
-                                        Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần hoặc đặt
+                                        Bạn hãy chọn ngày bắt đầu, số lượng thuốc bạn hút mỗi ngày và tốc độ bạn muốn
+                                        giảm dần.
+                                        Tùy vào thói quen và khả năng của mình, bạn có thể chọn giảm mỗi ngày, mỗi tuần
+                                        hoặc đặt
                                         ra
                                         ngày muốn bỏ hoàn toàn.
-                                        Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi, duy trì
+                                        Hãy chọn phương pháp phù hợp với bạn nhất – đây sẽ là nền tảng để bạn theo dõi,
+                                        duy trì
                                         và
                                         đạt được mục tiêu bỏ thuốc.
                                     </p>
-                                    <div><strong>Lưu ý:</strong> Bạn có thể tự tạo kế hoạch hoặc nhờ Huấn luyện viên hỗ trợ.
+                                    <div><strong>Lưu ý:</strong> Bạn có thể tự tạo kế hoạch hoặc nhờ Huấn luyện viên hỗ
+                                        trợ.
                                         Nếu muốn tự tạo, hãy điền thông tin phía dưới.
-                                        Nếu muốn Huấn luyện viên hỗ trợ, nhấn nút <strong>"Nhờ Huấn luyện viên"</strong> bên dưới – thông tin hiện tại <strong>sẽ được lưu</strong> và bạn sẽ được đưa đến khung trò chuyện.
+                                        Nếu muốn Huấn luyện viên hỗ trợ, nhấn nút <strong>"Nhờ Huấn luyện
+                                            viên"</strong> bên dưới – thông tin hiện tại <strong>sẽ được lưu</strong> và
+                                        bạn sẽ được đưa đến khung trò chuyện.
                                     </div>
                                     <CustomButton onClick={() => {
                                         setCurrentStepDashboard('coach')
@@ -315,97 +336,15 @@ const SetPlan = ({
                                 </div>
                             )}
 
-                            <form className="w-[60%] flex flex-col gap-3">
-                                <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
-                                <div className=''>
-                                    {errors.map((error, index) => {
-                                        if (error.location === "quitMethod") {
-                                            return (
-                                                <ErrorText key={index}>{error.message}</ErrorText>
-                                            )
-                                        }
-                                    })}
-                                </div>
-
-                                <Radio.Group
-                                    onChange={(e) => setQuittingMethod(e.target.value)}
-                                    value={quittingMethod}
-                                    options={quittingMethodOptions}
-                                    size="large"
-                                    style={checkboxStyle}
+                            <div className="min-w-[60%] max-w-[75%] flex flex-col gap-3">
+                                <Tabs
+                                    onChange={(e) => console.log(e)}
+                                    type="card"
+                                    items={tabsItems}
                                 />
+                            </div>
 
-                                <Checkbox
-                                    checked={useCustomStages}
-                                    onChange={(e) => setUseCustomStages(e.target.checked)}
-                                >
-                                    Tuỳ chỉnh từng giai đoạn cai thuốc
-                                </Checkbox>
-
-                                {(quittingMethod === "target-date") ? (
-                                    <>
-                                        <div className='block text-sm md:text-base text-gray-700 mb-1'>
-                                            <h3>Hãy chọn ngày trong tương lai
-                                                mà {from === 'coach-user' ? 'người dùng' : 'bạn'} quyết định ngừng hút</h3>
-                                        </div>
-
-                                        <DatePicker minDate={dayjs().add(1, 'day')} className='h-[42px]' onChange={(date, dateString) => {
-                                            setExpectedQuitDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
-                                        }} format={'DD-MM-YYYY'} value={expectedQuitDate ? dayjs(expectedQuitDate) : ''}
-                                                    allowClear={false}/>
-
-                                        <div className='my-[-30]'>
-                                            {errors.map((error, index) => {
-                                                if (error.location === "expectedQuitDate") {
-                                                    return (
-                                                        <ErrorText key={index}>{error.message}</ErrorText>
-                                                    )
-                                                }
-                                            })}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <label htmlFor="cigsPerInterval"
-                                               className="block text-sm md:text-base text-gray-700 mb-1">
-                                            {from === 'coach-user' ? 'Người dùng' : 'Bạn'} quyết định giảm bao nhiêu điếu
-                                            thuốc
-                                            mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}?
-                                        </label>
-                                        <div className=''>
-                                            {errors.map((error, index) => {
-                                                if (error.location === "cigsReduced") {
-                                                    return (
-                                                        <ErrorText key={index}>{error.message}</ErrorText>
-                                                    )
-                                                }
-                                            })}
-                                        </div>
-                                        <input
-                                            id="cigsPerInterval"
-                                            type="number"
-                                            value={cigsReduced}
-                                            onChange={(e) => setCigsReduced(Number(e.target.value))}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </>
-                                )}
-                            </form>
-
-                            {useCustomStages && (
-                                <CustomStageEditor
-                                    startDate={startDate}
-                                    cigsPerDay={cigsPerDay}
-                                    customStages={customStages}
-                                    setCustomStages={setCustomStages}
-                                    from={from}
-                                    planLog={planLog}
-                                />
-                            )}
-
-                            <CustomButton type="primary" onClick={createPlan}>Tạo kế hoạch</CustomButton>
-
-                            {planLog.length > 0 && (
+                            {(planLog.length > 0) && (
                                 <>
                                     <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
                                         <h3>Tổng quan kế hoạch</h3>
@@ -440,31 +379,36 @@ const SetPlan = ({
                                                     quittingMethod === "target-date"
                                                         ? "và sẽ giảm dần cho đến khi số điếu về 0"
                                                         : <>mỗi {frequencyLabel} giảm <strong>{cigsReduced}</strong> điếu</>
-                                                }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc vào{" "}
+                                                }. Nếu bạn giữ đúng kế hoạch này, bạn sẽ hoàn toàn ngừng hút thuốc
+                                                vào{" "}
                                                 <strong>{convertYYYYMMDDStrToDDMMYYYYStr(planLog[planLog.length - 1].date.split('T')[0])}</strong>.
                                             </p>
                                         )}
 
                                         <ul>
-                                            <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ lúc
+                                            <li><strong>Trục ngang (ngày):</strong> hiển thị các ngày trong kế hoạch từ
+                                                lúc
                                                 bắt đầu đến ngày kết thúc.
                                             </li>
                                             <li><strong>Trục dọc (số điếu thuốc):</strong> cho thấy số lượng nên hút mỗi
                                                 ngày tương ứng.
                                             </li>
-                                            <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn và
+                                            <li><strong>Đường kẻ giảm dần:</strong> thể hiện lộ trình cai thuốc đều đặn
+                                                và
                                                 rõ ràng.
                                             </li>
                                         </ul>
 
                                         {from === 'coach-user' ? (
                                             <p>
-                                                👉 <em>Sử dụng biểu đồ để theo dõi tiến độ và hỗ trợ người dùng trong hành
+                                                👉 <em>Sử dụng biểu đồ để theo dõi tiến độ và hỗ trợ người dùng trong
+                                                hành
                                                 trình cai thuốc.</em>
                                             </p>
                                         ) : (
                                             <p>
-                                                👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn đang
+                                                👉 <em>Hãy dùng biểu đồ này để theo dõi sự tiến bộ của bạn mỗi ngày. Bạn
+                                                đang
                                                 từng bước tiến gần hơn đến mục tiêu bỏ thuốc hoàn toàn!</em>
                                             </p>
                                         )}

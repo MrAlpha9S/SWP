@@ -119,6 +119,8 @@ export const usePlanStore = create((set) => ({
             date: convertYYYYMMDDStrToDDMMYYYYStr(entry.date.split('T')[0]),
         }))
     }),
+    useCustomPlan: false,
+    setUseCustomPlan: (value) => set({useCustomPlan: value}),
 }))
 
 export const useErrorStore = create((set) => ({

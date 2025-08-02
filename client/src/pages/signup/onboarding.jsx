@@ -64,7 +64,23 @@ const Onboarding = () => {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLogCloneDDMMYY, setPlanLogCloneDDMMYY, setQuittingMethod, setCigsReduced, setExpectedQuitDate, planLog, setPlanLog} = usePlanStore();
+    const {
+        startDate,
+        cigsPerDay,
+        quittingMethod,
+        cigsReduced,
+        expectedQuitDate,
+        stoppedDate,
+        planLogCloneDDMMYY,
+        setPlanLogCloneDDMMYY,
+        setQuittingMethod,
+        setCigsReduced,
+        setExpectedQuitDate,
+        planLog,
+        setPlanLog,
+        useCustomPlan,
+        setUseCustomPlan,
+    } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, goalName} = useGoalsStore()
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
@@ -551,6 +567,8 @@ const Onboarding = () => {
                                     setPlanLog={setPlanLog}
                                     planLogCloneDDMMYY={planLogCloneDDMMYY}
                                     setPlanLogCloneDDMMYY={setPlanLogCloneDDMMYY}
+                                    useCustomPlan={useCustomPlan}
+                                    setUseCustomPlan={setUseCustomPlan}
                                 />
                                 }
                                 {currentStep === 6 && <Summary/>}
