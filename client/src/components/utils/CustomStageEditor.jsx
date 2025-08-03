@@ -18,7 +18,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
 
     // Initialize currentId based on existing stages
     useEffect(() => {
-        if (customPlanWithStages.length > 0) {
+        if (customPlanWithStages && customPlanWithStages?.length > 0) {
             const maxId = Math.max(...customPlanWithStages.map(stage => stage.id || 0));
             setCurrentId(maxId + 1);
         }
@@ -52,7 +52,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
 
     const validateLogs = () => {
         let lastCigs = cigsPerDay
-        const updatedStages = customPlanWithStages.map((stage) => {
+        const updatedStages = customPlanWithStages?.map((stage) => {
             const updatedLogs = stage.logs.map((log, index, logsArray) => {
                 if (index === 0 && log.cigs > lastCigs) return {...log, status: 'warning'};
                 if (index === 0) {
@@ -96,7 +96,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
     };
 
     const addNewStage = () => {
-        if (customPlanWithStages.length > 0 && customPlanWithStages[customPlanWithStages.length - 1].startDate === "") {
+        if (customPlanWithStages?.length > 0 && customPlanWithStages[customPlanWithStages?.length - 1].startDate === "") {
             setValidationError('Hãy điền ngày bắt đầu, ngày kết thúc ở Giai đoạn trước.')
             return
         }
@@ -134,7 +134,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
     };
 
     const getMaxDateForStage = (stageIndex) => {
-        if (customPlanWithStages.length <= 1) return
+        if (customPlanWithStages?.length <= 1) return
         const nextStage = customPlanWithStages[stageIndex + 1];
         if (nextStage?.startDate) {
             return dayjs(nextStage.startDate).add(-1, 'day');
@@ -152,11 +152,11 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
     };
 
     useEffect(() => {
-        if (customPlanWithStages.length > 0) {
+        if (customPlanWithStages?.length > 0) {
             validateLogs();
             console.log(customPlanWithStages);
         }
-    }, [customPlanWithStages.length]);
+    }, [customPlanWithStages?.length]);
 
     const addDay = (stageId) => {
         const index = customPlanWithStages.findIndex((stage) => stage.id === stageId);
@@ -180,7 +180,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
         const customStageClone = [...customPlanWithStages];
         const currentStage = customStageClone.find((stage) => stage.id === stageId);
 
-        const lastLog = currentStage.logs[currentStage.logs.length - 1];
+        const lastLog = currentStage.logs[currentStage.logs?.length - 1];
         const nextLogDate = new Date(lastLog.date);
         nextLogDate.setUTCDate(nextLogDate.getUTCDate() + 1);
 
@@ -201,7 +201,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
     const removeDay = (stageId) => {
         const customStageClone = [...customPlanWithStages];
         const currentStage = customStageClone.find((stage) => stage.id === stageId);
-        if (currentStage.logs.length === 1) {
+        if (currentStage.logs?.length === 1) {
             return
         }
         const lastDateOfCurrentStageObj = new Date(currentStage.logs[currentStage.logs.length - 1].date)
@@ -233,7 +233,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
 
             <Collapse
                 className='flex flex-col justify-center'>
-                {customPlanWithStages.map((stage, stageIndex) => (
+                {customPlanWithStages && customPlanWithStages.map((stage, stageIndex) => (
                     <Panel
                         key={stage.id}
                         header={

@@ -173,7 +173,7 @@ const SetPlan = ({
 
 
     useEffect(() => {
-        if (planLog.length > 0 && !useCustomPlan) {
+        if (planLog?.length > 0 && !useCustomPlan) {
             setPlanLogCloneDDMMYY(planLog)
             if (readinessValue === 'ready' && quittingMethod !== 'target-date') {
                 setExpectedQuitDate(planLog[planLog.length - 1].date)
@@ -182,7 +182,7 @@ const SetPlan = ({
     }, [planLog])
 
     useEffect(() => {
-        if (customPlanWithStages.length > 0 && useCustomPlan) {
+        if (customPlanWithStages && customPlanWithStages?.length > 0 && useCustomPlan) {
             const lastStage = customPlanWithStages[customPlanWithStages.length - 1];
             const lastStageLogs = lastStage.logs
             if (lastStageLogs.length === 0) return
@@ -205,19 +205,25 @@ const SetPlan = ({
             triggers,
             cigsPerDay,
             updaterUserAuth0Id: coachInfo?.auth0_id,
-
+            useCustomPlan
         };
 
         payload.customTimeOfDay = customTimeOfDay;
         payload.customTrigger = customTrigger;
         if (readinessValue === 'ready') {
-            payload.startDate = startDate;
-            payload.quittingMethod = quittingMethod;
-            if (quittingMethod !== 'target-date') {
-                payload.cigsReduced = cigsReduced;
+            if (useCustomPlan) {
+                payload.startDate = customPlanWithStages[0].startDate;
+                payload.expectedQuitDate = expectedQuitDate
+                payload.customPlanWithStages = customPlanWithStages;
+            } else {
+                payload.startDate = startDate;
+                payload.quittingMethod = quittingMethod;
+                if (quittingMethod !== 'target-date') {
+                    payload.cigsReduced = cigsReduced;
+                }
+                payload.expectedQuitDate = expectedQuitDate;
+                payload.planLog = planLog;
             }
-            payload.expectedQuitDate = expectedQuitDate;
-            payload.planLog = planLog;
         } else {
             payload.stoppedDate = stoppedDate;
         }
@@ -373,9 +379,10 @@ const SetPlan = ({
                             <div className="min-w-[60%] max-w-[75%] flex flex-col gap-3">
                                 <Tabs
                                     onChange={(e) => {
-                                        if (e === 'custom-stages') setUseCustomPlan(true)
-                                        else setUseCustomPlan(false)
-                                    }}
+                                        if (setUseCustomPlan) {
+                                            if (e === 'custom-stages') setUseCustomPlan(true)
+                                            else setUseCustomPlan(false)
+                                    }}}
                                     type="card"
                                     items={tabsItems}
                                     defaultActiveKey={useCustomPlan ? 'custom-stages' : 'quick-create'}
@@ -465,14 +472,14 @@ const SetPlan = ({
                                 </>
                             )}
 
-                            {useCustomPlan && customPlanWithStages.length > 0 && (
+                            {useCustomPlan && customPlanWithStages?.length > 0 && (
                                 <>
                                     <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
                                         <h3>Tổng quan kế hoạch</h3>
                                     </div>
                                     <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
 
-                                    {selectOptions.length > 1 && <div className="mb-4 flex justify-center">
+                                    {selectOptions?.length > 1 && <div className="mb-4 flex justify-center">
                                         <Select
                                             defaultValue="overview"
                                             variant="borderless"
@@ -494,7 +501,7 @@ const SetPlan = ({
                                             <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                             <YAxis/>
                                             <Tooltip/>
-                                            {customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                            {customPlanWithStages?.length > 0 && customPlanWithStages?.map((stage) => {
                                                 if (!stage.logs[0]) return null
                                                 return <ReferenceArea
                                                     x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}

@@ -48,16 +48,17 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         if (userAuth0Id) {
             setSelectedUserAuth0Id(userAuth0Id);
         }
-    }, [setSelectedUserAuth0Id, userAuth0Id])
+    }, [userAuth0Id])
 
     // User profile query
     const {isPending: isProfilePending, data: profileData} = useQuery({
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
+            console.log('result', result);
             return result?.data;
         },
-        enabled: !!isAuthenticated && !!user && !!selectedUserAuth0Id,
+        enabled: !!isAuthenticated && !!user ,
     });
 
     // Check-in dataset query
@@ -92,6 +93,18 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     const isLoading = isProfilePending || isDatasetPending;
     const hasProfileData = profileData?.userProfile;
 
+    useEffect(() => {
+        if (profileData) {
+            console.log('profile', profileData);
+        }
+    }, [profileData]);
+
+    console.log({
+        isPending: isProfilePending,
+        profileData,
+        selectedUserAuth0Id
+    });
+
     const userInfoTabs = [
         {
             key: '1',
@@ -116,6 +129,8 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                             planLogCloneDDMMYY={planLogCloneDDMMYY}
                             userInfo={profileData.userInfo}
                             from="coach-user"
+                            useCustomPlan={profileData.userProfile.is_using_custom_stages}
+                            customPlanWithStages={profileData.userProfile.stages}
                         />
                     ) : (
                         !coach && <NotFoundBanner title="Người dùng chưa nhập thông tin"/>
@@ -158,6 +173,8 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                             createdAt={profileData.userProfile.created_at ?? ''}
                             updatedBy={profileData.userProfile.last_updated_by ?? ''}
                             coach={coach}
+                            useCustomPlan={profileData.userProfile.is_using_custom_stages}
+                            customPlanWithStages={profileData.userProfile.stages}
                         />
                     ) : (
                         !coach && <NotFoundBanner title="Người dùng chưa nhập thông tin"/>

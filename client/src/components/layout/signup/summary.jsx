@@ -296,7 +296,7 @@ const Summary = () => {
                                 Kế hoạch
                             </p>
 
-                            {!useCustomPlan && customPlanWithStages.length === 0 && planLog?.length > 0 ? <p className='text-sm md:text-base'>
+                            {!useCustomPlan ? <p className='text-sm md:text-base'>
                                 Ngày bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])} <br/>
                                 Số điếu hút mỗi ngày: {cigsPerDay} <br/>
                                 Phương

@@ -17,6 +17,11 @@ import {mergeByDateForPlanLog} from "../../utils/checkInUtils.js";
 import CustomButton from "../../ui/CustomButton.jsx";
 import SetPlan from "../signup/setPlan.jsx";
 import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
+import {CartesianGrid, Line, LineChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import getDatasetFromCustomPlanWithStages from "../../utils/getDatasetFromCustomPlanWithStages.js";
+import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
+import {Select} from "antd";
+import PlanSummaryReport from "../signup/planSummaryReport.jsx";
 
 const UserProfileInMessage = ({
                                   startDate,
@@ -41,7 +46,7 @@ const UserProfileInMessage = ({
                                   checkInDataSet,
                                   goalList,
                                   updatedAt,
-                                  createdAt, updatedBy, coach
+                                  createdAt, updatedBy, coach, useCustomPlan, customPlanWithStages
                               }) => {
     const [localReadinessValue, setLocalReadinessValue] = useState(readinessValue ?? '');
     const [localUserInfo, setLocalUserInfo] = useState(userInfo ?? null);
@@ -54,7 +59,10 @@ const UserProfileInMessage = ({
     const [localPlanLogCloneDDMMYY, _setLocalPlanLogCloneDDMMYY] = useState(
         () => ConvertPlanlogDdmmyy(planLog) ?? []
     );
+    const [selectedFilter, setSelectedFilter] = useState('overview')
     const [planCreation, setPlanCreation] = useState(false)
+    const [localUseCustomPlan, setLocalUseCustomPlan] = useState(useCustomPlan ?? false)
+    const [localCustomPlanWithStages, setLocalCustomPlanWithStages] = useState(customPlanWithStages ?? [])
 
     const setLocalPlanLogCloneDDMMYY = useCallback((valueOrUpdater) => {
         if (typeof valueOrUpdater === 'function') {
@@ -140,6 +148,22 @@ const UserProfileInMessage = ({
         );
     }
 
+    let selectOptions = [
+        {
+            value: 'overview', label: 'Tổng quan'
+        }
+    ]
+
+    if (customPlanWithStages?.length > 0) {
+        let index = 0
+        for (const stage of customPlanWithStages) {
+            selectOptions.push({
+                value: `${index}`, label: `Giai đoạn ${index + 1}`
+            })
+            index++
+        }
+    }
+
 
 
     return (
@@ -204,89 +228,108 @@ const UserProfileInMessage = ({
                 )}
 
                 <p className='font-bold text-2xl'>Kế hoạch</p>
-                {planLog?.length > 0 ? (
+
+                {(planEditClicked || planCreation) ? (
+                    <SetPlan
+                        readinessValue={localReadinessValue}
+                        userInfo={localUserInfo}
+                        startDate={localStartDate}
+                        cigsPerDay={localCigsPerDay}
+                        quittingMethod={localQuittingMethod}
+                        setQuittingMethod={setLocalQuittingMethod}
+                        cigsReduced={localCigsReduced}
+                        setCigsReduced={setLocalCigsReduced}
+                        expectedQuitDate={localExpectedQuitDate}
+                        setExpectedQuitDate={setLocalExpectedQuitDate}
+                        planLog={localPlanLog}
+                        setPlanLog={setLocalPlanLog}
+                        planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
+                        setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
+                        from="coach-user"
+                        reasonList={reasonList}
+                        pricePerPack={pricePerPack}
+                        cigsPerPack={cigsPerPack}
+                        timeAfterWaking={timeAfterWaking}
+                        timeOfDayList={timeOfDayList}
+                        triggers={triggers}
+                        customTimeOfDay={customTimeOfDay}
+                        customTrigger={customTrigger}
+                        stoppedDate={stoppedDate}
+                        goalList={goalList}
+                        setPlanEditClicked={setPlanEditClicked}
+                        coachInfo={coachInfo}
+                        coach={coach}
+                        useCustomPlan={localUseCustomPlan}
+                        setUseCustomPlan={setLocalUseCustomPlan}
+                        customPlanWithStages={localCustomPlanWithStages}
+                        setCustomPlanWithStages={setLocalCustomPlanWithStages}
+                    />
+                ) : (planLog?.length > 0 && !useCustomPlan) ? (
                     <>
-                        {!planEditClicked ? <><p><strong>Phương pháp: </strong>{quittingMethodLabel}</p>
-                                {quittingMethod !== 'target-date' ? (
-                                    <p><strong>Số điếu giảm
-                                        mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}: </strong>{cigsReduced || 0}
-                                    </p>
-                                ) : (
-                                    <p><strong>Người dùng chọn ngày kết thúc: </strong>{expectedQuitDate || 'Chưa xác định'}
-                                    </p>
-                                )}
-                                {quittingMethod !== 'target-date' && expectedQuitDate && (
-                                    <p><strong>Ngày dự kiến số điếu giảm về
-                                        0: </strong>{convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}</p>
-                                )}
-                                {displayPlanComplete && <span className='text-green-600'>(kế hoạch đã kết thúc)</span>}
-                                {displayWarning && <p className='text-red-500'>Người dùng vẫn
-                                    hút <strong>{totalCigsAfterPlan}</strong> điếu thuốc sau ngày kết thúc kế hoạch</p>}
-                                <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế
-                                    hoạch</CustomButton></> :
-                            <><SetPlan
-                                readinessValue={localReadinessValue}
-                                userInfo={localUserInfo}
-                                startDate={localStartDate}
-                                cigsPerDay={localCigsPerDay}
-                                quittingMethod={localQuittingMethod}
-                                setQuittingMethod={setLocalQuittingMethod}
-                                cigsReduced={localCigsReduced}
-                                setCigsReduced={setLocalCigsReduced}
-                                expectedQuitDate={localExpectedQuitDate}
-                                setExpectedQuitDate={setLocalExpectedQuitDate}
-                                planLog={localPlanLog}
-                                setPlanLog={setLocalPlanLog}
-                                planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
-                                setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
-                                from='coach-user'
-                                reasonList={reasonList}
-                                pricePerPack={pricePerPack}
-                                cigsPerPack={cigsPerPack}
-                                timeAfterWaking={timeAfterWaking}
-                                timeOfDayList={timeOfDayList}
-                                triggers={triggers}
-                                customTimeOfDay={customTimeOfDay} customTrigger={customTrigger}
-                                stoppedDate={stoppedDate} goalList={goalList}
-                                setPlanEditClicked={setPlanEditClicked}
-                                coachInfo={coachInfo}
-                            />
-                            </>}
+                        <p><strong>Phương pháp:</strong> {quittingMethodLabel}</p>
+                        {quittingMethod !== 'target-date' ? (
+                            <p><strong>Số điếu giảm mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}:</strong> {cigsReduced || 0}</p>
+                        ) : (
+                            <p><strong>Ngày kết thúc:</strong> {expectedQuitDate || 'Chưa xác định'}</p>
+                        )}
+                        {quittingMethod !== 'target-date' && expectedQuitDate && (
+                            <p><strong>Ngày dự kiến số điếu giảm về 0:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}</p>
+                        )}
+                        {displayPlanComplete && <span className='text-green-600'>(kế hoạch đã kết thúc)</span>}
+                        {displayWarning && (
+                            <p className='text-red-500'>
+                                Người dùng vẫn hút <strong>{totalCigsAfterPlan}</strong> điếu thuốc sau ngày kết thúc kế hoạch
+                            </p>
+                        )}
+                        <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
+                    </>
+                ) : (customPlanWithStages?.length > 0) ? (
+                    <>
+                        <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay} />
+                        {selectOptions.length > 1 && (
+                            <div className="mb-4 flex justify-center">
+                                <Select
+                                    defaultValue="overview"
+                                    variant="borderless"
+                                    style={{ width: 120 }}
+                                    onChange={(e) => setSelectedFilter(e)}
+                                    size="small"
+                                    options={selectOptions}
+                                />
+                            </div>
+                        )}
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart
+                                data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter))}
+                                margin={{ top: 20, right: 30, left: 20, bottom: 25 }}
+                            >
+                                <Line type="monotone" dataKey="cigs" name="Số điếu" stroke="#14b8a6" />
+                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                <XAxis dataKey="date" tick={<CustomizedAxisTick />} interval={0} />
+                                <YAxis />
+                                <Tooltip />
+                                {customPlanWithStages.map((stage) => {
+                                    if (!stage.logs[0]) return null;
+                                    return (
+                                        <ReferenceArea
+                                            key={stage.id}
+                                            x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
+                                            x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
+                                            y1={0}
+                                            y2={cigsPerDay}
+                                            label={`Giai đoạn ${stage.id + 1}`}
+                                        />
+                                    );
+                                })}
+                            </LineChart>
+                        </ResponsiveContainer>
+                        <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
                     </>
                 ) : (
-                    <>
-                        {!planCreation ? <div>
-                            <p>Người dùng chưa tạo kế hoạch</p>
-                            <CustomButton onClick={() => setPlanCreation(true)}>Tạo kế hoạch</CustomButton>
-                        </div> : <SetPlan
-                            readinessValue={localReadinessValue}
-                            userInfo={localUserInfo}
-                            startDate={localStartDate}
-                            cigsPerDay={localCigsPerDay}
-                            quittingMethod={localQuittingMethod}
-                            setQuittingMethod={setLocalQuittingMethod}
-                            cigsReduced={localCigsReduced}
-                            setCigsReduced={setLocalCigsReduced}
-                            expectedQuitDate={localExpectedQuitDate}
-                            setExpectedQuitDate={setLocalExpectedQuitDate}
-                            planLog={localPlanLog}
-                            setPlanLog={setLocalPlanLog}
-                            planLogCloneDDMMYY={localPlanLogCloneDDMMYY}
-                            setPlanLogCloneDDMMYY={setLocalPlanLogCloneDDMMYY}
-                            from='coach-user'
-                            reasonList={reasonList}
-                            pricePerPack={pricePerPack}
-                            cigsPerPack={cigsPerPack}
-                            timeAfterWaking={timeAfterWaking}
-                            timeOfDayList={timeOfDayList}
-                            triggers={triggers}
-                            customTimeOfDay={customTimeOfDay} customTrigger={customTrigger}
-                            stoppedDate={stoppedDate} goalList={goalList}
-                            setPlanEditClicked={setPlanEditClicked}
-                            coachInfo={coachInfo}
-                            coach={coach}
-                        />}
-                    </>
+                    <div>
+                        <p>Người dùng chưa tạo kế hoạch</p>
+                        <CustomButton onClick={() => setPlanCreation(true)}>Tạo kế hoạch</CustomButton>
+                    </div>
                 )}
             </div>
         </div>

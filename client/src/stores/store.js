@@ -202,7 +202,11 @@ export const useUserInfoStore = create((set) => ({
 
 export const useSelectedUserAuth0IdStore = create((set) => ({
     selectedUserAuth0Id: null,
-    setSelectedUserAuth0Id: (value) => set({selectedUserAuth0Id: value}),
+    setSelectedUserAuth0Id: (value) => {
+        if (value) {
+            set({selectedUserAuth0Id: value})
+        }
+    },
 }))
 
 export const useCoachInfoStore = create((set) => ({

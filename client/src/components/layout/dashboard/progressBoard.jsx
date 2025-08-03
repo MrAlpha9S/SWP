@@ -351,7 +351,7 @@ const ProgressBoard = ({
         if (isDatasetPending) return [];
         if ((!planLog && !customPlanWithStages) || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
         if (planLog.length > 0) return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, localCheckInDataSet, cigsPerDay, userInfo?.created_at, range));
-        if (customPlanWithStages.length > 0) {
+        if (customPlanWithStages && customPlanWithStages.length > 0) {
             return clonePlanLogToDDMMYYYY(mergeByDateForCustomStages(getDatasetFromCustomPlanWithStages(customPlanWithStages), localCheckInDataSet, cigsPerDay, userInfo?.created_at, selectedFilter))
         }
     }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.sub_id, userInfo?.created_at, cigsPerDay, range, selectedFilter]);
@@ -468,6 +468,8 @@ const ProgressBoard = ({
             index++
         }
     }
+    console.log(planLog)
+    console.log(customPlanWithStages)
 
     return (
         <div
