@@ -133,6 +133,7 @@ function Notifications({isFor}) {
                     setSelectedUserAuth0Id(metadata.recipientAuth0Id);
                     setCurrentStepDashboard('coach');
                 }
+                navigate('/dashboard')
                 break;
             }
             case 'system':
@@ -159,6 +160,7 @@ function Notifications({isFor}) {
                     setSelectedUserAuth0Id(metadata.userAuth0Id);
                     setCurrentStepDashboard('coach-user');
                 }
+                navigate('/dashboard')
                 break;
             }
             case 'community': {
