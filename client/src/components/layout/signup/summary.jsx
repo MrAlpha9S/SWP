@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import CustomButton from "../../ui/CustomButton.jsx";
 import {useAuth0} from "@auth0/auth0-react";
-import {Divider} from "antd";
+import {Divider, Select} from "antd";
 import {
     useCigsPerPackStore, useCurrentStepStore, useGoalsStore, usePlanStore,
     usePricePerPackStore,
@@ -14,10 +14,13 @@ import {
     reasonListOptions, smokingTriggerOptions,
     timeAfterWakingRadioOptions, timeOfDayOptions
 } from "../../../constants/constants.js";
-import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Line, LineChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import {convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCMidnightDate} from "../../utils/dateUtils.js";
 import {saveProfileToLocalStorage} from "../../utils/profileUtils.js";
+import PlanSummaryReport from "./planSummaryReport.jsx";
+import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
+import getDatasetFromCustomPlanWithStages from "../../utils/getDatasetFromCustomPlanWithStages.js";
 
 
 const Summary = () => {
@@ -39,12 +42,15 @@ const Summary = () => {
         expectedQuitDate,
         stoppedDate,
         planLog,
-        planLogCloneDDMMYY
+        planLogCloneDDMMYY,
+        useCustomPlan,
+        customPlanWithStages
     } = usePlanStore();
     const {createGoalChecked, goalList} = useGoalsStore()
     const {currentStep, setCurrentStep} = useCurrentStepStore()
     const {userInfo} = useUserInfoStore()
     const isFreeUser = !userInfo || userInfo.sub_id === 1;
+    const [selectedFilter, setSelectedFilter] = useState('overview')
 
     const calculatePrice = (type, numberOfYears = 1) => {
         const pricePerCigs = pricePerPack / cigsPerPack
@@ -122,6 +128,22 @@ const Summary = () => {
 
     const readiness = readinessRadioOptions.find(option => option.value === readinessValue);
 
+    let selectOptions = [
+        {
+            value: 'overview', label: 'Tổng quan'
+        }
+    ]
+
+    if (customPlanWithStages?.length > 0) {
+        let index = 0
+        for (const stage of customPlanWithStages) {
+            selectOptions.push({
+                value: `${index}`, label: `Giai đoạn ${index + 1}`
+            })
+            index++
+        }
+    }
+
     return (
         <div className='min-w-[1280px] flex flex-col'>
             <h2 className='text-left md:text-4xl lg:text-5xl font-bold mb-4'>
@@ -141,7 +163,11 @@ const Summary = () => {
                         </p>
                         <CustomButton
                             onClick={() => {
-                                const state = saveProfileToLocalStorage({currentStep : currentStep, referrer : 'summary', userInfo : userInfo})
+                                const state = saveProfileToLocalStorage({
+                                    currentStep: currentStep,
+                                    referrer: 'summary',
+                                    userInfo: userInfo
+                                })
 
                                 localStorage.setItem('onboarding_profile', JSON.stringify(state));
 
@@ -267,7 +293,7 @@ const Summary = () => {
                                 Kế hoạch
                             </p>
 
-                            <p className='text-sm md:text-base'>
+                            {!useCustomPlan && customPlanWithStages.length === 0 ? <p className='text-sm md:text-base'>
                                 Ngày bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])} <br/>
                                 Số điếu hút mỗi ngày: {cigsPerDay} <br/>
                                 Phương
@@ -303,8 +329,48 @@ const Summary = () => {
                                         <Tooltip/>
                                     </LineChart>
                                 </ResponsiveContainer>
-                                <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay đổi</CustomButton>
-                            </p>
+
+                            </p> : <>
+                                <div className="mt-8 text-left font-bold text-base md:text-lg">
+                                    <h3>Tổng quan kế hoạch</h3>
+                                </div>
+                                <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
+
+                                {selectOptions.length > 1 && <div className="mb-4 flex justify-center">
+                                    <Select
+                                        defaultValue="overview"
+                                        variant="borderless"
+                                        style={{width: 120}}
+                                        onChange={(e) => {
+                                            console.log(e)
+                                            setSelectedFilter(e)
+                                        }}
+                                        size="small"
+                                        options={selectOptions}
+                                    />
+                                </div>}
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <LineChart
+                                        data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter))}
+                                        margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                        <Line type="monotone" dataKey="cigs" name="Số điếu" stroke="#14b8a6"/>
+                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                        <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
+                                        <YAxis/>
+                                        <Tooltip/>
+                                        {customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                            return <ReferenceArea
+                                                x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
+                                                x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
+                                                y1={0} y2={cigsPerDay}
+                                                label={`Giai đoạn ${stage.id + 1}`}
+                                            />
+                                        })}
+                                    </LineChart>
+                                </ResponsiveContainer>
+                                <CustomButton type='primary' onClick={() => setCurrentStep(5)}>Thay đổi</CustomButton>
+                            </>
+                            }
 
                             <Divider/>
 
@@ -344,15 +410,19 @@ const Summary = () => {
                                 {goalList?.map((item, index) => (
                                     <div key={index}>
                                         <strong>{index + 1}.</strong> <br/>
-                                        <p className='text-sm md:text-base'>Tên mục tiêu: {item.goalName}</p>
+                                        <p className='text-sm md:text-base'>Tên mục
+                                            tiêu: {item.goalName}</p>
                                         <p className='text-sm md:text-base'>Số tiền cần tiết
                                             kiệm: {item.goalAmount.toLocaleString('vi-VN')}</p>
-                                        <p className='text-sm md:text-base font-bold'>Nếu cứ duy trì kế hoạch, bạn sẽ
-                                            đạt được mục tiêu sau: {calculateDateGoal(item.goalAmount)} ngày</p>
+                                        <p className='text-sm md:text-base font-bold'>Nếu cứ duy trì kế
+                                            hoạch, bạn sẽ
+                                            đạt được mục tiêu
+                                            sau: {calculateDateGoal(item.goalAmount)} ngày</p>
                                     </div>
                                 ))}
                             </div>
-                            <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay đổi</CustomButton>
+                            <CustomButton type='primary' onClick={() => setCurrentStep(4)}>Thay
+                                đổi</CustomButton>
                         </div>
                     </>}
             </div>

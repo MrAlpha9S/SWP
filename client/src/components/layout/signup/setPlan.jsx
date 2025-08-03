@@ -8,7 +8,7 @@ import ErrorText from "../../ui/errorText.jsx";
 import {checkboxStyle, quittingMethodOptions, onboardingErrorMsg} from "../../../constants/constants.js";
 import {Checkbox, DatePicker, Radio, Select, Tabs} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
-import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer} from 'recharts';
+import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
 import {
@@ -474,13 +474,23 @@ const SetPlan = ({
                                         />
                                     </div>}
                                     <ResponsiveContainer width="100%" height={300}>
-                                        <LineChart data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter))}
-                                                   margin={{top: 20, right: 30, left: 20, bottom: 25}}>
-                                            <Line type="monotone" dataKey="cigs" stroke="#14b8a6"/>
+                                        <LineChart
+                                            data={ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter))}
+                                            margin={{top: 20, right: 30, left: 20, bottom: 25}}>
+                                            <Line type="monotone" dataKey="cigs" name="Số điếu" stroke="#14b8a6"/>
                                             <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                             <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                             <YAxis/>
                                             <Tooltip/>
+                                            {customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                                if (!stage.logs[0]) return null
+                                                return <ReferenceArea
+                                                    x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
+                                                    x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
+                                                    y1={0} y2={cigsPerDay}
+                                                    label={`Giai đoạn ${stage.id + 1}`}
+                                                />
+                                            })}
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </>

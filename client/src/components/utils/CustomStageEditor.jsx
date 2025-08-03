@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {DatePicker, InputNumber, Button, Alert, Collapse, Popconfirm} from "antd";
+import {DatePicker, InputNumber, Button, Alert, Collapse, Popconfirm, Popover} from "antd";
 import {PlusOutlined, DeleteOutlined} from "@ant-design/icons";
 import dayjs from "dayjs";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "./dateUtils";
@@ -12,7 +12,7 @@ const {RangePicker} = DatePicker;
 const {Panel} = Collapse;
 
 const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsPerDay}) => {
-    const { openNotification } = useNotificationManager()
+    const {openNotification} = useNotificationManager()
     const [validationError, setValidationError] = useState("");
     const [currentId, setCurrentId] = useState(0);
 
@@ -35,10 +35,11 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
         const logs = [];
         const currentDate = new Date(start);
 
+        let index = 0
         while (currentDate <= end) {
             logs.push({
                 date: currentDate.toISOString(),
-                cigs: 0,
+                cigs: stageIndex === 0 && stageId === 0 && index++ === 0 ? cigsPerDay : 0,
                 status: '',
                 stageId: stageId,
             });
@@ -46,7 +47,6 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
         }
 
         updatedStages[stageIndex].logs = logs;
-        console.log(updatedStages);
         setCustomPlanWithStages(updatedStages);
     };
 
@@ -260,8 +260,12 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
                                     onChange={(e) => updateStageDate(stageIndex, e[0], e[1], stage.id)}
                                     className="w-full sm:w-auto"
                                 />
-                                <Button onClick={() => addDay(stage.id)}><IoMdAddCircleOutline/></Button>
-                                <Button onClick={() => removeDay(stage.id)}><IoMdRemoveCircleOutline/></Button>
+                                <Popover title='Thêm 1 ngày'>
+                                    <Button onClick={() => addDay(stage.id)}><IoMdAddCircleOutline/></Button>
+                                </Popover>
+                                <Popover title='Xóa 1 ngày'>
+                                    <Button onClick={() => removeDay(stage.id)}><IoMdRemoveCircleOutline/></Button>
+                                </Popover>
                                 <Popconfirm
                                     title="Xóa giai đoạn"
                                     description="Bạn có chắc muốn xóa giai đoạn này?"
