@@ -32,7 +32,9 @@ const handlePostOnboarding = async (req, res) => {
         cigsPerDay,
         planLog,
         goalList,
-        updaterUserAuth0Id
+        updaterUserAuth0Id,
+        useCustomPlan,
+        customPlanWithStages,
     } = req.body;
 
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userId required'});
@@ -57,7 +59,8 @@ const handlePostOnboarding = async (req, res) => {
                 stoppedDate,
                 cigsPerDay,
                 planLog,
-                goalList)
+                goalList, useCustomPlan,
+                customPlanWithStages,)
             if (userAuth0Id !== updaterUserAuth0Id) {
                 const updater = await getUserByAuth0Id(updaterUserAuth0Id);
                 socket.getIo().to(`${userAuth0Id}`).emit('plan-edit-by-coach', {
@@ -100,7 +103,8 @@ const handlePostOnboarding = async (req, res) => {
                 stoppedDate,
                 cigsPerDay,
                 planLog,
-                goalList)
+                goalList, useCustomPlan,
+                customPlanWithStages,)
             if (userAuth0Id !== updaterUserAuth0Id) {
                 const updater = await getUserByAuth0Id(updaterUserAuth0Id);
                 socket.getIo().to(`${userAuth0Id}`).emit('plan-edit-by-coach', {

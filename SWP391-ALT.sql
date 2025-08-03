@@ -144,7 +144,8 @@ CREATE TABLE [user_profiles]
   [created_at] datetime default (CURRENT_TIMESTAMP),
   [updated_at] datetime,
   [last_updated_by] int,
-  [is_public] bit default (1)
+  [is_public] bit default (1),
+  [is_using_custom_stages] bit default (0)
 )
 GO
 
@@ -214,6 +215,29 @@ CREATE TABLE [plan_log]
   [date] datetime,
   [num_of_cigs] int
 )
+GO
+
+CREATE TABLE [stages]
+(
+  [stage_id] int PRIMARY KEY IDENTITY(1, 1),
+  [profile_id] int,
+  [start_date] DATETIME,
+  [end_date] DATETIME
+)
+GO
+
+CREATE TABLE [stage_logs]
+(
+  [log_id] int PRIMARY KEY IDENTITY(1, 1),
+  [stage_id] int,
+  [date] DATETIME,
+  [cigs] int
+)
+GO
+
+ALTER TABLE [stages] ADD FOREIGN KEY ([profile_id]) REFERENCES [user_profiles] ([profile_id]) ON DELETE CASCADE;
+GO
+ALTER TABLE [stage_logs] ADD FOREIGN KEY ([stage_id]) REFERENCES [stages] ([stage_id]) ON DELETE CASCADE;
 GO
 
 CREATE TABLE [time_profile]

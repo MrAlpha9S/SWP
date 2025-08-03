@@ -108,6 +108,7 @@ function AppContent() {
 
     useEffect(() => {
         if (!isPending && userData) {
+            console.log(userData);
             syncProfileToStores(userData);
 
             const currentStepDashboard = useCurrentStepDashboard.getState().currentStepDashboard;

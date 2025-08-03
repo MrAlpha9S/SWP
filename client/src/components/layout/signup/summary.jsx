@@ -122,7 +122,9 @@ const Summary = () => {
         planLog,
         createGoalChecked,
         goalList,
-        quittingMethod
+        quittingMethod,
+        useCustomPlan,
+        customPlanWithStages
     });
 
 
@@ -142,6 +144,7 @@ const Summary = () => {
             })
             index++
         }
+        console.log(customPlanWithStages)
     }
 
     return (
@@ -286,14 +289,14 @@ const Summary = () => {
                         </>
                     )}
 
-                    {readinessValue === 'ready' && !isFreeUser && planLog?.length > 0 &&
+                    {readinessValue === 'ready' && !isFreeUser &&
                         <>
                             <Divider/>
                             <p className='md:text-lg lg:text-xl font-bold'>
                                 Kế hoạch
                             </p>
 
-                            {!useCustomPlan && customPlanWithStages.length === 0 ? <p className='text-sm md:text-base'>
+                            {!useCustomPlan && customPlanWithStages.length === 0 && planLog?.length > 0 ? <p className='text-sm md:text-base'>
                                 Ngày bắt đầu: {convertYYYYMMDDStrToDDMMYYYYStr(startDate.split('T')[0])} <br/>
                                 Số điếu hút mỗi ngày: {cigsPerDay} <br/>
                                 Phương
@@ -331,9 +334,6 @@ const Summary = () => {
                                 </ResponsiveContainer>
 
                             </p> : <>
-                                <div className="mt-8 text-left font-bold text-base md:text-lg">
-                                    <h3>Tổng quan kế hoạch</h3>
-                                </div>
                                 <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
 
                                 {selectOptions.length > 1 && <div className="mb-4 flex justify-center">
@@ -374,26 +374,26 @@ const Summary = () => {
 
                             <Divider/>
 
-                            <p className='md:text-lg lg:text-xl font-bold'>
-                                Số tiền bạn sẽ tiết kiệm được
-                            </p>
+                            {/*<p className='md:text-lg lg:text-xl font-bold'>*/}
+                            {/*    Số tiền bạn sẽ tiết kiệm được*/}
+                            {/*</p>*/}
 
-                            <div className='grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 items-center'>
-                                <p className='text-2xl font-bold'>{calculatePrice('week')} VNĐ</p>
-                                <span>một tuần</span>
+                            {/*<div className='grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 items-center'>*/}
+                            {/*    <p className='text-2xl font-bold'>{calculatePrice('week')} VNĐ</p>*/}
+                            {/*    <span>một tuần</span>*/}
 
-                                <p className='text-2xl font-bold'>{calculatePrice('month')} VNĐ</p>
-                                <span>một tháng</span>
+                            {/*    <p className='text-2xl font-bold'>{calculatePrice('month')} VNĐ</p>*/}
+                            {/*    <span>một tháng</span>*/}
 
-                                <p className='text-2xl font-bold'>{calculatePrice('year')} VNĐ</p>
-                                <span>một năm</span>
+                            {/*    <p className='text-2xl font-bold'>{calculatePrice('year')} VNĐ</p>*/}
+                            {/*    <span>một năm</span>*/}
 
-                                <p className='text-2xl font-bold'>{calculatePrice('year', 5)} VNĐ</p>
-                                <span>năm năm</span>
+                            {/*    <p className='text-2xl font-bold'>{calculatePrice('year', 5)} VNĐ</p>*/}
+                            {/*    <span>năm năm</span>*/}
 
-                                <p className='text-2xl font-bold'>{calculatePrice('year', 10)} VNĐ</p>
-                                <span>mười năm</span>
-                            </div>
+                            {/*    <p className='text-2xl font-bold'>{calculatePrice('year', 10)} VNĐ</p>*/}
+                            {/*    <span>mười năm</span>*/}
+                            {/*</div>*/}
                         </>
                     }
 

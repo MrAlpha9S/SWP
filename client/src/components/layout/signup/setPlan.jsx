@@ -160,24 +160,36 @@ const SetPlan = ({
     }, [planLog]);
 
     useEffect(() => {
-        if (quittingMethod === 'target-date' && expectedQuitDate.length > 0 && startDate.length > 0 && cigsPerDay > 0
-            && quittingMethod.length > 0) {
-            setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, 0, expectedQuitDate));
-        } else if (quittingMethod !== 'target-date' && startDate.length > 0 && cigsPerDay > 0
-            && quittingMethod.length > 0 && cigsReduced > 0) {
-            setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced));
+        if (!useCustomPlan) {
+            if (quittingMethod === 'target-date' && expectedQuitDate.length > 0 && startDate.length > 0 && cigsPerDay > 0
+                && quittingMethod.length > 0) {
+                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, 0, expectedQuitDate));
+            } else if (quittingMethod !== 'target-date' && startDate.length > 0 && cigsPerDay > 0
+                && quittingMethod.length > 0 && cigsReduced > 0) {
+                setPlanLog(calculatePlan(startDate, cigsPerDay, quittingMethod, cigsReduced));
+            }
         }
-    }, [cigsPerDay, cigsReduced, expectedQuitDate, quittingMethod, setPlanLog, startDate]);
+    }, [cigsPerDay, cigsReduced, expectedQuitDate, quittingMethod, setPlanLog, startDate, useCustomPlan]);
 
 
     useEffect(() => {
-        if (planLog.length > 0) {
+        if (planLog.length > 0 && !useCustomPlan) {
             setPlanLogCloneDDMMYY(planLog)
             if (readinessValue === 'ready' && quittingMethod !== 'target-date') {
                 setExpectedQuitDate(planLog[planLog.length - 1].date)
             }
         }
     }, [planLog])
+
+    useEffect(() => {
+        if (customPlanWithStages.length > 0 && useCustomPlan) {
+            const lastStage = customPlanWithStages[customPlanWithStages.length - 1];
+            const lastStageLogs = lastStage.logs
+            if (lastStageLogs.length === 0) return
+            const lastDateInLogs = lastStageLogs[lastStageLogs.length - 1].date
+            setExpectedQuitDate(lastDateInLogs)
+        }
+    }, [customPlanWithStages])
 
     const handleSavePlan = () => {
         if (!isAuthenticated || !user) return;

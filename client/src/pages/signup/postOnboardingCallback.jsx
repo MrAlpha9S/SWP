@@ -24,7 +24,7 @@ const PostOnboardingCallback = () => {
     const {timeAfterWaking} = useTimeAfterWakingStore();
     const {timeOfDayList, customTimeOfDay, customTimeOfDayChecked} = useTimeOfDayStore();
     const {triggers, customTrigger, customTriggerChecked} = useTriggersStore();
-    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog} = usePlanStore();
+    const {startDate, cigsPerDay, quittingMethod, cigsReduced, expectedQuitDate, stoppedDate, planLog, useCustomPlan, customPlanWithStages} = usePlanStore();
     const {goalList, createGoalChecked} = useGoalsStore()
     const {setIsProfileExist} = useProfileExists()
     const {userInfo} = useUserInfoStore()
@@ -45,18 +45,25 @@ const PostOnboardingCallback = () => {
             triggers,
             cigsPerDay,
             updaterUserAuth0Id: user.sub,
+            useCustomPlan,
         };
 
         if (customTimeOfDayChecked) payload.customTimeOfDay = customTimeOfDay;
         if (customTriggerChecked) payload.customTrigger = customTrigger;
         if (readinessValue === 'ready') {
-            payload.startDate = startDate;
-            payload.quittingMethod = quittingMethod;
-            if (quittingMethod !== 'target-date') {
-                payload.cigsReduced = cigsReduced;
+            if (useCustomPlan) {
+                payload.startDate = customPlanWithStages[0].startDate;
+                payload.expectedQuitDate = expectedQuitDate
+                payload.customPlanWithStages = customPlanWithStages;
+            } else {
+                payload.startDate = startDate;
+                payload.quittingMethod = quittingMethod;
+                if (quittingMethod !== 'target-date') {
+                    payload.cigsReduced = cigsReduced;
+                }
+                payload.expectedQuitDate = expectedQuitDate;
+                payload.planLog = planLog;
             }
-            payload.expectedQuitDate = expectedQuitDate;
-            payload.planLog = planLog;
         } else {
             payload.stoppedDate = stoppedDate;
         }
@@ -64,6 +71,9 @@ const PostOnboardingCallback = () => {
         if (createGoalChecked && goalList.length > 0) {
             payload.goalList = goalList;
         }
+
+        console.log(payload)
+
 
         mutation.mutate(payload, {
             onSuccess: (data) => {

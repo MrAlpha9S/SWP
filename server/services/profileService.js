@@ -38,7 +38,8 @@ const postUserProfile = async (userAuth0Id, updaterUserAuth0Id,
                                stoppedDate,
                                cigsPerDay,
                                planLog,
-                               goalList, actionType, profile_id = 0) => {
+                               goalList, actionType, profile_id = 0, useCustomPlan,
+                               customPlanWithStages) => {
     try {
         const pool = await poolPromise;
         const userId = await getUserIdFromAuth0Id(userAuth0Id);
@@ -49,7 +50,7 @@ const postUserProfile = async (userAuth0Id, updaterUserAuth0Id,
             const result = await pool.request()
                 .input('userId', sql.Int, userId)
                 .input('readiness', sql.VarChar(20), readiness)
-                .input('startDate', sql.DateTime, startDate && startDate.length >0 ? startDate : null)
+                .input('startDate', sql.DateTime, startDate && startDate.length > 0 ? startDate : null)
                 .input('quitDate', sql.DateTime, stoppedDate && stoppedDate.length > 0 ? stoppedDate : null)
                 .input('expectedQuitDate', sql.DateTime, expectedQuitDate && expectedQuitDate.length > 0 ? expectedQuitDate : null)
                 .input('cigsPerDay', sql.Int, cigsPerDay)
@@ -62,14 +63,15 @@ const postUserProfile = async (userAuth0Id, updaterUserAuth0Id,
                 .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
                 .input('created_at', sql.DateTime, getCurrentUTCDateTime().toISOString())
                 .input('lastUpdatedBy', sql.Int, updaterUserId)
+                .input('isUsingCustomPlanWithStages', sql.Bit, useCustomPlan)
                 .query(`
                     INSERT INTO user_profiles (user_id, readiness_value, start_date, quit_date, expected_quit_date,
                                                cigs_per_day, cigs_per_pack, price_per_pack, time_after_waking,
                                                quitting_method, cigs_reduced, custom_time_of_day, custom_trigger,
-                                               created_at, last_updated_by)
+                                               created_at, last_updated_by, is_using_custom_stages)
                         OUTPUT INSERTED.profile_id
                     VALUES (
-                        @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at, @lastUpdatedBy
+                        @userId, @readiness, @startDate, @quitDate, @expectedQuitDate, @cigsPerDay, @cigsPerPack, @pricePerPack, @timeAfterWaking, @quittingMethod, @cigsReduced, @customTimeOfDay, @customTrigger, @created_at, @lastUpdatedBy, @isUsingCustomPlanWithStages 
                         );
                 `);
 
@@ -109,6 +111,24 @@ const postUserProfile = async (userAuth0Id, updaterUserAuth0Id,
                 .input('date', sql.DateTime, entry.date)
                 .input('num_of_cigs', sql.Int, entry.cigs)
                 .query('INSERT INTO plan_log (profile_id, date, num_of_cigs) VALUES (@profile_id, @date, @num_of_cigs)');
+        }
+
+        for (const entry of customPlanWithStages ?? []) {
+            const result = await pool.request()
+                .input('profile_id', sql.Int, profile_id)
+                .input('startDate', sql.DateTime, entry.startDate)
+                .input('endDate', sql.DateTime, entry.endDate)
+                .query('INSERT INTO stages (profile_id, start_date, end_date) OUTPUT INSERTED.stage_id VALUES (@profile_id, @startDate, @endDate)')
+
+            const stageId = result.recordset[0].stage_id
+
+            for (const log of entry.logs) {
+                await pool.request()
+                    .input('stageId', sql.Int, stageId)
+                    .input('date', sql.DateTime, log.date)
+                    .input('cigs', sql.Int, log.cigs)
+                    .query('INSERT INTO stage_logs (stage_id, date, cigs) VALUES (@stageId, @date, @cigs)');
+            }
         }
 
         // 6. Insert goals
@@ -203,13 +223,37 @@ const getUserProfile = async (userAuth0Id) => {
             `);
         const goalList = goalsResult.recordset;
 
+        // 7. Get stages
+        const stagesResult = await pool.request()
+            .input("profileId", profileId)
+            .query(`SELECT * from stages where profile_id = @profileId`)
+
+        const stages = stagesResult.recordset;
+
+        let stageId = 0
+        for(const stage of stages) {
+            stage.id = stageId++
+            stage.startDate = stage.start_date;
+            stage.endDate = stage.end_date;
+            const localStageId = stage.stage_id;
+            const resultLogs = await pool.request()
+                .input("stageId", sql.Int, localStageId)
+                .query('SELECT * FROM stage_logs WHERE stage_id = @stageId')
+            const logs = resultLogs.recordset;
+            for (const log of logs) {
+                log.stageId = log.stage_id - 1
+            }
+            stage.logs = logs;
+        }
+
         return {
             ...profile,
             reasonList,
             triggers,
             timeOfDayList,
             planLog,
-            goalList
+            goalList,
+            stages
         };
     } catch (error) {
         console.error("Error getting user profile:", error);
@@ -236,7 +280,9 @@ const updateUserProfile = async (
     stoppedDate,
     cigsPerDay,
     planLog,
-    goalList
+    goalList,
+    useCustomPlan,
+    customPlanWithStages,
 ) => {
     try {
         const pool = await poolPromise;
@@ -260,6 +306,7 @@ const updateUserProfile = async (
             .input('customTimeOfDay', sql.NVarChar(100), customTimeOfDay ?? null)
             .input('customTrigger', sql.NVarChar(100), customTrigger ?? null)
             .input('updatedAt', sql.DateTime, updatedAt)
+            .input('isUsingCustomPlanWithStages', sql.Bit, useCustomPlan)
             .query(`
                 UPDATE user_profiles
                 SET readiness_value    = @readiness,
@@ -275,7 +322,8 @@ const updateUserProfile = async (
                     custom_time_of_day = @customTimeOfDay,
                     custom_trigger     = @customTrigger,
                     updated_at         = @updatedAt,
-                    last_updated_by    = @lastUpdatedBy
+                    last_updated_by    = @lastUpdatedBy,
+                    is_using_custom_stages = @isUsingCustomPlanWithStages
                 WHERE user_id = @userId
             `);
 
@@ -286,7 +334,7 @@ const updateUserProfile = async (
         const profile_id = result.recordset[0].profile_id;
 
         // Clear related tables
-        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals'];
+        const tablesToClear = ['profiles_reasons', 'triggers_profiles', 'time_profile', 'plan_log', 'goals', 'stages'];
         for (const table of tablesToClear) {
             await pool.request()
                 .input('profile_id', profile_id)
@@ -313,7 +361,8 @@ const updateUserProfile = async (
             stoppedDate,
             cigsPerDay,
             planLog,
-            goalList, 'update', profile_id)
+            goalList, 'update', profile_id, useCustomPlan,
+            customPlanWithStages)
 
     } catch (error) {
         console.error('Error in updateUserProfile:', error);
@@ -403,7 +452,6 @@ const getLeaderboard = async () => {
         console.error("postGoal error:", error);
     }
 }
-
 
 
 module.exports = {userProfileExists, postUserProfile, getUserProfile, updateUserProfile, postGoal, deleteGoal}

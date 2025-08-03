@@ -136,6 +136,12 @@ export async function syncProfileToStores(profile) {
             (userProfile.planLog ?? [])
         );
 
+        usePlanStore.getState().setCustomPlanWithStages(
+            (userProfile.stages)
+        )
+
+        usePlanStore.getState().setUseCustomPlan(userProfile.is_using_custom_stages)
+
         if (userProfile.goalList) {
             useGoalsStore.getState().setCreateGoalChecked(true);
             useGoalsStore.getState().setGoalList(userProfile.goalList);
@@ -169,6 +175,7 @@ export async function syncProfileToStores(profile) {
 }
 
 export const saveProfileToLocalStorage = ({currentStep, referrer = '', userInfo}) => {
+    const useCustomPlan = usePlanStore.getState().useCustomPlan
     const state = {
         userProfile : {
             readiness_value: useQuitReadinessStore.getState().readinessValue,
@@ -183,11 +190,13 @@ export const saveProfileToLocalStorage = ({currentStep, referrer = '', userInfo}
             custom_trigger: useTriggersStore.getState().customTrigger,
             customTriggerChecked: useTriggersStore.getState().customTriggerChecked,
             quit_date: usePlanStore.getState().stoppedDate,
-            planLog: usePlanStore.getState().planLog,
+            planLog: useCustomPlan ? [] : usePlanStore.getState().planLog,
             planLogCloneDDMMYY: usePlanStore.getState().planLogCloneDDMMYY,
             createGoalChecked: useGoalsStore.getState().createGoalChecked,
             goalList: useGoalsStore.getState().goalList,
-            currentStep: currentStep
+            currentStep: currentStep,
+            useCustomPlan: useCustomPlan,
+            customPlanWithStages: useCustomPlan ? usePlanStore.getState().customPlanWithStages : [],
         },
         referrer: referrer
     };
