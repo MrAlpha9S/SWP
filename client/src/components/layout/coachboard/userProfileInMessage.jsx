@@ -13,7 +13,7 @@ import {
     convertYYYYMMDDStrToDDMMYYYYStr,
     getCurrentUTCDateTime
 } from "../../utils/dateUtils.js";
-import {mergeByDate} from "../../utils/checkInUtils.js";
+import {mergeByDateForPlanLog} from "../../utils/checkInUtils.js";
 import CustomButton from "../../ui/CustomButton.jsx";
 import SetPlan from "../signup/setPlan.jsx";
 import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
@@ -108,7 +108,7 @@ const UserProfileInMessage = ({
     const [displayWarning, setDisplayWarning] = useState(false);
     const mergedDataSet = useMemo(() => {
         if (!planLog || !checkInDataSet || userInfo?.sub_id === 1 || checkInDataSet.length === 0) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, checkInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at));
+        return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, checkInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at));
     }, [planLog, checkInDataSet, userInfo?.sub_id, quittingMethod, cigsPerDay, userInfo?.created_at]);
 
     useEffect(() => {

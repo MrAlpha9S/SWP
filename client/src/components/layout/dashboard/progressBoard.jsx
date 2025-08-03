@@ -19,7 +19,7 @@ import {PiPiggyBankLight} from "react-icons/pi";
 import {IoLogoNoSmoking} from "react-icons/io";
 import {FaRegCalendarCheck, FaTrophy} from "react-icons/fa";
 import {BsGraphDown} from "react-icons/bs";
-import {getCheckInDataSet, mergeByDate} from "../../utils/checkInUtils.js";
+import {getCheckInDataSet, mergeByDateForPlanLog, mergeByDateForCustomStages} from "../../utils/checkInUtils.js";
 import {useCheckInDataStore, useStepCheckInStore} from "../../../stores/checkInStore.js";
 import {
     clonePlanLogToDDMMYYYY,
@@ -34,6 +34,8 @@ import html2canvas from "html2canvas";
 import {useEditorContentStore} from "../../../stores/store.js";
 import {getBackendUrl} from "../../utils/getBackendURL.js";
 import HealthStatistics from "./health-statistics.jsx";
+import getDatasetFromCustomPlanWithStages from "../../utils/getDatasetFromCustomPlanWithStages.js";
+import ConvertPlanlogDdmmyy from "../../utils/convertPlanlogDDMMYY.js";
 
 const ProgressBoard = ({
                            startDate,
@@ -50,7 +52,9 @@ const ProgressBoard = ({
                            setMoneySaved = null,
                            userInfo,
                            from = null,
-    achievementProgress = null
+                           achievementProgress = null,
+                           useCustomPlan,
+                           customPlanWithStages
                        }) => {
     const navigate = useNavigate();
     const {handleStepThree} = useStepCheckInStore();
@@ -63,6 +67,7 @@ const ProgressBoard = ({
     const [range, setRange] = useState('overview');
     const progressBoardRef = useRef(null);
     const {setTitle, setContent} = useEditorContentStore()
+    const [selectedFilter, setSelectedFilter] = useState('overview')
 
     const datasetQueryKey = from === 'coach-user'
         ? ['dataset-coach', userInfo?.auth0_id]
@@ -130,16 +135,32 @@ const ProgressBoard = ({
     }, [checkInDataset?.data]);
 
     useEffect(() => {
-        if (localCheckInDataSet && localCheckInDataSet.length > 0 && planLog && planLog.length > 0) {
-            const lastCheckInEntry = localCheckInDataSet[localCheckInDataSet.length - 1];
-            const lastPlanEntry = planLog[planLog.length - 1];
-            const lastDateInPlan = new Date(lastPlanEntry.date);
+        if (localCheckInDataSet && localCheckInDataSet.length > 0) {
+            if (!useCustomPlan && planLog && planLog.length > 0) {
+                const lastCheckInEntry = localCheckInDataSet[localCheckInDataSet.length - 1];
+                const lastPlanEntry = planLog[planLog.length - 1];
+                const lastDateInPlan = new Date(lastPlanEntry.date);
 
-            if (lastCheckInEntry.cigs > 0 && lastDateInPlan < getCurrentUTCDateTime()) {
-                setShowWarning(true);
+                if (lastCheckInEntry.cigs > 0 && lastDateInPlan < getCurrentUTCDateTime()) {
+                    setShowWarning(true);
+                }
             }
         }
     }, [localCheckInDataSet, planLog]);
+
+    useEffect(() => {
+        if (localCheckInDataSet && localCheckInDataSet.length > 0) {
+            if (useCustomPlan && customPlanWithStages.length > 0) {
+                const lastCheckInEntry = localCheckInDataSet[localCheckInDataSet.length - 1];
+                const lastLogsOfStage = customPlanWithStages[customPlanWithStages.length - 1].logs
+                const lastLogEntry = lastLogsOfStage[lastLogsOfStage.length - 1];
+                const lastDateInPlan = new Date(lastLogEntry.date);
+                if (lastCheckInEntry.cigs > 0 && lastDateInPlan < getCurrentUTCDateTime()) {
+                    setShowWarning(true);
+                }
+            }
+        }
+    }, [localCheckInDataSet, customPlanWithStages, useCustomPlan]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -328,45 +349,48 @@ const ProgressBoard = ({
 
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
-        if (!planLog || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        return clonePlanLogToDDMMYYYY(mergeByDate(planLog, localCheckInDataSet, quittingMethod, cigsPerDay, userInfo?.created_at, range));
-    }, [planLog, localCheckInDataSet, quittingMethod, isDatasetPending, range]);
-
-    const getReferenceArea = useCallback(() => {
-        if (!mergedDataSet || mergedDataSet.length === 0) return null;
-
-        const arrayOfArrays = [];
-        const size = 7;
-
-        for (let i = 0; i < mergedDataSet.length - (size - 1); i += 6) {
-            arrayOfArrays.push(mergedDataSet.slice(i, i + size));
+        if ((!planLog && !customPlanWithStages) || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
+        if (planLog.length > 0) return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, localCheckInDataSet, cigsPerDay, userInfo?.created_at, range));
+        if (customPlanWithStages.length > 0) {
+            return clonePlanLogToDDMMYYYY(mergeByDateForCustomStages(getDatasetFromCustomPlanWithStages(customPlanWithStages), localCheckInDataSet, cigsPerDay, userInfo?.created_at, selectedFilter))
         }
+    }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.sub_id, userInfo?.created_at, cigsPerDay, range, selectedFilter]);
 
-        for (let i = 0; i < arrayOfArrays.length; i++) {
-            const found = arrayOfArrays[i].some(
-                data => data.date === convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
-            );
-
-            if (found) {
-                const targetArray = arrayOfArrays[i];
-                const x1 = targetArray[0].date;
-                const x2 = targetArray[targetArray.length - 1].date;
-                const y1 = 0;
-
-                return (
-                    <ReferenceArea
-                        x1={x1}
-                        x2={x2}
-                        y1={y1}
-                        y2={cigsPerDay + 1}
-                        stroke="green"
-                        strokeOpacity={0.3}
-                    />
-                );
-            }
-        }
-        return null;
-    }, [cigsPerDay, currentDate, mergedDataSet]);
+    // const getReferenceArea = useCallback(() => {
+    //     if (!mergedDataSet || mergedDataSet.length === 0) return null;
+    //
+    //     const arrayOfArrays = [];
+    //     const size = 7;
+    //
+    //     for (let i = 0; i < mergedDataSet.length - (size - 1); i += 6) {
+    //         arrayOfArrays.push(mergedDataSet.slice(i, i + size));
+    //     }
+    //
+    //     for (let i = 0; i < arrayOfArrays.length; i++) {
+    //         const found = arrayOfArrays[i].some(
+    //             data => data.date === convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
+    //         );
+    //
+    //         if (found) {
+    //             const targetArray = arrayOfArrays[i];
+    //             const x1 = targetArray[0].date;
+    //             const x2 = targetArray[targetArray.length - 1].date;
+    //             const y1 = 0;
+    //
+    //             return (
+    //                 <ReferenceArea
+    //                     x1={x1}
+    //                     x2={x2}
+    //                     y1={y1}
+    //                     y2={cigsPerDay + 1}
+    //                     stroke="green"
+    //                     strokeOpacity={0.3}
+    //                 />
+    //             );
+    //         }
+    //     }
+    //     return null;
+    // }, [cigsPerDay, currentDate, mergedDataSet]);
 
     const handleCheckIn = useCallback(() => {
         if (setCurrentStepDashboard) {
@@ -429,6 +453,22 @@ const ProgressBoard = ({
         }
     };
 
+    let selectOptions = [
+        {
+            value: 'overview', label: 'Tổng quan'
+        }
+    ]
+
+    if (customPlanWithStages?.length > 0) {
+        let index = 0
+        for (const stage of customPlanWithStages) {
+            selectOptions.push({
+                value: `${index}`, label: `Giai đoạn ${index + 1}`
+            })
+            index++
+        }
+    }
+
     return (
         <div
             className='bg-white p-2 sm:p-4 md:p-6 rounded-xl shadow-xl w-full max-w-4xl mx-auto space-y-3 sm:space-y-4'>
@@ -443,7 +483,8 @@ const ProgressBoard = ({
                     {isPending ? (
                         <Skeleton.Input style={{width: 180}} active size="small"/>
                     ) : (
-                        !localCheckInDataSet?.some((checkin) => checkin.date.split('T')[0] === getCurrentUTCDateTime().toISOString().split('T')[0]) ? <strong>Hôm nay bạn chưa check-in.</strong> : <strong>Hôm nay bạn đã check-in.</strong>
+                        !localCheckInDataSet?.some((checkin) => checkin.date.split('T')[0] === getCurrentUTCDateTime().toISOString().split('T')[0]) ?
+                            <strong>Hôm nay bạn chưa check-in.</strong> : <strong>Hôm nay bạn đã check-in.</strong>
                     )}
                 </div>}
 
@@ -556,21 +597,9 @@ const ProgressBoard = ({
                             : 'Số điếu thuốc theo kế hoạch và thực tế'}
                     </h3>
 
-                    <div className="mb-4">
-                        <Select
-                            defaultValue="overview"
-                            variant="borderless"
-                            style={{width: 120}}
-                            onChange={handleSelectChange}
-                            size="small"
-                            options={[
-                                {value: 'plan', label: 'Kế hoạch'},
-                                {value: 'overview', label: 'Tổng quan'},
-                            ]}
-                        />
-                    </div>
 
-                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (!planLog || planLog.length === 0) &&
+
+                    {readinessValue === 'ready' && userInfo?.sub_id !== 1 && ((!useCustomPlan && (!planLog || planLog.length === 0)) || (useCustomPlan && (!customPlanWithStages || customPlanWithStages.length === 0))) &&
                         <div className='flex flex-col items-center justify-center space-y-3'>
                             <p className="text-sm text-center">
                                 {from === 'coach-user'
@@ -597,8 +626,23 @@ const ProgressBoard = ({
 
                     {isPending ? (
                         <Skeleton.Input style={{width: '100%', height: 300}} active/>
-                    ) : mergedDataSet?.length > 0 ? (
+                    ) : mergedDataSet?.length === 0 ? (
+                        <div className="text-center text-gray-500 text-sm">Không có dữ liệu để hiển thị.</div>
+                    ) : !useCustomPlan ? (
                         <div className="w-full overflow-x-auto">
+                            <div className="mb-4">
+                                <Select
+                                    defaultValue="overview"
+                                    variant="borderless"
+                                    style={{width: 120}}
+                                    onChange={handleSelectChange}
+                                    size="small"
+                                    options={[
+                                        {value: 'plan', label: 'Kế hoạch'},
+                                        {value: 'overview', label: 'Tổng quan'},
+                                    ]}
+                                />
+                            </div>
                             <ResponsiveContainer width="100%" height={300} minWidth={300}>
                                 <LineChart
                                     data={mergedDataSet}
@@ -624,7 +668,7 @@ const ProgressBoard = ({
                                         connectNulls={true}
                                     />
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
-                                    {quittingMethod === 'gradual-weekly' && getReferenceArea()}
+                                    {/*{quittingMethod === 'gradual-weekly' && getReferenceArea()}*/}
                                     <ReferenceLine
                                         x={
                                             currentDate < new Date(expectedQuitDate)
@@ -650,12 +694,86 @@ const ProgressBoard = ({
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <div className="text-center text-gray-500 text-sm">Không có dữ liệu để hiển thị.</div>
+                        <div className="w-full overflow-x-auto">
+                            {selectOptions.length > 1 && <div className="mb-4 flex justify-center">
+                                <Select
+                                    defaultValue="overview"
+                                    variant="borderless"
+                                    style={{width: 120}}
+                                    onChange={(e) => {
+                                        setSelectedFilter(e)
+                                    }}
+                                    size="small"
+                                    options={selectOptions}
+                                />
+                            </div>}
+                            <ResponsiveContainer width="100%" height={300} minWidth={300}>
+                                <LineChart
+                                    data={mergedDataSet}
+                                    margin={{top: 20, right: 10, left: 10, bottom: 25}}
+                                >
+                                    <Line
+                                        type="monotone"
+                                        dataKey="actual"
+                                        stroke="#ef4444"
+                                        dot={{r: 2}}
+                                        strokeWidth={2}
+                                        name="Đã hút"
+                                        connectNulls={true}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="plan"
+                                        stroke="#14b8a6"
+                                        strokeDasharray="5 5"
+                                        strokeWidth={2}
+                                        dot={false}
+                                        name="Kế hoạch"
+                                        connectNulls={true}
+                                    />
+                                    <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
+                                    {/*{quittingMethod === 'gradual-weekly' && getReferenceArea()}*/}
+                                    <ReferenceLine
+                                        x={
+                                            currentDate < new Date(expectedQuitDate)
+                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
+                                                : ''
+                                        }
+                                        stroke="#115e59"
+                                        label="Hôm nay"
+                                    />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={<CustomizedAxisTick/>}
+                                        interval={1}
+                                        fontSize={12}
+                                    />
+                                    <YAxis fontSize={12}/>
+                                    <Tooltip content={<CustomTooltip/>}/>
+                                    <Legend
+                                        verticalAlign="top"
+                                        wrapperStyle={{fontSize: '12px'}}
+                                    />
+                                    {selectedFilter === 'overview' && customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                        if (!stage.logs[0]) return null
+                                        return <ReferenceArea
+                                            key={stage.id}
+                                            x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
+                                            x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
+                                            y1={0}
+                                            y2={cigsPerDay}
+                                            label={`Giai đoạn ${stage.id + 1}`}
+                                        />
+                                    })}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
                     )}
                 </div>
             )}
 
-            {!from && <HealthStatistics achievementProgress={achievementProgress?.data} checkInDataset={checkInDataset?.data} />}
+            {!from && <HealthStatistics achievementProgress={achievementProgress?.data}
+                                        checkInDataset={checkInDataset?.data}/>}
 
             {!from && <div className="text-center">
                 {isPending ? (

@@ -1,4 +1,4 @@
-  const getDatasetFromCustomPlanWithStages = (customPlanWithStages, selectedStage = null) => {
+  const getDatasetFromCustomPlanWithStages = (customPlanWithStages, selectedStage = 'overview') => {
 
     if (!customPlanWithStages || !Array.isArray(customPlanWithStages) || customPlanWithStages.length === 0) {
         return [];

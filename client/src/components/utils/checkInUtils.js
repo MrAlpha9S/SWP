@@ -138,10 +138,9 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
 //     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 // }
 
-export function mergeByDate(
+export function mergeByDateForPlanLog(
     planLog = [],
     checkinLog = [],
-    quittingMethod, // unused
     cigsPerDay = null,
     userCreationDate = null,
     range = "overview"
@@ -239,7 +238,7 @@ export function mergeByDate(
 
         let plan = null;
         for (const range of planRanges) {
-            const { start, end, cigs, nextCigs } = range;
+            const {start, end, cigs, nextCigs} = range;
 
             if (current >= start && current <= end) {
                 const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
@@ -276,6 +275,121 @@ export function mergeByDate(
     }
 
     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+export function mergeByDateForCustomStages(
+    customPlanWithStages = [],
+    checkinLog = [],
+    cigsPerDay = null,
+    userCreationDate = null,
+    range = "overview"
+) {
+    const map = new Map();
+
+    const checkinMap = new Map();
+    for (const entry of checkinLog) {
+        const dateStr = new Date(entry.date).toISOString().split("T")[0];
+        checkinMap.set(dateStr, entry.cigs);
+    }
+
+    const sortedPlanLog = [...customPlanWithStages].sort((a, b) => new Date(a.date) - new Date(b.date));
+    console.log('sortedPlanLog', sortedPlanLog);
+
+    const getCurrentUTCDate = () => {
+        const now = new Date();
+        return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    };
+
+    const currentDate = getCurrentUTCDate();
+
+    const allDates = [
+        ...checkinLog.map(e => new Date(e.date)),
+        ...customPlanWithStages.map(e => new Date(e.date)),
+        ...(userCreationDate ? [new Date(userCreationDate)] : [])
+    ];
+
+    if (allDates.length === 0 && userCreationDate) {
+        allDates.push(new Date(userCreationDate));
+    }
+
+    const firstDate = new Date(Math.min(...allDates.map(d => d.getTime())));
+    const lastDate = new Date(Math.max(...allDates.map(d => d.getTime()), currentDate.getTime()));
+
+    const current = new Date(firstDate);
+    let lastKnownActual = null;
+
+    const planMap = new Map();
+    for (const entry of sortedPlanLog) {
+        const dayStr = new Date(entry.date).toISOString().split("T")[0];
+        planMap.set(dayStr, { cigs: entry.cigs, stage: entry.stage });
+    }
+
+    while (current <= lastDate) {
+        const dayStr = current.toISOString().split("T")[0];
+        const actualFromCheckin = checkinMap.get(dayStr);
+        let actual = actualFromCheckin ?? null;
+        let checkinMissed = false;
+
+        if (actual == null && lastKnownActual != null && current <= currentDate) {
+            actual = lastKnownActual;
+            checkinMissed = true;
+        } else if (actual != null) {
+            lastKnownActual = actual;
+        }
+
+        const ucDate = userCreationDate ? new Date(userCreationDate) : null;
+        const firstPlanDate = sortedPlanLog.length > 0 ? new Date(sortedPlanLog[0].date) : null;
+
+        if (
+            actual == null &&
+            cigsPerDay != null &&
+            ucDate &&
+            current >= ucDate &&
+            (!firstPlanDate || current < firstPlanDate)
+        ) {
+            actual = cigsPerDay;
+            checkinMissed = true;
+        }
+
+        const planEntry = planMap.get(dayStr);
+
+        if (range === "plan" && !planEntry) {
+            current.setUTCDate(current.getUTCDate() + 1);
+            continue;
+        }
+
+        map.set(dayStr, {
+            date: dayStr,
+            actual,
+            plan: planEntry?.cigs ?? null,
+            stage: planEntry?.stage ?? null,
+            checkinMissed
+        });
+
+        current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    let result = Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (range !== "overview" && !isNaN(Number(range))) {
+        const targetStage = Number(range);
+        result = result.filter(log => log.stage === targetStage);
+    } else if (range === "overview") {
+        // Find the last log with non-null stage
+        const lastLogWithStage = [...result].reverse().find(log => log.stage != null);
+        if (lastLogWithStage) {
+            const endDate = new Date(lastLogWithStage.date);
+            const startDate = new Date(endDate);
+            startDate.setUTCDate(endDate.getUTCDate() - 29); // 30 days window
+
+            result = result.filter(log => {
+                const logDate = new Date(log.date);
+                return logDate >= startDate && logDate <= endDate;
+            });
+        }
+    }
+
+    return result;
 }
 
 

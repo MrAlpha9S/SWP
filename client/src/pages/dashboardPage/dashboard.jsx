@@ -56,6 +56,8 @@ function Dashboard() {
         stoppedDate,
         planLog,
         planLogCloneDDMMYY,
+        useCustomPlan,
+        customPlanWithStages
     } = usePlanStore();
     const {createGoalChecked, goalAmount, goalList, setMoneySaved} = useGoalsStore()
     const navigate = useNavigate();
@@ -240,6 +242,8 @@ function Dashboard() {
                             getAccessTokenSilently={getAccessTokenSilently}
                             setMoneySaved={setMoneySaved}
                             achievementProgress={achievementProgress}
+                            useCustomPlan={useCustomPlan}
+                            customPlanWithStages={customPlanWithStages}
                         />
                         </>
                     ) : (
