@@ -66,7 +66,7 @@ const Onboarding = () => {
     }, []);
 
     const {readinessValue} = useQuitReadinessStore();
-    const {addError, removeError} = useErrorStore();
+    const {addError, removeError, errors} = useErrorStore();
     const {reasonList} = useReasonStore();
     const {pricePerPack} = usePricePerPackStore();
     const {cigsPerPack} = useCigsPerPackStore();
@@ -294,6 +294,8 @@ const Onboarding = () => {
                                     removeError(errorMsgQuitMethod)
                                 }
                                 if (cigsReduced > cigsPerDay) {
+                                    console.log('hey')
+                                    console.log(errors)
                                     addError(errorMsgCigsReducedLarge)
                                 } else {
                                     removeError(errorMsgCigsReducedLarge)
@@ -316,7 +318,7 @@ const Onboarding = () => {
                                 if (startDate.length > 0 &&
                                     cigsPerDay > 0 &&
                                     quittingMethod.length > 0 &&
-                                    ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
+                                    ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced) && cigsReduced < cigsPerDay) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
                                     setCurrentStep(currentStep + 1)
                                 }
                             }

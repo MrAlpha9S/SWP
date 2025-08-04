@@ -11,7 +11,7 @@ const QuickCreate = ({setQuittingMethod, quittingMethod, from, setExpectedQuitDa
             <p className="block text-sm md:text-base text-gray-700 mb-1">Hãy chọn phương pháp:</p>
             <div className=''>
                 {errors.map((error, index) => {
-                    if (error.location === "quitMethod") {
+                    if (error.location === "quitMethod" ) {
                         return (
                             <ErrorText key={index}>{error.message}</ErrorText>
                         )
@@ -61,7 +61,7 @@ const QuickCreate = ({setQuittingMethod, quittingMethod, from, setExpectedQuitDa
                     </label>
                     <div className=''>
                         {errors.map((error, index) => {
-                            if (error.location === "cigsReduced") {
+                            if (error.location === "cigsReduced" || error.location === "cigsReducedLarge") {
                                 return (
                                     <ErrorText key={index}>{error.message}</ErrorText>
                                 )

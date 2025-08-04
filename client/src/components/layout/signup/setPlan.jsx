@@ -54,6 +54,7 @@ const SetPlan = ({
                      stoppedDate,
                      goalList,
                      setPlanEditClicked,
+                     setPlanCreation,
                      useCustomPlan,
                      setUseCustomPlan,
                      customPlanWithStages, setCustomPlanWithStages
@@ -257,6 +258,7 @@ const SetPlan = ({
         mutation.mutate(payload, {
             onSuccess: (data) => {
                 setPlanEditClicked(false)
+                setPlanCreation(false)
                 openNotification('success', {
                     message: 'Thành công',
                     content: 'Lưu kế hoạch thành công'

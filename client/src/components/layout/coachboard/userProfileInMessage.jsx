@@ -138,6 +138,11 @@ const UserProfileInMessage = ({
         }
     }, [expectedQuitDate, mergedDataSet, today]);
 
+    useEffect(() => {
+        console.log('edit', planEditClicked)
+        console.log('create', planCreation)
+    }, [planCreation, planEditClicked]);
+
 
     // Show loading state if data is still being fetched
     if (isPending) {
@@ -164,7 +169,7 @@ const UserProfileInMessage = ({
         }
     }
 
-    console.log(ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter)))
+
 
     return (
         <div className='h-full w-full flex flex-col overflow-y-auto px-5'>
@@ -257,6 +262,7 @@ const UserProfileInMessage = ({
                         stoppedDate={stoppedDate}
                         goalList={goalList}
                         setPlanEditClicked={setPlanEditClicked}
+                        setPlanCreation={setPlanCreation}
                         coachInfo={coachInfo}
                         coach={coach}
                         useCustomPlan={localUseCustomPlan}
