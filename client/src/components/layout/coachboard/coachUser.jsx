@@ -231,7 +231,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
             <div className="w-full flex-1 flex justify-center">
                 <Tabs
                     centered
-                    destroyOnHidden
+                    destroyOnHidden={false}
                     defaultActiveKey="1"
                     items={userInfoTabs}
                     className="w-full"
@@ -285,7 +285,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                 <div className="w-full h-full flex-1 flex justify-center px-2 sm:px-4">
                     <Tabs
                         centered
-                        destroyOnHidden
+                        destroyOnHidden={false}
                         defaultActiveKey="messages"
                         items={[
                             {
