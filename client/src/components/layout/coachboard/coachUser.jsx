@@ -185,7 +185,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
             key: '3',
             label: 'Dữ liệu Checkin',
             children: (
-                <div className="flex-1 h-full flex justify-center overflow-y-auto p-5">
+                <div className="flex-1 h-full min-w-0 flex justify-center overflow-y-auto p-5">
                     <Journal userAuth0Id={selectedUserAuth0Id}/>
                 </div>
             )

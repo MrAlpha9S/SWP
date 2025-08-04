@@ -133,7 +133,7 @@ const Journal = ({userAuth0Id = null}) => {
     }, [searchDate, dropdownItems]);
 
     return <>
-        <div className="flex flex-col gap-4 h-full min-w-[650px] w-full min-h-0">
+        <div className="flex  flex-col gap-4 h-full max-w-full min-h-0">
             <div className='flex gap-5'>
                 <DatePicker className='h-[42px] w-[40%]' onChange={(date, dateString) => {
                     setSearchDate(`${convertDDMMYYYYStrToYYYYMMDDStr(dateString)}T00:00:00Z`);
