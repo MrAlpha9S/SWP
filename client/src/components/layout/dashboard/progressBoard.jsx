@@ -350,11 +350,11 @@ const ProgressBoard = ({
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
         if ((!planLog && !customPlanWithStages) || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
-        if (planLog.length > 0) return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, localCheckInDataSet, cigsPerDay, userInfo?.created_at, range));
-        if (customPlanWithStages && customPlanWithStages.length > 0) {
+        if (planLog.length > 0 && !useCustomPlan) return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, localCheckInDataSet, cigsPerDay, userInfo?.created_at, range));
+        if (customPlanWithStages && customPlanWithStages.length > 0 && useCustomPlan) {
             return clonePlanLogToDDMMYYYY(mergeByDateForCustomStages(getDatasetFromCustomPlanWithStages(customPlanWithStages), localCheckInDataSet, cigsPerDay, userInfo?.created_at, selectedFilter))
         }
-    }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.sub_id, userInfo?.created_at, cigsPerDay, range, selectedFilter]);
+    }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.sub_id, userInfo?.created_at, cigsPerDay, range, selectedFilter, useCustomPlan]);
 
     // const getReferenceArea = useCallback(() => {
     //     if (!mergedDataSet || mergedDataSet.length === 0) return null;
@@ -415,8 +415,8 @@ const ProgressBoard = ({
                     <div className="font-semibold">{label}</div>
                     <div>
                         <div
-                            className={`${data.checkinMissed ? 'text-red-500' : 'text-green-600'}`}>{data.checkinMissed ? 'Chưa check-in (ước lượng)' : 'Đã check-in'}</div>
-                        <div>Đã hút: {data.actual}</div>
+                            className={`${data.checkinMissed === 'missed' ? 'text-red-500' : data.checkinMissed === 'checked' ? 'text-green-600' : ''}`}>{data.checkinMissed === 'missed' ? 'Chưa check-in (ước lượng)' : data.checkinMissed === 'checked' ? 'Đã check-in' : ''}</div>
+                        {data.checkinMissed !== 'future' && <div>Đã hút: {data.actual}</div>}
                         {data.plan != null && <div>Kế hoạch: {data.plan}</div>}
                     </div>
 

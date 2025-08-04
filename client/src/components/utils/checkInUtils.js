@@ -54,90 +54,6 @@ export async function getCheckInDataSet(user, getAccessTokenSilently, isAuthenti
     return await res.json();
 }
 
-// export function mergeByDate(planLog = [], checkinLog = [], quittingMethod) {
-//     const map = new Map();
-//
-//     const checkinMap = new Map();
-//     for (let i = 0; i < checkinLog.length; i++) {
-//         const dateStr = new Date(checkinLog[i].date).toISOString().split('T')[0];
-//         checkinMap.set(dateStr, checkinLog[i].cigs);
-//     }
-//
-//     // Define plan ranges
-//     const planRanges = [];
-//     for (let i = 0; i < planLog.length; i++) {
-//         const start = new Date(planLog[i].date);
-//         const end = planLog[i + 1]
-//             ? new Date(planLog[i + 1].date)
-//             : new Date(start);
-//
-//         if (!planLog[i + 1]) {
-//             end.setUTCDate(
-//                 quittingMethod === 'gradual-weekly'
-//                     ? start.getUTCDate() + 6
-//                     : start.getUTCDate() + 1
-//             );
-//         }
-//
-//         planRanges.push({
-//             start,
-//             end,
-//             cigs: planLog[i].cigs
-//         });
-//     }
-//
-//     const getCurrentUTCDateTime = () => {
-//         const now = new Date();
-//         return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-//     };
-//
-//     const currentDate = getCurrentUTCDateTime();
-//
-//     // Determine first and last date for loop
-//     const firstDate = new Date(Math.min(
-//         ...checkinLog.map(e => new Date(e.date)),
-//         ...planLog.map(e => new Date(e.date))
-//     ));
-//
-//     const lastDate = new Date(Math.max(
-//         ...checkinLog.map(e => new Date(e.date)),
-//         ...planLog.map(e => new Date(e.date))
-//     ));
-//
-//     const current = new Date(firstDate);
-//     let lastKnownActual = null;
-//
-//     while (current <= lastDate) {
-//         const dayStr = current.toISOString().split('T')[0];
-//         let actual = checkinMap.get(dayStr);
-//
-//         // Only fill forward if the current day is <= today
-//         if (actual == null && lastKnownActual != null && current <= currentDate) {
-//             actual = lastKnownActual;
-//         } else if (actual != null) {
-//             lastKnownActual = actual;
-//         }
-//
-//         let plan = null;
-//         for (const range of planRanges) {
-//             if (dayStr === range.start.toISOString().split('T')[0]) {
-//                 plan = range.cigs;
-//                 break;
-//             }
-//         }
-//
-//         map.set(dayStr, {
-//             date: dayStr,
-//             actual,
-//             plan
-//         });
-//
-//         current.setUTCDate(current.getUTCDate() + 1);
-//     }
-//
-//     return Array.from(map.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
-// }
-
 export function mergeByDateForPlanLog(
     planLog = [],
     checkinLog = [],
@@ -191,6 +107,7 @@ export function mergeByDateForPlanLog(
         ...(userCreationDate ? [new Date(userCreationDate)] : [])
     ];
 
+
     if (allDates.length === 0 && userCreationDate) {
         allDates.push(new Date(userCreationDate));
     }
@@ -205,11 +122,11 @@ export function mergeByDateForPlanLog(
         const dayStr = current.toISOString().split("T")[0];
         const actualFromCheckin = checkinMap.get(dayStr);
         let actual = actualFromCheckin ?? null;
-        let checkinMissed = false;
+        let checkinMissed = 'checked';
 
         if (actual == null && lastKnownActual != null && current <= currentDate) {
             actual = lastKnownActual;
-            checkinMissed = true;
+            checkinMissed = 'missed';
         } else if (actual != null) {
             lastKnownActual = actual;
         }
@@ -226,7 +143,7 @@ export function mergeByDateForPlanLog(
             (!firstPlanDate || current < firstPlanDate)
         ) {
             actual = cigsPerDay;
-            checkinMissed = true;
+            checkinMissed = 'missed';
         }
 
         let plan = null;
@@ -255,6 +172,10 @@ export function mergeByDateForPlanLog(
         if (range === "plan" && !inPlanRange) {
             current.setUTCDate(current.getUTCDate() + 1);
             continue;
+        }
+
+        if (current > currentDate) {
+            checkinMissed = 'future';
         }
 
         map.set(dayStr, {
@@ -320,11 +241,11 @@ export function mergeByDateForCustomStages(
         const dayStr = current.toISOString().split("T")[0];
         const actualFromCheckin = checkinMap.get(dayStr);
         let actual = actualFromCheckin ?? null;
-        let checkinMissed = false;
+        let checkinMissed = 'checked';
 
         if (actual == null && lastKnownActual != null && current <= currentDate) {
             actual = lastKnownActual;
-            checkinMissed = true;
+            checkinMissed = 'missed'
         } else if (actual != null) {
             lastKnownActual = actual;
         }
@@ -340,7 +261,7 @@ export function mergeByDateForCustomStages(
             (!firstPlanDate || current < firstPlanDate)
         ) {
             actual = cigsPerDay;
-            checkinMissed = true;
+            checkinMissed = 'missed';
         }
 
         const planEntry = planMap.get(dayStr);
@@ -348,6 +269,10 @@ export function mergeByDateForCustomStages(
         if (range === "plan" && !planEntry) {
             current.setUTCDate(current.getUTCDate() + 1);
             continue;
+        }
+
+        if (current > currentDate) {
+            checkinMissed = 'future';
         }
 
         map.set(dayStr, {
