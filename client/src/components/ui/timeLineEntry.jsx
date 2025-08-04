@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {FEELINGS, qnaOptions} from "../../constants/constants.js";
+import {FEELINGS, qnaOptions, quitStrategies} from "../../constants/constants.js";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../utils/dateUtils.js";
 import {MdExpandMore, MdExpandLess} from "react-icons/md";
 import {useNavigate} from "react-router-dom";
@@ -18,16 +18,24 @@ const TimelineEntry = ({entry, userAuth0Id}) => {
         return (
             <div className="p-2 border-l-4 border-red-400 bg-red-50 rounded">
                 <p className="text-base font-semibold text-gray-800">{dateStrDDMMYY}</p>
-                <p className="text-sm italic text-gray-700">{!userAuth0Id ? 'Bạn' : 'Người dùng'} đã bỏ lỡ check-in trong ngày này.</p>
-                {!userAuth0Id && <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at)}>Nhấn vào đây để Check-in ngay</button>}
+                <p className="text-sm italic text-gray-700">{!userAuth0Id ? 'Bạn' : 'Người dùng'} đã bỏ lỡ check-in
+                    trong ngày này.</p>
+                {!userAuth0Id &&
+                    <button className='hover:text-primary-600' onClick={() => handleCheckIn(entry.logged_at)}>Nhấn vào
+                        đây để Check-in ngay</button>}
             </div>
         );
     }
+
+    console.log(entry)
 
     const feeling = FEELINGS.find((feel) => entry.feeling === feel.value);
     const freetext = entry.free_text_content;
     const qna = entry.qna || [];
     const cigsSmoked = entry.cigs_smoked;
+    const quittingItems = entry.quitting_items.map((strategy) => {
+        return quitStrategies.find((str) => str.value === strategy).label;
+    })
 
     const cigsSmokedPhrase =
         cigsSmoked === 0
@@ -36,7 +44,7 @@ const TimelineEntry = ({entry, userAuth0Id}) => {
                 ? `${!userAuth0Id ? 'Tôi' : 'Người dùng'} đã hút ${cigsSmoked} điếu thuốc`
                 : 'missed';
 
-    const shouldShowExpand = freetext?.length > 200 || qna.length > 0;
+    const shouldShowExpand = freetext?.length > 200 || qna.length > 0 || (quittingItems.length > 4 && freetext.length > 100);
 
     return (
         <>
@@ -52,8 +60,18 @@ const TimelineEntry = ({entry, userAuth0Id}) => {
 
                 <p className="text-sm italic text-gray-700">{cigsSmokedPhrase}</p>
 
+                {quittingItems?.length > 0 && <>
+                    <p><strong>Những điều thúc đẩy tôi không hút thuốc:</strong> </p>
+                    <ul>
+                        {quittingItems?.map((item, idx) => {
+                            return <li key={idx}>{item}</li>
+                        })}
+                    </ul>
+                </>}
+
                 {(freetext || qna.length > 0) && (
-                    <p className="text-sm font-semibold text-primary-700 mt-2">{!userAuth0Id ? 'Tôi' : 'Người dùng'} đã viết:</p>
+                    <p className="text-sm font-semibold text-primary-700 mt-2">{!userAuth0Id ? 'Tôi' : 'Người dùng'} đã
+                        viết:</p>
                 )}
 
                 {freetext && (
@@ -74,14 +92,15 @@ const TimelineEntry = ({entry, userAuth0Id}) => {
 
             {shouldShowExpand && (
                 <div className="text-sm text-gray-600 flex justify-center mt-2 cursor-pointer">
-                    <button onClick={() => setExpanded(!expanded)} className="mt-1 flex items-center gap-1 hover:text-primary-600">
+                    <button onClick={() => setExpanded(!expanded)}
+                            className="mt-1 flex items-center gap-1 hover:text-primary-600">
                         {expanded ? (
                             <>
-                                Rút gọn <MdExpandLess className="size-5" />
+                                Rút gọn <MdExpandLess className="size-5"/>
                             </>
                         ) : (
                             <>
-                                Xem thêm <MdExpandMore className="size-5" />
+                                Xem thêm <MdExpandMore className="size-5"/>
                             </>
                         )}
                     </button>

@@ -29,7 +29,7 @@ const Badge = ({label, icon, locked = false, description = '', progressInfo = ''
                     type="secondary"
                     size="small"
                     icon={<ShareAltOutlined />}
-                    className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-8 h-[30px]"
+                    className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-8 h-[25px] w-[25px]"
                     onClick={(e) => {
                         e.stopPropagation();
                         onShare && onShare(badgeRef.current, label, description);
