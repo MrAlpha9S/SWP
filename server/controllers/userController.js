@@ -36,17 +36,27 @@ const handlePostSignup = async (req, res) => {
     if (!userAuth0Id) return res.status(400).json({success: false, message: 'userAuth0Id required'});
 
     try {
+        console.log('Checking user with Auth0 ID:', userAuth0Id);
         const isUserExists = await userExists(userAuth0Id);
+        console.log('User exists check result:', isUserExists);
+        
         if (isUserExists) {
+            console.log('User already exists, returning existing user data');
             return res.status(200).json({success: true, message: isUserExists});
         }
 
+        console.log('User does not exist, creating new user...');
         const userData = await getUserFromAuth0(userAuth0Id);
+        console.log('Auth0 user data:', userData);
 
         const result = await createUser(userAuth0Id, userData.name || '', userData.email || '', userData.created_at, userData.picture, userData.identities[0].isSocial);
         if (result) {
+            console.log('User created successfully in database');
             await processAchievementsWithNotifications(userAuth0Id)
             return res.status(201).json({success: true, message: 'User info inserted'});
+        } else {
+            console.log('Failed to create user in database');
+            return res.status(500).json({success: false, message: 'Failed to create user in database'});
         }
 
     } catch (err) {
@@ -604,6 +614,61 @@ const handleGetCoachRegistrationInfo = async (req, res) => {
     }
 };
 
+const findUserByEmail = async (req, res) => {
+    const {email} = req.query;
+    if (!email) return res.status(400).json({success: false, message: 'Email required'});
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('email', sql.NVarChar, email)
+            .query('SELECT * FROM users WHERE email = @email');
+        
+        if (result.recordset.length > 0) {
+            return res.status(200).json({
+                success: true, 
+                message: 'User found', 
+                data: result.recordset[0]
+            });
+        } else {
+            return res.status(404).json({
+                success: false, 
+                message: 'User not found with this email'
+            });
+        }
+    } catch (err) {
+        console.error('Error finding user by email:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
+    }
+};
+
+const fixUserAuth0Id = async (req, res) => {
+    const {userId, correctAuth0Id} = req.body;
+    if (!userId || !correctAuth0Id) {
+        return res.status(400).json({success: false, message: 'userId and correctAuth0Id are required'});
+    }
+
+    try {
+        const {updateUserAuth0Id} = require('../utils/debugUserSync');
+        const success = await updateUserAuth0Id(userId, correctAuth0Id);
+        
+        if (success) {
+            return res.status(200).json({
+                success: true, 
+                message: 'Auth0 ID updated successfully'
+            });
+        } else {
+            return res.status(500).json({
+                success: false, 
+                message: 'Failed to update Auth0 ID'
+            });
+        }
+    } catch (err) {
+        console.error('Error fixing user Auth0 ID:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
+    }
+};
+
 
 module.exports = {
     getAllUsersController,
@@ -630,5 +695,7 @@ module.exports = {
     handleUpdateUserTimesForPush,
     getLeaderboardStats,
     handleCoachRegistration,
-    handleGetCoachRegistrationInfo
+    handleGetCoachRegistrationInfo,
+    findUserByEmail,
+    fixUserAuth0Id
 };

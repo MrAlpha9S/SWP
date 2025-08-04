@@ -9,8 +9,10 @@ async function getAllUsers() {
 async function createUser(data) {
   const pool = await poolPromise;
   const req = pool.request();
-  // Tạo auth0_id tự động nếu không có
+  
+  // Sử dụng auth0_id được truyền vào hoặc tạo tự động nếu không có
   const auth0_id = data.auth0_id || `admin|${Date.now()}`;
+  
   req.input('auth0_id', sql.NVarChar, auth0_id);
   req.input('username', sql.NVarChar, data.username);
   req.input('email', sql.NVarChar, data.email);
@@ -22,6 +24,7 @@ async function createUser(data) {
   req.input('is_social', sql.Bit, 0);
   // sub_id mặc định là 1
   req.input('sub_id', sql.Int, 1);
+  
   const result = await req.query(
     'INSERT INTO users (auth0_id, username, email, role, avatar, isBanned, created_at, is_social, sub_id) VALUES (@auth0_id, @username, @email, @role, @avatar, @isBanned, @created_at, @is_social, @sub_id)'
   );
@@ -661,7 +664,7 @@ async function getStatistics() {
   const blogCount = (await pool.request().query('SELECT COUNT(*) as total FROM blog_posts')).recordset[0].total;
   const topicCount = (await pool.request().query('SELECT COUNT(*) as total FROM Topics')).recordset[0].total;
   const checkinCount = (await pool.request().query('SELECT COUNT(*) as total FROM checkin_log')).recordset[0].total;
-  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM revenue')).recordset[0].total;
+  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM users_subscriptions')).recordset[0].total;
   let totalRevenue = null;
   try {
     const revenueResult = await pool.request().query(`

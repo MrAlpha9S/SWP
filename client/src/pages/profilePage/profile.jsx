@@ -137,12 +137,6 @@ function Profile() {
     return (
         <PageFadeWrapper>
         <div className="bg-[#e0f7fa] min-h-screen flex flex-col">
-            <Hero
-                title="Hồ sơ cá nhân"
-                heroHeight={120}
-                username={user?.name || user?.nickname || ""}
-                role={profile.role}
-            />
             <div className="flex flex-1 justify-center items-start py-8">
                 <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mt-2">
                     <div className="flex flex-col items-center mb-6">

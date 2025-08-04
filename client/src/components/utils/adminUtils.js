@@ -466,3 +466,15 @@ export async function getCommentsByPostId(postId, token) {
   const result = await res.json();
   return result.data; // chỉ trả về mảng comment
 }
+
+export async function getRevenue(token) {
+  const res = await fetch(`${getBackendUrl()}/admin/revenue`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+  });
+  if (!res.ok) throw new Error('Lỗi lấy dữ liệu revenue');
+  return await res.json();
+}

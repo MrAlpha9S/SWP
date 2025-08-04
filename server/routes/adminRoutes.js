@@ -73,6 +73,8 @@ router.delete('/checkins/:id', adminController.handleDeleteCheckIn);
 router.get('/statistics', adminController.handleGetStatistics);
 router.get('/statistics/revenue', adminController.handleGetRevenueDataset);
 
+// Route quản lý revenue
+router.get('/revenue', adminController.handleGetRevenue);
 
 // Route mẫu kiểm tra quyền admin
 router.get('/test', (req, res) => {
