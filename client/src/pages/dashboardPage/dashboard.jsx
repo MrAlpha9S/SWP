@@ -63,7 +63,6 @@ function Dashboard() {
     const navigate = useNavigate();
     const {isProfileExist} = useProfileExists();
     const {setCheckInDataSet} = useCheckInDataStore()
-    const [heroHeight, setHeroHeight] = useState(188);
     const [heroTitle, setHeroTitle] = useState("");
     const {currentStepDashboard, setCurrentStepDashboard} = useCurrentStepDashboard();
     const {userInfo} = useUserInfoStore()
@@ -155,24 +154,6 @@ function Dashboard() {
     }, [userProfile, isUserProfilePending])
 
     useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 20) {
-                setHeroHeight(50)
-            } else {
-                setHeroHeight(188)
-            }
-        };
-
-        if (typeof window !== 'undefined') {
-            window.addEventListener("scroll", handleScroll);
-
-            return () => {
-                window.removeEventListener("scroll", handleScroll);
-            };
-        }
-    }, []);
-
-    useEffect(() => {
         switch (currentStepDashboard) {
             case 'dashboard':
                 setHeroTitle('Bảng điều khiển');
@@ -195,14 +176,26 @@ function Dashboard() {
             case 'badges':
                 setHeroTitle('Huy hiệu');
                 break;
-            case 'post-blog':
-                setHeroTitle('Đăng Bài Blog');
-                break;
             case 'messager':
                 setHeroTitle('Trò Chuyện');
                 break;
             case 'coach':
                 setHeroTitle('Huấn luyện viên');
+                break;
+            case 'overview':
+                setHeroTitle('Tổng quan');
+                break;
+            case 'coach-user':
+                setHeroTitle('Người dùng');
+                break;
+            case 'post-blog':
+                setHeroTitle('Quản lý Blog');
+                break;
+            case 'forum-manage':
+                setHeroTitle('Quản lý cộng đồng');
+                break;
+            case 'user-review':
+                setHeroTitle('Đánh giá từ người dùng');
                 break;
             default:
                 setHeroTitle('');
@@ -335,7 +328,7 @@ function Dashboard() {
     return (
         <PageFadeWrapper>
             <div className="w-full min-h-screen bg-primary-50 flex flex-col items-center">
-                <Hero title={heroTitle} heroHeight={heroHeight} role={userRole} username={userInfo?.username}/>
+                <Hero title={heroTitle} role={userRole} username={userInfo?.username}/>
 
                 {/* Responsive Container */}
                 <div className="w-full max-w-[1680px] flex flex-col lg:flex-row gap-2 sm:gap-4 px-2 py-2 sm:px-4 sm:py-4 overflow-hidden">

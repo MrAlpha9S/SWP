@@ -270,7 +270,7 @@ const UserProfileInMessage = ({
                         {quittingMethod !== 'target-date' ? (
                             <p><strong>Số điếu giảm mỗi {quittingMethod === 'gradual-daily' ? 'ngày' : 'tuần'}:</strong> {cigsReduced || 0}</p>
                         ) : (
-                            <p><strong>Ngày kết thúc:</strong> {expectedQuitDate || 'Chưa xác định'}</p>
+                            <p><strong>Ngày kết thúc:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0]) || 'Chưa xác định'}</p>
                         )}
                         {quittingMethod !== 'target-date' && expectedQuitDate && (
                             <p><strong>Ngày dự kiến số điếu giảm về 0:</strong> {convertYYYYMMDDStrToDDMMYYYYStr(expectedQuitDate.split('T')[0])}</p>
