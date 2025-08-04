@@ -81,71 +81,94 @@ const SetPlan = ({
 
     useEffect(() => {
         if (from !== 'coach-user') return;
-        if (useCustomPlan) {
-            if (customPlanWithStages.length === 0) {
-                setValidationError("Hãy tạo ít nhất một giai đoạn.")
-                setIsValid(false)
-            } else {
-                setValidationError("")
-                setIsValid(true)
-            }
-        }
-    }, [customPlanWithStages.length, from, useCustomPlan]);
 
-    useEffect(() => {
-        if (from !== 'coach-user') return;
-        if (!useCustomPlan) {
+        setValidationError("");
+        setIsValid(false);
+
+        if (useCustomPlan) {
+            // Custom plan validation
+            if (customPlanWithStages.length === 0) {
+                setValidationError("Hãy tạo ít nhất một giai đoạn.");
+                setIsValid(false);
+            } else {
+                // Validate each stage has proper data
+                let hasInvalidStage = false;
+                let errorMessage = "";
+
+                for (let i = 0; i < customPlanWithStages.length; i++) {
+                    const stage = customPlanWithStages[i];
+
+                    if (!stage.logs || stage.logs.length === 0) {
+                        errorMessage = `Giai đoạn ${i + 1} không có dữ liệu logs.`;
+                        hasInvalidStage = true;
+                        break;
+                    }
+
+                    if (!stage.startDate || stage.startDate.length === 0) {
+                        errorMessage = `Giai đoạn ${i + 1} thiếu ngày bắt đầu.`;
+                        hasInvalidStage = true;
+                        break;
+                    }
+
+                    if (hasInvalidStage) break;
+                }
+
+                if (hasInvalidStage) {
+                    setValidationError(errorMessage);
+                    setIsValid(false);
+                } else {
+                    setValidationError("");
+                    setIsValid(true);
+                }
+            }
+        } else {
             const {
-                startDate: errStartDate,
                 quitMethod: errQuitMethod,
                 cigsReduced: errCigsReduced,
                 cigsReducedLarge: errCigsReducedLarge,
                 expectedQuitDate: errExpectedQuitDate
             } = errorMap;
 
-            if (!startDate || startDate.length === 0) {
-                addError(errStartDate);
-            } else {
-                removeError(errStartDate);
-            }
+            removeError(errQuitMethod);
+            removeError(errCigsReduced);
+            removeError(errCigsReducedLarge);
+            removeError(errExpectedQuitDate);
+
+            let isQuickCreateValid = true;
 
             if (!quittingMethod || quittingMethod.length === 0) {
                 addError(errQuitMethod);
-            } else {
-                removeError(errQuitMethod);
+                isQuickCreateValid = false;
             }
 
             if (quittingMethod === 'target-date') {
                 if (!expectedQuitDate || expectedQuitDate.length === 0) {
                     addError(errExpectedQuitDate);
-                } else {
-                    removeError(errExpectedQuitDate);
+                    isQuickCreateValid = false;
                 }
-                removeError(errCigsReduced);
-                removeError(errCigsReducedLarge);
-            } else {
-                if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+            } else if (quittingMethod && quittingMethod.length > 0) {
+                if (!cigsReduced || cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
                     addError(errCigsReduced);
-                } else {
-                    removeError(errCigsReduced);
-                }
-
-                if (cigsReduced > cigsPerDay) {
+                    isQuickCreateValid = false;
+                } else if (cigsReduced >= cigsPerDay) {
                     addError(errCigsReducedLarge);
-                } else {
-                    removeError(errCigsReducedLarge);
+                    isQuickCreateValid = false;
                 }
+            }
 
-                removeError(errExpectedQuitDate);
-            }
-            const isValidToContinue = errors.some((e) => e.atPage === "createPlan");
-            if (!isValidToContinue) {
-                setIsValid(true)
-            } else {
-                setIsValid(false)
-            }
+            setIsValid(isQuickCreateValid);
         }
-    }, [cigsPerDay, cigsReduced, expectedQuitDate, from, quittingMethod, startDate, useCustomPlan])
+    }, [
+        customPlanWithStages,
+        from,
+        useCustomPlan,
+        quittingMethod,
+        expectedQuitDate,
+        cigsReduced,
+        cigsPerDay,
+    ]);
+
+// Remove the old separate useEffects for validation
 
 
     useEffect(() => {
