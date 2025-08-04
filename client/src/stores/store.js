@@ -244,6 +244,11 @@ export const useHighlightReviewIdStore = create((set) => ({
     setHighlightReviewId: (value) => set({highlightReviewId: value}),
 }))
 
+export const useValidationErrorStore = create((set) => ({
+    validationError: '',
+    setValidationError: (value) => set({validationError: value}),
+}))
+
 
 
 

@@ -358,12 +358,12 @@ const Summary = () => {
                                         <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                         <YAxis/>
                                         <Tooltip/>
-                                        {customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                        {customPlanWithStages.length > 0 && customPlanWithStages.map((stage, idx) => {
                                             return <ReferenceArea
                                                 x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
                                                 x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
                                                 y1={0} y2={cigsPerDay}
-                                                label={`Giai đoạn ${stage.id + 1}`}
+                                                label={`Giai đoạn ${idx + 1}`}
                                             />
                                         })}
                                     </LineChart>

@@ -55,7 +55,6 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         queryKey: ['user-profile-coach', selectedUserAuth0Id],
         queryFn: async () => {
             const result = await getUserProfile(user, getAccessTokenSilently, isAuthenticated, selectedUserAuth0Id);
-            console.log('result', result);
             return result?.data;
         },
         enabled: !!isAuthenticated && !!user ,
@@ -92,18 +91,6 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     // Loading state - be more specific about when data is actually ready
     const isLoading = isProfilePending || isDatasetPending;
     const hasProfileData = profileData?.userProfile;
-
-    useEffect(() => {
-        if (profileData) {
-            console.log('profile', profileData);
-        }
-    }, [profileData]);
-
-    console.log({
-        isPending: isProfilePending,
-        profileData,
-        selectedUserAuth0Id
-    });
 
     const userInfoTabs = [
         {

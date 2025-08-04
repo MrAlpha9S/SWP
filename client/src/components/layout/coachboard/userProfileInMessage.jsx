@@ -164,7 +164,7 @@ const UserProfileInMessage = ({
         }
     }
 
-
+    console.log(ConvertPlanlogDdmmyy(getDatasetFromCustomPlanWithStages(customPlanWithStages, selectedFilter)))
 
     return (
         <div className='h-full w-full flex flex-col overflow-y-auto px-5'>
@@ -308,16 +308,16 @@ const UserProfileInMessage = ({
                                 <XAxis dataKey="date" tick={<CustomizedAxisTick />} interval={0} />
                                 <YAxis />
                                 <Tooltip />
-                                {customPlanWithStages.map((stage) => {
-                                    if (!stage.logs[0]) return null;
+                                {customPlanWithStages?.length > 0 && customPlanWithStages?.map((stage, idx) => {
+                                    if (!stage?.logs[0] || selectedFilter !== 'overview') return null;
                                     return (
                                         <ReferenceArea
-                                            key={stage.id}
+                                            key={idx}
                                             x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
                                             x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
                                             y1={0}
                                             y2={cigsPerDay}
-                                            label={`Giai đoạn ${stage.id + 1}`}
+                                            label={`Giai đoạn ${idx + 1}`}
                                         />
                                     );
                                 })}

@@ -6,15 +6,15 @@ import {convertYYYYMMDDStrToDDMMYYYYStr} from "./dateUtils";
 import {IoWarningOutline} from "react-icons/io5";
 import {IoMdAddCircleOutline, IoMdRemoveCircleOutline} from "react-icons/io";
 import {useNotificationManager} from "../hooks/useNotificationManager.jsx";
-import getDatasetFromCustomPlanWithStages from "./getDatasetFromCustomPlanWithStages.js";
+import {useValidationErrorStore} from "../../stores/store.js";
 
 const {RangePicker} = DatePicker;
 const {Panel} = Collapse;
 
 const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsPerDay}) => {
     const {openNotification} = useNotificationManager()
-    const [validationError, setValidationError] = useState("");
     const [currentId, setCurrentId] = useState(0);
+    const {validationError, setValidationError} = useValidationErrorStore();
 
     // Initialize currentId based on existing stages
     useEffect(() => {
@@ -116,9 +116,9 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
 
     const removeStage = (index) => {
         if (index === 0) return;
-        const clone = [...customPlanWithStages];
-        clone.splice(index, 1);
-        setCustomPlanWithStages(clone);
+        setCustomPlanWithStages(prev =>
+            prev.filter((_, i) => i !== index)
+        );
         setValidationError("");
     };
 

@@ -2,20 +2,17 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
     useCurrentStepDashboard,
     useCurrentStepStore,
-    useErrorStore,
+    useErrorStore, useValidationErrorStore,
 } from "../../../stores/store.js";
-import ErrorText from "../../ui/errorText.jsx";
-import {checkboxStyle, quittingMethodOptions, onboardingErrorMsg} from "../../../constants/constants.js";
-import {Checkbox, DatePicker, Radio, Select, Tabs} from "antd";
+import {onboardingErrorMsg} from "../../../constants/constants.js";
+import {Select, Tabs} from "antd";
 import CustomButton from "../../ui/CustomButton.jsx";
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceArea} from 'recharts';
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
 import {
-    convertDDMMYYYYStrToYYYYMMDDStr,
-    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime
+    convertYYYYMMDDStrToDDMMYYYYStr
 } from "../../utils/dateUtils.js";
-import dayjs from 'dayjs'
 import {FaArrowRight} from "react-icons/fa";
 import {useNavigate} from "react-router-dom";
 import CustomStageEditor from "../../utils/CustomStageEditor.jsx";
@@ -69,9 +66,11 @@ const SetPlan = ({
     const {user, getAccessTokenSilently, isAuthenticated} = useAuth0();
     const {addError, removeError} = useErrorStore()
     const mutation = usePostUserProfile(getAccessTokenSilently, user);
-    const {currentStep, setCurrentStep} = useCurrentStepStore();
     const {setCurrentStepDashboard} = useCurrentStepDashboard()
     const [selectedFilter, setSelectedFilter] = useState('overview')
+    const {setValidationError} = useValidationErrorStore();
+    const [isValid, setIsValid] = useState(false);
+
 
     const errorMap = Object.fromEntries(
         onboardingErrorMsg
@@ -79,72 +78,74 @@ const SetPlan = ({
             .map(msg => [msg.location, msg])
     );
     const {openNotification} = useNotificationManager();
-    const {socket} = useSocketStore()
 
-    const validateCoachPlan = () => {
-        if (from !== 'coach-user') return true;
-
-        const {
-            startDate: errStartDate,
-            cigsPerDay: errCigsPerDay,
-            quitMethod: errQuitMethod,
-            cigsReduced: errCigsReduced,
-            cigsReducedLarge: errCigsReducedLarge,
-            expectedQuitDate: errExpectedQuitDate
-        } = errorMap;
-
-        let isValid = true;
-
-        if (!startDate || startDate.length === 0) {
-            addError(errStartDate);
-            isValid = false;
-        } else {
-            removeError(errStartDate);
-        }
-
-        if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
-            addError(errCigsPerDay);
-            isValid = false;
-        } else {
-            removeError(errCigsPerDay);
-        }
-
-        if (!quittingMethod || quittingMethod.length === 0) {
-            addError(errQuitMethod);
-            isValid = false;
-        } else {
-            removeError(errQuitMethod);
-        }
-
-        if (quittingMethod === 'target-date') {
-            if (!expectedQuitDate || expectedQuitDate.length === 0) {
-                addError(errExpectedQuitDate);
-                isValid = false;
+    useEffect(() => {
+        if (from !== 'coach-user') return;
+        if (useCustomPlan) {
+            if (customPlanWithStages.length === 0) {
+                setValidationError("Hãy tạo ít nhất một giai đoạn.")
+                setIsValid(false)
             } else {
+                setValidationError("")
+                setIsValid(true)
+            }
+        }
+    }, [customPlanWithStages.length, from, useCustomPlan]);
+
+    useEffect(() => {
+        if (from !== 'coach-user') return;
+        if (!useCustomPlan) {
+            const {
+                startDate: errStartDate,
+                quitMethod: errQuitMethod,
+                cigsReduced: errCigsReduced,
+                cigsReducedLarge: errCigsReducedLarge,
+                expectedQuitDate: errExpectedQuitDate
+            } = errorMap;
+
+            if (!startDate || startDate.length === 0) {
+                addError(errStartDate);
+            } else {
+                removeError(errStartDate);
+            }
+
+            if (!quittingMethod || quittingMethod.length === 0) {
+                addError(errQuitMethod);
+            } else {
+                removeError(errQuitMethod);
+            }
+
+            if (quittingMethod === 'target-date') {
+                if (!expectedQuitDate || expectedQuitDate.length === 0) {
+                    addError(errExpectedQuitDate);
+                } else {
+                    removeError(errExpectedQuitDate);
+                }
+                removeError(errCigsReduced);
+                removeError(errCigsReducedLarge);
+            } else {
+                if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                    addError(errCigsReduced);
+                } else {
+                    removeError(errCigsReduced);
+                }
+
+                if (cigsReduced > cigsPerDay) {
+                    addError(errCigsReducedLarge);
+                } else {
+                    removeError(errCigsReducedLarge);
+                }
+
                 removeError(errExpectedQuitDate);
             }
-            removeError(errCigsReduced);
-            removeError(errCigsReducedLarge);
-        } else {
-            if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
-                addError(errCigsReduced);
-                isValid = false;
+            const isValidToContinue = errors.some((e) => e.atPage === "createPlan");
+            if (!isValidToContinue) {
+                setIsValid(true)
             } else {
-                removeError(errCigsReduced);
+                setIsValid(false)
             }
-
-            if (cigsReduced > cigsPerDay) {
-                addError(errCigsReducedLarge);
-                isValid = false;
-            } else {
-                removeError(errCigsReducedLarge);
-            }
-
-            removeError(errExpectedQuitDate);
         }
-
-        return isValid;
-    };
+    }, [cigsPerDay, cigsReduced, expectedQuitDate, from, quittingMethod, startDate, useCustomPlan])
 
 
     useEffect(() => {
@@ -382,7 +383,8 @@ const SetPlan = ({
                                         if (setUseCustomPlan) {
                                             if (e === 'custom-stages') setUseCustomPlan(true)
                                             else setUseCustomPlan(false)
-                                    }}}
+                                        }
+                                    }}
                                     type="card"
                                     items={tabsItems}
                                     defaultActiveKey={useCustomPlan ? 'custom-stages' : 'quick-create'}
@@ -477,7 +479,8 @@ const SetPlan = ({
                                     <div className="mt-8 text-left font-bold text-base md:text-lg" ref={scrollRef}>
                                         <h3>Tổng quan kế hoạch</h3>
                                     </div>
-                                    <PlanSummaryReport customPlanWithStages={customPlanWithStages} cigsPerDay={cigsPerDay}/>
+                                    <PlanSummaryReport customPlanWithStages={customPlanWithStages}
+                                                       cigsPerDay={cigsPerDay}/>
 
                                     {selectOptions?.length > 1 && <div className="mb-4 flex justify-center">
                                         <Select
@@ -501,13 +504,13 @@ const SetPlan = ({
                                             <XAxis dataKey="date" tick={<CustomizedAxisTick/>} interval={0}/>
                                             <YAxis/>
                                             <Tooltip/>
-                                            {customPlanWithStages?.length > 0 && customPlanWithStages?.map((stage) => {
-                                                if (!stage.logs[0]) return null
+                                            {customPlanWithStages?.length > 0 && customPlanWithStages?.map((stage, idx) => {
+                                                if (!stage?.logs[0] || selectedFilter !== 'overview') return null;
                                                 return <ReferenceArea
                                                     x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
                                                     x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
                                                     y1={0} y2={cigsPerDay}
-                                                    label={`Giai đoạn ${stage.id + 1}`}
+                                                    label={`Giai đoạn ${idx + 1}`}
                                                 />
                                             })}
                                         </LineChart>
@@ -517,7 +520,7 @@ const SetPlan = ({
 
                             {from === 'coach-user' && (
                                 <CustomButton type="primary" onClick={() => {
-                                    if (validateCoachPlan()) handleSavePlan()
+                                    if (isValid) handleSavePlan()
                                 }}>Lưu</CustomButton>
                             )}
                         </>

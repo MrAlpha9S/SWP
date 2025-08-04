@@ -10,11 +10,20 @@ import CigInfo from "../../components/layout/signup/cigInfo.jsx";
 import SmokingRoutine from "../../components/layout/signup/smokingRoutine.jsx";
 import SetPlan from "../../components/layout/signup/setPlan.jsx";
 import {
-    useCigsPerPackStore, useCurrentStepStore,
-    useErrorStore, useGoalsStore, usePlanStore,
+    useCigsPerPackStore,
+    useCurrentStepStore,
+    useErrorStore,
+    useGoalsStore,
+    usePlanStore,
     usePricePerPackStore,
     useQuitReadinessStore,
-    useReasonStore, useTimeAfterWakingStore, useTimeOfDayStore, useTriggersStore, useProfileExists, useUserInfoStore
+    useReasonStore,
+    useTimeAfterWakingStore,
+    useTimeOfDayStore,
+    useTriggersStore,
+    useProfileExists,
+    useUserInfoStore,
+    useValidationErrorStore
 } from "../../stores/store.js";
 import {onboardingErrorMsg} from "../../constants/constants.js";
 import SetGoals from "../../components/layout/signup/setGoals.jsx";
@@ -89,6 +98,7 @@ const Onboarding = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {user, isAuthenticated} = useAuth0();
     const {userInfo} = useUserInfoStore();
+    const {validationError, setValidationError} = useValidationErrorStore();
 
     const {from} = useParams();
 
@@ -258,46 +268,57 @@ const Onboarding = () => {
                         setCurrentStep(currentStep + 1);
                     } else {
                         if (readinessValue === 'ready') {
-                            if (startDate.length === 0) {
-                                addError(errorMsgStartDate)
-                            } else {
-                                removeError(errorMsgStartDate)
-                            }
-                            if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
-                                addError(errorMsgCigsPerDay)
-                            } else {
-                                removeError(errorMsgCigsPerDay)
-                            }
-                            if (quittingMethod.length === 0) {
-                                addError(errorMsgQuitMethod)
-                            } else {
-                                removeError(errorMsgQuitMethod)
-                            }
-                            if (cigsReduced > cigsPerDay) {
-                                addError(errorMsgCigsReducedLarge)
-                            } else {
-                                removeError(errorMsgCigsReducedLarge)
-                            }
-                            if (quittingMethod === 'target-date') {
-                                if (expectedQuitDate.length === 0) {
-                                    addError(errorMsgExpectedQuitDate);
+                            if (useCustomPlan) {
+                                if (customPlanWithStages.length === 0) {
+                                setValidationError("Hãy tạo ít nhất một giai đoạn.")
                                 } else {
+                                    setValidationError("")
+                                }
+                                if (customPlanWithStages.length > 0) {
+                                    setCurrentStep(currentStep + 1);
+                                }
+                            } else {
+                                if (startDate.length === 0) {
+                                    addError(errorMsgStartDate)
+                                } else {
+                                    removeError(errorMsgStartDate)
+                                }
+                                if (cigsPerDay <= 0 || !Number.isInteger(cigsPerDay)) {
+                                    addError(errorMsgCigsPerDay)
+                                } else {
+                                    removeError(errorMsgCigsPerDay)
+                                }
+                                if (quittingMethod.length === 0) {
+                                    addError(errorMsgQuitMethod)
+                                } else {
+                                    removeError(errorMsgQuitMethod)
+                                }
+                                if (cigsReduced > cigsPerDay) {
+                                    addError(errorMsgCigsReducedLarge)
+                                } else {
+                                    removeError(errorMsgCigsReducedLarge)
+                                }
+                                if (quittingMethod === 'target-date') {
+                                    if (expectedQuitDate.length === 0) {
+                                        addError(errorMsgExpectedQuitDate);
+                                    } else {
+                                        removeError(errorMsgExpectedQuitDate);
+                                    }
+                                    removeError(errorMsgCigsReduced);
+                                } else {
+                                    if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
+                                        addError(errorMsgCigsReduced);
+                                    } else {
+                                        removeError(errorMsgCigsReduced);
+                                    }
                                     removeError(errorMsgExpectedQuitDate);
                                 }
-                                removeError(errorMsgCigsReduced);
-                            } else {
-                                if (cigsReduced <= 0 || !Number.isInteger(cigsReduced)) {
-                                    addError(errorMsgCigsReduced);
-                                } else {
-                                    removeError(errorMsgCigsReduced);
+                                if (startDate.length > 0 &&
+                                    cigsPerDay > 0 &&
+                                    quittingMethod.length > 0 &&
+                                    ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
+                                    setCurrentStep(currentStep + 1)
                                 }
-                                removeError(errorMsgExpectedQuitDate);
-                            }
-                            if (startDate.length > 0 &&
-                                cigsPerDay > 0 &&
-                                quittingMethod.length > 0 &&
-                                ((quittingMethod !== 'target-date' && cigsReduced > 0 && Number.isInteger(cigsReduced)) || (quittingMethod === 'target-date' && expectedQuitDate.length > 0))) {
-                                setCurrentStep(currentStep + 1)
                             }
                         } else {
                             if (stoppedDate.length === 0) {

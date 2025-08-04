@@ -468,8 +468,6 @@ const ProgressBoard = ({
             index++
         }
     }
-    console.log(planLog)
-    console.log(customPlanWithStages)
 
     return (
         <div
@@ -756,7 +754,7 @@ const ProgressBoard = ({
                                         verticalAlign="top"
                                         wrapperStyle={{fontSize: '12px'}}
                                     />
-                                    {selectedFilter === 'overview' && customPlanWithStages.length > 0 && customPlanWithStages.map((stage) => {
+                                    {selectedFilter === 'overview' && customPlanWithStages.length > 0 && customPlanWithStages.map((stage, idx) => {
                                         if (!stage.logs[0]) return null
                                         return <ReferenceArea
                                             key={stage.id}
@@ -764,7 +762,7 @@ const ProgressBoard = ({
                                             x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
                                             y1={0}
                                             y2={cigsPerDay}
-                                            label={`Giai đoạn ${stage.id + 1}`}
+                                            label={`Giai đoạn ${idx + 1}`}
                                         />
                                     })}
                                 </LineChart>
