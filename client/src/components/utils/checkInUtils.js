@@ -156,7 +156,6 @@ export function mergeByDateForPlanLog(
     // Sort planLog to ensure proper interpolation
     const sortedPlanLog = [...planLog].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    console.log('sortedPlanLog', sortedPlanLog);
 
     // Build interpolated plan ranges
     const planRanges = [];
@@ -177,7 +176,6 @@ export function mergeByDateForPlanLog(
         });
     }
 
-    console.log('planRanges', planRanges)
 
     const getCurrentUTCDate = () => {
         const now = new Date();
@@ -197,15 +195,10 @@ export function mergeByDateForPlanLog(
         allDates.push(new Date(userCreationDate));
     }
 
-    console.log('allDates', allDates);
-
     const firstDate = new Date(Math.min(...allDates.map(d => d.getTime())));
     const lastDate = new Date(Math.max(...allDates.map(d => d.getTime()), currentDate.getTime()));
 
     const current = new Date(firstDate);
-    console.log('firstDate', firstDate);
-    console.log('lastDate', lastDate);
-    console.log('current', current);
     let lastKnownActual = null;
 
     while (current <= lastDate) {
@@ -293,7 +286,6 @@ export function mergeByDateForCustomStages(
     }
 
     const sortedPlanLog = [...customPlanWithStages].sort((a, b) => new Date(a.date) - new Date(b.date));
-    console.log('sortedPlanLog', sortedPlanLog);
 
     const getCurrentUTCDate = () => {
         const now = new Date();
