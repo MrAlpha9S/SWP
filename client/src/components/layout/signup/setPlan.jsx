@@ -305,7 +305,7 @@ const SetPlan = ({
         }
     ]
 
-    if (customPlanWithStages?.length > 0) {
+    if (customPlanWithStages?.length > 0 && Array.isArray(customPlanWithStages)) {
         let index = 0
         for (const stage of customPlanWithStages) {
             selectOptions.push({

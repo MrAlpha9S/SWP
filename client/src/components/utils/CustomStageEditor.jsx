@@ -116,9 +116,9 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
 
     const removeStage = (index) => {
         if (index === 0) return;
-        setCustomPlanWithStages(prev =>
-            prev.filter((_, i) => i !== index)
-        );
+        const clone = [...customPlanWithStages];
+        const deleted = clone.splice(index, 1);
+        setCustomPlanWithStages(deleted);
         setValidationError("");
     };
 
