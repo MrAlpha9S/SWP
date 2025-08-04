@@ -274,7 +274,7 @@ const CustomStageEditor = ({customPlanWithStages, setCustomPlanWithStages, cigsP
                                     cancelText="Không"
                                 >
                                     <Button
-                                        disabled={customPlanWithStages.length === 0}
+                                        disabled={customPlanWithStages.length === 1 || stageIndex === 0}
                                         danger
                                         icon={<DeleteOutlined/>}
                                     >
