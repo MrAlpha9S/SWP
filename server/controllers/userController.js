@@ -3,7 +3,7 @@ const {
     updateUserSubscriptionService,
     getUserIdFromAuth0Id,
     getCoaches,
-    getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService,
+    getCoachDetailsById, assignUserToCoachService, getUserNotes, noteUpdateService, noteCreateService, noteDeleteService,
     deleteReviewService, updateReviewService, createReviewService, getAllReviews, updateUserFCMToken,
     updateUserTimesForPush, getUserReasonsCSVByAuth0Id, leaderboardStatsService
 } = require('../services/userService');
@@ -17,7 +17,6 @@ const {getUserFromAuth0} = require("../services/auth0Service");
 const {getCurrentUTCDateTime} = require("../utils/dateUtils");
 const {getSubscriptionService, addSubscriptionPurchaseLog} = require("../services/subscriptionService");
 const socket = require('../utils/socket');
-const noteDeleteService = require("../services/userService");
 const {getCoachCommissionRate} = require("../services/coachService");
 const {sendPushNotification} = require("../utils/sendPushNotification");
 

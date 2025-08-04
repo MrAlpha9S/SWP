@@ -51,8 +51,9 @@ const NotesManager = ({ userAuth0Id }) => {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (noteId) =>
-            deleteUserNote(user, getAccessTokenSilently, isAuthenticated, noteId),
+        mutationFn: (noteId) => {
+            deleteUserNote(user, getAccessTokenSilently, isAuthenticated, noteId)
+        },
         onSuccess: () => {
             queryClient.invalidateQueries(['user-notes', userAuth0Id]);
             message.success('Note deleted');
@@ -72,7 +73,7 @@ const NotesManager = ({ userAuth0Id }) => {
 
     useEffect(() => {
         if (!isPending) {
-            console.log(notes)
+            console.log('notes', notes)
         }
     }, [isPending])
 

@@ -412,7 +412,8 @@ const getUserNotes = async (userAuth0Id) => {
                        n.updated_at,
                        subject.username AS subject_username,
                        creator.username AS created_by_username,
-                       updater.username AS updated_by_username
+                       updater.username AS updated_by_username,
+                       subject.auth0_id AS subject_auth0
                 FROM user_notes n
                          JOIN users subject ON n.user_id = subject.user_id
                          JOIN users creator ON n.created_by = creator.user_id

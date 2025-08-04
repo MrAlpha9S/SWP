@@ -5,7 +5,8 @@ const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserS
     getCoachesController, getCoachByIdController, assignUserToCoachController, getUserNotesController,
     createUserNoteController, updateUserNoteController, getAllReviewsController, createReviewController,
     updateReviewController, deleteReviewController, handleUpdateUserFCMToken, sendPushNotificationTo,
-    handleUpdateUserTimesForPush, getLeaderboardStats, handleCoachRegistration, handleGetCoachRegistrationInfo
+    handleUpdateUserTimesForPush, getLeaderboardStats, handleCoachRegistration, handleGetCoachRegistrationInfo,
+    deleteUserNoteController
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 const {handleAllMember} = require("../controllers/userController");
@@ -25,7 +26,7 @@ userRouter.post('/assign-coach', checkJwt, assignUserToCoachController)
 userRouter.get('/getAllMembers', checkJwt, handleAllMember);
 userRouter.put('/notes', checkJwt, updateUserNoteController);
 userRouter.post('/notes', checkJwt, createUserNoteController);
-userRouter.delete('/notes/:noteId', checkJwt, createUserNoteController);
+userRouter.delete('/notes/:noteId', checkJwt, deleteUserNoteController);
 userRouter.get('/notes/:userAuth0Id', checkJwt, getUserNotesController);
 userRouter.get('/coach-reviews/:userAuth0Id/:coachAuth0Id',checkJwt, getAllReviewsController);
 userRouter.post('/coach-reviews',checkJwt, createReviewController);

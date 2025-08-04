@@ -1,4 +1,4 @@
-import { Card, Typography, Button, Space, Input, Modal } from 'antd';
+import {Card, Typography, Button, Space, Input, Modal, Popconfirm} from 'antd';
 import {
     EditOutlined,
     DeleteOutlined,
@@ -35,20 +35,6 @@ const UserNoteCard = ({ note, onEdit, onDelete }) => {
         setEditing(false);
     };
 
-    const showDeleteConfirm = () => {
-        confirm({
-            title: 'Are you sure you want to delete this note?',
-            icon: <ExclamationCircleOutlined />,
-            content: note.content.length > 100 ? note.content.slice(0, 100) + '…' : note.content,
-            okText: 'Yes',
-            okType: 'danger',
-            cancelText: 'No',
-            onOk() {
-                onDelete(note.note_id);
-            }
-        });
-    };
-
     return (
         <Card
             title={
@@ -69,14 +55,15 @@ const UserNoteCard = ({ note, onEdit, onDelete }) => {
                                 <Button icon={<EditOutlined />} size="small" onClick={handleEdit}>
                                     Sửa
                                 </Button>
-                                <Button
-                                    icon={<DeleteOutlined />}
-                                    danger
-                                    size="small"
-                                    onClick={showDeleteConfirm}
-                                >
-                                    Xóa
-                                </Button>
+                                <Popconfirm title='Bạn có chắc muốn xóa?' onConfirm={() => onDelete(note.note_id)}>
+                                    <Button
+                                        icon={<DeleteOutlined />}
+                                        danger
+                                        size="small"
+                                    >
+                                        Xóa
+                                    </Button>
+                                </Popconfirm>
                             </>
                         )}
                     </Space>
