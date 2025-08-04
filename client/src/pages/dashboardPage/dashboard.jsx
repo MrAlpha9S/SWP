@@ -244,7 +244,7 @@ function Dashboard() {
                     );
 
                 case 'check-in':
-                    return <CheckinMenu/>;
+                    return <CheckinMenu checkInDataset={checkInDataset?.data}/>;
 
                 case 'goals':
                     return <GoalsMenu/>;
