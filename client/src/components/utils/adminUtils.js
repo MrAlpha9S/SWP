@@ -38,7 +38,10 @@ export async function deleteUser(id, token) {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error('Lỗi xóa user');
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || 'Lỗi xóa user');
+  }
   return await res.json();
 }
 
@@ -370,10 +373,11 @@ export async function updateUserSubscription(user_id, sub_id, data, token) {
   if (!res.ok) throw new Error('Lỗi cập nhật user subscription');
   return await res.json();
 }
-export async function deleteUserSubscription(user_id, sub_id, token) {
-  const res = await fetch(`${getBackendUrl()}/admin/user-subscriptions/${user_id}/${sub_id}`, {
+export async function deleteUserSubscription(id, reason, token) {
+  const res = await fetch(`${getBackendUrl()}/admin/user-subscriptions`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, reason })
   });
   if (!res.ok) throw new Error('Lỗi xóa user subscription');
   return await res.json();
@@ -476,5 +480,13 @@ export async function getRevenue(token) {
     },
   });
   if (!res.ok) throw new Error('Lỗi lấy dữ liệu revenue');
+  return await res.json();
+}
+
+export async function getAllDeletedUserSubscriptions(token) {
+  const res = await fetch(`${getBackendUrl()}/admin/user-subscriptions/deleted`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Lỗi lấy danh sách subscription đã xóa');
   return await res.json();
 }

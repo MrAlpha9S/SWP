@@ -51,6 +51,8 @@ CREATE TABLE [users_subscriptions]
   [user_id] int,
   [sub_id] int,
   [purchased_date] DATETIME,
+  [deleted_at] DATETIME NULL,
+  [deletion_reason] nvarchar(200) NULL
 )
 GO
 

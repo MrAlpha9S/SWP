@@ -74,6 +74,18 @@ const handleUpdateUser = async (req, res) => {
 const handleDeleteUser = async (req, res) => {
     const {id} = req.params;
     try {
+        // Kiểm tra xem user có phải là coach và có user liên kết không
+        const user = await adminService.getUserById(Number(id));
+        if (user && user.role === 'Coach') {
+            const linkedUsers = await adminService.getCoachUserByCoachId(Number(id));
+            if (linkedUsers && linkedUsers.length > 0) {
+                return res.status(400).json({
+                    success: false, 
+                    message: 'Không thể xóa huấn luyện viên đã có học viên liên kết!'
+                });
+            }
+        }
+        
         const deleted = await adminService.deleteUserById(Number(id));
         if (!deleted) return res.status(404).json({success: false, message: 'User not found'});
         return res.status(200).json({success: true, message: 'User deleted successfully'});
@@ -608,14 +620,14 @@ const handleUpdateUserSubscription = async (req, res) => {
     }
 };
 const handleDeleteUserSubscription = async (req, res) => {
-    const {user_id, sub_id} = req.params;
+    const { id, reason } = req.body;
     try {
-        const deleted = await adminService.deleteUserSubscription(Number(user_id), Number(sub_id));
-        if (!deleted) return res.status(404).json({success: false, message: 'User subscription not found'});
-        return res.status(200).json({success: true, message: 'User subscription deleted successfully'});
+        const deleted = await adminService.deleteUserSubscription(id, reason || 'Admin deleted');
+        if (!deleted) return res.status(404).json({success: false, message: 'Subscription not found'});
+        return res.status(200).json({success: true, message: 'Subscription deleted successfully'});
     } catch (error) {
         console.error('Error in handleDeleteUserSubscription:', error);
-        return res.status(500).json({success: false, message: 'Failed to delete user subscription'});
+        return res.status(500).json({success: false, message: 'Failed to delete subscription'});
     }
 };
 
@@ -716,6 +728,16 @@ const handleGetRevenue = async (req, res) => {
     }
 };
 
+const handleGetAllDeletedUserSubscriptions = async (req, res) => {
+    try {
+        const deletedSubs = await adminService.getAllDeletedUserSubscriptions();
+        return res.status(200).json({success: true, data: deletedSubs});
+    } catch (error) {
+        console.error('Error in handleGetAllDeletedUserSubscriptions:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch deleted user subscriptions'});
+    }
+};
+
 module.exports = {
     // User
     handleGetAllUsers,
@@ -777,4 +799,5 @@ module.exports = {
     handleGetPendingCoachDetails,
     // Revenue
     handleGetRevenue,
+    handleGetAllDeletedUserSubscriptions,
 };

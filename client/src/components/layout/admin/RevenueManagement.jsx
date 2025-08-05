@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {
     Table,
     Button,
@@ -16,7 +16,8 @@ import {
     Statistic,
     Row,
     Col,
-    DatePicker as AntdDatePicker
+    DatePicker as AntdDatePicker,
+    Tabs
 } from 'antd';
 import {EyeOutlined, DeleteOutlined, DollarOutlined, UserOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -27,7 +28,8 @@ import {
     getAllUsers,
     getAllSubscriptions as getAllPlans,
     getRevenue,
-    getStatistics
+    getStatistics,
+    getAllDeletedUserSubscriptions
 } from '../../utils/adminUtils';
 import {useAuth0} from '@auth0/auth0-react';
 import {getBackendUrl} from "../../utils/getBackendURL.js";
@@ -49,6 +51,11 @@ const RevenueManagement = () => {
     const [viewingSub, setViewingSub] = useState(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedSubscription, setSelectedSubscription] = useState(0);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [subToDelete, setSubToDelete] = useState(null);
+    const [deleteReason, setDeleteReason] = useState('');
+    const [activeTab, setActiveTab] = useState('active');
+    const [deletedSubs, setDeletedSubs] = useState([]);
     const {openNotification} = useNotificationManager();
     
     // Revenue statistics
@@ -60,6 +67,29 @@ const RevenueManagement = () => {
     });
     const [dateRange, setDateRange] = useState([dayjs().subtract(30, 'days'), dayjs()]);
     const [filteredData, setFilteredData] = useState([]);
+
+    // Sử dụng useMemo để tính toán filteredData
+    const filteredDataMemo = useMemo(() => {
+        console.log('Calculating filtered data with:', userSubs.length, 'items');
+        if (!dateRange || dateRange.length !== 2) {
+            console.log('No date range, showing all data');
+            return userSubs;
+        }
+        
+        const filtered = userSubs.filter(sub => {
+            const purchaseDate = new Date(sub.purchased_date);
+            const startDate = dateRange[0].startOf('day').toDate(); // Bắt đầu từ 00:00:00
+            const endDate = dateRange[1].endOf('day').toDate(); // Kết thúc lúc 23:59:59
+            return purchaseDate >= startDate && purchaseDate <= endDate;
+        });
+        console.log('Filtered data:', filtered.length, 'items');
+        return filtered;
+    }, [userSubs, dateRange]);
+
+    // Cập nhật filteredData khi filteredDataMemo thay đổi
+    useEffect(() => {
+        setFilteredData([...filteredDataMemo]);
+    }, [filteredDataMemo]);
 
     // Fetch statistics for total revenue
     const fetchStatistics = async () => {
@@ -84,6 +114,7 @@ const RevenueManagement = () => {
             const token = await getAccessTokenSilently();
             const data = await getAllUserSubscriptions(token);
             const subsData = data.data || data.userSubs || [];
+            console.log('Fetched subscriptions:', subsData.length);
             setUserSubs(subsData);
             
             // Calculate subscription statistics (not revenue)
@@ -102,8 +133,7 @@ const RevenueManagement = () => {
 
             console.log('sub', subsData);
             
-            // Apply date filter
-            applyDateFilter(subsData);
+            // applyDateFilter(subsData); // This line is no longer needed
         } catch (err) {
             notification.error({message: 'Lỗi tải danh sách subscription'});
         } finally {
@@ -111,17 +141,15 @@ const RevenueManagement = () => {
         }
     };
 
-    const applyDateFilter = (data) => {
-        if (!dateRange || dateRange.length !== 2) {
-            setFilteredData(data);
-            return;
+    // Fetch deleted subscriptions
+    const fetchDeletedSubscriptions = async () => {
+        try {
+            const token = await getAccessTokenSilently();
+            const data = await getAllDeletedUserSubscriptions(token);
+            setDeletedSubs(data.data || []);
+        } catch (err) {
+            console.error('Error fetching deleted subscriptions:', err);
         }
-        
-        const filtered = data.filter(sub => {
-            const purchaseDate = new Date(sub.purchased_date);
-            return purchaseDate >= dateRange[0].toDate() && purchaseDate <= dateRange[1].toDate();
-        });
-        setFilteredData(filtered);
     };
 
     // Fetch users and plans for select options (giữ nguyên fetch cũ nếu chưa có API admin)
@@ -149,13 +177,10 @@ const RevenueManagement = () => {
             fetchUserSubs();
             fetchUsersAndPlans();
             fetchStatistics();
+            fetchDeletedSubscriptions();
         }
         // eslint-disable-next-line
     }, [isAuthenticated]);
-
-    useEffect(() => {
-        applyDateFilter(userSubs);
-    }, [dateRange, userSubs]);
 
     // Add or update subscription
     const handleSaveSub = async () => {
@@ -181,16 +206,28 @@ const RevenueManagement = () => {
     };
 
     // Delete subscription - chỉ cho phép xóa subscription còn hạn (không phải lịch sử)
-    const handleDeleteSub = async (user_id, sub_id) => {
+    const handleDeleteSub = async () => {
+        if (!subToDelete) return;
+        
         try {
             const token = await getAccessTokenSilently();
-            await deleteUserSubscription(user_id, sub_id, token);
+            await deleteUserSubscription(subToDelete.id, deleteReason, token);
             notification.success({message: 'Xóa subscription thành công'});
+            setIsDeleteModalOpen(false);
+            setSubToDelete(null);
+            setDeleteReason('');
             fetchUserSubs();
+            fetchDeletedSubscriptions(); // Refresh deleted data
             fetchStatistics(); // Refresh statistics after change
         } catch (err) {
             notification.error({message: 'Lỗi khi xóa subscription'});
         }
+    };
+
+    // Open delete confirmation modal
+    const openDeleteModal = (sub) => {
+        setSubToDelete(sub);
+        setIsDeleteModalOpen(true);
     };
 
     // Open modal for create
@@ -216,11 +253,23 @@ const RevenueManagement = () => {
             key: 'user',
             render: (_, r) => (
                 <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                    <Avatar src={r.avatar} size={32}/>
-                    <div>
-                        <div style={{fontWeight: 600}}>{r.username}</div>
-                        <div style={{fontSize: 12, color: '#666'}}>{r.email}</div>
-                    </div>
+                    {r.user_id ? (
+                        <>
+                            <Avatar src={r.avatar} size={32}/>
+                            <div>
+                                <div style={{fontWeight: 600}}>{r.username}</div>
+                                <div style={{fontSize: 12, color: '#666'}}>{r.email}</div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Avatar icon={<UserOutlined />} size={32} style={{backgroundColor: '#f5f5f5'}}/>
+                            <div>
+                                <div style={{fontWeight: 600, color: '#999'}}>User đã xóa</div>
+                                <div style={{fontSize: 12, color: '#ccc'}}>N/A</div>
+                            </div>
+                        </>
+                    )}
                 </div>
             ),
         },
@@ -271,7 +320,7 @@ const RevenueManagement = () => {
                         <Button icon={<EyeOutlined/>} size="small" onClick={() => handleViewSub(r)}/>
                         {isActive && (
                             <Popconfirm title="Bạn có chắc muốn xóa subscription này?"
-                                        onConfirm={() => handleDeleteSub(r.user_id, r.sub_id)} okText="Xóa" cancelText="Hủy">
+                                        onConfirm={() => openDeleteModal(r)} okText="Xóa" cancelText="Hủy">
                                 <Button icon={<DeleteOutlined/>} size="small" danger/>
                             </Popconfirm>
                         )}
@@ -346,7 +395,7 @@ const RevenueManagement = () => {
                         format="DD/MM/YYYY"
                         placeholder={['Từ ngày', 'Đến ngày']}
                     />
-                    <Button onClick={() => setDateRange([dayjs().subtract(30, 'days'), dayjs()])}>
+                    <Button onClick={() => setDateRange([dayjs().startOf('month'), dayjs().endOf('month')])}>
                         Tháng này
                     </Button>
                     <Button onClick={() => setDateRange([dayjs().subtract(90, 'days'), dayjs()])}>
@@ -358,13 +407,115 @@ const RevenueManagement = () => {
                 </div>
             </div>
 
-            <Table
-                columns={columns}
-                dataSource={filteredData}
-                rowKey={r => `${r.user_id}_${r.sub_id}`}
-                loading={loading}
-                pagination={{pageSize: 10}}
-                bordered
+            <Tabs
+                activeKey={activeTab}
+                onChange={setActiveTab}
+                items={[
+                    {
+                        key: 'active',
+                        label: 'Subscription đang hoạt động',
+                        children: (
+                            <Table
+                                columns={columns}
+                                dataSource={filteredData}
+                                rowKey={r => r.id}
+                                loading={loading}
+                                pagination={{pageSize: 10}}
+                                bordered
+                            />
+                        )
+                    },
+                    {
+                        key: 'deleted',
+                        label: 'Lịch sử đã xóa',
+                        children: (
+                            <Table
+                                columns={[
+                                    // User column
+                                    {
+                                        title: 'User',
+                                        key: 'user',
+                                        render: (_, r) => (
+                                            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                                                {r.user_id ? (
+                                                    <>
+                                                        <Avatar src={r.avatar} size={32}/>
+                                                        <div>
+                                                            <div style={{fontWeight: 600}}>{r.username}</div>
+                                                            <div style={{fontSize: 12, color: '#666'}}>{r.email}</div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Avatar icon={<UserOutlined />} size={32} style={{backgroundColor: '#f5f5f5'}}/>
+                                                        <div>
+                                                            <div style={{fontWeight: 600, color: '#999'}}>User đã xóa</div>
+                                                            <div style={{fontSize: 12, color: '#ccc'}}>N/A</div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ),
+                                    },
+                                    // Subscription column
+                                    {
+                                        title: 'Gói Subscription',
+                                        key: 'subscription',
+                                        render: (_, r) => (
+                                            <div>
+                                                <div style={{fontWeight: 600}}>{r.sub_name}</div>
+                                                <div style={{fontSize: 12, color: '#666'}}>{r.price?.toLocaleString()} đ</div>
+                                            </div>
+                                        ),
+                                    },
+                                    // Purchase date column
+                                    {
+                                        title: 'Ngày mua',
+                                        dataIndex: 'purchased_date',
+                                        key: 'purchased_date',
+                                        render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '-',
+                                    },
+                                    // End date column - chỉ hiển thị ngày, không có tag trạng thái
+                                    {
+                                        title: 'Ngày hết hạn',
+                                        dataIndex: 'vip_end_date',
+                                        key: 'vip_end_date',
+                                        render: (date) => {
+                                            if (!date) return '-';
+                                            const endDate = new Date(date);
+                                            return (
+                                                <div>
+                                                    <div style={{color: '#666'}}>
+                                                        {endDate.toLocaleDateString('vi-VN')}
+                                                    </div>
+                                                </div>
+                                            );
+                                        },
+                                    },
+                                    // Deleted date column
+                                    {
+                                        title: 'Ngày xóa',
+                                        dataIndex: 'deleted_at',
+                                        key: 'deleted_at',
+                                        render: (date) => date ? new Date(date).toLocaleDateString('vi-VN') : '-',
+                                    },
+                                    // Deletion reason column
+                                    {
+                                        title: 'Lý do xóa',
+                                        dataIndex: 'deletion_reason',
+                                        key: 'deletion_reason',
+                                        render: (reason) => reason || 'Không có lý do',
+                                    }
+                                ]}
+                                dataSource={deletedSubs}
+                                rowKey={r => r.id}
+                                loading={loading}
+                                pagination={{pageSize: 10}}
+                                bordered
+                            />
+                        )
+                    }
+                ]}
             />
 
             {/* View Modal */}
@@ -401,8 +552,17 @@ const RevenueManagement = () => {
                                 fontSize: 20,
                                 marginBottom: 8
                             }}>Gói: {viewingSub.sub_name}</div>
-                            <div style={{color: '#888', fontSize: 13, marginBottom: 8}}>User: <Avatar
-                                src={viewingSub.avatar} size={24}/> {viewingSub.username}</div>
+                            <div style={{color: '#888', fontSize: 13, marginBottom: 8}}>
+                                User: {viewingSub.user_id ? (
+                                    <>
+                                        <Avatar src={viewingSub.avatar} size={24}/> {viewingSub.username}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Avatar icon={<UserOutlined />} size={24} style={{backgroundColor: '#f5f5f5'}}/> User đã xóa
+                                    </>
+                                )}
+                            </div>
                             <div style={{
                                 fontSize: 15,
                                 marginBottom: 8,
@@ -483,6 +643,44 @@ const RevenueManagement = () => {
                         </>
                     )}
                 </Form>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                title="Xác nhận xóa subscription"
+                open={isDeleteModalOpen}
+                onCancel={() => {
+                    setIsDeleteModalOpen(false);
+                    setSubToDelete(null);
+                    setDeleteReason('');
+                }}
+                onOk={handleDeleteSub}
+                okText="Xóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
+            >
+                {subToDelete && (
+                    <div>
+                        <p>Bạn có chắc muốn xóa subscription này?</p>
+                        <div style={{ marginBottom: 16 }}>
+                            <strong>User:</strong> {subToDelete.user_id ? subToDelete.username : 'User đã xóa'}
+                        </div>
+                        <div style={{ marginBottom: 16 }}>
+                            <strong>Gói:</strong> {subToDelete.sub_name}
+                        </div>
+                        <div style={{ marginBottom: 16 }}>
+                            <strong>Ngày mua:</strong> {new Date(subToDelete.purchased_date).toLocaleDateString('vi-VN')}
+                        </div>
+                        <Form.Item label="Lý do xóa (tùy chọn)">
+                            <Input.TextArea
+                                value={deleteReason}
+                                onChange={(e) => setDeleteReason(e.target.value)}
+                                placeholder="Nhập lý do xóa subscription..."
+                                rows={3}
+                            />
+                        </Form.Item>
+                    </div>
+                )}
             </Modal>
         </div>
     );

@@ -100,9 +100,6 @@ const CoachManagement = () => {
         <>
           <Button icon={<EyeOutlined />} onClick={() => handleViewUser(coach)} className="mr-2" />
           <Button icon={<EditOutlined />} onClick={() => openEditModal(coach)} className="mr-2" />
-          <Popconfirm title="Xóa coach này?" onConfirm={() => handleDeleteCoach(coach.user_id)} okText="Xóa" cancelText="Hủy">
-            <Button icon={<DeleteOutlined />} danger />
-          </Popconfirm>
         </>
       ),
     },

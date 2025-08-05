@@ -566,6 +566,7 @@ async function getAllUserSubscriptions() {
   const pool = await poolPromise;
   const result = await pool.request().query(`
     SELECT
+      us.id,
       us.user_id,
       u.username,
       u.email,
@@ -574,10 +575,13 @@ async function getAllUserSubscriptions() {
       s.sub_name,
       s.price,
       us.purchased_date,
+      us.deleted_at,
+      us.deletion_reason,
       DATEADD(MONTH, s.duration, us.purchased_date) AS vip_end_date
     FROM users_subscriptions us
            LEFT JOIN users u ON us.user_id = u.user_id
            JOIN subscriptions s ON us.sub_id = s.sub_id
+    WHERE us.deleted_at IS NULL
     ORDER BY us.purchased_date DESC
   `);
   return result.recordset;
@@ -636,29 +640,79 @@ async function updateUserSubscription(user_id, sub_id, data) {
   const result = await req.query(`UPDATE users_subscriptions SET ${fields.join(', ')} WHERE user_id = @user_id AND sub_id = @sub_id`);
   return result.rowsAffected[0] > 0;
 }
-async function deleteUserSubscription(user_id, sub_id) {
+async function deleteUserSubscription(id, reason = 'Admin deleted') {
   try {
     const pool = await poolPromise;
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // Xóa khỏi bảng users_subscriptions
-    const deleteResult = await transaction.request()
-      .input('user_id', sql.Int, user_id)
-      .input('sub_id', sql.Int, sub_id)
-      .query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
+    // Lấy thông tin subscription trước khi xóa
+    const subscriptionInfo = await transaction.request()
+      .input('id', sql.Int, id)
+      .query(`
+        SELECT user_id, sub_id FROM users_subscriptions 
+        WHERE id = @id AND deleted_at IS NULL
+      `);
 
-    // Reset sub_id và vip_end_date ở bảng users
+    if (subscriptionInfo.recordset.length === 0) {
+      await transaction.rollback();
+      return false;
+    }
+
+    const { user_id, sub_id } = subscriptionInfo.recordset[0];
+
+    // Soft delete - cập nhật deleted_at và deletion_reason
+    const softDeleteResult = await transaction.request()
+      .input('id', sql.Int, id)
+      .input('deleted_at', sql.DateTime, new Date())
+      .input('deletion_reason', sql.NVarChar, reason)
+      .query(`
+        UPDATE users_subscriptions 
+        SET deleted_at = @deleted_at, deletion_reason = @deletion_reason 
+        WHERE id = @id AND deleted_at IS NULL
+      `);
+
+    // Reset sub_id và vip_end_date ở bảng users nếu subscription này đang active
     const updateResult = await transaction.request()
       .input('user_id', sql.Int, user_id)
-      .query('UPDATE users SET sub_id = 1, vip_end_date = NULL WHERE user_id = @user_id');
+      .input('sub_id', sql.Int, sub_id)
+      .query(`
+        UPDATE users 
+        SET sub_id = 1, vip_end_date = NULL 
+        WHERE user_id = @user_id AND sub_id = @sub_id
+      `);
 
     await transaction.commit();
-    return deleteResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+    return softDeleteResult.rowsAffected[0] > 0;
   } catch (err) {
     console.error('SQL ERROR in deleteUserSubscription:', err);
     return false;
   }
+}
+
+async function getAllDeletedUserSubscriptions() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT
+      us.id,
+      us.user_id,
+      u.username,
+      u.email,
+      u.avatar,
+      us.sub_id,
+      s.sub_name,
+      s.price,
+      us.purchased_date,
+      us.deleted_at,
+      us.deletion_reason,
+      DATEADD(MONTH, s.duration, us.purchased_date) AS vip_end_date
+    FROM users_subscriptions us
+           LEFT JOIN users u ON us.user_id = u.user_id
+           JOIN subscriptions s ON us.sub_id = s.sub_id
+    WHERE us.deleted_at IS NOT NULL
+    ORDER BY us.deleted_at DESC
+  `);
+  return result.recordset;
 }
 
 // STATISTICS
@@ -847,7 +901,6 @@ const checkSubscriptionExist = async (user_id) => {
 }
 
 module.exports = {
-  approveBlog,
   getAllUsers,
   createUser,
   getUserById,
@@ -865,6 +918,7 @@ module.exports = {
   getPostLikes,
   getAllComments,
   deleteCommentById,
+  getCommentsByPostId,
   getAllBlogs,
   getIsPendingBlogs,
   approveBlog,
@@ -885,6 +939,7 @@ module.exports = {
   createUserSubscription,
   updateUserSubscription,
   deleteUserSubscription,
+  getAllDeletedUserSubscriptions,
   getStatistics,
   getAllUserAchievements,
   createUserAchievement,
