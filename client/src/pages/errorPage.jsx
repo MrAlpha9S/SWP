@@ -3,6 +3,7 @@ import React from 'react';
 import { Button, Result, Typography } from 'antd';
 import { HomeOutlined, ReloadOutlined } from '@ant-design/icons';
 import {useNavigate} from "react-router-dom";
+import PageFadeWrapper from "../components/utils/PageFadeWrapper.jsx";
 
 const { Title, Paragraph } = Typography;
 
@@ -75,6 +76,9 @@ const ErrorPage = ({
     }
 
     return (
+        <PageFadeWrapper>
+
+
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
             <div className="w-full max-w-2xl">
                 <div className="bg-white rounded-2xl shadow-2xl shadow-blue-100/50 p-8 md:p-12 border border-gray-100">
@@ -123,6 +127,7 @@ const ErrorPage = ({
                 </div>
             </div>
         </div>
+        </PageFadeWrapper>
     );
 };
 
