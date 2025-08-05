@@ -457,6 +457,7 @@ const sendPushNotificationTo = async (req, res) => {
 const { schedulePushForUser } = require('../utils/pushScheduler');
 const {processAchievementsWithNotifications} = require("../services/achievementService");
 const {createNotificationService} = require("../services/notificationService");
+const {checkSubscriptionExist} = require("../services/adminService");
 
 const handleUpdateUserTimesForPush = async (req, res) => {
     const { userAuth0Id, times } = req.body;
@@ -669,6 +670,24 @@ const fixUserAuth0Id = async (req, res) => {
     }
 };
 
+const alreadyHaveSub = async (req, res) => {
+    const {userAuth0Id} = req.params;
+    if (!userAuth0Id) {
+        return res.status(400).json({success: false, message: 'userAuth0Id is required'});
+    }
+    try {
+        const alreadyHasSubscription = await checkSubscriptionExist(userAuth0Id)
+        if (alreadyHasSubscription) {
+            return res.status(200).json({success: true, message: true, data: alreadyHasSubscription.sub_id});
+        } else {
+            return res.status(200).json({success: true, message: false});
+        }
+    } catch (err) {
+        console.error('Error alreadyHaveSub:', err);
+        return res.status(500).json({success: false, message: 'Internal server error: ' + err.message});
+    }
+}
+
 
 module.exports = {
     getAllUsersController,
@@ -697,5 +716,6 @@ module.exports = {
     handleCoachRegistration,
     handleGetCoachRegistrationInfo,
     findUserByEmail,
-    fixUserAuth0Id
+    fixUserAuth0Id,
+    alreadyHaveSub
 };

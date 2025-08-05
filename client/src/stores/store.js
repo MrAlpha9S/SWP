@@ -249,6 +249,10 @@ export const useValidationErrorStore = create((set) => ({
     setValidationError: (value) => set({validationError: value}),
 }))
 
+export const useIsUserExpiredStore = create((set) => ({
+    isUserExpired: false,
+    setIsUserExpired: (value) => set({isUserExpired: value}),
+}))
 
 
 

@@ -975,6 +975,7 @@ async function getCoachRegistrationInfo(auth0Id) {
     }
 }
 
+
 module.exports = {
     userExists,
     createUser,

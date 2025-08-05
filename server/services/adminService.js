@@ -1,4 +1,5 @@
 const { poolPromise, sql } = require('../configs/sqlConfig');
+const {getUserIdFromAuth0Id} = require("./userService");
 
 // USER
 async function getAllUsers() {
@@ -887,13 +888,14 @@ const getPendingCoachDetails = async (id) => {
   return result.recordset[0];
 };
 
-const checkSubscriptionExist = async (user_id) => {
+const checkSubscriptionExist = async (userAuth0Id) => {
     try {
+      const user_id = await getUserIdFromAuth0Id(userAuth0Id);
       const pool = await poolPromise;
       const result = await pool.request()
           .input('user_id', sql.Int, user_id)
-          .query('select * from users_subscriptions WHERE user_id = @user_id');
-      return result.recordset.length > 0;
+          .query('select u.sub_id from users_subscriptions us, users u WHERE u.user_id = @user_id AND us.user_id = u.user_id');
+      return result.recordset[0];
     } catch (error) {
       console.error('Error in checkSubscriptionExist:', error);
       return false;

@@ -4,22 +4,24 @@ import CustomButton from "../../ui/CustomButton.jsx";
 import {useNavigate} from "react-router-dom";
 import {Card} from "antd";
 import {useQuery} from "@tanstack/react-query";
-import {getCoachByIdOrAuth0Id} from "../../utils/userUtils.js";
+import {alreadyHaveSubCheck, getCoachByIdOrAuth0Id} from "../../utils/userUtils.js";
 import {convertYYYYMMDDStrToDDMMYYYYStr} from "../../utils/dateUtils.js";
 import {CheckCircle, Star, Users} from "lucide-react";
 import NotFoundBanner from "../notFoundBanner.jsx";
 import Messager from '../coachboard/messager/messager.jsx'
 import NotesManager from "../coachboard/notesManager.jsx";
 import CoachUser from "../coachboard/coachUser.jsx";
+import {useAuth0} from "@auth0/auth0-react";
 
 const CoachDashboard = () => {
     const {userInfo} = useUserInfoStore()
     const navigate = useNavigate();
     const [coachInfo, setCoachInfo] = useState();
+    const [alreadyHaveSub, setAlreadyHaveSub] = useState(false);
     const {Meta} = Card
-    const {planLog} = usePlanStore()
+    const {getAccessTokenSilently, isAuthenticated} = useAuth0()
 
-    const {isPending, data} = useQuery({
+    const {isPending : isCoachInfoPending, data: coachInfoFetched} = useQuery({
         queryFn: async () => {
             return await getCoachByIdOrAuth0Id(userInfo?.user_id)
         },
@@ -27,18 +29,28 @@ const CoachDashboard = () => {
         enabled: userInfo !== null,
     })
 
+    const {isPending : isSubCheckPending, data : alreadyHaveSubFromAPI} = useQuery({
+        queryFn: async () => {
+            const token = await getAccessTokenSilently()
+            return await alreadyHaveSubCheck(userInfo?.auth0_id, token)
+        },
+        queryKey: ['subscription-check'],
+        enabled: userInfo !== null && isAuthenticated,
+    })
+
     useEffect(() => {
-        if (!isPending && data?.data) {
-            console.log('hey')
-            setCoachInfo(data?.data)
+        if (!isSubCheckPending && alreadyHaveSubFromAPI) {
+            setAlreadyHaveSub(alreadyHaveSubFromAPI.message)
         }
-    }, [isPending])
+    }, [isSubCheckPending])
 
     useEffect(() => {
-        console.log('coachInfo', coachInfo)
-    }, [coachInfo, isPending])
+        if (!isCoachInfoPending && coachInfoFetched?.data) {
+            setCoachInfo(coachInfoFetched?.data)
+        }
+    }, [isCoachInfoPending])
 
-    if (userInfo && userInfo.sub_id === 1) {
+    if (userInfo && userInfo.sub_id === 1 && !alreadyHaveSub) {
         return (
             <div className='space-y-4'>
                 <p>Chức năng này dành riêng cho người dùng <strong>Premium</strong>. Nâng cấp ngay để truy cập những
@@ -69,11 +81,26 @@ const CoachDashboard = () => {
                 </div>
             </div>
         )
-    } else if (userInfo && userInfo.sub_id !== 1 && coachInfo?.coach) {
+    } else if (userInfo && coachInfo?.coach) {
         return (
-            <div className='w-full h-full min-h-0'>
+            <div className='relative w-full h-full min-h-0'>
+                {/* Overlay if subscription expired */}
+                {userInfo.sub_id === 1 && alreadyHaveSub && (
+                    <div className='absolute inset-0 z-[49] flex items-center justify-center bg-black/30 backdrop-blur-sm'>
+                        <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md flex flex-col items-center">
+                            <h2 className="text-2xl font-bold mb-4 text-red-600">Gói của bạn đã hết hạn</h2>
+                            <p className="mb-6">
+                                Bạn cần gia hạn để tiếp tục sử dụng các chức năng Premium.
+                            </p>
+                            <CustomButton onClick={() => navigate('/subscription/coach-dashboard')}>
+                                Gia hạn ngay
+                            </CustomButton>
+                        </div>
+                    </div>
+                )}
 
-                <div className=' rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5 '>
+                {/* Main dashboard content */}
+                <div className='rounded-xl bg-white w-full h-full p-5 flex flex-col gap-5'>
                     <p className='text-2xl font-bold'>Huấn luyện viên của bạn</p>
                     <div className="bg-gradient-to-r from-primary-600 to-primary-500 p-8">
                         <div className="flex flex-col md:flex-row items-center gap-6">
@@ -97,13 +124,15 @@ const CoachDashboard = () => {
                                             ? convertYYYYMMDDStrToDDMMYYYYStr(coachInfo.coach.started_date.split('T')[0])
                                             : 'Chưa có thông tin'}
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div className='flex-1 w-full flex min-h-0'>
-                        <div><CoachUser userAuth0Id={userInfo?.auth0_id} from='user' coach={coachInfo?.coach}/></div>
+                        <div>
+                            <CoachUser userAuth0Id={userInfo?.auth0_id} from='user' coach={coachInfo?.coach}/>
+                        </div>
                     </div>
                 </div>
             </div>
