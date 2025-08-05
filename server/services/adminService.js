@@ -565,12 +565,19 @@ async function deleteCheckInById(id) {
 async function getAllUserSubscriptions() {
   const pool = await poolPromise;
   const result = await pool.request().query(`
-    SELECT us.user_id, u.username, u.email, u.avatar,
-           us.sub_id, s.sub_name, s.price,
-           us.purchased_date, u.vip_end_date
+    SELECT
+      us.user_id,
+      u.username,
+      u.email,
+      u.avatar,
+      us.sub_id,
+      s.sub_name,
+      s.price,
+      us.purchased_date,
+      DATEADD(MONTH, s.duration, us.purchased_date) AS vip_end_date
     FROM users_subscriptions us
-    JOIN users u ON us.user_id = u.user_id
-    JOIN subscriptions s ON us.sub_id = s.sub_id
+           LEFT JOIN users u ON us.user_id = u.user_id
+           JOIN subscriptions s ON us.sub_id = s.sub_id
     ORDER BY us.purchased_date DESC
   `);
   return result.recordset;
@@ -581,15 +588,15 @@ async function createUserSubscription(data) {
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    const alreadyHasSubscription = await checkSubscriptionExist(data.user_id)
-    if (alreadyHasSubscription) {
-      const req = transaction.request();
-      req.input('user_id', sql.Int, data.user_id);
-
-      const deleteResult = await req.query(
-          'DELETE FROM users_subscriptions WHERE user_id = @user_id'
-      );
-    }
+    // const alreadyHasSubscription = await checkSubscriptionExist(data.user_id)
+    // if (alreadyHasSubscription) {
+    //   const req = transaction.request();
+    //   req.input('user_id', sql.Int, data.user_id);
+    //
+    //   const deleteResult = await req.query(
+    //       'DELETE FROM users_subscriptions WHERE user_id = @user_id'
+    //   );
+    // }
 
     // Insert vào users_subscriptions (KHÔNG có end_date)
     const req = transaction.request();

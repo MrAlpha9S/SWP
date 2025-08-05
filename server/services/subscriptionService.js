@@ -54,16 +54,16 @@ const addSubscriptionPurchaseLog = async (user_id, subscription_id, today) => {
     try {
         const pool = await poolPromise;
 
-        const alreadyHasSubscription = await checkSubscriptionExist(user_id)
-
-        if (alreadyHasSubscription) {
-            const req = await pool.request()
-            req.input('user_id', sql.Int, user_id);
-
-            const deleteResult = await req.query(
-                'DELETE FROM users_subscriptions WHERE user_id = @user_id'
-            );
-        }
+        // const alreadyHasSubscription = await checkSubscriptionExist(user_id)
+        //
+        // if (alreadyHasSubscription) {
+        //     const req = await pool.request()
+        //     req.input('user_id', sql.Int, user_id);
+        //
+        //     const deleteResult = await req.query(
+        //         'DELETE FROM users_subscriptions WHERE user_id = @user_id'
+        //     );
+        // }
 
         const subsInfo = await pool.request()
             .input('user_id', sql.Int, user_id)

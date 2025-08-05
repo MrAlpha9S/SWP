@@ -99,6 +99,8 @@ const RevenueManagement = () => {
                 totalSubscriptions,
                 activeSubscriptions: activeSubs
             }));
+
+            console.log('sub', subsData);
             
             // Apply date filter
             applyDateFilter(subsData);
