@@ -19,7 +19,7 @@ const checkExpiry = async () => {
     }
 };
 
-cron.schedule(`13 ${process.env.NODE_ENV === 'production' ? '17' : '11'} * * *`, async () => {
+cron.schedule(`59 ${process.env.NODE_ENV === 'production' ? '17' : '22'} * * *`, async () => {
 
     console.log('Running VIP expiry check...');
     try {

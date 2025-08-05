@@ -7,7 +7,7 @@ import PostManagement from '../../components/layout/admin/postmanage/PostManagem
 import CommentManagement from '../../components/layout/admin/CommentManagement.jsx';
 import BlogManagement from '../../components/layout/admin/blogmanage/BlogManagement.jsx';
 import TopicManagement from '../../components/layout/admin/TopicManagement.jsx';
-import SubscriptionManagement from '../../components/layout/admin/SubscriptionManagement.jsx';
+import RevenueManagement from '../../components/layout/admin/RevenueManagement.jsx';
 import CheckinManagement from '../../components/layout/admin/CheckinManagement.jsx';
 import UserAchievementManagement from '../../components/layout/admin/UserAchivementManagement.jsx';
 import Statistics from '../../components/layout/admin/Statistics.jsx';
@@ -23,7 +23,7 @@ const boardMap = {
   comment: <CommentManagement />,
   blog: <BlogManage />,
   topic: <TopicManagement />,
-  subscription: <SubscriptionManagement />,
+  subscription: <RevenueManagement />,
   checkin: <CheckinManagement />,
   'user-achievement': <UserAchievementManagement />,
   statistics: <Statistics />,

@@ -4,9 +4,10 @@ import {useAuth0} from "@auth0/auth0-react";
 import ChatMessage from './chatmessage.jsx';
 import {SendOutlined} from '@ant-design/icons';
 import {SendMessage} from '../../../utils/messagerUtils';
-import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {getCurrentUTCDateTime} from '../../../utils/dateUtils';
-import {useUserInfoStore} from "../../../../stores/store.js";
+import {useIsUserExpiredStore, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../../stores/store.js";
+import {alreadyHaveSubCheck} from "../../../utils/userUtils.js";
 
 const {TextArea} = Input;
 
@@ -29,6 +30,7 @@ export default function MessageBox({
     if (contacts && contacts.length > 0) {
         recipientId = contacts?.find((contact) => contact.conversation_id === conversationId)?.other_participant_id;
     }
+    const {isUserExpired} = useIsUserExpiredStore();
 
 
     const sendMessageMutation = useMutation({
@@ -177,7 +179,7 @@ export default function MessageBox({
                         value={input}
                         onChange={handleInputChange}
                         onKeyPress={handleKeyPress}
-                        disabled={sendMessageMutation.isPending}
+                        disabled={sendMessageMutation.isPending || isUserExpired}
                     />
                     <button
                         onClick={handleOnSend}

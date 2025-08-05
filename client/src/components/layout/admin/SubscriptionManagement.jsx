@@ -150,15 +150,15 @@ const SubscriptionManagement = () => {
     };
 
     const handleSubChange = (e) => {
-        setSelectedSubscription(e)
-    }
+        setSelectedSubscription(e);
+    };
 
     const columns = [
         {
             title: 'User', key: 'user', render: (_, r) => (
                 <span style={{display: 'flex', alignItems: 'center', gap: 8}}>
-          <Avatar src={r.avatar} size={24}/>{r.username}
-        </span>
+                    <Avatar src={r.avatar} size={24}/>{r.username}
+                </span>
             )
         },
         {title: 'Gói', key: 'plan', render: (_, r) => r.sub_name},
@@ -170,6 +170,7 @@ const SubscriptionManagement = () => {
         },
         {
             title: 'Ngày kết thúc',
+            dataIndex: 'vip_end_date',
             key: 'vip_end_date',
             render: r => r.vip_end_date ? new Date(r.vip_end_date).toLocaleDateString() : ''
         },
@@ -201,7 +202,6 @@ const SubscriptionManagement = () => {
         startDate.setMonth(startDate.getMonth() + monthsToAdd);
         return type !== 'payload' ? convertYYYYMMDDStrToDDMMYYYYStr(startDate.toISOString().split('T')[0]) : startDate.toISOString();
     };
-
 
     return (
         <div className="p-6 bg-white rounded shadow min-h-[400px]">

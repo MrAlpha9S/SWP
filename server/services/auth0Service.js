@@ -70,7 +70,8 @@ const createUserAuth0Service = async (username, email, avatar, password) => {
         console.error('Auth0 error:', resData);
         return false;
     }
-    return true;
+    // Trả về thông tin user bao gồm user_id (Auth0 ID)
+    return resData;
 }
 
 module.exports = {getUserFromAuth0, updateUserAuth0, createUserAuth0Service};

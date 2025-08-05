@@ -333,3 +333,15 @@ export async function getCoachRegistrationInfo(token) {
     if (!res.ok) throw new Error('Lỗi lấy thông tin đăng ký');
     return await res.json();
 }
+
+export async function alreadyHaveSubCheck(userAuth0Id, token) {
+    const res = await fetch(`${getBackendUrl()}/users/subscription-check/${userAuth0Id}`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+    });
+    if (!res.ok) throw new Error('Lỗi kiểm tra subscription');
+    return await res.json();
+}

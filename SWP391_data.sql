@@ -50,7 +50,6 @@ VALUES
 ('10m', N'Mười Triệu – Mười Thắng Lợi', N'10 triệu VNĐ đã ở lại với bạn, không phải với thuốc lá – một chiến thắng lớn!', '/10m.svg');
 
 
-
 --Sample user info
 INSERT INTO [users] ([auth0_id], [username], [email], [created_at], [avatar], [is_social], [sub_id], [vip_end_date], [role])
 VALUES 

@@ -1,4 +1,5 @@
 const { poolPromise, sql } = require('../configs/sqlConfig');
+const {getUserIdFromAuth0Id} = require("./userService");
 
 // USER
 async function getAllUsers() {
@@ -9,8 +10,10 @@ async function getAllUsers() {
 async function createUser(data) {
   const pool = await poolPromise;
   const req = pool.request();
-  // Tạo auth0_id tự động nếu không có
+  
+  // Sử dụng auth0_id được truyền vào hoặc tạo tự động nếu không có
   const auth0_id = data.auth0_id || `admin|${Date.now()}`;
+  
   req.input('auth0_id', sql.NVarChar, auth0_id);
   req.input('username', sql.NVarChar, data.username);
   req.input('email', sql.NVarChar, data.email);
@@ -22,6 +25,7 @@ async function createUser(data) {
   req.input('is_social', sql.Bit, 0);
   // sub_id mặc định là 1
   req.input('sub_id', sql.Int, 1);
+  
   const result = await req.query(
     'INSERT INTO users (auth0_id, username, email, role, avatar, isBanned, created_at, is_social, sub_id) VALUES (@auth0_id, @username, @email, @role, @avatar, @isBanned, @created_at, @is_social, @sub_id)'
   );
@@ -562,12 +566,23 @@ async function deleteCheckInById(id) {
 async function getAllUserSubscriptions() {
   const pool = await poolPromise;
   const result = await pool.request().query(`
-    SELECT us.user_id, u.username, u.email, u.avatar,
-           us.sub_id, s.sub_name, s.price,
-           us.purchased_date, u.vip_end_date
+    SELECT
+      us.id,
+      us.user_id,
+      u.username,
+      u.email,
+      u.avatar,
+      us.sub_id,
+      s.sub_name,
+      s.price,
+      us.purchased_date,
+      us.deleted_at,
+      us.deletion_reason,
+      DATEADD(MONTH, s.duration, us.purchased_date) AS vip_end_date
     FROM users_subscriptions us
-    JOIN users u ON us.user_id = u.user_id
-    JOIN subscriptions s ON us.sub_id = s.sub_id
+           LEFT JOIN users u ON us.user_id = u.user_id
+           JOIN subscriptions s ON us.sub_id = s.sub_id
+    WHERE us.deleted_at IS NULL
     ORDER BY us.purchased_date DESC
   `);
   return result.recordset;
@@ -578,15 +593,15 @@ async function createUserSubscription(data) {
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    const alreadyHasSubscription = await checkSubscriptionExist(data.user_id)
-    if (alreadyHasSubscription) {
-      const req = transaction.request();
-      req.input('user_id', sql.Int, data.user_id);
-
-      const deleteResult = await req.query(
-          'DELETE FROM users_subscriptions WHERE user_id = @user_id'
-      );
-    }
+    // const alreadyHasSubscription = await checkSubscriptionExist(data.user_id)
+    // if (alreadyHasSubscription) {
+    //   const req = transaction.request();
+    //   req.input('user_id', sql.Int, data.user_id);
+    //
+    //   const deleteResult = await req.query(
+    //       'DELETE FROM users_subscriptions WHERE user_id = @user_id'
+    //   );
+    // }
 
     // Insert vào users_subscriptions (KHÔNG có end_date)
     const req = transaction.request();
@@ -626,29 +641,79 @@ async function updateUserSubscription(user_id, sub_id, data) {
   const result = await req.query(`UPDATE users_subscriptions SET ${fields.join(', ')} WHERE user_id = @user_id AND sub_id = @sub_id`);
   return result.rowsAffected[0] > 0;
 }
-async function deleteUserSubscription(user_id, sub_id) {
+async function deleteUserSubscription(id, reason = 'Admin deleted') {
   try {
     const pool = await poolPromise;
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // Xóa khỏi bảng users_subscriptions
-    const deleteResult = await transaction.request()
-      .input('user_id', sql.Int, user_id)
-      .input('sub_id', sql.Int, sub_id)
-      .query('DELETE FROM users_subscriptions WHERE user_id = @user_id AND sub_id = @sub_id');
+    // Lấy thông tin subscription trước khi xóa
+    const subscriptionInfo = await transaction.request()
+      .input('id', sql.Int, id)
+      .query(`
+        SELECT user_id, sub_id FROM users_subscriptions 
+        WHERE id = @id AND deleted_at IS NULL
+      `);
 
-    // Reset sub_id và vip_end_date ở bảng users
+    if (subscriptionInfo.recordset.length === 0) {
+      await transaction.rollback();
+      return false;
+    }
+
+    const { user_id, sub_id } = subscriptionInfo.recordset[0];
+
+    // Soft delete - cập nhật deleted_at và deletion_reason
+    const softDeleteResult = await transaction.request()
+      .input('id', sql.Int, id)
+      .input('deleted_at', sql.DateTime, new Date())
+      .input('deletion_reason', sql.NVarChar, reason)
+      .query(`
+        UPDATE users_subscriptions 
+        SET deleted_at = @deleted_at, deletion_reason = @deletion_reason 
+        WHERE id = @id AND deleted_at IS NULL
+      `);
+
+    // Reset sub_id và vip_end_date ở bảng users nếu subscription này đang active
     const updateResult = await transaction.request()
       .input('user_id', sql.Int, user_id)
-      .query('UPDATE users SET sub_id = 1, vip_end_date = NULL WHERE user_id = @user_id');
+      .input('sub_id', sql.Int, sub_id)
+      .query(`
+        UPDATE users 
+        SET sub_id = 1, vip_end_date = NULL 
+        WHERE user_id = @user_id AND sub_id = @sub_id
+      `);
 
     await transaction.commit();
-    return deleteResult.rowsAffected[0] > 0 && updateResult.rowsAffected[0] > 0;
+    return softDeleteResult.rowsAffected[0] > 0;
   } catch (err) {
     console.error('SQL ERROR in deleteUserSubscription:', err);
     return false;
   }
+}
+
+async function getAllDeletedUserSubscriptions() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT
+      us.id,
+      us.user_id,
+      u.username,
+      u.email,
+      u.avatar,
+      us.sub_id,
+      s.sub_name,
+      s.price,
+      us.purchased_date,
+      us.deleted_at,
+      us.deletion_reason,
+      DATEADD(MONTH, s.duration, us.purchased_date) AS vip_end_date
+    FROM users_subscriptions us
+           LEFT JOIN users u ON us.user_id = u.user_id
+           JOIN subscriptions s ON us.sub_id = s.sub_id
+    WHERE us.deleted_at IS NOT NULL
+    ORDER BY us.deleted_at DESC
+  `);
+  return result.recordset;
 }
 
 // STATISTICS
@@ -661,7 +726,7 @@ async function getStatistics() {
   const blogCount = (await pool.request().query('SELECT COUNT(*) as total FROM blog_posts')).recordset[0].total;
   const topicCount = (await pool.request().query('SELECT COUNT(*) as total FROM Topics')).recordset[0].total;
   const checkinCount = (await pool.request().query('SELECT COUNT(*) as total FROM checkin_log')).recordset[0].total;
-  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM revenue')).recordset[0].total;
+  const subscriptionCount = (await pool.request().query('SELECT COUNT(*) as total FROM users_subscriptions')).recordset[0].total;
   let totalRevenue = null;
   try {
     const revenueResult = await pool.request().query(`
@@ -823,13 +888,14 @@ const getPendingCoachDetails = async (id) => {
   return result.recordset[0];
 };
 
-const checkSubscriptionExist = async (user_id) => {
+const checkSubscriptionExist = async (userAuth0Id) => {
     try {
+      const user_id = await getUserIdFromAuth0Id(userAuth0Id);
       const pool = await poolPromise;
       const result = await pool.request()
           .input('user_id', sql.Int, user_id)
-          .query('select * from users_subscriptions WHERE user_id = @user_id');
-      return result.recordset.length > 0;
+          .query('select u.sub_id from users_subscriptions us, users u WHERE u.user_id = @user_id AND us.user_id = u.user_id');
+      return result.recordset[0];
     } catch (error) {
       console.error('Error in checkSubscriptionExist:', error);
       return false;
@@ -837,7 +903,6 @@ const checkSubscriptionExist = async (user_id) => {
 }
 
 module.exports = {
-  approveBlog,
   getAllUsers,
   createUser,
   getUserById,
@@ -855,6 +920,7 @@ module.exports = {
   getPostLikes,
   getAllComments,
   deleteCommentById,
+  getCommentsByPostId,
   getAllBlogs,
   getIsPendingBlogs,
   approveBlog,
@@ -875,6 +941,7 @@ module.exports = {
   createUserSubscription,
   updateUserSubscription,
   deleteUserSubscription,
+  getAllDeletedUserSubscriptions,
   getStatistics,
   getAllUserAchievements,
   createUserAchievement,

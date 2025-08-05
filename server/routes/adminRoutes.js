@@ -59,9 +59,10 @@ router.delete('/subscriptions/:id', adminController.handleDeleteSubscription);
 
 // Route quản lý user subscriptions
 router.get('/user-subscriptions', adminController.handleGetAllUserSubscriptions);
+router.get('/user-subscriptions/deleted', adminController.handleGetAllDeletedUserSubscriptions);
 router.post('/user-subscriptions', adminController.handleCreateUserSubscription);
 router.put('/user-subscriptions/:user_id/:sub_id', adminController.handleUpdateUserSubscription);
-router.delete('/user-subscriptions/:user_id/:sub_id', adminController.handleDeleteUserSubscription);
+router.delete('/user-subscriptions', adminController.handleDeleteUserSubscription);
 
 // Route quản lý check-in
 router.get('/checkins', adminController.handleGetAllCheckIns);
@@ -73,6 +74,8 @@ router.delete('/checkins/:id', adminController.handleDeleteCheckIn);
 router.get('/statistics', adminController.handleGetStatistics);
 router.get('/statistics/revenue', adminController.handleGetRevenueDataset);
 
+// Route quản lý revenue
+router.get('/revenue', adminController.handleGetRevenue);
 
 // Route mẫu kiểm tra quyền admin
 router.get('/test', (req, res) => {

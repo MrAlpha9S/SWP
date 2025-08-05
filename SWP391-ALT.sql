@@ -47,10 +47,12 @@ GO
 
 CREATE TABLE [users_subscriptions]
 (
+  [id] int PRIMARY KEY IDENTITY(1, 1),
   [user_id] int,
   [sub_id] int,
   [purchased_date] DATETIME,
-  PRIMARY KEY ([user_id], [sub_id], [purchased_date])
+  [deleted_at] DATETIME NULL,
+  [deletion_reason] nvarchar(200) NULL
 )
 GO
 
@@ -498,7 +500,7 @@ GO
 -- Fixed Foreign keys with consistent CASCADE paths
 ALTER TABLE [users] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id]);
 
-ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]) ON DELETE CASCADE;
+ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([user_id]) REFERENCES [users] ([user_id]) ON DELETE SET NULL;
 ALTER TABLE [users_subscriptions] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id]) ON DELETE CASCADE;
 
 ALTER TABLE [subs_features] ADD FOREIGN KEY ([sub_id]) REFERENCES [subscriptions] ([sub_id]) ON DELETE CASCADE;

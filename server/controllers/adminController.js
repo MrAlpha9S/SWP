@@ -27,15 +27,26 @@ const handleCreateUser = async (req, res) => {
         return res.status(400).json({success: false, message: 'Username, email and password are required'});
     }
     try {
-        const auth0Created = await createUserAuth0Service(username, email, avatar, password);
-        if (auth0Created) {
-            const created = await adminService.createUser({username, email, role, avatar, isBanned});
-            if (!created) return res.status(400).json({success: false, message: 'Failed to create user'});
-            return res.status(201).json({success: true, message: 'User created successfully'});
+        // Tạo user trong Auth0 và lấy về Auth0 ID
+        const auth0Result = await createUserAuth0Service(username, email, avatar, password);
+        if (auth0Result && auth0Result.user_id) {
+            // Sử dụng Auth0 ID từ kết quả tạo user
+            const created = await adminService.createUser({
+                auth0_id: auth0Result.user_id, // Sử dụng Auth0 ID thực tế
+                username, 
+                email, 
+                role, 
+                avatar, 
+                isBanned
+            });
+            if (!created) return res.status(400).json({success: false, message: 'Failed to create user in database'});
+            return res.status(201).json({success: true, message: 'User created successfully', auth0Id: auth0Result.user_id});
+        } else {
+            return res.status(400).json({success: false, message: 'Failed to create user in Auth0'});
         }
     } catch (error) {
         console.error('Error in handleCreateUser:', error);
-        return res.status(500).json({success: false, message: 'Failed to create user'});
+        return res.status(500).json({success: false, message: 'Failed to create user: ' + error.message});
     }
 };
 const handleGetUserById = async (req, res) => {
@@ -63,6 +74,18 @@ const handleUpdateUser = async (req, res) => {
 const handleDeleteUser = async (req, res) => {
     const {id} = req.params;
     try {
+        // Kiểm tra xem user có phải là coach và có user liên kết không
+        const user = await adminService.getUserById(Number(id));
+        if (user && user.role === 'Coach') {
+            const linkedUsers = await adminService.getCoachUserByCoachId(Number(id));
+            if (linkedUsers && linkedUsers.length > 0) {
+                return res.status(400).json({
+                    success: false, 
+                    message: 'Không thể xóa huấn luyện viên đã có học viên liên kết!'
+                });
+            }
+        }
+        
         const deleted = await adminService.deleteUserById(Number(id));
         if (!deleted) return res.status(404).json({success: false, message: 'User not found'});
         return res.status(200).json({success: true, message: 'User deleted successfully'});
@@ -597,14 +620,14 @@ const handleUpdateUserSubscription = async (req, res) => {
     }
 };
 const handleDeleteUserSubscription = async (req, res) => {
-    const {user_id, sub_id} = req.params;
+    const { id, reason } = req.body;
     try {
-        const deleted = await adminService.deleteUserSubscription(Number(user_id), Number(sub_id));
-        if (!deleted) return res.status(404).json({success: false, message: 'User subscription not found'});
-        return res.status(200).json({success: true, message: 'User subscription deleted successfully'});
+        const deleted = await adminService.deleteUserSubscription(id, reason || 'Admin deleted');
+        if (!deleted) return res.status(404).json({success: false, message: 'Subscription not found'});
+        return res.status(200).json({success: true, message: 'Subscription deleted successfully'});
     } catch (error) {
         console.error('Error in handleDeleteUserSubscription:', error);
-        return res.status(500).json({success: false, message: 'Failed to delete user subscription'});
+        return res.status(500).json({success: false, message: 'Failed to delete subscription'});
     }
 };
 
@@ -683,16 +706,35 @@ const handleRejectCoach = async (req, res) => {
 };
 
 const handleGetPendingCoachDetails = async (req, res) => {
+    const {id} = req.params;
     try {
-        const { id } = req.params;
-        const coachDetails = await adminService.getPendingCoachDetails(parseInt(id));
-        if (!coachDetails) {
-            return res.status(404).json({success: false, message: 'Không tìm thấy thông tin coach'});
-        }
-        return res.status(200).json({success: true, data: coachDetails});
+        const coach = await adminService.getPendingCoachDetails(Number(id));
+        if (!coach) return res.status(404).json({success: false, message: 'Coach not found'});
+        return res.status(200).json({success: true, data: coach});
     } catch (error) {
-        console.error('Lỗi getPendingCoachDetails:', error);
-        return res.status(500).json({success: false, message: 'Lỗi server khi lấy thông tin coach'});
+        console.error('Error in handleGetPendingCoachDetails:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch coach details'});
+    }
+};
+
+// --- REVENUE ---
+const handleGetRevenue = async (req, res) => {
+    try {
+        const revenue = await adminService.getRevenue();
+        return res.status(200).json({success: true, data: revenue});
+    } catch (error) {
+        console.error('Error in handleGetRevenue:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch revenue data'});
+    }
+};
+
+const handleGetAllDeletedUserSubscriptions = async (req, res) => {
+    try {
+        const deletedSubs = await adminService.getAllDeletedUserSubscriptions();
+        return res.status(200).json({success: true, data: deletedSubs});
+    } catch (error) {
+        console.error('Error in handleGetAllDeletedUserSubscriptions:', error);
+        return res.status(500).json({success: false, message: 'Failed to fetch deleted user subscriptions'});
     }
 };
 
@@ -755,4 +797,7 @@ module.exports = {
     handleGetPendingCoaches,
     handleApproveCoach,
     handleGetPendingCoachDetails,
+    // Revenue
+    handleGetRevenue,
+    handleGetAllDeletedUserSubscriptions,
 };

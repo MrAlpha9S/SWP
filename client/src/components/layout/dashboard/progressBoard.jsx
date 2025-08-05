@@ -349,12 +349,12 @@ const ProgressBoard = ({
 
     const mergedDataSet = useMemo(() => {
         if (isDatasetPending) return [];
-        if ((!planLog && !customPlanWithStages) || !localCheckInDataSet || userInfo?.sub_id === 1) return [];
+        if ((!planLog && !customPlanWithStages) || !localCheckInDataSet) return [];
         if (planLog.length > 0 && !useCustomPlan) return clonePlanLogToDDMMYYYY(mergeByDateForPlanLog(planLog, localCheckInDataSet, cigsPerDay, userInfo?.created_at, range));
         if (customPlanWithStages && customPlanWithStages.length > 0 && useCustomPlan) {
             return clonePlanLogToDDMMYYYY(mergeByDateForCustomStages(getDatasetFromCustomPlanWithStages(customPlanWithStages), localCheckInDataSet, cigsPerDay, userInfo?.created_at, selectedFilter))
         }
-    }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.sub_id, userInfo?.created_at, cigsPerDay, range, selectedFilter, useCustomPlan]);
+    }, [isDatasetPending, planLog, customPlanWithStages, localCheckInDataSet, userInfo?.created_at, cigsPerDay, range, selectedFilter, useCustomPlan]);
 
     // const getReferenceArea = useCallback(() => {
     //     if (!mergedDataSet || mergedDataSet.length === 0) return null;
@@ -568,22 +568,22 @@ const ProgressBoard = ({
                     </div>
                     <h3 className="text-base sm:text-lg font-semibold text-primary-800 mb-2 leading-relaxed">
                         {from === 'coach-user'
-                            ? (readinessValue === 'ready' ? 'Ngày người dùng bắt đầu cai thuốc' : 'Ngày người dùng đã bỏ thuốc')
-                            : (readinessValue === 'ready' ? 'Ngày tôi bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
+                            ? (readinessValue === 'ready' ? 'Ngày bắt đầu bỏ thuốc' : 'Ngày người dùng đã bỏ thuốc')
+                            : (readinessValue === 'ready' ? 'Ngày bắt đầu bỏ thuốc' : 'Ngày tôi đã bỏ thuốc')}
                     </h3>
 
                     <div className="text-xs sm:text-sm text-gray-600">
                         {isPending ?
                             <Skeleton.Input style={{width: 160}} active/> :
                             readinessValue === 'ready' ?
-                                `${new Date(startDate).toLocaleDateString('vi-VN')} ${userInfo?.sub_id === 1 || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
+                                `${new Date(startDate).toLocaleDateString('vi-VN')} ${(userInfo?.sub_id === 1 && from !== 'coach-user') || (!expectedQuitDate && expectedQuitDate.length === 0) ? '' : `- ${new Date(expectedQuitDate).toLocaleDateString('vi-VN')}`}` :
                                 new Date(stoppedDate).toLocaleDateString('vi-VN')
                         }
                     </div>
                 </div>
             </div>
 
-            {readinessValue === 'ready' && userInfo?.sub_id !== 1 && (
+            {readinessValue === 'ready' && (userInfo?.sub_id !== 1 || (userInfo?.sub_id === 1 && from === 'coach-user')) && (
                 <div className="bg-primary-100 p-3 sm:p-4 rounded-lg flex flex-col items-center text-center relative">
                     {!from && <div className="absolute right-2 sm:right-3 top-2 sm:top-3">
                         {!isPending && (

@@ -144,21 +144,17 @@ const UserManagement = () => {
   // Delete user
   const handleDeleteUser = async (user_id) => {
     try {
-      const user = users.find(u => u.user_id === user_id);
-      if (user.role === 'Coach') {
-        const token = await getAccessTokenSilently();
-        const res = await getCoachUserByCoachId(user_id, token);
-        if (res.data && res.data.length > 0) {
-          message.error('Không thể xóa huấn luyện viên đã có học viên liên kết!');
-          return;
-        }
-      }
       const token = await getAccessTokenSilently();
       await deleteUser(user_id, token);
       message.success('Xóa user thành công');
       fetchUsers();
     } catch (err) {
-      message.error('Lỗi xóa user');
+      // Hiển thị thông báo lỗi từ server nếu có
+      if (err.message && err.message.includes('Không thể xóa huấn luyện viên')) {
+        message.error(err.message);
+      } else {
+        message.error('Lỗi xóa user');
+      }
     }
   };
 

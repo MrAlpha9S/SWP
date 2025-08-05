@@ -22,6 +22,7 @@ import getDatasetFromCustomPlanWithStages from "../../utils/getDatasetFromCustom
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import {Select} from "antd";
 import PlanSummaryReport from "../signup/planSummaryReport.jsx";
+import {useIsUserExpiredStore} from "../../../stores/store.js";
 
 const UserProfileInMessage = ({
                                   startDate,
@@ -63,6 +64,7 @@ const UserProfileInMessage = ({
     const [planCreation, setPlanCreation] = useState(false)
     const [localUseCustomPlan, setLocalUseCustomPlan] = useState(useCustomPlan ?? false)
     const [localCustomPlanWithStages, setLocalCustomPlanWithStages] = useState(customPlanWithStages ?? [])
+    const {isUserExpired, setIsUserExpired} = useIsUserExpiredStore()
 
     const setLocalPlanLogCloneDDMMYY = useCallback((valueOrUpdater) => {
         if (typeof valueOrUpdater === 'function') {
@@ -287,7 +289,7 @@ const UserProfileInMessage = ({
                                 Người dùng vẫn hút <strong>{totalCigsAfterPlan}</strong> điếu thuốc sau ngày kết thúc kế hoạch
                             </p>
                         )}
-                        <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
+                        <CustomButton disabled={isUserExpired} onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
                     </>
                 ) : (customPlanWithStages?.length > 0) ? (
                     <>
@@ -329,7 +331,7 @@ const UserProfileInMessage = ({
                                 })}
                             </LineChart>
                         </ResponsiveContainer>
-                        <CustomButton onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
+                        <CustomButton disabled={isUserExpired} onClick={() => setPlanEditClicked(true)}>Chỉnh sửa kế hoạch</CustomButton>
                     </>
                 ) : (
                     <div>

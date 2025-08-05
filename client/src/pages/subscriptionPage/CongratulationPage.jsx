@@ -119,8 +119,9 @@ const CongratulationPage = ({subscriptionData, from, hasCoach}) => {
                             onClick={() => {
                                 if (from === 'onboarding-step-5-payment') {
                                     setCurrentStep(5)
+                                    navigate('/onboarding/onboarding-step-5-payment')
                                 }
-                                navigate('/onboarding/onboarding-step-5-payment')
+                                navigate('/onboarding')
                             }
                             }
                             className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:from-emerald-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200">

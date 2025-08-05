@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import Messager from "./messager/messager.jsx";
-import {useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
+import {useIsUserExpiredStore, useSelectedUserAuth0IdStore, useUserInfoStore} from "../../../stores/store.js";
 import {useQuery} from "@tanstack/react-query";
 import {getUserProfile} from "../../utils/profileUtils.js";
 import {useAuth0} from "@auth0/auth0-react";
@@ -17,6 +17,7 @@ import {IoReload} from "react-icons/io5";
 import {queryClient} from "../../../main.jsx";
 import {useNotificationManager} from "../../hooks/useNotificationManager.jsx";
 import ReviewForm from "../dashboard/reviewForCoach.jsx";
+import {alreadyHaveSubCheck} from "../../utils/userUtils.js";
 
 
 const CoachUser = ({userAuth0Id = null, coach}) => {
@@ -25,6 +26,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
     const {selectedUserAuth0Id, setSelectedUserAuth0Id} = useSelectedUserAuth0IdStore()
     const [isCooldown, setIsCooldown] = useState(false);
     const {openNotification} = useNotificationManager()
+    const {isUserExpired, setIsUserExpired} = useIsUserExpiredStore()
 
     const handleReload = () => {
         if (isCooldown) return;
@@ -59,6 +61,29 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
         },
         enabled: !!isAuthenticated && !!user ,
     });
+
+
+
+    const {isPending : isSubCheckPending, data : alreadyHaveSubFromAPI} = useQuery({
+        queryFn: async () => {
+            const token = await getAccessTokenSilently()
+            return await alreadyHaveSubCheck(selectedUserAuth0Id, token)
+        },
+        queryKey: ['subscription-check'],
+        enabled: userInfo !== null && isAuthenticated && (userInfo?.role === 'Coach' && selectedUserAuth0Id?.length > 0),
+    })
+
+    useEffect(() => {
+        if (!isSubCheckPending && alreadyHaveSubFromAPI) {
+            if (userInfo?.role === 'Coach' && alreadyHaveSubFromAPI.data === 1 && alreadyHaveSubFromAPI.message === true && setIsUserExpired) {
+                setIsUserExpired(true)
+            }
+        }
+    }, [alreadyHaveSubFromAPI, isSubCheckPending, setIsUserExpired, userInfo?.role])
+
+    useEffect(() => {
+        console.log(isUserExpired)
+    }, [isUserExpired])
 
     // Check-in dataset query
     const {
@@ -262,6 +287,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                             <IoReload className='size-7'/>
                         </div>
                     </div>
+                    {isUserExpired && <p className='text-red-500 font-bold'>Gói đăng ký của người dùng đã hết hạn! Bạn sẽ không thể tương tác với họ.</p>}
 
                     {renderUserInfoSection()}
                 </div>
@@ -273,6 +299,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                     <p className='font-bold text-2xl sm:text-3xl lg:text-4xl text-center'>
                         {coach ? 'Thông tin của bạn' : 'Thông tin người dùng'}
                     </p>
+                    {isUserExpired && <p className='text-red-500 font-bold'>Gói đăng ký của người dùng đã hết hạn! Bạn sẽ không thể tương tác với họ.</p>}
                     <div
                         className={`hover:bg-primary-500 rounded-md cursor-pointer ${isCooldown ? 'opacity-50 pointer-events-none' : ''}`}
                         onClick={handleReload}
@@ -283,6 +310,7 @@ const CoachUser = ({userAuth0Id = null, coach}) => {
                 </div>
 
                 <div className="w-full h-full flex-1 flex justify-center px-2 sm:px-4">
+
                     <Tabs
                         centered
                         destroyOnHidden={false}

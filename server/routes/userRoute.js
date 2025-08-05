@@ -6,7 +6,7 @@ const {getAllUsersController, handlePostSignup, getUserCreationDate, updateUserS
     createUserNoteController, updateUserNoteController, getAllReviewsController, createReviewController,
     updateReviewController, deleteReviewController, handleUpdateUserFCMToken, sendPushNotificationTo,
     handleUpdateUserTimesForPush, getLeaderboardStats, handleCoachRegistration, handleGetCoachRegistrationInfo,
-    deleteUserNoteController
+    deleteUserNoteController, findUserByEmail, fixUserAuth0Id, alreadyHaveSub
 } = require("../controllers/userController");
 const { getUserInfo, updateUserInfo, updateUserController} = require("../controllers/userController");
 const {handleAllMember} = require("../controllers/userController");
@@ -33,10 +33,17 @@ userRouter.post('/coach-reviews',checkJwt, createReviewController);
 userRouter.put('/coach-reviews',checkJwt, updateReviewController);
 userRouter.delete('/coach-reviews/:reviewId', checkJwt,deleteReviewController);
 userRouter.get('/leaderboard', getLeaderboardStats)
+userRouter.get('/subscription-check/:userAuth0Id', checkJwt, alreadyHaveSub)
 
 // Coach registration routes
 userRouter.post('/coach/register', checkJwt, handleCoachRegistration);
 userRouter.get('/coach/registration-info', checkJwt, handleGetCoachRegistrationInfo);
+
+// Route để tìm user theo email (cho debug)
+userRouter.get('/find-by-email', findUserByEmail);
+
+// Route để sửa Auth0 ID cho user (cho admin)
+userRouter.post('/fix-auth0-id', fixUserAuth0Id);
 
 
 module.exports = userRouter;
