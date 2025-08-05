@@ -75,9 +75,6 @@ function Navbar() {
 
                     {/* Search and Mobile Menu Button */}
                     <div className="flex items-center">
-                        <button className="p-2 text-gray-500 hover:text-primary-600 transition-colors rounded-full">
-                            <FiSearch className="w-5 h-5"/>
-                        </button>
                         <button
                             className="ml-4 md:hidden p-2 text-gray-500 hover:text-primary-600 transition-colors rounded-full"
                             onClick={toggleMenu}
