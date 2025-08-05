@@ -226,6 +226,7 @@ function AppContent() {
             })
 
             socket.on('like', (data) => {
+                if (data.owner_auth0_id === user?.sub) return
                 queryClient.invalidateQueries(['notifications'])
                 if (currentStepDashboard === 'notifications') return
                 const onClick = () => {

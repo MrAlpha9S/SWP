@@ -39,9 +39,9 @@ LEFT JOIN users u_reporter ON u_reporter.user_id = sr.user_id
 LEFT JOIN users u_post_author ON u_post_author.user_id = sp.user_id
 LEFT JOIN users u_comment_author ON u_comment_author.user_id = sc.user_id
 `);
-        if (result.rowsAffected[0] === 0) {
-            throw new Error('error in GetReports');
-        }
+        // if (result.rowsAffected[0] === 0) {
+        //     throw new Error('error in GetReports');
+        // }
         return result.recordsets;
     } catch (err) {
         console.error('SQL error at GetReports', err);

@@ -412,8 +412,11 @@ const handleAddLike = async (req, res) => {
                 category_tag: ownerInfo.category_tag,
                 post_id: post_id,
                 inner_type: 'post',
+                owner_auth0_id: ownerInfo.auth0_id
             }
-            await createNotificationService(ownerInfo.auth0_id, `Người dùng ${username} vừa thích bài viết của bạn.`, `Bài viết: ${ownerInfo.title}`, 'community', metadata)
+            if (auth0_id !== ownerInfo.auth0_id) {
+                await createNotificationService(ownerInfo.auth0_id, `Người dùng ${username} vừa thích bài viết của bạn.`, `Bài viết: ${ownerInfo.title}`, 'community', metadata)
+            }
             const io = socket.getIo()
             io.to(`${ownerInfo.auth0_id}`).emit('like', {
                 ...metadata,

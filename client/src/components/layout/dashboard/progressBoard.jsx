@@ -414,10 +414,15 @@ const ProgressBoard = ({
                 <div className="bg-white border rounded shadow p-2 text-sm">
                     <div className="font-semibold">{label}</div>
                     <div>
+                        {data.stage !== null && <div><strong>Giai đoạn: {data.stage + 1}</strong></div>}
                         <div
-                            className={`${data.checkinMissed === 'missed' ? 'text-red-500' : data.checkinMissed === 'checked' ? 'text-green-600' : ''}`}>{data.checkinMissed === 'missed' ? 'Chưa check-in (ước lượng)' : data.checkinMissed === 'checked' ? 'Đã check-in' : ''}</div>
-                        {data.checkinMissed !== 'future' && <div>Đã hút: {data.actual}</div>}
-                        {data.plan != null && <div>Kế hoạch: {data.plan}</div>}
+                            className={`${data.checkinMissed === 'missed' ? 'text-red-500' : data.checkinMissed === 'checked' ? 'text-green-600' : ''}`}>
+                            {data.checkinMissed === 'missed' ? 'Chưa check-in' : data.checkinMissed === 'checked' ? 'Đã check-in' : ''}</div>
+                        {data.checkinMissed !== 'future' &&
+                            <div>Đã hút: {data.actual} {data.checkinMissed === 'missed' && '(ước lượng)'}</div>}
+                        {data.plan != null && <>
+                            <div>Số điếu theo kế hoạch: {data.plan}</div>
+                        </>}
                     </div>
 
                 </div>
@@ -598,7 +603,6 @@ const ProgressBoard = ({
                     </h3>
 
 
-
                     {readinessValue === 'ready' && userInfo?.sub_id !== 1 && ((!useCustomPlan && (!planLog || planLog.length === 0)) || (useCustomPlan && (!customPlanWithStages || customPlanWithStages.length === 0))) &&
                         <div className='flex flex-col items-center justify-center space-y-3'>
                             <p className="text-sm text-center">
@@ -719,7 +723,7 @@ const ProgressBoard = ({
                                         dot={{r: 2}}
                                         strokeWidth={2}
                                         name="Đã hút"
-                                        connectNulls={true}
+                                        connectNulls={false}
                                     />
                                     <Line
                                         type="monotone"
@@ -729,16 +733,12 @@ const ProgressBoard = ({
                                         strokeWidth={2}
                                         dot={false}
                                         name="Kế hoạch"
-                                        connectNulls={true}
+                                        connectNulls={false}
                                     />
                                     <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
                                     {/*{quittingMethod === 'gradual-weekly' && getReferenceArea()}*/}
                                     <ReferenceLine
-                                        x={
-                                            currentDate < new Date(expectedQuitDate)
-                                                ? convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])
-                                                : ''
-                                        }
+                                        x={convertYYYYMMDDStrToDDMMYYYYStr(currentDate.toISOString().split('T')[0])}
                                         stroke="#115e59"
                                         label="Hôm nay"
                                     />
@@ -755,11 +755,13 @@ const ProgressBoard = ({
                                         wrapperStyle={{fontSize: '12px'}}
                                     />
                                     {selectedFilter === 'overview' && customPlanWithStages.length > 0 && customPlanWithStages.map((stage, idx) => {
-                                        if (!stage.logs[0]) return null
+                                        //if (!stage.logs[0]) return null
+                                        const startDate = convertYYYYMMDDStrToDDMMYYYYStr(stage.start_date.split('T')[0])
+                                        const endDate = convertYYYYMMDDStrToDDMMYYYYStr(stage.end_date.split('T')[0])
                                         return <ReferenceArea
                                             key={stage.id}
-                                            x1={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[0].date.split('T')[0])}
-                                            x2={convertYYYYMMDDStrToDDMMYYYYStr(stage.logs[stage.logs.length - 1].date.split('T')[0])}
+                                            x1={startDate}
+                                            x2={endDate}
                                             y1={0}
                                             y2={cigsPerDay}
                                             label={`Giai đoạn ${idx + 1}`}
