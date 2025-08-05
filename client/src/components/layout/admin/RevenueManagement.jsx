@@ -341,7 +341,7 @@ const RevenueManagement = () => {
         <div className="p-6 bg-white rounded shadow min-h-[400px]">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold mb-2">Quản lý Doanh thu</h2>
+                    <h2 className="text-2xl font-bold mb-2">Quản lý Đăng Ký</h2>
                     <p className="text-gray-600">Theo dõi và quản lý lịch sử subscription của users</p>
                 </div>
                 <Button type="primary" onClick={openCreateModal}>
