@@ -1,6 +1,7 @@
 const {getSubscribedUsers} = require("../services/coachService");
 const {getAllBlogPostsOfUser} = require("../services/blogService");
 const {getAllSocialPosts} = require("../services/socialPostService");
+const {GetReports} = require("../services/reportService");
 
 const getDashboardStats = async (req, res) => {
     const { userAuth0Id } = req.params;
@@ -11,6 +12,8 @@ const getDashboardStats = async (req, res) => {
         const subscribedUsers = await getSubscribedUsers(userAuth0Id);
         const blogPosts = await getAllBlogPostsOfUser(userAuth0Id);
         const socialPosts = await getAllSocialPosts()
+        const report = await GetReports()
+        const reportCount = report[0].length
         const subscribedUserCount = subscribedUsers.length
         let totalCommission = 0
         for (const subscribedUser of subscribedUsers) {
@@ -23,10 +26,8 @@ const getDashboardStats = async (req, res) => {
             else approvedBlogPostCount += 1
         }
         let pendingSocialPostCount = 0
-        let reportCount = 0
         for (const socialPost of socialPosts) {
             if (socialPost.is_pending) pendingSocialPostCount += 1
-            if (!socialPost.is_pending && socialPost.is_reported) reportCount += 1
         }
         const data = {
             subscribedUsers : subscribedUsers,
@@ -38,6 +39,7 @@ const getDashboardStats = async (req, res) => {
             reportCount : reportCount,
             pendingSocialPostCount : pendingSocialPostCount,
         }
+        //console.log(data)
         return res.status(200).json({ success: true, message: 'getDashboardStats successful', data: data });
     } catch (error) {
         console.error('Error in HandleCreateConversation:', error);
