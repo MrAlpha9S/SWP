@@ -65,7 +65,7 @@ const Onboarding = () => {
         return map;
     }, []);
 
-    const {readinessValue} = useQuitReadinessStore();
+    const {readinessValue, setReadinessValue} = useQuitReadinessStore();
     const {addError, removeError, errors} = useErrorStore();
     const {reasonList} = useReasonStore();
     const {pricePerPack} = usePricePerPackStore();
@@ -596,6 +596,7 @@ const Onboarding = () => {
                                     setUseCustomPlan={setUseCustomPlan}
                                     customPlanWithStages={customPlanWithStages}
                                     setCustomPlanWithStages={setCustomPlanWithStages}
+                                    setReadinessValue={setReadinessValue}
                                 />
                                 }
                                 {currentStep === 6 && <Summary/>}

@@ -163,7 +163,7 @@ const CoachCard = ({coach, from}) => {
                     title="Xác nhận chọn Huấn luyện viên?"
                     description={<div>
                         <p>Bạn có chắc muốn chọn Huấn luyện viên {coach.username}?</p>
-                        <p> Bạn có thể đổi Huấn luyện viên sau 48 giờ.</p>
+                        {/*<p> Bạn có thể đổi Huấn luyện viên sau 48 giờ.</p>*/}
                     </div>}
                     onConfirm={() => handleOk()}
                     onCancel={() => console.log("Cancel")}

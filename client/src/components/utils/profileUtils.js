@@ -115,8 +115,8 @@ export async function syncProfileToStores(profile) {
         useProfileExists.getState().setIsProfileExist(true);
         useQuitReadinessStore.getState().setReadinessValue(userProfile.readiness_value);
 
-        usePlanStore.getState().setStartDate(userProfile.start_date?.split('T')[0] ?? '');
-        usePlanStore.getState().setStoppedDate(userProfile.quit_date?.split('T')[0] ?? '');
+        usePlanStore.getState().setStartDate(userProfile.start_date ?? '');
+        usePlanStore.getState().setStoppedDate(userProfile.quit_date ?? '');
         usePlanStore.getState().setExpectedQuitDate(userProfile.expected_quit_date?.split('T')[0] ?? '');
         usePlanStore.getState().setCigsPerDay(userProfile.cigs_per_day);
         useCigsPerPackStore.getState().setCigsPerPack(userProfile.cigs_per_pack);

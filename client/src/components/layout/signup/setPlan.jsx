@@ -11,7 +11,7 @@ import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContain
 import {CustomizedAxisTick} from "../../utils/customizedAxisTick.jsx";
 import calculatePlan from "../../utils/calculatePlan.js";
 import {
-    convertYYYYMMDDStrToDDMMYYYYStr
+    convertYYYYMMDDStrToDDMMYYYYStr, getCurrentUTCDateTime
 } from "../../utils/dateUtils.js";
 import {FaArrowRight} from "react-icons/fa";
 import {useNavigate} from "react-router-dom";
@@ -57,7 +57,7 @@ const SetPlan = ({
                      setPlanCreation,
                      useCustomPlan,
                      setUseCustomPlan,
-                     customPlanWithStages, setCustomPlanWithStages
+                     customPlanWithStages, setCustomPlanWithStages, setReadinessValue, setStartDate,
                  }) => {
 
     const {errors} = useErrorStore();
@@ -230,7 +230,7 @@ const SetPlan = ({
             triggers,
             cigsPerDay,
             updaterUserAuth0Id: coachInfo?.auth0_id,
-            useCustomPlan
+            useCustomPlan,
         };
 
         payload.customTimeOfDay = customTimeOfDay;
@@ -326,7 +326,13 @@ const SetPlan = ({
 
             {/* Handle relapse-support case for both free and paid users */}
             {readinessValue === 'relapse-support' && (
-                <p>Bạn đã bỏ thuốc, bạn có thể bỏ qua bước này</p>
+                <>
+                    <p>Bạn đã bỏ thuốc, bạn có thể bỏ qua bước này</p>
+                    <CustomButton onClick={() => {
+                        if (setReadinessValue) setReadinessValue('ready')
+                        if (setStartDate) setStartDate(getCurrentUTCDateTime().toISOString())
+                    }}>Vẫn tạo?</CustomButton>
+                </>
             )}
 
             {/* Handle ready case */}

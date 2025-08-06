@@ -271,6 +271,8 @@ const UserProfileInMessage = ({
                         setUseCustomPlan={setLocalUseCustomPlan}
                         customPlanWithStages={localCustomPlanWithStages}
                         setCustomPlanWithStages={setLocalCustomPlanWithStages}
+                        setReadinessValue={setLocalReadinessValue}
+                        setStartDate={setLocalStartDate}
                     />
                 ) : (planLog?.length > 0 && !useCustomPlan) ? (
                     <>

@@ -178,6 +178,9 @@ const ProgressBoard = ({
         let differenceInMs;
 
         if (readinessValue === 'ready') {
+            console.log('diff cur', currentDate.toISOString());
+            console.log('diff sta', startDate);
+
             differenceInMs = differenceInMilliseconds(currentDate, new Date(startDate));
         } else {
             differenceInMs = differenceInMilliseconds(currentDate, new Date(stoppedDate));
@@ -192,7 +195,10 @@ const ProgressBoard = ({
 
     const totalDaysPhrase = useMemo(() => {
         const localStartDate = new Date(startDate);
-
+        console.log('start', localStartDate.toISOString());
+        console.log('current', currentDate.toISOString());
+        const localStartISO = localStartDate.toISOString().slice(0, 10);
+        const currentISO = currentDate.toISOString().slice(0, 10);
         if (from === 'coach-user') {
             if (readinessValue === 'relapse-support') {
                 return (
@@ -208,7 +214,7 @@ const ProgressBoard = ({
                         Tổng thời gian kể từ khi bắt đầu hành trình
                     </>
                 );
-            } else if (localStartDate > currentDate) {
+            } else if (localStartISO > currentISO) {
                 return 'Thời gian còn lại đến khi bắt đầu hành trình cai thuốc';
             } else if (currentDate < new Date(expectedQuitDate)) {
                 return 'Tổng thời gian kể từ khi người dùng bắt đầu hành trình cai thuốc';
