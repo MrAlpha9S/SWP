@@ -12,7 +12,7 @@ async function createUser(data) {
   const req = pool.request();
   
   // Sử dụng auth0_id được truyền vào hoặc tạo tự động nếu không có
-  const auth0_id = data.auth0_id || `admin|${Date.now()}`;
+  const auth0_id = data.auth0_id
   
   req.input('auth0_id', sql.NVarChar, auth0_id);
   req.input('username', sql.NVarChar, data.username);
